@@ -10,6 +10,8 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.0.0] — 2026-11-05
+
 ### Added
 
 - **ZCode and OpenCode agent badges** — sessions from the ZCode and OpenCode adapters show their own `ZCode` / `OpenCode` badge (light and dark styles, WCAG AA contrast). These tools run many vendors' models, so the adapter tag now wins over the model name; before, a ZCode session on Claude showed "Claude" and one on GLM/Qwen showed the generic "Agent".

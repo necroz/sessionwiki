@@ -78,8 +78,8 @@ git checkout master && git pull
 # Bump version if needed, update CHANGELOG, commit...
 
 # Create a signed tag
-git tag -s v1.1.0 -m "v1.1.0 release"
-git push origin v1.1.0
+git tag -s v2.0.0 -m "v2.0.0 release"
+git push origin v2.0.0
 ```
 
 Watch the workflow at:
@@ -95,6 +95,16 @@ pip install sessionwiki
 sessionwiki --version    # should match the tag
 sessionwiki adapters     # should list Claude Code, Codex, Cursor, Gemini, …
 deactivate
+```
+
+### 7. Move the major tag
+
+Consumers pin the action to `@v2`, so keep a moving major tag on the
+latest stable release:
+
+```bash
+git tag -f v2 v2.0.0
+git push -f origin v2
 ```
 
 ## Troubleshooting

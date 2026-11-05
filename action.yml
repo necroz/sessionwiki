@@ -1,6 +1,6 @@
 # GitHub Action metadata — lets other repos use this as:
 #
-#   - uses: necroz/sessionwiki@v0.9
+#   - uses: necroz/sessionwiki@v2
 #     with:
 #       python-version: "3.12"
 #       additional-args: "--adapter claude-code"

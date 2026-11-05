@@ -4,7 +4,7 @@
 #
 #   jobs:
 #     wiki:
-#       uses: necroz/sessionwiki/.github/workflows/sessionwiki-action.yml@master
+#       uses: necroz/sessionwiki/.github/workflows/sessionwiki-action.yml@v2
 #       with:
 #         python-version: "3.12"
 #         sync-args: "--adapter claude-code"
