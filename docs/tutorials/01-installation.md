@@ -82,13 +82,12 @@ pip install sessionwiki
 sessionwiki --version
 ```
 
-Or via Homebrew, once [#247](https://github.com/Pratiyush/llm-wiki/issues/247) is set up:
+Or with [pipx](https://pipx.pypa.io/), which keeps the CLI in its own
+environment (works on macOS, Linux and Windows):
 
 ```bash
-brew install necroz/tap/sessionwiki
+pipx install sessionwiki
 ```
-
-Until then the clone-and-run path above is authoritative.
 
 ## Step 5 — (Optional) Install via Docker
 

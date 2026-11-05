@@ -30,7 +30,7 @@ Start with issues that are already `priority:should` in the queue.
 - [ ] **qmd export adapter** — #59 ✅ shipped
 - [ ] **Maintainer governance** — #62 ✅ shipping now
 - [ ] **PyPI release automation** — #42 (v0.6). One-tag-push → published
-- [ ] **Homebrew formula** — #41 (v0.6). `brew install sessionwiki`
+- [x] ~~**Homebrew formula**~~ — dropped in sessionwiki 2.0; install with `pip` / `pipx` or Docker
 - [ ] **Vault overlay mode** — #54 (v0.6). Compile existing Obsidian
       vaults without a sync step
 - [ ] **PDF adapter graduation** — #39 (v0.5). Scaffold → production

@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Removed
+
+- **Homebrew formula and tap automation** — `homebrew/sessionwiki.rb`, the `homebrew-bump` workflow, `scripts/bump-homebrew-formula.sh` and `docs/deploy/homebrew-setup.md`. The tap repository was never created and the formula still pointed at the upstream v1.2.0 tarball, so `brew install` could not work. Install with `pip install sessionwiki`, `pipx install sessionwiki` or the `ghcr.io/necroz/sessionwiki` image.
+
 ## [2.0.0] — 2026-11-05
 
 ### Added
