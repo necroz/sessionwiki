@@ -225,6 +225,9 @@ def test_build_graphify_graph_forces_overwrite():
 
 
 def test_query_graph_reads_links_keyed_export(tmp_path, monkeypatch):
+    # networkx ships with the optional [graph] extra; the base CI job and a
+    # plain `pip install -e .[dev]` don't have it.
+    pytest.importorskip("networkx")
     from sessionwiki import graphify_bridge
 
     graph = {

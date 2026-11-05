@@ -22,7 +22,9 @@ permissions:
 
 jobs:
   agents-e2e:
-    runs-on: ubuntu-latest
+    # Pinned: the npm Playwright used here cannot install Chromium on
+    # ubuntu 26.04 (the new ubuntu-latest).
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
