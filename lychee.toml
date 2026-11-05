@@ -39,6 +39,14 @@ exclude = [
   "^https://github\\.com/necroz/sessionwiki/security/advisories/new",
   # PyPI (pre-first-release)
   "^https://pypi\\.org/project/sessionwiki/",
+  # Pre-first-release: download stats exist only once sessionwiki is on PyPI,
+  # and the GHCR image + docker-publish badge only after the first `v*.*.*`
+  # tag. Remove these three after v2.0.0 ships.
+  "^https://pepy\\.tech/projects?/sessionwiki",
+  "^https://github\\.com/necroz/sessionwiki/pkgs/container/sessionwiki",
+  "^https://github\\.com/necroz/sessionwiki/actions/workflows/docker-publish\\.yml/badge\\.svg",
+  # Third-party repo cited in the historical docs/research.md; it was deleted.
+  "^https://github\\.com/Ss1024sS/LLM-wiki",
   # Homebrew tap (pre-creation)
   "^https://github\\.com/necroz/homebrew-sessionwiki",
   # Repo settings URLs (auth-gated, only visible to admins — CI runner
