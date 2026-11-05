@@ -5,10 +5,10 @@ import { test, expect } from "@playwright/test";
 // via #466's Generator pass once this bootstrap is on master.
 
 test.describe("seed — site reachability", () => {
-  test("home renders the LLM Wiki hero", async ({ page }) => {
+  test("home renders the sessionwiki hero", async ({ page }) => {
     await page.goto("/");
-    await expect(page).toHaveTitle(/LLM Wiki/);
-    await expect(page.locator("h1").first()).toContainText("LLM Wiki");
+    await expect(page).toHaveTitle(/sessionwiki/);
+    await expect(page.locator("h1").first()).toContainText("sessionwiki");
   });
 
   test("nav has the canonical links", async ({ page }) => {
