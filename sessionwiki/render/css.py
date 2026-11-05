@@ -224,27 +224,33 @@ kbd { display: inline-block; padding: 2px 6px; font-family: var(--mono); font-si
      hljs-attr        #005cc5 → 4.34:1 (light) → #0050a8 (4.78:1)
      hljs-symbol      #e36209 → 4.05:1 (light) → #c8530a (4.51:1)
    Dark-theme tokens stay on the hljs-dark stylesheet which already passes. */
-:root:not([data-theme="dark"]) .hljs-keyword,
-:root:not([data-theme="dark"]) .hljs-type { color: #c23a40; }
-:root:not([data-theme="dark"]) .hljs-built_in,
-:root:not([data-theme="dark"]) .hljs-number,
-:root:not([data-theme="dark"]) .hljs-literal,
-:root:not([data-theme="dark"]) .hljs-attr { color: #0050a8; }
-:root:not([data-theme="dark"]) .hljs-title,
-:root:not([data-theme="dark"]) .hljs-title.function_,
-:root:not([data-theme="dark"]) .hljs-class .hljs-title { color: #5c34a3; }
-:root:not([data-theme="dark"]) .hljs-symbol,
-:root:not([data-theme="dark"]) .hljs-bullet { color: #c8530a; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .hljs-keyword,
-  :root:not([data-theme="light"]) .hljs-type,
-  :root:not([data-theme="light"]) .hljs-built_in,
-  :root:not([data-theme="light"]) .hljs-number,
-  :root:not([data-theme="light"]) .hljs-literal,
-  :root:not([data-theme="light"]) .hljs-attr,
-  :root:not([data-theme="light"]) .hljs-title,
-  :root:not([data-theme="light"]) .hljs-symbol,
-  :root:not([data-theme="light"]) .hljs-bullet { color: unset; }
+/* Applied only while the page is actually light: an explicit light theme, or
+   no explicit theme on a light OS. (The old `:root:not([data-theme=dark])` plus a
+   dark-OS `color: unset` reset also wiped the hljs-dark colours, so code was
+   nearly unhighlighted in dark mode.) */
+:root[data-theme="light"] .hljs-keyword,
+:root[data-theme="light"] .hljs-type { color: #c23a40; }
+:root[data-theme="light"] .hljs-built_in,
+:root[data-theme="light"] .hljs-number,
+:root[data-theme="light"] .hljs-literal,
+:root[data-theme="light"] .hljs-attr { color: #0050a8; }
+:root[data-theme="light"] .hljs-title,
+:root[data-theme="light"] .hljs-title.function_,
+:root[data-theme="light"] .hljs-class .hljs-title { color: #5c34a3; }
+:root[data-theme="light"] .hljs-symbol,
+:root[data-theme="light"] .hljs-bullet { color: #c8530a; }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) .hljs-keyword,
+  :root:not([data-theme]) .hljs-type { color: #c23a40; }
+  :root:not([data-theme]) .hljs-built_in,
+  :root:not([data-theme]) .hljs-number,
+  :root:not([data-theme]) .hljs-literal,
+  :root:not([data-theme]) .hljs-attr { color: #0050a8; }
+  :root:not([data-theme]) .hljs-title,
+  :root:not([data-theme]) .hljs-title.function_,
+  :root:not([data-theme]) .hljs-class .hljs-title { color: #5c34a3; }
+  :root:not([data-theme]) .hljs-symbol,
+  :root:not([data-theme]) .hljs-bullet { color: #c8530a; }
 }
 
 /* Cards */
@@ -325,10 +331,13 @@ kbd { display: inline-block; padding: 2px 6px; font-family: var(--mono); font-si
    thead doesn't lose its z-axis ordering against the nav blur. The
    `transform: translateZ(0)` gives older WebKit a hardware layer so
    the sticky cells don't get repainted as plain rows during scroll. */
+/* top: 0, not the nav height: .table-wrap scrolls (overflow-x: auto), so
+   it is the sticky container and `top` is measured from the table's own
+   top edge. With 56px the header sat 56px down, over the first row. */
 .sessions-table thead {
   position: -webkit-sticky;
   position: sticky;
-  top: 56px;
+  top: 0;
   background: var(--bg-alt);
   z-index: 1;
   transform: translateZ(0);
