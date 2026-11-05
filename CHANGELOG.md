@@ -48,6 +48,8 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Fixed
 
+- **Code is highlighted again in dark mode** — a `color: unset` reset on `.hljs-*` tokens under a dark OS theme out-ranked the github-dark stylesheet, so code blocks were nearly monochrome. The accessible light-token overrides now apply only while the page is actually light.
+- **Sessions table header no longer covers the first row** — `.table-wrap` scrolls horizontally, so it is the sticky container; `top: 56px` (the nav height) placed the header 56px down, over row one. It is now `top: 0`.
 - **PR lint accepts scoped `chore` / `docs` / `test` titles and no longer pastes the PR title into shell** — `chore(deps): …` (Dependabot) and similar titles skip the CHANGELOG rule like their unscoped forms; the title reaches the script through an environment variable, closing a script-injection path from untrusted PR titles.
 - **CI runs again on the new `ubuntu-latest` (26.04)** — the Python 3.9 test job and the npm Playwright agents job are pinned to `ubuntu-24.04` (26.04 has no Python 3.9 build for `setup-python`, and that Playwright cannot install Chromium there); `test_query_graph_reads_links_keyed_export` now skips when the optional `networkx` is not installed instead of failing the base job.
 - **Hook-triggered autosync skips instead of queueing** — the OpenCode plugin and the ZCode Stop hook now call `autosync --lock-timeout 0`, so an idle/stop event that arrives while a cycle is running exits at once instead of leaving a python process waiting up to 600 s for the lock. Scheduled runs (systemd/launchd/Task Scheduler) still wait.
