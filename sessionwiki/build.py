@@ -2687,7 +2687,16 @@ def detect_agent_label(meta: dict) -> tuple[str, str]:
     agent = str(meta.get("agent", "")).strip().lower()
     if agent:
         return _agent_map(agent)
-    
+
+    # 1b. Adapter tag for tools that run many vendors' models. ZCode and
+    #     OpenCode pages carry `zcode` / `opencode` as a tag but no
+    #     `agent:` field, and their model can be Claude, GPT, GLM, Qwen…
+    #     so the tag has to win over the model check below. Whole-tag
+    #     match only: a project tag like `opencode-plugin` does not count.
+    adapter_tag = _multi_model_adapter_tag(meta.get("tags", []))
+    if adapter_tag:
+        return _agent_map(adapter_tag)
+
     # 2. Model name
     model = str(meta.get("model", "")).lower()
     if "claude" in model:
@@ -2728,6 +2737,22 @@ def detect_agent_label(meta: dict) -> tuple[str, str]:
     return ("Agent", "agent-unknown")
 
 
+_MULTI_MODEL_ADAPTER_TAGS = ("zcode", "opencode")
+
+
+def _multi_model_adapter_tag(tags: object) -> str:
+    """Return ``zcode`` / ``opencode`` when that exact tag is present."""
+    if isinstance(tags, (list, tuple)):
+        items = [str(t) for t in tags]
+    else:
+        items = str(tags or "").strip().strip("[]").split(",")
+    names = {item.strip().strip("'\"").lower() for item in items}
+    for tag in _MULTI_MODEL_ADAPTER_TAGS:
+        if tag in names:
+            return tag
+    return ""
+
+
 def _agent_map(agent: str) -> tuple[str, str]:
     """Map an explicit agent name to (label, css_class)."""
     m = {
@@ -2742,6 +2767,8 @@ def _agent_map(agent: str) -> tuple[str, str]:
         "gemini": ("Gemini", "agent-gemini"),
         "gemini-cli": ("Gemini", "agent-gemini"),
         "obsidian": ("Obsidian", "agent-obsidian"),
+        "zcode": ("ZCode", "agent-zcode"),
+        "opencode": ("OpenCode", "agent-opencode"),
         # Simplification sweep removed the PDF adapter. The "pdf" entry
         # used to live here; left as a comment so a future grep sees
         # the rationale instead of guessing why the agent-pdf badge is

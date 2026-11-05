@@ -698,6 +698,8 @@ a.topic-chip:hover {
 .agent-cursor   { color: #92400E; background: rgba(217,119,6,0.1); border-color: rgba(217,119,6,0.3); }
 .agent-gemini   { color: #991B1B; background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.3); }
 .agent-obsidian { color: #7E22CE; background: rgba(126,34,206,0.1); border-color: rgba(126,34,206,0.3); }
+.agent-zcode    { color: #0E7490; background: rgba(8,145,178,0.1); border-color: rgba(8,145,178,0.3); }
+.agent-opencode { color: #9D174D; background: rgba(219,39,119,0.1); border-color: rgba(219,39,119,0.3); }
 /* Simplification sweep removed the PDF adapter — agent-pdf rule deleted. */
 .agent-unknown  { color: #6B7280; background: rgba(107,114,128,0.1); border-color: rgba(107,114,128,0.3); }
 :root[data-theme="dark"] .agent-claude   { color: #A78BFA; background: rgba(167,139,250,0.15); border-color: rgba(167,139,250,0.3); }
@@ -705,6 +707,8 @@ a.topic-chip:hover {
 :root[data-theme="dark"] .agent-copilot  { color: #60A5FA; background: rgba(96,165,250,0.15); border-color: rgba(96,165,250,0.3); }
 :root[data-theme="dark"] .agent-cursor   { color: #FBBF24; background: rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); }
 :root[data-theme="dark"] .agent-gemini   { color: #F87171; background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.3); }
+:root[data-theme="dark"] .agent-zcode    { color: #22D3EE; background: rgba(34,211,238,0.15); border-color: rgba(34,211,238,0.3); }
+:root[data-theme="dark"] .agent-opencode { color: #F472B6; background: rgba(244,114,182,0.15); border-color: rgba(244,114,182,0.3); }
 .sessions-table .agent-badge { font-size: 0.65rem; padding: 1px 6px; }
 
 /* v0.4: Deep-link icon next to headings */
