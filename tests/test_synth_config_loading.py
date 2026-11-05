@@ -1,10 +1,10 @@
-"""Config layering for `llmwiki synthesize` (gitignored local overrides)."""
+"""Config layering for `sessionwiki synthesize` (gitignored local overrides)."""
 
 from __future__ import annotations
 
 import json
 
-from llmwiki import cli
+from sessionwiki import cli
 
 
 def _write(path, data):

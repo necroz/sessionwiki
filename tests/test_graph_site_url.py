@@ -18,8 +18,8 @@ from pathlib import Path
 
 import pytest
 
-import llmwiki.graph as graph_mod
-from llmwiki.graph import (
+import sessionwiki.graph as graph_mod
+from sessionwiki.graph import (
     HTML_TEMPLATE,
     _compute_site_url,
     _verify_site_url,

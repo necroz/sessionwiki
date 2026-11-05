@@ -1,10 +1,10 @@
-Run the full llmwiki pipeline end-to-end: build → graph → export all → lint.
+Run the full sessionwiki pipeline end-to-end: build → graph → export all → lint.
 
 Usage: /wiki-all [flags]
 
-`$ARGUMENTS` is forwarded verbatim to `python3 -m llmwiki all`. Common flags:
+`$ARGUMENTS` is forwarded verbatim to `python3 -m sessionwiki all`. Common flags:
 
-- `--graph-engine builtin` — skip optional Graphify (use when `pip install llm-notebook[graph]` has not been run)
+- `--graph-engine builtin` — skip optional Graphify (use when `pip install sessionwiki[graph]` has not been run)
 - `--skip-graph` — skip the graph step entirely
 - `--strict` — exit non-zero if lint reports any errors/warnings (good for CI)
 - `--fail-fast` — stop at the first non-zero step instead of continuing to the next
@@ -15,7 +15,7 @@ Usage: /wiki-all [flags]
 Run:
 
 ```bash
-python3 -m llmwiki all $ARGUMENTS
+python3 -m sessionwiki all $ARGUMENTS
 ```
 
 The command runs these steps in order and surfaces their combined output:

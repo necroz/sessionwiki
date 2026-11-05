@@ -4,7 +4,7 @@ quarantine the file instead of silently classifying it as 'filtered'.
 Bug: ``try: … except OSError: pass`` at the top of parse_jsonl
 swallowed every I/O failure, returned an empty list, and downstream
 ``convert_all`` then bucketed the file as 'filtered' (legitimate
-empty session). The file disappeared from `llmwiki sync --status`
+empty session). The file disappeared from `sessionwiki sync --status`
 and from the quarantine, so operators never saw it.
 
 Fix: parse_jsonl re-raises OSError; convert_all wraps the call in
@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.convert import parse_jsonl
+from sessionwiki.convert import parse_jsonl
 
 
 def test_oserror_now_propagates_to_caller(tmp_path: Path):

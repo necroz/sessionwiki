@@ -1,17 +1,17 @@
 # GitHub Copilot adapters
 
 **Status:** Production (v0.6)
-**Modules:** `llmwiki.adapters.contrib.copilot_chat`, `llmwiki.adapters.contrib.copilot_cli`
+**Modules:** `sessionwiki.adapters.contrib.copilot_chat`, `sessionwiki.adapters.contrib.copilot_cli`
 **Tracking issue:** #93
 
-llmwiki ships two adapters for GitHub Copilot, covering the two distinct storage layouts.
+sessionwiki ships two adapters for GitHub Copilot, covering the two distinct storage layouts.
 
 ---
 
 ## Copilot Chat (VS Code extension)
 
-**Module:** `llmwiki.adapters.contrib.copilot_chat`
-**Source:** [`llmwiki/adapters/contrib/copilot_chat.py`](../../llmwiki/adapters/contrib/copilot_chat.py)
+**Module:** `sessionwiki.adapters.contrib.copilot_chat`
+**Source:** [`sessionwiki/adapters/contrib/copilot_chat.py`](../../sessionwiki/adapters/contrib/copilot_chat.py)
 **Registry name:** `copilot_chat` (canonical) — `copilot-chat` is kept as a back-compat alias for existing configs (#626).
 
 ### What it reads
@@ -66,8 +66,8 @@ Override roots in `config.json`:
 
 ## Copilot CLI
 
-**Module:** `llmwiki.adapters.contrib.copilot_cli`
-**Source:** [`llmwiki/adapters/contrib/copilot_cli.py`](../../llmwiki/adapters/contrib/copilot_cli.py)
+**Module:** `sessionwiki.adapters.contrib.copilot_cli`
+**Source:** [`sessionwiki/adapters/contrib/copilot_cli.py`](../../sessionwiki/adapters/contrib/copilot_cli.py)
 **Registry name:** `copilot_cli` (canonical) — `copilot-cli` is kept as a back-compat alias for existing configs (#626).
 
 ### What it reads
@@ -120,13 +120,13 @@ export COPILOT_HOME=~/.copilot-custom
 ## Testing both adapters
 
 ```bash
-python3 -m llmwiki adapters      # should list copilot_chat and copilot_cli
+python3 -m sessionwiki adapters      # should list copilot_chat and copilot_cli
 python3 -m pytest tests/test_copilot_adapters.py -v
 ```
 
 ## Reference
 
-- [`llmwiki/adapters/contrib/copilot_chat.py`](../../llmwiki/adapters/contrib/copilot_chat.py) -- Chat adapter source
-- [`llmwiki/adapters/contrib/copilot_cli.py`](../../llmwiki/adapters/contrib/copilot_cli.py) -- CLI adapter source
-- [`llmwiki/convert.py`](../../llmwiki/convert.py) -- the shared converter
+- [`sessionwiki/adapters/contrib/copilot_chat.py`](../../sessionwiki/adapters/contrib/copilot_chat.py) -- Chat adapter source
+- [`sessionwiki/adapters/contrib/copilot_cli.py`](../../sessionwiki/adapters/contrib/copilot_cli.py) -- CLI adapter source
+- [`sessionwiki/convert.py`](../../sessionwiki/convert.py) -- the shared converter
 - [README](../../README.md) -- project overview

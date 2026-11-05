@@ -24,7 +24,7 @@ import pytest
 
 
 def test_base_adapter_default_returns_false():
-    from llmwiki.adapters.base import BaseAdapter
+    from sessionwiki.adapters.base import BaseAdapter
 
     class _Stub(BaseAdapter):
         name = "stub"
@@ -42,7 +42,7 @@ def test_base_adapter_default_returns_false():
 
 
 def _claude_adapter():
-    from llmwiki.adapters.claude_code import ClaudeCodeAdapter
+    from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
     return ClaudeCodeAdapter({})
 
 
@@ -99,7 +99,7 @@ def test_other_adapters_never_classify_as_subagent(adapter_cls_name):
     layout, even if it has the same false-positive risk."""
     import importlib
     mod_path, cls_name = adapter_cls_name.rsplit(".", 1)
-    mod = importlib.import_module(f"llmwiki.adapters.{mod_path}")
+    mod = importlib.import_module(f"sessionwiki.adapters.{mod_path}")
     cls = getattr(mod, cls_name)
     a = cls({})
     # Throw every adversarial path at it

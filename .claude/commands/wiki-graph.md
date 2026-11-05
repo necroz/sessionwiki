@@ -11,11 +11,11 @@ The graph tool walks every file under `wiki/` looking for `[[wikilink]]` referen
 
 ## Steps
 
-1. Ensure the Python graph builder exists at `llmwiki/graph.py`. If it doesn't, create it (see "Fallback" below for a pure-agent version).
+1. Ensure the Python graph builder exists at `sessionwiki/graph.py`. If it doesn't, create it (see "Fallback" below for a pure-agent version).
 
 2. Run:
    ```bash
-   python3 -m llmwiki graph $ARGUMENTS
+   python3 -m sessionwiki graph $ARGUMENTS
    ```
 
 3. Read `graph/graph.json` after it runs and report to the user:
@@ -26,7 +26,7 @@ The graph tool walks every file under `wiki/` looking for `[[wikilink]]` referen
    - Any orphan nodes (zero inbound edges)
    - Any broken edges (links to pages that don't exist) — cross-check with `/wiki-lint`
 
-4. If the user asked for `html` or `both`, offer to open `graph/graph.html` locally with `python3 -m llmwiki serve --dir graph --port 8766`.
+4. If the user asked for `html` or `both`, offer to open `graph/graph.html` locally with `python3 -m sessionwiki serve --dir graph --port 8766`.
 
 5. Append to `wiki/log.md`:
    ```
@@ -35,7 +35,7 @@ The graph tool walks every file under `wiki/` looking for `[[wikilink]]` referen
 
 ## Fallback (no graph.py)
 
-If `llmwiki/graph.py` doesn't exist yet, build the graph manually using Grep and Read:
+If `sessionwiki/graph.py` doesn't exist yet, build the graph manually using Grep and Read:
 
 1. `grep -roh '\[\[[^]]*\]\]' wiki/ | sort -u` → unique wikilink targets
 2. For each wiki page, list the wikilinks found in it (out-edges)

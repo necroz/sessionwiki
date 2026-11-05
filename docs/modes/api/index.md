@@ -15,7 +15,7 @@ money per token, doesn't require Claude Code to be running.
 ## Status
 
 Scaffolding has shipped — the prompt caching + batch primitives live
-in `llmwiki/cache.py`. The full backend lands in
+in `sessionwiki/cache.py`. The full backend lands in
 **[#315 · feat: Mode A claude-api synthesis backend with prompt caching](https://github.com/Pratiyush/llm-wiki/issues/315)**.
 
 Until #315 merges, use the **Ollama backend** as a stand-in:
@@ -44,9 +44,9 @@ echo "ANTHROPIC_API_KEY=sk-ant-…" >> .env
 ## Daily flow
 
 ```bash
-llmwiki synthesize --estimate      # cost preview
-llmwiki synthesize                 # batch run with prompt caching
-llmwiki build && llmwiki serve --open
+sessionwiki synthesize --estimate      # cost preview
+sessionwiki synthesize                 # batch run with prompt caching
+sessionwiki build && sessionwiki serve --open
 ```
 
 ## Cost model
@@ -63,7 +63,7 @@ llmwiki build && llmwiki serve --open
 
 - Large corpora (100+ sessions) where serial Agent-mode synthesis
   would take hours.
-- Headless runs: cron, CI, `launchd` / `systemd` scheduling of `llmwiki sync`.
+- Headless runs: cron, CI, `launchd` / `systemd` scheduling of `sessionwiki sync`.
 - Shared server (multiple developers syncing into one wiki) — the API
   key belongs to the server, not individual laptops.
 

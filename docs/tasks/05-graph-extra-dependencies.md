@@ -30,7 +30,7 @@ declare:
   crashes with `ModuleNotFoundError: No module named 'scipy'`.
 
 Both were installed manually in this environment. A fresh
-`pip install llmwiki[graph]` leaves `llmwiki graph` broken: it falls
+`pip install sessionwiki[graph]` leaves `sessionwiki graph` broken: it falls
 back to the builtin engine with a warning.
 
 ## Required change
@@ -60,7 +60,7 @@ Update `tests/test_graphify_bridge.py::test_pyproject_has_graph_extra`:
 
 ```python
 def test_pyproject_has_graph_extra():
-    from llmwiki import REPO_ROOT
+    from sessionwiki import REPO_ROOT
 
     content = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert 'graph = [' in content
@@ -79,7 +79,7 @@ check is enough.
 .venv/bin/pip install -e '.[graph]'
 .venv/bin/python -c "import matplotlib, scipy; print(matplotlib.__version__, scipy.__version__)"
 .venv/bin/python -m pytest tests/test_graphify_bridge.py -q
-.venv/bin/python -m llmwiki graph
+.venv/bin/python -m sessionwiki graph
 ```
 
 Expected:
@@ -96,7 +96,7 @@ diff in the PR body. Do not commit a lock file.
 - [ ] `graph` extra lists `matplotlib` and `scipy`.
 - [ ] `all` extra lists `matplotlib` and `scipy`.
 - [ ] The updated test passes.
-- [ ] `llmwiki graph` completes without a missing-module fallback.
+- [ ] `sessionwiki graph` completes without a missing-module fallback.
 - [ ] `CHANGELOG.md` updated.
 
 ## Out of scope

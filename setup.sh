@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# llmwiki — one-click installer for macOS / Linux.
+# sessionwiki — one-click installer for macOS / Linux.
 #
 # Usage: ./setup.sh [--graph]
 # Idempotent — safe to re-run.
@@ -20,7 +20,7 @@ case "${1:-}" in
   *) echo "usage: $0 [--graph]" >&2; exit 2 ;;
 esac
 
-echo "==> llmwiki setup"
+echo "==> sessionwiki setup"
 echo "    root: $SCRIPT_DIR"
 
 # 1. Python check
@@ -49,8 +49,8 @@ PY="$SCRIPT_DIR/.venv/bin/python"
 
 # 3. Install the package into the venv (editable, so source edits apply).
 #    Skip the network when the existing venv already has everything.
-if [ -n "$EXTRAS" ] || ! "$PY" -c "import llmwiki, markdown" 2>/dev/null; then
-  echo "==> installing llmwiki${EXTRAS} into .venv"
+if [ -n "$EXTRAS" ] || ! "$PY" -c "import sessionwiki, markdown" 2>/dev/null; then
+  echo "==> installing sessionwiki${EXTRAS} into .venv"
   "$PY" -m pip install -e "${SCRIPT_DIR}${EXTRAS}" --quiet
 fi
 
@@ -61,20 +61,20 @@ if ! "$PY" -c "import markdown" 2>/dev/null; then
 fi
 
 # 4. Scaffold raw/ wiki/ site/
-"$PY" -m llmwiki init
+"$PY" -m sessionwiki init
 
 # 5. Show available adapters
-"$PY" -m llmwiki adapters
+"$PY" -m sessionwiki adapters
 
 # 6. First sync (status probe so users see how many sessions exist
 #    without actually converting them yet)
 echo
 echo "==> sync status:"
-"$PY" -m llmwiki sync --status || true
+"$PY" -m sessionwiki sync --status || true
 
 echo
 echo "==> environment check:"
-"$PY" -m llmwiki doctor || true
+"$PY" -m sessionwiki doctor || true
 
 echo
 echo "================================================================"
@@ -82,15 +82,15 @@ echo "  Setup complete."
 echo "================================================================"
 echo
 echo "Next steps:"
-echo "  source .venv/bin/activate   # or call .venv/bin/llmwiki directly"
+echo "  source .venv/bin/activate   # or call .venv/bin/sessionwiki directly"
 echo "  ./sync.sh                   # export ZCode + convert new sessions"
 echo "  ./build.sh                  # generate the static HTML site"
 echo "  ./serve.sh                  # browse at http://127.0.0.1:8765/"
-echo "  .venv/bin/python -m llmwiki zcode export   # ZCode store -> JSONL"
+echo "  .venv/bin/python -m sessionwiki zcode export   # ZCode store -> JSONL"
 echo
 echo "Optional SessionStart hook — auto-sync on every Claude Code launch:"
 echo "  Add this to ~/.claude/settings.json under 'hooks':"
 echo '    "SessionStart": [ { "hooks": [ { "type": "command",'
-echo "      \"command\": \"($PY -m llmwiki sync --no-auto-build > /tmp/llmwiki-sync.log 2>&1 &) ; exit 0\" } ] } ]"
+echo "      \"command\": \"($PY -m sessionwiki sync --no-auto-build > /tmp/sessionwiki-sync.log 2>&1 &) ; exit 0\" } ] } ]"
 echo
 echo "For ZCode Stop-hook and timer setup, see ZCODE.md."

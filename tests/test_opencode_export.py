@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import session_export
-from llmwiki.opencode import export
+from sessionwiki import session_export
+from sessionwiki.opencode import export
 
 T0 = 1_700_000_000_000
 OLD = 1_600_000_000_000

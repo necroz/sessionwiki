@@ -19,13 +19,13 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.docs_pages import (
+from sessionwiki.docs_pages import (
     _rewrite_one_to_github,
     rewrite_source_code_links_to_github,
 )
 
 
-_GH = "https://github.com/Pratiyush/llm-wiki/blob/master"
+_GH = "https://github.com/necroz/sessionwiki/blob/master"
 
 
 # ─── _rewrite_one_to_github: unit ────────────────────────────────────────
@@ -33,9 +33,9 @@ _GH = "https://github.com/Pratiyush/llm-wiki/blob/master"
 
 @pytest.mark.parametrize("href,expected", [
     # Source code at various depths
-    ("../../llmwiki/convert.py", f"{_GH}/llmwiki/convert.py"),
-    ("llmwiki/convert.py", f"{_GH}/llmwiki/convert.py"),
-    ("../llmwiki/adapters/cursor.py", f"{_GH}/llmwiki/adapters/cursor.py"),
+    ("../../sessionwiki/convert.py", f"{_GH}/sessionwiki/convert.py"),
+    ("sessionwiki/convert.py", f"{_GH}/sessionwiki/convert.py"),
+    ("../sessionwiki/adapters/cursor.py", f"{_GH}/sessionwiki/adapters/cursor.py"),
     # Different extensions
     ("script.js", f"{_GH}/script.js"),
     ("src/types.ts", f"{_GH}/src/types.ts"),
@@ -78,9 +78,9 @@ def test_rewrite_one_to_github_leaves_other_paths_alone(href):
 
 
 def test_rewrites_source_code_ref_in_href():
-    html = 'See <a href="../../llmwiki/convert.py">convert.py</a>.'
+    html = 'See <a href="../../sessionwiki/convert.py">convert.py</a>.'
     out = rewrite_source_code_links_to_github(html)
-    assert 'href="https://github.com/Pratiyush/llm-wiki/blob/master/llmwiki/convert.py"' in out
+    assert 'href="https://github.com/necroz/sessionwiki/blob/master/sessionwiki/convert.py"' in out
 
 
 def test_rewrites_repo_root_md():
@@ -135,7 +135,7 @@ def test_leaves_docs_md_alone():
 def test_multiple_rewrites_in_one_body():
     html = (
         'Read <a href="../../CLAUDE.md">CLAUDE</a> and '
-        '<a href="../../llmwiki/convert.py">convert</a> and '
+        '<a href="../../sessionwiki/convert.py">convert</a> and '
         '<a href="docs/reference/cli.md">CLI ref</a>.'
     )
     out = rewrite_source_code_links_to_github(html)
@@ -153,13 +153,13 @@ def test_preserves_html_attributes_on_anchor():
 
 
 def test_python_link_under_subdir():
-    html = '<a href="llmwiki/adapters/claude_code.py">src</a>'
+    html = '<a href="sessionwiki/adapters/claude_code.py">src</a>'
     out = rewrite_source_code_links_to_github(html)
-    assert f'href="{_GH}/llmwiki/adapters/claude_code.py"' in out
+    assert f'href="{_GH}/sessionwiki/adapters/claude_code.py"' in out
 
 
 def test_handles_hash_anchor_on_source_file():
-    html = '<a href="llmwiki/convert.py#L42">line 42</a>'
+    html = '<a href="sessionwiki/convert.py#L42">line 42</a>'
     out = rewrite_source_code_links_to_github(html)
     # Anchor is stripped in the GH URL — this is fine; reviewers click
     # the file and use GitHub's line-number UI.

@@ -19,7 +19,7 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki.mcp.server import (
+from sessionwiki.mcp.server import (
     _MCP_SCAN_AGGREGATE_BYTES,
     _MCP_SCAN_PER_FILE_BYTES,
     _read_capped,
@@ -81,7 +81,7 @@ def test_search_response_includes_skipped_oversize_counter(tmp_path: Path):
     (wiki / "small.md").write_text("findme appears here\n", encoding="utf-8")
     (wiki / "huge.md").write_text("x" * (_MCP_SCAN_PER_FILE_BYTES + 100),
                                    encoding="utf-8")
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         res = tool_wiki_search({"term": "findme"})
     body = res.get("content", [{}])[0].get("text", "")
     payload = json.loads(body)
@@ -100,7 +100,7 @@ def test_search_normal_corpus_no_skips(tmp_path: Path):
     raw.mkdir()
     (wiki / "a.md").write_text("apple\n", encoding="utf-8")
     (wiki / "b.md").write_text("banana\n", encoding="utf-8")
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         res = tool_wiki_search({"term": "apple"})
     body = res.get("content", [{}])[0].get("text", "")
     payload = json.loads(body)

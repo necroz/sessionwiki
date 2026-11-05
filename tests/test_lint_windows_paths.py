@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.lint.rules import _basename, _page_slug, FrontmatterCompleteness
+from sessionwiki.lint.rules import _basename, _page_slug, FrontmatterCompleteness
 
 
 @pytest.mark.parametrize("rel,expected", [

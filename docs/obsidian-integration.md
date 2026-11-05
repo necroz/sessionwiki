@@ -1,11 +1,11 @@
 # Obsidian Integration Guide
 
-llmwiki is designed to work natively inside Obsidian. This guide covers
+sessionwiki is designed to work natively inside Obsidian. This guide covers
 the recommended plugins and configuration for the best experience.
 
 ## Why Obsidian?
 
-llmwiki emits plain markdown with YAML frontmatter and `[[wikilinks]]` —
+sessionwiki emits plain markdown with YAML frontmatter and `[[wikilinks]]` —
 exactly what Obsidian reads natively. Open your `wiki/` folder as an
 Obsidian vault (or symlink it into an existing vault) and you get:
 
@@ -19,7 +19,7 @@ Obsidian vault (or symlink it into an existing vault) and you get:
 ### Option 1: Open wiki/ as a standalone vault
 
 ```
-Obsidian → Open another vault → Open folder as vault → .../llm-wiki/wiki
+Obsidian → Open another vault → Open folder as vault → .../sessionwiki/wiki
 ```
 
 ### Option 2: Symlink into an existing vault
@@ -27,11 +27,11 @@ Obsidian → Open another vault → Open folder as vault → .../llm-wiki/wiki
 Use the built-in CLI:
 
 ```bash
-python3 -m llmwiki link-obsidian --vault ~/Documents/"Obsidian Vault"
+python3 -m sessionwiki link-obsidian --vault ~/Documents/"Obsidian Vault"
 ```
 
 This creates `~/Documents/Obsidian Vault/LLM Wiki/` as a symlink to the
-llm-wiki project root, so `[[wikilinks]]` resolve and the graph view
+sessionwiki project root, so `[[wikilinks]]` resolve and the graph view
 shows the entire wiki alongside your other notes.
 
 ## Recommended Plugins
@@ -58,15 +58,15 @@ Install in Obsidian via `Settings → Community plugins → Browse`.
 
 4. **[Obsidian Web Clipper](https://obsidian.md/clipper)** —
    Chrome/Firefox extension for saving web articles directly into
-   `raw/web/`. Configure its default save location to your llmwiki's
-   `raw/` directory and llmwiki's Web Clipper intake (see #149) will
+   `raw/web/`. Configure its default save location to your sessionwiki's
+   `raw/` directory and sessionwiki's Web Clipper intake (see #149) will
    auto-queue them for ingestion.
 
 ### Optional (LLM-powered)
 
 5. **[Smart Connections](https://github.com/brianpetro/obsidian-smart-connections)** —
    Semantic similarity across notes using local embeddings.
-   Complements llmwiki's explicit `[[wikilinks]]` with
+   Complements sessionwiki's explicit `[[wikilinks]]` with
    "pages related by meaning."
 
 6. **obsidian-mcp-tools** (jacksteamdev) —
@@ -113,17 +113,17 @@ Enable these YAML rules:
 
 ## Workflow
 
-1. **Ingest** — run `python3 -m llmwiki sync` (converts new sessions)
+1. **Ingest** — run `python3 -m sessionwiki sync` (converts new sessions)
    and `/wiki-sync` (Claude Code slash command to compile into wiki).
 2. **Read & edit** — open Obsidian, browse graph view, click `[[links]]`.
 3. **Create** — hit `Cmd/Ctrl+Shift+P → Templater: New from template`.
 4. **Review** — open `wiki/dashboard.md` to see what's stale, uncited,
    or low-confidence.
-5. **Lint** — `python3 -m llmwiki lint` for structural checks.
+5. **Lint** — `python3 -m sessionwiki lint` for structural checks.
 
 ## Two-way editing
 
-Obsidian edits directly to `wiki/*.md` are preserved — llmwiki's ingest
+Obsidian edits directly to `wiki/*.md` are preserved — sessionwiki's ingest
 pipeline never overwrites sections outside the frontmatter and the
 specific sections it manages (`## Summary`, `## Key Facts`, etc.).
 

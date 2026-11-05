@@ -42,7 +42,7 @@ labels: 'adapter, enhancement'
 
 Per `docs/framework.md §5.25 Adapter Flow`, a new adapter needs:
 
-1. `llmwiki/adapters/<agent>.py`
+1. `sessionwiki/adapters/<agent>.py`
 2. `tests/fixtures/<agent>/minimal.jsonl`
 3. `tests/snapshots/<agent>/minimal.md`
 4. `tests/test_<agent>_adapter.py`

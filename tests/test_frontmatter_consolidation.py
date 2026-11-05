@@ -13,10 +13,10 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki._frontmatter import parse_frontmatter as canonical
-from llmwiki.lint import parse_frontmatter as lint_parse
-from llmwiki.models_page import _parse_frontmatter as models_parse
-from llmwiki.tags import _parse_frontmatter as tags_parse
+from sessionwiki._frontmatter import parse_frontmatter as canonical
+from sessionwiki.lint import parse_frontmatter as lint_parse
+from sessionwiki.models_page import _parse_frontmatter as models_parse
+from sessionwiki.tags import _parse_frontmatter as tags_parse
 
 
 def _make(content_body: str, line_ending: str = "\n", bom: bool = False) -> str:

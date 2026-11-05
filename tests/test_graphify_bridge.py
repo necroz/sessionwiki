@@ -1,4 +1,4 @@
-"""Tests for llmwiki.graphify_bridge — Graphify integration."""
+"""Tests for sessionwiki.graphify_bridge — Graphify integration."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from llmwiki.graphify_bridge import is_available, GRAPHIFY_OUT
+from sessionwiki.graphify_bridge import is_available, GRAPHIFY_OUT
 
 _GRAPHIFY_INSTALLED = importlib.util.find_spec("graphify") is not None
 
@@ -24,7 +24,7 @@ def test_is_available_returns_bool():
 
 @pytest.mark.skipif(
     not _GRAPHIFY_INSTALLED,
-    reason="graphify is an optional dependency; install with `pip install llmwiki[graph]`",
+    reason="graphify is an optional dependency; install with `pip install sessionwiki[graph]`",
 )
 def test_is_available_true_when_graphify_installed():
     """When graphify is installed in the dev environment, is_available() is True."""
@@ -35,7 +35,7 @@ def test_is_available_false_when_not_installed():
     with patch.dict("sys.modules", {"graphify": None}):
         # Force ImportError by removing the module
         import importlib
-        from llmwiki import graphify_bridge
+        from sessionwiki import graphify_bridge
         importlib.reload(graphify_bridge)
         # The function does a fresh import each time so we need to mock it
         with patch("builtins.__import__", side_effect=ImportError("no graphify")):
@@ -47,7 +47,7 @@ def test_is_available_false_when_not_installed():
 
 
 def test_bridge_module_imports():
-    from llmwiki.graphify_bridge import (
+    from sessionwiki.graphify_bridge import (
         is_available,
         build_graphify_graph,
         export_to_obsidian,
@@ -62,7 +62,7 @@ def test_bridge_module_imports():
 
 
 def test_cli_graph_has_engine_flag():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     # Parse a graph --help to check the engine flag exists
@@ -71,7 +71,7 @@ def test_cli_graph_has_engine_flag():
 
 
 def test_cli_graph_engine_default_is_graphify():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     args = parser.parse_args(["graph"])
@@ -79,7 +79,7 @@ def test_cli_graph_engine_default_is_graphify():
 
 
 def test_cli_graph_engine_graphify_accepted():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     args = parser.parse_args(["graph", "--engine", "graphify"])
@@ -90,7 +90,7 @@ def test_cli_graph_engine_graphify_accepted():
 
 
 def test_pyproject_has_graph_extra():
-    from llmwiki import REPO_ROOT
+    from sessionwiki import REPO_ROOT
 
     content = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
 
@@ -119,7 +119,7 @@ def test_pyproject_has_graph_extra():
 
 
 def test_gitignore_excludes_graphify_out():
-    from llmwiki import REPO_ROOT
+    from sessionwiki import REPO_ROOT
 
     gitignore = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
     assert "graphify-out/" in gitignore
@@ -130,8 +130,8 @@ def test_gitignore_excludes_graphify_out():
 
 def test_query_graph_no_graph_file(tmp_path):
     """When no graph.json exists, return a helpful message."""
-    from llmwiki.graphify_bridge import query_graph
-    with patch("llmwiki.graphify_bridge.GRAPHIFY_OUT", tmp_path):
+    from sessionwiki.graphify_bridge import query_graph
+    with patch("sessionwiki.graphify_bridge.GRAPHIFY_OUT", tmp_path):
         result = query_graph("test question")
     assert "No graph found" in result
 
@@ -141,7 +141,7 @@ def test_query_graph_no_graph_file(tmp_path):
 
 def test_extract_wiki_nodes_project_edges(tmp_path):
     """Pages sharing a project: field get connected via project hub + proximity edges."""
-    from llmwiki.graphify_bridge import _extract_wiki_nodes
+    from sessionwiki.graphify_bridge import _extract_wiki_nodes
 
     # Create three wiki pages in the same project
     for i, (slug, date) in enumerate([
@@ -175,7 +175,7 @@ def test_extract_wiki_nodes_project_edges(tmp_path):
 
 def test_extract_wiki_nodes_no_project_no_extra_edges(tmp_path):
     """Pages without project: field produce no project edges."""
-    from llmwiki.graphify_bridge import _extract_wiki_nodes
+    from sessionwiki.graphify_bridge import _extract_wiki_nodes
 
     (tmp_path / "solo.md").write_text(
         "---\ntitle: \"solo\"\ntype: entity\n---\n\n# Solo page\n",
@@ -191,7 +191,7 @@ def test_extract_wiki_nodes_no_project_no_extra_edges(tmp_path):
 
 def test_extract_wiki_nodes_project_proximity_capped_at_5(tmp_path):
     """Proximity edges connect at most 5 neighbours (not N^2)."""
-    from llmwiki.graphify_bridge import _extract_wiki_nodes
+    from sessionwiki.graphify_bridge import _extract_wiki_nodes
 
     # Create 10 pages in the same project
     for i in range(10):
@@ -217,7 +217,7 @@ def test_extract_wiki_nodes_project_proximity_capped_at_5(tmp_path):
 )
 def test_build_graphify_graph_forces_overwrite():
     import inspect
-    from llmwiki.graphify_bridge import build_graphify_graph
+    from sessionwiki.graphify_bridge import build_graphify_graph
 
     source = inspect.getsource(build_graphify_graph)
     assert "force=True" in source
@@ -225,7 +225,7 @@ def test_build_graphify_graph_forces_overwrite():
 
 
 def test_query_graph_reads_links_keyed_export(tmp_path, monkeypatch):
-    from llmwiki import graphify_bridge
+    from sessionwiki import graphify_bridge
 
     graph = {
         "directed": False,

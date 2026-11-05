@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import llmwiki.graph as graph_mod
-from llmwiki._frontmatter import parse_frontmatter
-from llmwiki.build import ensure_projects_index
-from llmwiki.graph import HTML_TEMPLATE, build_session_graph, scan_pages, write_html
-from llmwiki.lint.rules.frontmatter_validity import FrontmatterValidity
+import sessionwiki.graph as graph_mod
+from sessionwiki._frontmatter import parse_frontmatter
+from sessionwiki.build import ensure_projects_index
+from sessionwiki.graph import HTML_TEMPLATE, build_session_graph, scan_pages, write_html
+from sessionwiki.lint.rules.frontmatter_validity import FrontmatterValidity
 
 
 def _write_raw(
@@ -163,11 +163,11 @@ def test_scan_pages_keeps_nested_index(tmp_path: Path, monkeypatch) -> None:
 
 def test_write_html_uses_custom_title(tmp_path: Path) -> None:
     out = tmp_path / "graph.html"
-    write_html(_minimal_graph("llmwiki — Sessions & Projects"), out)
+    write_html(_minimal_graph("sessionwiki — Sessions & Projects"), out)
     text = out.read_text(encoding="utf-8")
-    assert "<title>llmwiki — Sessions &amp; Projects</title>" in text
-    assert "<h1>llmwiki — Sessions &amp; Projects</h1>" in text
-    assert "llmwiki — Knowledge Graph" not in text
+    assert "<title>sessionwiki — Sessions &amp; Projects</title>" in text
+    assert "<h1>sessionwiki — Sessions &amp; Projects</h1>" in text
+    assert "sessionwiki — Knowledge Graph" not in text
 
 
 def test_project_graph_template_starts_clustered() -> None:

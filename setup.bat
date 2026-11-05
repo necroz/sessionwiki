@@ -1,5 +1,5 @@
 @echo off
-REM llmwiki — one-click installer for Windows.
+REM sessionwiki — one-click installer for Windows.
 REM Usage: setup.bat [--graph]
 REM Idempotent — safe to re-run.
 REM
@@ -12,7 +12,7 @@ cd /d "%~dp0"
 set "TARGET=."
 if /I "%~1"=="--graph" set "TARGET=.[graph]"
 
-echo ==^> llmwiki setup
+echo ==^> sessionwiki setup
 echo     root: %cd%
 
 REM 1. Python check
@@ -42,11 +42,11 @@ set "PY=%cd%\.venv\Scripts\python.exe"
 
 REM 3. Install the package into the venv (editable).
 set "NEED_INSTALL=0"
-"%PY%" -c "import llmwiki, markdown" >nul 2>&1
+"%PY%" -c "import sessionwiki, markdown" >nul 2>&1
 if errorlevel 1 set "NEED_INSTALL=1"
 if /I "%~1"=="--graph" set "NEED_INSTALL=1"
 if "!NEED_INSTALL!"=="1" (
-  echo ==^> installing llmwiki into .venv
+  echo ==^> installing sessionwiki into .venv
   "%PY%" -m pip install -e "%TARGET%" --quiet
   if errorlevel 1 (
     echo error: pip install failed
@@ -61,20 +61,20 @@ if errorlevel 1 (
 )
 
 REM 4. Scaffold raw/ wiki/ site/
-"%PY%" -m llmwiki init
+"%PY%" -m sessionwiki init
 if errorlevel 1 exit /b 1
 
 REM 5. Show available adapters
-"%PY%" -m llmwiki adapters
+"%PY%" -m sessionwiki adapters
 
 REM 6. First sync status (read-only)
 echo.
 echo ==^> sync status:
-"%PY%" -m llmwiki sync --status
+"%PY%" -m sessionwiki sync --status
 
 echo.
 echo ==^> environment check:
-"%PY%" -m llmwiki doctor
+"%PY%" -m sessionwiki doctor
 
 echo.
 echo ================================================================
@@ -82,10 +82,10 @@ echo   Setup complete.
 echo ================================================================
 echo.
 echo Next steps:
-echo   .venv\Scripts\activate.bat  ^-^- or call .venv\Scripts\llmwiki.exe directly
+echo   .venv\Scripts\activate.bat  ^-^- or call .venv\Scripts\sessionwiki.exe directly
 echo   sync.bat                    ^-^- export ZCode + convert new sessions
 echo   build.bat                   ^-^- generate the static HTML site
 echo   serve.bat                   ^-^- browse at http://127.0.0.1:8765/
-echo   .venv\Scripts\python.exe -m llmwiki zcode export
+echo   .venv\Scripts\python.exe -m sessionwiki zcode export
 echo.
 echo For ZCode Stop-hook and scheduler setup, see ZCODE.md.

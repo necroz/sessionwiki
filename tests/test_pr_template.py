@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 TEMPLATE = REPO_ROOT / ".github" / "PULL_REQUEST_TEMPLATE.md"

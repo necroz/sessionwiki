@@ -1,6 +1,6 @@
 # Maintainer guide
 
-This directory is the governance scaffold for llmwiki maintainers.
+This directory is the governance scaffold for sessionwiki maintainers.
 Contributors should read [`../../CONTRIBUTING.md`](../../CONTRIBUTING.md)
 first — it has the short version of what this folder covers in detail.
 

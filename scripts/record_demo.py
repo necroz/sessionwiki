@@ -1,10 +1,10 @@
 """#638 + #248: scripted demo recording for the README demo GIF.
 
-Records a polished walkthrough of the live llmwiki site using
+Records a polished walkthrough of the live sessionwiki site using
 Playwright's `page.video()` API, then optionally converts the WebM
 to an animated GIF via ffmpeg. The output lives at:
 
-  - ``docs/videos/llmwiki-demo.webm``  (raw recording)
+  - ``docs/videos/sessionwiki-demo.webm``  (raw recording)
   - ``docs/demo.gif``                  (README-embeddable GIF)
 
 The walkthrough mirrors the manual flow from #248:
@@ -160,7 +160,7 @@ def record(base_url: str) -> Path:
             # 1. Home
             page.goto(f"{base_url}/index.html"); page.wait_for_load_state("networkidle")
             inject_overlays(page)
-            subtitle(page, "llmwiki — your sessions, browsable", 1400)
+            subtitle(page, "sessionwiki — your sessions, browsable", 1400)
             smooth_scroll(page, 250); subtitle(page, "Activity heatmap")
             smooth_scroll(page, 480); subtitle(page, "Token stats")
             smooth_scroll(page, 700); subtitle(page, "Project grid"); page.wait_for_timeout(800)
@@ -214,7 +214,7 @@ def record(base_url: str) -> Path:
 
     if not video_src:
         raise RuntimeError("playwright reported no video path")
-    final = VIDEO_DIR / "llmwiki-demo.webm"
+    final = VIDEO_DIR / "sessionwiki-demo.webm"
     Path(video_src).rename(final)
     return final
 
@@ -247,7 +247,7 @@ def to_gif(webm: Path, out: Path, *, fps: int = 12, width: int = 960) -> bool:
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Record llmwiki demo walkthrough")
+    p = argparse.ArgumentParser(description="Record sessionwiki demo walkthrough")
     p.add_argument("--base-url",
                    default=os.environ.get("QA_BASE_URL", "http://127.0.0.1:8765"))
     p.add_argument("--no-gif", action="store_true",

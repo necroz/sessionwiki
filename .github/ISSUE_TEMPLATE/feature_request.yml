@@ -27,7 +27,7 @@ body:
       label: Proposal
       description: What should the feature do? Include the CLI surface, new files, new config if any.
       placeholder: |
-        Add a new subcommand `llmwiki foo` that does ...
+        Add a new subcommand `sessionwiki foo` that does ...
     validations:
       required: true
 

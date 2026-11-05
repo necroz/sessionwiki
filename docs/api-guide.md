@@ -1,18 +1,18 @@
 # API Guide
 
-Using llmwiki as a Python library in your own scripts and pipelines.
+Using sessionwiki as a Python library in your own scripts and pipelines.
 
 ## Public API
 
-The `llmwiki` package exposes several functions that can be imported directly:
+The `sessionwiki` package exposes several functions that can be imported directly:
 
 ```python
-from llmwiki.convert import convert_all
-from llmwiki.build import build_site
-from llmwiki.serve import serve_site
-from llmwiki.graph import build_and_report
-from llmwiki.exporters import export_all
-from llmwiki.adapters import REGISTRY, discover_adapters
+from sessionwiki.convert import convert_all
+from sessionwiki.build import build_site
+from sessionwiki.serve import serve_site
+from sessionwiki.graph import build_and_report
+from sessionwiki.exporters import export_all
+from sessionwiki.adapters import REGISTRY, discover_adapters
 ```
 
 ## Core functions
@@ -20,7 +20,7 @@ from llmwiki.adapters import REGISTRY, discover_adapters
 ### `convert_all()` -- sync agent sessions to markdown
 
 ```python
-from llmwiki.convert import convert_all
+from sessionwiki.convert import convert_all
 
 rc = convert_all(
     adapters=None,         # list[str] | None -- adapter names; None = all available
@@ -33,12 +33,12 @@ rc = convert_all(
 # Returns: 0 on success, non-zero on error
 ```
 
-This is the programmatic equivalent of `llmwiki sync`. It discovers agent session stores, converts `.jsonl` files to markdown, and writes them under `raw/sessions/`.
+This is the programmatic equivalent of `sessionwiki sync`. It discovers agent session stores, converts `.jsonl` files to markdown, and writes them under `raw/sessions/`.
 
 ### `build_site()` -- compile HTML from markdown
 
 ```python
-from llmwiki.build import build_site
+from sessionwiki.build import build_site
 from pathlib import Path
 
 rc = build_site(
@@ -49,12 +49,12 @@ rc = build_site(
 # Returns: 0 on success, non-zero on error
 ```
 
-Reads `raw/` (and `wiki/` if populated) and renders a complete static HTML site. Equivalent to `llmwiki build`.
+Reads `raw/` (and `wiki/` if populated) and renders a complete static HTML site. Equivalent to `sessionwiki build`.
 
 ### `serve_site()` -- start local HTTP server
 
 ```python
-from llmwiki.serve import serve_site
+from sessionwiki.serve import serve_site
 from pathlib import Path
 
 rc = serve_site(
@@ -71,7 +71,7 @@ Starts a local HTTP server using Python's stdlib `http.server`. Binds to localho
 ### `build_and_report()` -- knowledge graph
 
 ```python
-from llmwiki.graph import build_and_report
+from sessionwiki.graph import build_and_report
 
 rc = build_and_report(
     write_json_flag=True,  # bool -- write graph/graph.json
@@ -85,8 +85,8 @@ Walks `[[wikilinks]]` in `wiki/` and produces a JSON graph and/or an interactive
 ### `export_all()` -- AI-consumable exports
 
 ```python
-from llmwiki.exporters import export_all
-from llmwiki.build import discover_sources, group_by_project, RAW_SESSIONS
+from sessionwiki.exporters import export_all
+from sessionwiki.build import discover_sources, group_by_project, RAW_SESSIONS
 from pathlib import Path
 
 sources = discover_sources(RAW_SESSIONS)
@@ -104,7 +104,7 @@ Generates all export formats: `llms.txt`, `llms-full.txt`, JSON-LD, sitemap, RSS
 ### Discovering adapters
 
 ```python
-from llmwiki.adapters import REGISTRY, discover_adapters, get_available
+from sessionwiki.adapters import REGISTRY, discover_adapters, get_available
 
 # Import all built-in adapters
 discover_adapters()
@@ -120,7 +120,7 @@ available = get_available()
 ### Using an adapter directly
 
 ```python
-from llmwiki.adapters import discover_adapters, REGISTRY
+from sessionwiki.adapters import discover_adapters, REGISTRY
 
 discover_adapters()
 adapter_cls = REGISTRY["claude_code"]
@@ -138,7 +138,7 @@ for path in sessions:
 ### Source discovery
 
 ```python
-from llmwiki.build import discover_sources, group_by_project, RAW_SESSIONS
+from sessionwiki.build import discover_sources, group_by_project, RAW_SESSIONS
 
 # Find all .md files under raw/sessions/
 sources = discover_sources(RAW_SESSIONS)
@@ -152,9 +152,9 @@ for project, project_sources in groups.items():
 ### Render visualizations
 
 ```python
-from llmwiki.viz_heatmap import render_heatmap, collect_session_counts
-from llmwiki.viz_tools import render_session_tool_chart
-from llmwiki.viz_tokens import render_session_token_card
+from sessionwiki.viz_heatmap import render_heatmap, collect_session_counts
+from sessionwiki.viz_tools import render_session_tool_chart
+from sessionwiki.viz_tokens import render_session_token_card
 
 # Heatmap SVG
 counts = collect_session_counts(raw_dir=Path("raw/sessions"))
@@ -175,7 +175,7 @@ svg = render_session_token_card({
 ### Freshness checks
 
 ```python
-from llmwiki.freshness import freshness_badge, load_freshness_config
+from sessionwiki.freshness import freshness_badge, load_freshness_config
 
 config = load_freshness_config()
 badge = freshness_badge("2026-04-01", config)
@@ -185,7 +185,7 @@ badge = freshness_badge("2026-04-01", config)
 ### Model discovery
 
 ```python
-from llmwiki.models_page import discover_model_entities, discover_model_entities_with_meta
+from sessionwiki.models_page import discover_model_entities, discover_model_entities_with_meta
 
 # Find model entity pages in wiki/entities/
 models = discover_model_entities()
@@ -197,7 +197,7 @@ models_with_meta = discover_model_entities_with_meta()
 ### Project topics
 
 ```python
-from llmwiki.project_topics import get_project_topics, load_project_profile
+from sessionwiki.project_topics import get_project_topics, load_project_profile
 
 topics = get_project_topics("my-project")
 # Returns: list of topic strings
@@ -209,7 +209,7 @@ profile = load_project_profile("my-project")
 ### Model schema
 
 ```python
-from llmwiki.schema import parse_model_profile, ModelProfile
+from sessionwiki.schema import parse_model_profile, ModelProfile
 
 profile = parse_model_profile(frontmatter_dict)
 if profile:
@@ -220,7 +220,7 @@ if profile:
 ### Export to qmd
 
 ```python
-from llmwiki.export_qmd import export_qmd
+from sessionwiki.export_qmd import export_qmd
 
 summary = export_qmd(
     out_dir=Path("export/qmd"),
@@ -236,12 +236,12 @@ A script that syncs sessions, builds the site, and exports all formats:
 
 ```python
 #!/usr/bin/env python3
-"""Custom llmwiki pipeline."""
+"""Custom sessionwiki pipeline."""
 
 from pathlib import Path
-from llmwiki.convert import convert_all
-from llmwiki.build import build_site, discover_sources, group_by_project, RAW_SESSIONS
-from llmwiki.exporters import export_all
+from sessionwiki.convert import convert_all
+from sessionwiki.build import build_site, discover_sources, group_by_project, RAW_SESSIONS
+from sessionwiki.exporters import export_all
 
 # Step 1: sync new sessions
 print("Syncing sessions...")
@@ -272,7 +272,7 @@ A script that reports on all detected agents and their session counts:
 #!/usr/bin/env python3
 """Report on detected coding agents."""
 
-from llmwiki.adapters import discover_adapters, REGISTRY
+from sessionwiki.adapters import discover_adapters, REGISTRY
 
 discover_adapters()
 

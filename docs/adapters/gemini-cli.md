@@ -1,8 +1,8 @@
 # Gemini CLI adapter
 
 **Status:** Production (v0.5)
-**Module:** `llmwiki.adapters.contrib.gemini_cli`
-**Source:** [`llmwiki/adapters/contrib/gemini_cli.py`](../../llmwiki/adapters/contrib/gemini_cli.py)
+**Module:** `sessionwiki.adapters.contrib.gemini_cli`
+**Source:** [`sessionwiki/adapters/contrib/gemini_cli.py`](../../sessionwiki/adapters/contrib/gemini_cli.py)
 **Tracking issue:** #38
 
 ## What it reads
@@ -51,7 +51,7 @@ Override roots in `config.json`:
 ## Testing the adapter
 
 ```bash
-python3 -m llmwiki adapters      # should list gemini_cli as available (if installed)
+python3 -m sessionwiki adapters      # should list gemini_cli as available (if installed)
 python3 -m pytest tests/test_adapter_graduation.py -k gemini -v
 ```
 
@@ -61,6 +61,6 @@ A minimal synthetic fixture is provided at `tests/fixtures/gemini_cli/minimal.js
 
 ## Reference
 
-- [`llmwiki/adapters/contrib/gemini_cli.py`](../../llmwiki/adapters/contrib/gemini_cli.py) -- the adapter source
-- [`llmwiki/convert.py`](../../llmwiki/convert.py) -- the shared converter
+- [`sessionwiki/adapters/contrib/gemini_cli.py`](../../sessionwiki/adapters/contrib/gemini_cli.py) -- the adapter source
+- [`sessionwiki/convert.py`](../../sessionwiki/convert.py) -- the shared converter
 - [README](../../README.md) -- project overview

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from llmwiki.build import CSS
+from sessionwiki.build import CSS
 
 
 def test_card_shadow_var_defined():

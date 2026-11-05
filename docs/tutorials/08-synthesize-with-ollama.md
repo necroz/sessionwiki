@@ -64,7 +64,7 @@ Defaults if omitted: `llama3.1:8b` at `127.0.0.1:11434`, 60s timeout,
 ### 4. Check the backend
 
 ```bash
-llmwiki synthesize --check
+sessionwiki synthesize --check
 ```
 
 Expected:
@@ -79,7 +79,7 @@ If `Available: False`, Ollama isn't running — `ollama serve &`.
 ### 5. Estimate cost (dry-run math)
 
 ```bash
-llmwiki synthesize --estimate
+sessionwiki synthesize --estimate
 ```
 
 Ollama backend cost is $0 — the estimator still shows token counts
@@ -96,7 +96,7 @@ Prefix: 3,944 tok  Model: llama3.1:8b  (local, $0)
 ### 6. Run synthesize
 
 ```bash
-llmwiki synthesize
+sessionwiki synthesize
 ```
 
 Each new raw session becomes a `wiki/sources/<project>/<YYYY-MM-DD>-<slug>.md`.
@@ -115,7 +115,7 @@ LLM's prose (one-paragraph summary + key claims + connections).
 ## Verify
 
 ```bash
-llmwiki build && llmwiki serve --open
+sessionwiki build && sessionwiki serve --open
 ```
 
 Browse to a session page; the body should be an actual summary, not
@@ -140,7 +140,7 @@ quantization is ~2.3 GB and ~3× faster.
 
 ### Model hallucinates facts about the session
 
-Local models have lower accuracy. Run `llmwiki lint` after to catch
+Local models have lower accuracy. Run `sessionwiki lint` after to catch
 the obvious hallucinations (`frontmatter_validity`, `duplicate_detection`).
 
 For higher quality, switch to API mode — the Claude API backend is

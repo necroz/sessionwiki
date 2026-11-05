@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 TEMPLATES_DIR = REPO_ROOT / "examples" / "obsidian-templates"

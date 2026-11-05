@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki.synth.ollama import (
+from sessionwiki.synth.ollama import (
     DEFAULT_BACKOFF_BASE,
     DEFAULT_BASE_URL,
     DEFAULT_MAX_RETRIES,
@@ -144,7 +144,7 @@ def test_load_ollama_config_rejects_bad_max_retries():
 
 
 def test_load_ollama_config_warns_on_remote_host(caplog):
-    with caplog.at_level("WARNING", logger="llmwiki.synth.ollama"):
+    with caplog.at_level("WARNING", logger="sessionwiki.synth.ollama"):
         load_ollama_config({"synthesis": {"base_url": "http://ollama.prod:11434"}})
     assert any("leave this machine" in rec.message for rec in caplog.records)
 
@@ -317,7 +317,7 @@ def test_render_prompt_survives_curly_braces_in_body():
 
 
 def test_synthesizer_is_base_synthesizer():
-    from llmwiki.synth.base import BaseSynthesizer
+    from sessionwiki.synth.base import BaseSynthesizer
     assert isinstance(OllamaSynthesizer(), BaseSynthesizer)
 
 
@@ -417,23 +417,23 @@ def test_ollama_http_error_message_truncates_long_body():
 
 
 def test_resolve_backend_defaults_to_dummy_when_no_config():
-    from llmwiki.synth.base import DummySynthesizer
-    from llmwiki.synth.pipeline import resolve_backend
+    from sessionwiki.synth.base import DummySynthesizer
+    from sessionwiki.synth.pipeline import resolve_backend
 
     assert isinstance(resolve_backend(None), DummySynthesizer)
     assert isinstance(resolve_backend({}), DummySynthesizer)
 
 
 def test_resolve_backend_picks_ollama_when_configured():
-    from llmwiki.synth.pipeline import resolve_backend
+    from sessionwiki.synth.pipeline import resolve_backend
 
     backend = resolve_backend({"synthesis": {"backend": "ollama"}})
     assert isinstance(backend, OllamaSynthesizer)
 
 
 def test_resolve_backend_falls_back_on_unknown_name(caplog):
-    from llmwiki.synth.base import DummySynthesizer
-    from llmwiki.synth.pipeline import resolve_backend
+    from sessionwiki.synth.base import DummySynthesizer
+    from sessionwiki.synth.pipeline import resolve_backend
 
     with caplog.at_level("WARNING"):
         backend = resolve_backend({"synthesis": {"backend": "magic"}})
@@ -442,7 +442,7 @@ def test_resolve_backend_falls_back_on_unknown_name(caplog):
 
 
 def test_resolve_backend_case_insensitive():
-    from llmwiki.synth.pipeline import resolve_backend
+    from sessionwiki.synth.pipeline import resolve_backend
     assert isinstance(
         resolve_backend({"synthesis": {"backend": "OLLAMA"}}),
         OllamaSynthesizer,
@@ -453,7 +453,7 @@ def test_resolve_backend_case_insensitive():
 
 
 def test_synthesize_subcommand_registered():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     sub_action = None

@@ -1,4 +1,4 @@
-Sync Claude Code (and Codex CLI) session transcripts into the llmwiki, then ingest the new ones into `wiki/`.
+Sync Claude Code (and Codex CLI) session transcripts into the sessionwiki, then ingest the new ones into `wiki/`.
 
 Usage: /wiki-sync [project-substring]
 
@@ -6,7 +6,7 @@ Steps (run in this order, report progress to the user):
 
 1. **Convert new sessions to markdown** by running:
    ```bash
-   python3 -m llmwiki sync $ARGUMENTS
+   python3 -m sessionwiki sync $ARGUMENTS
    ```
    Capture the summary line (`N converted, M unchanged, K live, J filtered, X errors`).
 
@@ -28,7 +28,7 @@ Steps (run in this order, report progress to the user):
 6. **Complete any pending agent-delegate syntheses (#316)** — the `agent` synthesis backend writes pending prompts to `.llmwiki-pending-prompts/<uuid>.md` that need you (the agent) to finalise. Run:
 
    ```bash
-   python3 -m llmwiki synthesize --list-pending
+   python3 -m sessionwiki synthesize --list-pending
    ```
 
    **If the output is "No pending prompts"**: skip to step 7.
@@ -42,7 +42,7 @@ Steps (run in this order, report progress to the user):
    c. Write the synthesized body to a scratch file, then finalise:
 
       ```bash
-      python3 -m llmwiki synthesize --complete <uuid> --page wiki/sources/<project>/<date>-<slug>.md --body /tmp/synth-<uuid>.md
+      python3 -m sessionwiki synthesize --complete <uuid> --page wiki/sources/<project>/<date>-<slug>.md --body /tmp/synth-<uuid>.md
       ```
 
    d. The CLI verifies the uuid matches the page's sentinel, rewrites the placeholder in place, and deletes `.llmwiki-pending-prompts/<uuid>.md`.

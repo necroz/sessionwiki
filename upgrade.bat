@@ -1,5 +1,5 @@
 @echo off
-REM llmwiki — pull latest from git and re-run setup.
+REM sessionwiki — pull latest from git and re-run setup.
 cd /d "%~dp0"
 echo ==^> git pull
 git pull --rebase --autostash

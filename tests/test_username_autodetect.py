@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.convert import load_config
+from sessionwiki.convert import load_config
 
 
 def _config_path(tmp_path: Path) -> Path:

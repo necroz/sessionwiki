@@ -1,4 +1,4 @@
-Meta-skill that loads all llmwiki governance docs and exposes the three maintainer slash commands.
+Meta-skill that loads all sessionwiki governance docs and exposes the three maintainer slash commands.
 
 Usage: /maintainer
 

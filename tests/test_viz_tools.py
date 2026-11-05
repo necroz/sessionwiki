@@ -1,4 +1,4 @@
-"""Tests for `llmwiki.viz_tools` — tool-calling bar chart (v0.8 · #65)."""
+"""Tests for `sessionwiki.viz_tools` — tool-calling bar chart (v0.8 · #65)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from llmwiki.viz_tools import (
+from sessionwiki.viz_tools import (
     _category_for,
     _TOOL_CATEGORIES,
     _CATEGORY_PALETTE,

@@ -1,6 +1,6 @@
 """Tests for the first-class /changelog page (#72).
 
-``llmwiki.build.render_changelog`` reads ``CHANGELOG.md`` at the repo root and
+``sessionwiki.build.render_changelog`` reads ``CHANGELOG.md`` at the repo root and
 renders it to ``site/changelog.html``. These tests pin the contract so a
 future refactor doesn't silently drop the page or mangle its layout.
 """
@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.build import render_changelog
+from sessionwiki.build import render_changelog
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def test_render_changelog_renders_markdown_headings(tmp_out: Path):
 
 def test_render_changelog_returns_none_when_missing(tmp_path: Path, monkeypatch):
     # Point REPO_ROOT at an empty tmp dir so CHANGELOG.md is missing.
-    import llmwiki.build as build
+    import sessionwiki.build as build
 
     empty = tmp_path / "empty_repo"
     empty.mkdir()

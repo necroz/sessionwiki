@@ -29,7 +29,7 @@ def test_homepage_loads_with_nav_and_title(page: Page, base_url: str) -> None:
     resolution failures + missing-feature regressions."""
     page.goto(f"{base_url}/index.html", wait_until="domcontentloaded")
     title = page.title()
-    assert "LLM Wiki" in title or "llmwiki" in title.lower(), (
+    assert "LLM Wiki" in title or "sessionwiki" in title.lower(), (
         f"unexpected document title: {title!r}"
     )
     nav = page.locator("header.nav").first

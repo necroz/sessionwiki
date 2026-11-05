@@ -1,11 +1,11 @@
-Regenerate the static HTML site for the llmwiki.
+Regenerate the static HTML site for the sessionwiki.
 
 Usage: /wiki-build [--synthesize]
 
 Run:
 
 ```bash
-python3 -m llmwiki build $ARGUMENTS
+python3 -m sessionwiki build $ARGUMENTS
 ```
 
 The `--synthesize` flag (optional) calls the `claude` CLI once to generate an Overview paragraph for the home page.

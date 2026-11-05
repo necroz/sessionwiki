@@ -10,7 +10,7 @@ Interactive force-directed knowledge graph of every wiki page and its `[[wikilin
 
 ## Must
 
-- Page `<title>` contains "Graph" (e.g. "llmwiki — Knowledge Graph").
+- Page `<title>` contains "Graph" (e.g. "sessionwiki — Knowledge Graph").
 - The site nav bar (Home/Projects/Sessions/Graph/Docs/Changelog) is present and the "Graph" link carries `class="active"` (closes #456 — graph used to be standalone with no nav chrome).
 - A `<div id="network">` containing the rendered graph canvas.
 - vis-network loads from a CDN-pinned URL with SHA-384 SRI integrity attribute.
@@ -31,4 +31,4 @@ Interactive force-directed knowledge graph of every wiki page and its `[[wikilin
 
 - #456 (closed) — site nav restored on `/graph.html`
 - v1.3.67 (#679) — SHA-384 SRI for vis-network@9.1.9
-- `llmwiki/graph.py:copy_to_site`
+- `sessionwiki/graph.py:copy_to_site`

@@ -1,8 +1,8 @@
-# Contributing to llmwiki
+# Contributing to sessionwiki
 
 Thanks for wanting to contribute. This project follows strict rules about commits, PRs, and privacy — please read this before opening a PR.
 
-**Try the live demo first:** [pratiyush.github.io/llm-wiki](https://pratiyush.github.io/llm-wiki/). It's rebuilt on every `master` push from [`examples/demo-sessions/`](examples/demo-sessions) so you can see every feature working before touching code.
+**Try the live demo first:** [necroz.github.io/sessionwiki](https://necroz.github.io/sessionwiki/). It's rebuilt on every `master` push from [`examples/demo-sessions/`](examples/demo-sessions) so you can see every feature working before touching code.
 
 ## Table of contents
 
@@ -36,8 +36,8 @@ Be kind. Respect privacy. Prefer plain English to jargon. No scope creep.
 ## Dev setup
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ./setup.sh                # installs markdown, scaffolds raw/ wiki/ site/
 python3 -m pytest tests/ -q
 ```
@@ -56,7 +56,7 @@ No other runtime deps. That's a hard rule. Syntax highlighting runs in the brows
 See [docs/architecture.md](docs/architecture.md) for the full breakdown. TL;DR:
 
 ```
-llmwiki/              # Python package
+sessionwiki/              # Python package
 ├── cli.py            # argparse entry (init/sync/build/serve/adapters/version)
 ├── convert.py        # .jsonl → markdown
 ├── build.py          # markdown → HTML (god-level UI)
@@ -77,7 +77,7 @@ Adapted from the parent [Open Source Project Framework](docs/framework.md):
 
 ### Identity
 
-- `git config user.name "Pratiyush"` (on this fork — you should use your own name on your fork)
+- `git config user.name` / `user.email` — use your own identity (a GitHub noreply address keeps your email private)
 - **Never** add `Co-authored-by: Claude`, `Co-authored-by: AI`, or similar AI attribution lines. Commits from this project are human-authored.
 
 ### PR size
@@ -135,7 +135,7 @@ Every box must be checked (or have a one-line waiver). See [`.github/PULL_REQUES
 
 See [docs/framework.md §5.25 Adapter Flow](docs/framework.md) for the full contract. Minimum requirements:
 
-1. **One file** under `llmwiki/adapters/<agent>.py` that:
+1. **One file** under `sessionwiki/adapters/<agent>.py` that:
    - Subclasses `BaseAdapter`
    - Registers itself via `@register("<agent>")`
    - Sets `session_store_path` to the agent's default location(s)
@@ -182,7 +182,7 @@ are exempt.
 
 ## Privacy rules
 
-llmwiki processes session transcripts that may contain PII, API keys, file paths, and secrets. These rules are **non-negotiable**:
+sessionwiki processes session transcripts that may contain PII, API keys, file paths, and secrets. These rules are **non-negotiable**:
 
 1. **Redaction is on by default.** Username, API keys, tokens, passwords, and emails are redacted before anything hits `raw/`.
 2. **Never commit real session data.** `raw/` is gitignored. Fixtures under `tests/fixtures/` must be synthetic or heavily redacted.
@@ -196,8 +196,8 @@ llmwiki processes session transcripts that may contain PII, API keys, file paths
 ```bash
 python3 -m pytest tests/ -q             # all tests
 python3 -m pytest tests/test_convert.py # one file
-python3 -m llmwiki build                # smoke test build
-python3 -m llmwiki --version            # version check
+python3 -m sessionwiki build                # smoke test build
+python3 -m sessionwiki --version            # version check
 ```
 
 Every adapter must ship with:
@@ -212,7 +212,7 @@ Every adapter must ship with:
 
 Release flow (Phase 6 of the framework):
 
-1. Bump version in `llmwiki/__init__.py`
+1. Bump version in `sessionwiki/__init__.py`
 2. Update `CHANGELOG.md`
 3. `git tag v0.x.y && git push origin v0.x.y`
 4. Create a GitHub Release (mark pre-release for 0.x)
@@ -220,4 +220,4 @@ Release flow (Phase 6 of the framework):
 
 ## Questions?
 
-Open an issue with the `question` label. Or ping [@Pratiyush](https://github.com/Pratiyush) on X.
+Open an issue with the `question` label. Or mention [@necroz](https://github.com/necroz) in the issue.

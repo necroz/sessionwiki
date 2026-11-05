@@ -5,12 +5,12 @@ from __future__ import annotations
 import subprocess
 import sys
 
-from llmwiki import __version__
+from sessionwiki import __version__
 
 
 def test_version_flag():
     r = subprocess.run(
-        [sys.executable, "-m", "llmwiki", "--version"],
+        [sys.executable, "-m", "sessionwiki", "--version"],
         capture_output=True, text=True,
     )
     assert r.returncode == 0
@@ -19,7 +19,7 @@ def test_version_flag():
 
 def test_version_subcommand():
     r = subprocess.run(
-        [sys.executable, "-m", "llmwiki", "version"],
+        [sys.executable, "-m", "sessionwiki", "version"],
         capture_output=True, text=True,
     )
     assert r.returncode == 0
@@ -28,7 +28,7 @@ def test_version_subcommand():
 
 def test_adapters_lists_claude_code():
     r = subprocess.run(
-        [sys.executable, "-m", "llmwiki", "adapters"],
+        [sys.executable, "-m", "sessionwiki", "adapters"],
         capture_output=True, text=True,
     )
     assert r.returncode == 0
@@ -39,9 +39,9 @@ def test_adapters_lists_claude_code():
 
 def test_no_args_prints_help():
     r = subprocess.run(
-        [sys.executable, "-m", "llmwiki"],
+        [sys.executable, "-m", "sessionwiki"],
         capture_output=True, text=True,
     )
     # Should print help and exit 0
     assert r.returncode == 0
-    assert "usage" in r.stdout.lower() or "llmwiki" in r.stdout
+    assert "usage" in r.stdout.lower() or "sessionwiki" in r.stdout

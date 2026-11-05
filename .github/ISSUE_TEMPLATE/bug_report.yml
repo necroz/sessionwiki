@@ -33,7 +33,7 @@ body:
       description: Shell commands or minimal file contents that trigger the bug. Redact any real session data before pasting.
       placeholder: |
         ```bash
-        python3 -m llmwiki ...
+        python3 -m sessionwiki ...
         ```
       render: bash
     validations:
@@ -42,9 +42,9 @@ body:
   - type: input
     id: version
     attributes:
-      label: llmwiki version
-      description: Output of `python3 -m llmwiki --version`
-      placeholder: "llmwiki 0.9.0"
+      label: sessionwiki version
+      description: Output of `python3 -m sessionwiki --version`
+      placeholder: "sessionwiki 0.9.0"
     validations:
       required: true
 

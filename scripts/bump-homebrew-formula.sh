@@ -5,7 +5,7 @@
 #   scripts/bump-homebrew-formula.sh v1.1.0
 #
 # Fetches the GitHub archive tarball for the tag, computes its SHA-256,
-# and rewrites `homebrew/llmwiki.rb` so `url` + `sha256` match. After
+# and rewrites `homebrew/sessionwiki.rb` so `url` + `sha256` match. After
 # running this, copy the updated formula into your `homebrew-tap` repo
 # and `git push` it — that's what users `brew install` from.
 #
@@ -27,7 +27,7 @@ fi
 
 cd "$(dirname "$0")/.."
 
-tarball_url="https://github.com/Pratiyush/llm-wiki/archive/refs/tags/${tag}.tar.gz"
+tarball_url="https://github.com/necroz/sessionwiki/archive/refs/tags/${tag}.tar.gz"
 
 echo "→ Fetching $tarball_url …"
 tmpfile="$(mktemp)"
@@ -50,7 +50,7 @@ fi
 echo "→ SHA-256: $sha"
 
 # Rewrite url + sha256 lines in the formula (macOS/BSD sed needs '' arg).
-formula="homebrew/llmwiki.rb"
+formula="homebrew/sessionwiki.rb"
 if [[ "$(uname -s)" == "Darwin" ]]; then
   sed -i '' -E \
     -e "s|^(  url \").*(\".*)$|\1${tarball_url}\2|" \
@@ -68,8 +68,8 @@ echo "✓ Updated $formula:"
 grep -E '^  (url|sha256) ' "$formula"
 echo ""
 echo "Next steps:"
-echo "  1. Copy $formula → Pratiyush/homebrew-tap/Formula/llmwiki.rb"
+echo "  1. Copy $formula → necroz/homebrew-tap/Formula/sessionwiki.rb"
 echo "  2. Commit + push the tap repo"
-echo "  3. Users run: brew upgrade Pratiyush/tap/llmwiki"
+echo "  3. Users run: brew upgrade necroz/tap/sessionwiki"
 echo ""
 echo "See docs/deploy/homebrew-setup.md for the first-time setup."

@@ -1,8 +1,8 @@
 # Claude Code adapter
 
 **Status:** ✅ Production (v0.1)
-**Module:** `llmwiki.adapters.claude_code`
-**Source:** [`llmwiki/adapters/claude_code.py`](../../llmwiki/adapters/claude_code.py)
+**Module:** `sessionwiki.adapters.claude_code`
+**Source:** [`sessionwiki/adapters/claude_code.py`](../../sessionwiki/adapters/claude_code.py)
 
 ## What it reads
 
@@ -74,7 +74,7 @@ Thinking blocks (`type: "thinking"` inside assistant messages) are **dropped ent
 
 ## Live-session detection
 
-Claude Code appends to the current session's `.jsonl` as records happen. If llmwiki reads a file mid-write, it may get a truncated view or corrupt the user's state. To prevent this, the adapter (and `convert.py`) **skips any file whose last record is younger than 60 minutes**.
+Claude Code appends to the current session's `.jsonl` as records happen. If sessionwiki reads a file mid-write, it may get a truncated view or corrupt the user's state. To prevent this, the adapter (and `convert.py`) **skips any file whose last record is younger than 60 minutes**.
 
 This means:
 
@@ -97,8 +97,8 @@ raw/sessions/<project>/<date>-<parent-slug>-subagent-<agent-id-8>.md
 ## Testing the adapter
 
 ```bash
-python3 -m llmwiki adapters      # should list claude_code as available
-python3 -m llmwiki sync --dry-run --project ai-newsletter
+python3 -m sessionwiki adapters      # should list claude_code as available
+python3 -m sessionwiki sync --dry-run --project ai-newsletter
 ```
 
 ## Troubleshooting
@@ -114,5 +114,5 @@ python3 -m llmwiki sync --dry-run --project ai-newsletter
 ## Reference
 
 - [Claude Code session format](https://docs.claude.com/claude-code/session-history) (if the docs page exists — TODO verify)
-- [`llmwiki/adapters/claude_code.py`](../../llmwiki/adapters/claude_code.py) — the adapter source
-- [`llmwiki/convert.py`](../../llmwiki/convert.py) — the shared converter
+- [`sessionwiki/adapters/claude_code.py`](../../sessionwiki/adapters/claude_code.py) — the adapter source
+- [`sessionwiki/convert.py`](../../sessionwiki/convert.py) — the shared converter

@@ -1,6 +1,6 @@
 # Synthetic monitoring failure
 
-The nightly synthetic monitoring workflow (`.github/workflows/synthetic.yml`) failed against the deployed demo at `https://pratiyush.github.io/llm-wiki/`.
+The nightly synthetic monitoring workflow (`.github/workflows/synthetic.yml`) failed against the deployed demo at `https://necroz.github.io/sessionwiki/`.
 
 ## Possible causes
 

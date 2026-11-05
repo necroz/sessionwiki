@@ -1,4 +1,4 @@
-"""#632: regenerate `docs/images/*.png` from a live llmwiki build.
+"""#632: regenerate `docs/images/*.png` from a live sessionwiki build.
 
 The README + docs reference six canonical screenshots (home, sessions
 index, session detail, changelog, projects index, model card). They're
@@ -74,7 +74,7 @@ def _serve(port: int) -> ThreadingHTTPServer:
 def _build_site() -> None:
     """Force a fresh build into ./site so we screenshot the latest."""
     subprocess.run(
-        [sys.executable, "-m", "llmwiki", "build"],
+        [sys.executable, "-m", "sessionwiki", "build"],
         cwd=str(REPO_ROOT),
         check=True,
     )
@@ -93,7 +93,7 @@ def _capture(port: int, theme: str) -> dict[str, bool]:
         ctx = browser.new_context(viewport={"width": 1280, "height": 800})
         # Pre-set theme via init script so it's set before first paint.
         ctx.add_init_script(
-            f"try {{ localStorage.setItem('llmwiki-theme', {theme!r}); }} catch (e) {{}}"
+            f"try {{ localStorage.setItem('sessionwiki-theme', {theme!r}); }} catch (e) {{}}"
         )
         page = ctx.new_page()
 

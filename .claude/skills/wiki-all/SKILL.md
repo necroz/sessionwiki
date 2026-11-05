@@ -1,13 +1,13 @@
 ---
 name: wiki-all
-description: Run the complete llmwiki pipeline from scratch — init, sync, graph, build, lint, and serve. Use when the user says "run everything", "full pipeline", "wiki-all", or wants to rebuild the entire wiki from session history.
+description: Run the complete sessionwiki pipeline from scratch — init, sync, graph, build, lint, and serve. Use when the user says "run everything", "full pipeline", "wiki-all", or wants to rebuild the entire wiki from session history.
 ---
 
 # wiki-all
 
 ## What this skill does
 
-Runs the complete llmwiki pipeline in the correct sequence:
+Runs the complete sessionwiki pipeline in the correct sequence:
 
 1. **init** — scaffold `raw/`, `wiki/`, `site/` directories
 2. **sync** — convert `.jsonl` sessions to markdown
@@ -23,7 +23,7 @@ Run each step in order. Report the result of each before proceeding to the next.
 ### Step 1: Init
 
 ```bash
-python3 -m llmwiki init
+python3 -m sessionwiki init
 ```
 
 Report what was created or confirmed.
@@ -31,7 +31,7 @@ Report what was created or confirmed.
 ### Step 2: Sync
 
 ```bash
-python3 -m llmwiki sync --no-auto-build --no-auto-lint
+python3 -m sessionwiki sync --no-auto-build --no-auto-lint
 ```
 
 Report: how many sessions converted, how many unchanged, any errors.
@@ -41,7 +41,7 @@ If new sessions were converted, follow the **Ingest Workflow** from `CLAUDE.md` 
 ### Step 3: Graph
 
 ```bash
-python3 -m llmwiki graph
+python3 -m sessionwiki graph
 ```
 
 Report: node count, edge count, community count, top 5 connected nodes.
@@ -50,7 +50,7 @@ Ask the user: **"Export graph to Obsidian vault?"** If yes:
 
 ```python
 python3 -c "
-from llmwiki.graphify_bridge import export_to_obsidian
+from sessionwiki.graphify_bridge import export_to_obsidian
 from pathlib import Path
 export_to_obsidian(Path.home() / 'Documents/Obsidian Vault/Temp/Graph')
 "
@@ -59,7 +59,7 @@ export_to_obsidian(Path.home() / 'Documents/Obsidian Vault/Temp/Graph')
 ### Step 4: Build
 
 ```bash
-python3 -m llmwiki build
+python3 -m sessionwiki build
 ```
 
 Report: HTML file count, total size, export formats written.
@@ -67,7 +67,7 @@ Report: HTML file count, total size, export formats written.
 ### Step 5: Lint
 
 ```bash
-python3 -m llmwiki lint
+python3 -m sessionwiki lint
 ```
 
 Report: total issues by severity (errors, warnings, info). Highlight any errors that need immediate attention.
@@ -77,7 +77,7 @@ Report: total issues by severity (errors, warnings, info). Highlight any errors 
 Ask the user: **"Start the local server?"** If yes:
 
 ```bash
-python3 -m llmwiki serve --open
+python3 -m sessionwiki serve --open
 ```
 
 Report the URL: http://127.0.0.1:8765

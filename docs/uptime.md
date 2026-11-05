@@ -1,6 +1,6 @@
 # Uptime Monitoring
 
-Monitor the llmwiki demo site availability with a simple GitHub Actions
+Monitor the sessionwiki demo site availability with a simple GitHub Actions
 workflow and README badge.
 
 ## GitHub Actions scheduled workflow
@@ -24,7 +24,7 @@ jobs:
       - name: Check demo site
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://pratiyush.github.io/llm-wiki/)
+            https://necroz.github.io/sessionwiki/)
           echo "HTTP status: $STATUS"
           if [ "$STATUS" -ne 200 ]; then
             echo "::error::Demo site returned HTTP $STATUS"
@@ -34,7 +34,7 @@ jobs:
       - name: Check sitemap
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://pratiyush.github.io/llm-wiki/sitemap.xml)
+            https://necroz.github.io/sessionwiki/sitemap.xml)
           echo "Sitemap HTTP status: $STATUS"
           if [ "$STATUS" -ne 200 ]; then
             echo "::warning::Sitemap returned HTTP $STATUS"
@@ -43,7 +43,7 @@ jobs:
       - name: Check llms.txt
         run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://pratiyush.github.io/llm-wiki/llms.txt)
+            https://necroz.github.io/sessionwiki/llms.txt)
           echo "llms.txt HTTP status: $STATUS"
           if [ "$STATUS" -ne 200 ]; then
             echo "::warning::llms.txt returned HTTP $STATUS"
@@ -64,7 +64,7 @@ Add this step after the checks to post to Slack on failure:
         run: |
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
             -H 'Content-type: application/json' \
-            -d '{"text":"llmwiki demo site is DOWN. Check: https://github.com/Pratiyush/llm-wiki/actions/workflows/uptime.yml"}'
+            -d '{"text":"sessionwiki demo site is DOWN. Check: https://github.com/necroz/sessionwiki/actions/workflows/uptime.yml"}'
 ```
 
 ## Simple cron job (self-hosted)
@@ -75,7 +75,7 @@ job locally:
 ```bash
 # Add to crontab -e
 0 */6 * * * curl -sf https://wiki.example.com/ > /dev/null || \
-  echo "llmwiki site is down" | mail -s "Uptime alert" you@example.com
+  echo "sessionwiki site is down" | mail -s "Uptime alert" you@example.com
 ```
 
 ## README badge
@@ -83,7 +83,7 @@ job locally:
 Add an uptime badge using the GitHub Actions workflow status:
 
 ```markdown
-[![Uptime](https://github.com/Pratiyush/llm-wiki/actions/workflows/uptime.yml/badge.svg)](https://github.com/Pratiyush/llm-wiki/actions/workflows/uptime.yml)
+[![Uptime](https://github.com/necroz/sessionwiki/actions/workflows/uptime.yml/badge.svg)](https://github.com/necroz/sessionwiki/actions/workflows/uptime.yml)
 ```
 
 This badge reflects the most recent workflow run. Green means the last

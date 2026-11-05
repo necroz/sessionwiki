@@ -43,7 +43,7 @@ and point the adapter at `conversations.json`:
 Then:
 
 ```bash
-llmwiki sync --adapter chatgpt
+sessionwiki sync --adapter chatgpt
 ```
 
 If `enabled` is omitted the adapter stays silent (AI-session-opt-in
@@ -71,7 +71,7 @@ filesystem-safe chars via the usual slug normaliser).
 
 ## Code
 
-- `llmwiki/adapters/contrib/chatgpt.py`
+- `sessionwiki/adapters/contrib/chatgpt.py`
 - Tests: `tests/test_chatgpt_adapter.py` (28 cases)
 - Issue history: #44 (initial) · #326 (is_ai_session flag)
 

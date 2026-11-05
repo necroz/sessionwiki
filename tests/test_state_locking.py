@@ -1,6 +1,6 @@
 """Concurrent sync/synthesize runs must not corrupt the state files.
 
-The Claude Code Stop-hook runs ``llmwiki sync`` after every reply, in
+The Claude Code Stop-hook runs ``sessionwiki sync`` after every reply, in
 every open session, so several converters can start at once. Before
 this guard they raced on ``.llmwiki-state.json``: a reader that caught a
 half-written file got ``{}`` and re-processed the whole corpus. The
@@ -12,9 +12,9 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from llmwiki import convert
-from llmwiki.lock import FileLock, atomic_write_text, lock_path_for
-from llmwiki.synth import pipeline
+from sessionwiki import convert
+from sessionwiki.lock import FileLock, atomic_write_text, lock_path_for
+from sessionwiki.synth import pipeline
 
 
 def test_lock_path_sits_next_to_state_file(tmp_path: Path) -> None:

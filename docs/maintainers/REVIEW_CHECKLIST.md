@@ -48,7 +48,7 @@ Copy the relevant section into the PR review comment. Run the
       wrapped in a trusted template. #74 is the canonical example of
       what happens when you forget this.
 - [ ] **No network calls during build** — run
-      `python3 -m llmwiki build` and confirm the console has no
+      `python3 -m sessionwiki build` and confirm the console has no
       `GET https://...` lines (other than the highlight.js CDN, which
       is client-side, not build-time).
 - [ ] **Localhost binding stays default** — any new server code must
@@ -60,7 +60,7 @@ Copy the relevant section into the PR review comment. Run the
 ## Code quality
 
 - [ ] **Functions have docstrings** — new public functions in
-      `llmwiki/` need a one-paragraph docstring explaining what,
+      `sessionwiki/` need a one-paragraph docstring explaining what,
       how, and any non-obvious invariants.
 - [ ] **Inline comments where the reader would get stuck** — not
       comments that narrate every line. Comments answer "why" where
@@ -106,7 +106,7 @@ Copy the relevant section into the PR review comment. Run the
 
 ## Build + runtime smoke
 
-- [ ] Run `python3 -m llmwiki build` locally on the real wiki. No
+- [ ] Run `python3 -m sessionwiki build` locally on the real wiki. No
       crashes, no warnings that weren't there before, byte-identical
       output for unrelated pages.
 - [ ] Run the preview server, open the affected page, click around.

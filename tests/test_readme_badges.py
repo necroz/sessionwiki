@@ -4,7 +4,7 @@ These tests don't verify badge visuals — they verify the plumbing stays
 wired up so badges don't silently rot:
 
 - Every workflow the badges point at exists in ``.github/workflows/``.
-- The version badge matches ``llmwiki.__version__``.
+- The version badge matches ``sessionwiki.__version__``.
 - The CI + link-check + wiki-checks + docker badges are present (the
   four key workflows the issue #129 asked to surface).
 - The demo GIF referenced from the README is checked into the repo.
@@ -17,7 +17,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT, __version__
+from sessionwiki import REPO_ROOT, __version__
 
 
 README = REPO_ROOT / "README.md"
@@ -90,7 +90,7 @@ def test_version_badge_matches_package_version(readme_text: str):
 
     assert _normalize(badge_version) == _normalize(__version__), (
         f"version badge says {badge_version!r} but "
-        f"llmwiki.__version__ is {__version__!r}"
+        f"sessionwiki.__version__ is {__version__!r}"
     )
 
 
@@ -172,8 +172,8 @@ def test_no_stale_lint_rule_counts_in_user_docs():
     '13 lint rules' string in README / CLI help / top-level design docs,
     **unless** the surrounding line also mentions a historical release
     (v0.x.y) — those are legitimate release-notes references."""
-    from llmwiki.lint import REGISTRY
-    from llmwiki.lint import rules  # noqa: F401 — force registration
+    from sessionwiki.lint import REGISTRY
+    from sessionwiki.lint import rules  # noqa: F401 — force registration
     live = len(REGISTRY)
     assert live >= 14, "unexpectedly low lint-rule count"
 

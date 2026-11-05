@@ -79,12 +79,12 @@ doubles the state-machine complexity. Defer until users ask.
 
 **Context:** #65 non-goal.
 
-## 2026-04-09 — Replicating qmd's hybrid search inside llmwiki
+## 2026-04-09 — Replicating qmd's hybrid search inside sessionwiki
 
 **Reason:** qmd already does hybrid BM25 + vector + LLM rerank.
-llmwiki's built-in search is a deliberate "works offline, zero
+sessionwiki's built-in search is a deliberate "works offline, zero
 deps, client-side fuzzy" design. Users who need hybrid search run
-`llmwiki export-qmd` and point qmd at the output. Two tools, one
+`sessionwiki export-qmd` and point qmd at the output. Two tools, one
 source of truth, no competing stacks.
 
 **Context:** #59 non-goal. Reconsider only if qmd becomes
@@ -92,7 +92,7 @@ unmaintained.
 
 ## 2026-04-09 — Shipping qmd as a dependency
 
-**Reason:** qmd is TypeScript/Node. llmwiki is stdlib Python plus
+**Reason:** qmd is TypeScript/Node. sessionwiki is stdlib Python plus
 `markdown`. Adding a Node runtime as a dep would destroy the
 "works on any 3.9+ Python, no other dependencies" promise.
 
@@ -132,7 +132,7 @@ type.
 
 ## 2026-04-09 — CLAs or DCO sign-off for contributions
 
-**Reason:** llmwiki is MIT. The added bureaucracy deters small
+**Reason:** sessionwiki is MIT. The added bureaucracy deters small
 PRs and buys nothing the license doesn't already cover.
 
 **Context:** #62 non-goal.

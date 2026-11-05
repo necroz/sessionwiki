@@ -3,8 +3,8 @@ name: Playwright Test Agents (TS)
 on:
   pull_request:
     paths:
-      - "llmwiki/build.py"
-      - "llmwiki/render/**"
+      - "sessionwiki/build.py"
+      - "sessionwiki/render/**"
       - "tests/agents/**"
       - "playwright.config.ts"
       - "package.json"
@@ -12,8 +12,8 @@ on:
   push:
     branches: [master]
     paths:
-      - "llmwiki/build.py"
-      - "llmwiki/render/**"
+      - "sessionwiki/build.py"
+      - "sessionwiki/render/**"
       - "tests/agents/**"
       - "playwright.config.ts"
 
@@ -45,19 +45,19 @@ jobs:
 
       - name: Build the demo site
         run: |
-          python3 -m llmwiki init
+          python3 -m sessionwiki init
           # Seed raw/sessions/ from examples/demo-sessions/ so build
           # has something to work with (mirrors pages.yml). Without
-          # this `llmwiki build` exits 2 with "no sources found".
+          # this `sessionwiki build` exits 2 with "no sources found".
           if [ -d examples/demo-sessions ] && [ "$(ls -A examples/demo-sessions 2>/dev/null)" ]; then
             cp -r examples/demo-sessions/* raw/sessions/
             echo "Seeded raw/sessions/ from examples/demo-sessions/"
           fi
-          python3 -m llmwiki build
+          python3 -m sessionwiki build
 
       - name: Serve site in the background
         run: |
-          python3 -m llmwiki serve --port 8765 &
+          python3 -m sessionwiki serve --port 8765 &
           for i in {1..30}; do
             curl -fsS http://127.0.0.1:8765/ > /dev/null && break
             sleep 1

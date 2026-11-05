@@ -6,8 +6,8 @@ import argparse
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from llmwiki import cli
-from llmwiki.opencode import export
+from sessionwiki import cli
+from sessionwiki.opencode import export
 
 
 def _args(**overrides):

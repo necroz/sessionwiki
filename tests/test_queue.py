@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.ingest_queue import enqueue, dequeue, peek, clear, queue_size
+from sessionwiki.ingest_queue import enqueue, dequeue, peek, clear, queue_size
 
 
 # ─── Basic operations ──────────────────────────────────────────────────

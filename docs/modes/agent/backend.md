@@ -29,12 +29,12 @@ Set the backend in `sessions_config.json`:
 
 The agent backend is a thin file-I/O layer over `BaseSynthesizer`.  On each synthesize call:
 
-1. **Backend writes a pending prompt file.**  `llmwiki synthesize` renders the standard `source_page.md` prompt template with the session body + frontmatter, then writes the full prompt to `.llmwiki-pending-prompts/<uuid>.md` under the repo root.
+1. **Backend writes a pending prompt file.**  `sessionwiki synthesize` renders the standard `source_page.md` prompt template with the session body + frontmatter, then writes the full prompt to `.llmwiki-pending-prompts/<uuid>.md` under the repo root.
 
 2. **Backend writes a placeholder page.**  `wiki/sources/<project>/<slug>.md` gets a sentinel body:
 
    ```markdown
-   <!-- llmwiki-pending: 3d2a1b0c-…-… -->
+   <!-- sessionwiki-pending: 3d2a1b0c-…-… -->
 
    ## Summary
 
@@ -67,14 +67,14 @@ Outside an agent runtime, `is_available()` returns `False` and the pipeline fall
 
 ```bash
 # Show pending prompts (0 exit even when empty)
-python3 -m llmwiki synthesize --list-pending
+python3 -m sessionwiki synthesize --list-pending
 
 # Complete a pending synthesis — body via stdin
-python3 -m llmwiki synthesize --complete <uuid> \
+python3 -m sessionwiki synthesize --complete <uuid> \
   --page wiki/sources/<project>/<slug>.md < body.md
 
 # Complete a pending synthesis — body via file
-python3 -m llmwiki synthesize --complete <uuid> \
+python3 -m sessionwiki synthesize --complete <uuid> \
   --page wiki/sources/<project>/<slug>.md \
   --body /tmp/synth-<uuid>.md
 ```
@@ -88,7 +88,7 @@ Step 6 of the `/wiki-sync` slash command (post-rc8) runs `--list-pending` after 
 1. Slash command reads `.llmwiki-pending-prompts/<uuid>.md`.
 2. Slash command synthesizes the wiki body inside its own agent turn (including the `<!-- suggested-tags: ... -->` block).
 3. Slash command writes the body to a scratch file.
-4. Slash command runs `llmwiki synthesize --complete <uuid> --page <path> --body <scratch>` which rewrites the placeholder and deletes the prompt file.
+4. Slash command runs `sessionwiki synthesize --complete <uuid> --page <path> --body <scratch>` which rewrites the placeholder and deletes the prompt file.
 
 The loop is serial — the agent is single-conversation.
 

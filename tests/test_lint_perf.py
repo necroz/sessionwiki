@@ -17,8 +17,8 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.lint import REGISTRY, load_pages, run_all
-from llmwiki.lint.rules import (
+from sessionwiki.lint import REGISTRY, load_pages, run_all
+from sessionwiki.lint.rules import (
     DuplicateDetection,
     LinkIntegrity,
     OrphanDetection,

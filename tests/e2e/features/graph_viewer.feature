@@ -4,7 +4,7 @@ Feature: Interactive knowledge graph viewer
   payload so clicks never land on a 404.
 
   Background:
-    Given a built llmwiki site is served
+    Given a built sessionwiki site is served
 
   Scenario: Graph viewer has back-to-site link (#268)
     When I visit the graph page

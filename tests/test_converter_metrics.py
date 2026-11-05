@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from llmwiki.convert import (
+from sessionwiki.convert import (
     compute_duration_seconds,
     compute_hour_buckets,
     compute_token_totals,
@@ -266,7 +266,7 @@ def test_duration_seconds_never_negative():
 
 
 def test_render_session_markdown_emits_v08_metrics(synthetic_records, tmp_path):
-    from llmwiki.convert import Redactor, render_session_markdown
+    from sessionwiki.convert import Redactor, render_session_markdown
 
     redactor = Redactor({})
     jsonl = tmp_path / "abc123.jsonl"
@@ -305,7 +305,7 @@ def test_render_session_markdown_emits_v08_metrics(synthetic_records, tmp_path):
 def test_render_session_markdown_is_idempotent(synthetic_records, tmp_path):
     """Re-running the converter on an unchanged record set produces
     byte-identical output."""
-    from llmwiki.convert import Redactor, render_session_markdown
+    from sessionwiki.convert import Redactor, render_session_markdown
 
     redactor = Redactor({})
     jsonl = tmp_path / "abc123.jsonl"
@@ -321,7 +321,7 @@ def test_render_session_markdown_is_idempotent(synthetic_records, tmp_path):
 
 def test_render_session_markdown_keeps_legacy_fields(synthetic_records, tmp_path):
     """Adding new frontmatter keys must not remove the old ones."""
-    from llmwiki.convert import Redactor, render_session_markdown
+    from sessionwiki.convert import Redactor, render_session_markdown
 
     redactor = Redactor({})
     jsonl = tmp_path / "abc123.jsonl"

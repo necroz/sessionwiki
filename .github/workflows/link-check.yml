@@ -3,7 +3,7 @@ name: Link check
 # Scans README, CHANGELOG, docs/, and examples/ for broken external links.
 # Runs weekly on Sunday 03:00 UTC, on push to master when link-heavy files
 # change, and on manual dispatch. Internal links in site/ have a separate
-# checker (llmwiki check-links) that runs on build.
+# checker (sessionwiki check-links) that runs on build.
 
 on:
   schedule:

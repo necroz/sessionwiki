@@ -7,14 +7,14 @@ docs_shell: true
 # 02 · First sync
 
 **Time:** 5 minutes
-**You'll need:** A working `llmwiki` CLI ([tutorial 01](01-installation.md)) and session history from at least one AI-coding agent.
+**You'll need:** A working `sessionwiki` CLI ([tutorial 01](01-installation.md)) and session history from at least one AI-coding agent.
 **Result:** A browsable static site at `http://127.0.0.1:8765` listing every session you've ever run.
 
 ---
 
 ## Why this matters
 
-llmwiki turns dormant JSONL transcripts into a searchable wiki. The first
+sessionwiki turns dormant JSONL transcripts into a searchable wiki. The first
 sync is the "aha" moment: minutes after install, you can browse sessions
 you'd forgotten you ran last month.
 
@@ -25,7 +25,7 @@ you'd forgotten you ran last month.
 A dry-run shows you exactly what will be written without touching disk:
 
 ```bash
-python3 -m llmwiki sync --dry-run
+python3 -m sessionwiki sync --dry-run
 ```
 
 Expected output (numbers vary):
@@ -41,7 +41,7 @@ Expected output (numbers vary):
 ## Step 2 — Run the real sync
 
 ```bash
-python3 -m llmwiki sync
+python3 -m sessionwiki sync
 ```
 
 Expected ending:
@@ -58,7 +58,7 @@ output lives. `site/` is the browsable static site.
 ## Step 3 — Serve the site
 
 ```bash
-python3 -m llmwiki serve
+python3 -m sessionwiki serve
 ```
 
 Output:
@@ -78,7 +78,7 @@ Open that URL. You'll see:
 ## Step 4 — (Optional) Cost preview before running synthesis
 
 ```bash
-python3 -m llmwiki synthesize --estimate
+python3 -m sessionwiki synthesize --estimate
 ```
 
 Output (numbers vary):
@@ -92,7 +92,7 @@ Batch total: $17.98 (model claude-sonnet-4-6)
 ```
 
 Nothing is called. Numbers are pre-spend estimates using the rate card
-in `llmwiki/cache.py`. Actual numbers come back in `usage` on each API
+in `sessionwiki/cache.py`. Actual numbers come back in `usage` on each API
 response.
 
 ---
@@ -114,13 +114,13 @@ code block is syntax-highlighted, every `[[wikilink]]` resolves.
 
 ## Troubleshooting
 
-**`no sources found`** — `python3 -m llmwiki adapters` must show at least one `configured ✓`. If every line says `-`, the agent hasn't created sessions in the standard paths yet. Run the agent once and retry.
+**`no sources found`** — `python3 -m sessionwiki adapters` must show at least one `configured ✓`. If every line says `-`, the agent hasn't created sessions in the standard paths yet. Run the agent once and retry.
 
 **`Permission denied` on `~/.claude/projects/`** — the adapter reads; it never writes. Check file permissions: `ls -la ~/.claude/projects/ | head -3`.
 
 **Site loads but is empty** — you ran `sync --dry-run`. Re-run without the flag.
 
-**Port 8765 already in use** — `python3 -m llmwiki serve --port 9000` picks a different port.
+**Port 8765 already in use** — `python3 -m sessionwiki serve --port 9000` picks a different port.
 
 ---
 

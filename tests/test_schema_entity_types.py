@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.schema import ENTITY_TYPES, validate_entity_type
+from sessionwiki.schema import ENTITY_TYPES, validate_entity_type
 
 
 def test_entity_types_has_7_values():

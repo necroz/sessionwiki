@@ -3,15 +3,15 @@
 - Priority: P3
 - Depends on: none
 - Size: S (30–45 min)
-- Files: `llmwiki/synth/pipeline.py`, `llmwiki/cli.py`,
+- Files: `sessionwiki/synth/pipeline.py`, `sessionwiki/cli.py`,
   `examples/sessions_config.json`, `tests/test_synth_pipeline.py`
 - PR title: `feat: make unresolved wikilink stripping configurable`
 
 ## Read first
 
-- `llmwiki/synth/pipeline.py`, `_strip_unresolved_wikilinks`
+- `sessionwiki/synth/pipeline.py`, `_strip_unresolved_wikilinks`
   (around line 389) and `synthesize_new_sessions` (around line 900)
-- `llmwiki/cli.py`, `cmd_synthesize` (around line 472)
+- `sessionwiki/cli.py`, `cmd_synthesize` (around line 472)
 - `examples/sessions_config.json`, the `synthesis` block
 - `AGENTS.md`, the "Cross-link everything" hard rule
 
@@ -80,7 +80,7 @@ touch the real wiki.
 ```bash
 .venv/bin/python -m pytest tests/test_synth_pipeline.py -q
 .venv/bin/python -m pytest tests/ -q
-.venv/bin/python -m llmwiki lint
+.venv/bin/python -m sessionwiki lint
 ```
 
 Expected: tests pass, lint reports `0 errors`, and the default behavior

@@ -15,7 +15,7 @@ Heuristics encoded here:
    (``title`` or ``aria-label``).
 3. **Headings are not empty** — an empty ``<h1>`` is a layout bug.
 4. **The site name is consistent** — a build that says "LLM Wiki" in
-   the title and "llmwiki" in the nav and "Wiki" in the footer is
+   the title and "sessionwiki" in the nav and "Wiki" in the footer is
    confusing. We don't enforce a single canonical form; we just flag
    inconsistencies in case the brand voice changes.
 5. **Time formatting is human-readable** — a session card showing
@@ -292,9 +292,9 @@ def test_session_page_breadcrumbs_make_sense_to_humans(page: Page, base_url: str
     )
     if not crumbs_text:
         pytest.skip("no breadcrumbs on this build")
-    # First crumb should be a well-known landing — Home / llmwiki / Wiki / Index.
+    # First crumb should be a well-known landing — Home / sessionwiki / Wiki / Index.
     first = crumbs_text[0].lower()
-    assert any(s in first for s in ("home", "wiki", "index", "llmwiki", "all")), (
+    assert any(s in first for s in ("home", "wiki", "index", "sessionwiki", "all")), (
         f"first breadcrumb is {crumbs_text[0]!r} — not a recognisable root label"
     )
     # No crumb should be a raw UUID or hash.

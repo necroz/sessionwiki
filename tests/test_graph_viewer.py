@@ -14,8 +14,8 @@ from pathlib import Path
 
 import pytest
 
-import llmwiki.graph as graph_mod
-from llmwiki.graph import (
+import sessionwiki.graph as graph_mod
+from sessionwiki.graph import (
     HTML_TEMPLATE,
     build_graph,
     copy_to_site,
@@ -147,7 +147,7 @@ def test_template_has_theme_toggle_and_localstorage(tmp_path: Path):
         "rendered graph.html must expose a theme toggle (now via the site nav)"
     )
     # Pre-paint reader still in the template head.
-    assert "localStorage.getItem('llmwiki-theme')" in HTML_TEMPLATE
+    assert "localStorage.getItem('sessionwiki-theme')" in HTML_TEMPLATE
     # The setItem half lives in script.js (loaded by the rendered page).
     assert 'src="script.js"' in rendered
 
@@ -266,7 +266,7 @@ def test_copy_to_site_rebuilds_graph_when_omitted(tmp_path: Path, monkeypatch):
 
 
 def test_site_nav_includes_graph_link():
-    from llmwiki import build as build_mod
+    from sessionwiki import build as build_mod
     # The nav link template lives in build.py; source-grep is the
     # lightest test that guards the registration.
     src = Path(build_mod.__file__).read_text(encoding="utf-8")

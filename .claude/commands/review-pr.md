@@ -1,4 +1,4 @@
-Run the canonical llmwiki code review against a pull request and post findings.
+Run the canonical sessionwiki code review against a pull request and post findings.
 
 Usage: /review-pr <pr-number-or-url>
 
@@ -10,7 +10,7 @@ relevant doc section for every finding.
 ## Workflow
 
 1. **Resolve the PR number** — accept either `123` or
-   `https://github.com/Pratiyush/llm-wiki/pull/123`. Use `gh pr view
+   `https://github.com/necroz/sessionwiki/pull/123`. Use `gh pr view
    <N>` to fetch the title, body, author, and file list.
 
 2. **Read the governance docs first** — load all of:
@@ -63,7 +63,7 @@ relevant doc section for every finding.
 
 ## Blockers
 
-### `llmwiki/build.py`
+### `sessionwiki/build.py`
 
 - **[Security]** `<finding>` — see [REVIEW_CHECKLIST §Security + privacy](docs/maintainers/REVIEW_CHECKLIST.md#security--privacy)
 

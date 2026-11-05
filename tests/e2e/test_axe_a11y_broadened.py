@@ -50,7 +50,7 @@ def test_light_mode_passes_color_contrast(page: Page, base_url: str) -> None:
     light-mode one so theme regressions in either direction are caught
     by axe in CI rather than via #459-style manual audits."""
     page.add_init_script(
-        "try { localStorage.setItem('llmwiki-theme', 'light'); } catch (e) {}"
+        "try { localStorage.setItem('sessionwiki-theme', 'light'); } catch (e) {}"
     )
     page.goto(f"{base_url}/index.html", wait_until="domcontentloaded")
     page.wait_for_load_state("networkidle", timeout=5000)

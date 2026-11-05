@@ -19,16 +19,16 @@ Eso es todo. Sin `npm`, sin `brew`, sin base de datos, sin cuenta.
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ./setup.sh
 ```
 
 ### Windows
 
 ```cmd
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 setup.bat
 ```
 
@@ -36,7 +36,7 @@ setup.bat
 
 1. Instala `markdown` (obligatorio) con `pip install --user`. El resaltado de sintaxis usa highlight.js desde un CDN.
 2. Crea los directorios `raw/`, `wiki/` y `site/`
-3. Ejecuta `llmwiki adapters` para mostrar qué Agents detectó
+3. Ejecuta `sessionwiki adapters` para mostrar qué Agents detectó
 4. Hace una ejecución en seco del primer sync para que veas qué se convertiría
 
 ## Tres comandos después de la instalación

@@ -1,10 +1,10 @@
 # Writing a New Adapter
 
-This guide walks you through adding support for a new coding agent to llmwiki.
+This guide walks you through adding support for a new coding agent to sessionwiki.
 
 ## The BaseAdapter contract
 
-Every adapter extends `llmwiki.adapters.base.BaseAdapter` and must provide:
+Every adapter extends `sessionwiki.adapters.base.BaseAdapter` and must provide:
 
 ### Required
 
@@ -22,7 +22,7 @@ Every adapter extends `llmwiki.adapters.base.BaseAdapter` and must provide:
 | `derive_project_slug(path)` | Parent directory name under the store | Your agent encodes project info differently |
 | `normalize_records(records)` | No-op pass-through | Your agent's JSONL schema differs from Claude Code's |
 | `is_subagent(path)` | Checks for "subagent" in path | Your agent has a different sub-agent layout |
-| `description()` | First line of the class docstring | You want a custom description for `llmwiki adapters` |
+| `description()` | First line of the class docstring | You want a custom description for `sessionwiki adapters` |
 
 ## Cross-platform path requirements
 
@@ -55,8 +55,8 @@ Never hardcode `/Users/` or `C:\Users\`. Always use `Path.home()`.
 Adapters register themselves using the `@register` decorator:
 
 ```python
-from llmwiki.adapters import register
-from llmwiki.adapters.base import BaseAdapter
+from sessionwiki.adapters import register
+from sessionwiki.adapters.base import BaseAdapter
 
 @register("myagent")
 class MyAgentAdapter(BaseAdapter):
@@ -64,14 +64,14 @@ class MyAgentAdapter(BaseAdapter):
     ...
 ```
 
-Then add the import to `llmwiki/adapters/__init__.py` in `discover_adapters()`:
+Then add the import to `sessionwiki/adapters/__init__.py` in `discover_adapters()`:
 
 ```python
 def discover_adapters() -> None:
-    from llmwiki.adapters import claude_code   # noqa: F401
-    from llmwiki.adapters import codex_cli     # noqa: F401
+    from sessionwiki.adapters import claude_code   # noqa: F401
+    from sessionwiki.adapters import codex_cli     # noqa: F401
     # ... existing adapters ...
-    from llmwiki.adapters import myagent       # noqa: F401
+    from sessionwiki.adapters import myagent       # noqa: F401
 ```
 
 ## Example: minimal adapter skeleton
@@ -87,8 +87,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from llmwiki.adapters import register
-from llmwiki.adapters.base import BaseAdapter
+from sessionwiki.adapters import register
+from sessionwiki.adapters.base import BaseAdapter
 
 
 @register("myagent")
@@ -198,7 +198,7 @@ Example test structure:
 
 ```python
 from pathlib import Path
-from llmwiki.adapters.myagent import MyAgentAdapter
+from sessionwiki.adapters.myagent import MyAgentAdapter
 
 
 def test_is_available_when_missing(tmp_path):
@@ -233,13 +233,13 @@ def test_derive_project_slug(tmp_path):
 
 ## Checklist before PR
 
-- [ ] Adapter module created at `llmwiki/adapters/<name>.py`
+- [ ] Adapter module created at `sessionwiki/adapters/<name>.py`
 - [ ] `@register("<name>")` decorator applied
-- [ ] Import added to `discover_adapters()` in `llmwiki/adapters/__init__.py`
+- [ ] Import added to `discover_adapters()` in `sessionwiki/adapters/__init__.py`
 - [ ] `session_store_path` covers macOS, Linux, and Windows
 - [ ] `is_available()` returns `False` gracefully when the agent is not installed
 - [ ] `normalize_records()` implemented if the schema differs from Claude Code
 - [ ] Test file at `tests/test_adapter_<name>.py` with fixture, snapshot, and degradation tests
 - [ ] Fixture file at `tests/fixtures/<name>/sample.jsonl`
-- [ ] `llmwiki adapters` shows the new adapter with correct description
+- [ ] `sessionwiki adapters` shows the new adapter with correct description
 - [ ] Documentation updated in `docs/multi-agent-setup.md`

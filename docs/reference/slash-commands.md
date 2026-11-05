@@ -26,7 +26,7 @@ Summary of **18 commands in 4 groups**:
 
 | You want to… | Use |
 |---|---|
-| …run a check in CI, a cron job, or a shell script | **CLI** (`python3 -m llmwiki …`) |
+| …run a check in CI, a cron job, or a shell script | **CLI** (`python3 -m sessionwiki …`) |
 | …chain commands with `&&` / pipe to `jq` | **CLI** |
 | …have the model read output + take follow-up actions | **slash** (inside Claude Code / Codex) |
 | …answer a free-form question ("what did I decide about X?") | **slash** (`/wiki-query`) |
@@ -42,8 +42,8 @@ Two different QA surfaces that are easy to confuse:
 
 | Command | Checks | Severity model | When to run |
 |---|---|---|---|
-| [`llmwiki lint`](../reference/cli.md#lint--run-13-wiki-quality-rules) / `/wiki-lint` | **Wiki content quality** — frontmatter completeness, `[[wikilink]]` integrity, orphans, duplicate titles, stale pages, cache-tier consistency, tag-topic convention, stale references | 15 rules with `error` / `warning` / `info` severities; `--fail-on-errors` exits non-zero only on errors | After every `/wiki-sync` or `/wiki-build` |
-| [`llmwiki eval`](../reference/cli.md#eval--structural-eval-checks-over-wiki) | **Structural corpus health** — site-wide metrics (total pages, orphan ratio, avg outbound links, broken-link rate, duplicate-slug rate, content-length distribution) | Pass / fail against configurable thresholds | In CI, weekly, or when comparing two wiki snapshots |
+| [`sessionwiki lint`](../reference/cli.md#lint--run-13-wiki-quality-rules) / `/wiki-lint` | **Wiki content quality** — frontmatter completeness, `[[wikilink]]` integrity, orphans, duplicate titles, stale pages, cache-tier consistency, tag-topic convention, stale references | 15 rules with `error` / `warning` / `info` severities; `--fail-on-errors` exits non-zero only on errors | After every `/wiki-sync` or `/wiki-build` |
+| [`sessionwiki eval`](../reference/cli.md#eval--structural-eval-checks-over-wiki) | **Structural corpus health** — site-wide metrics (total pages, orphan ratio, avg outbound links, broken-link rate, duplicate-slug rate, content-length distribution) | Pass / fail against configurable thresholds | In CI, weekly, or when comparing two wiki snapshots |
 
 In plain English: **lint** checks each page against its contract;
 **eval** checks the whole wiki against health thresholds.  A page
@@ -59,12 +59,12 @@ wiki trending healthier? getting more orphans?).
 
 ### `/wiki-init`
 
-**What:** scaffolds an empty llmwiki — creates `raw/`, `wiki/`, `site/`
+**What:** scaffolds an empty sessionwiki — creates `raw/`, `wiki/`, `site/`
 and seeds `wiki/index.md`, `wiki/log.md`, `wiki/overview.md`, plus the
 nine navigation files (`CRITICAL_FACTS.md`, `MEMORY.md`, `SOUL.md`,
 `hints.md`, `hot.md`, `dashboard.md`).
 
-**Wraps:** `python3 -m llmwiki init`.
+**Wraps:** `python3 -m sessionwiki init`.
 
 **When to use:** first time in a fresh repo, or after deleting `wiki/`
 to start over.
@@ -85,7 +85,7 @@ were seeded.
 **What:** convert new Claude Code (+ Codex + Cursor + etc.) `.jsonl`
 sessions into markdown under `raw/sessions/`, then ingest into `wiki/`.
 
-**Wraps:** `python3 -m llmwiki sync`.
+**Wraps:** `python3 -m sessionwiki sync`.
 
 **Arguments Claude may pass through:** `--dry-run`, `--since`,
 `--project`, `--force`, `--vault`. Say any of them in natural language
@@ -186,9 +186,9 @@ want to re-run sync.
 structural + 3 LLM-powered + `stale_candidates` (#51) +
 `cache_tier_consistency` (#52) + `tags_topics_convention` (#302) +
 `stale_reference_detection` (#303)). The live number is printed by
-`llmwiki lint --help`.
+`sessionwiki lint --help`.
 
-**Wraps:** `python3 -m llmwiki lint`.
+**Wraps:** `python3 -m sessionwiki lint`.
 
 **Rules, in order:**
 
@@ -223,7 +223,7 @@ structural + 3 LLM-powered + `stale_candidates` (#51) +
 **What:** call the configured LLM backend on every new `raw/sessions/*.md`
 to produce `wiki/sources/<slug>.md`.
 
-**Wraps:** `python3 -m llmwiki synthesize` (respects the
+**Wraps:** `python3 -m sessionwiki synthesize` (respects the
 `synthesis.backend` key in `sessions_config.json` — `dummy` / `ollama`
 and, in-progress on #315, `claude-api`).
 
@@ -250,7 +250,7 @@ and, in-progress on #315, `claude-api`).
 
 **What:** triage pending candidates — `promote`, `merge`, or `discard`.
 
-**Wraps:** `python3 -m llmwiki candidates list` + follow-ups.
+**Wraps:** `python3 -m sessionwiki candidates list` + follow-ups.
 
 **When to use:** `/wiki-lint` reported a `stale_candidates` info line,
 or `/wiki-sync` produced new `wiki/candidates/*.md` files.
@@ -271,7 +271,7 @@ candidate.
 **What:** build the knowledge graph. Nodes = wiki pages, edges =
 `[[wikilinks]]`. Emits `graph/graph.json` + `graph/graph.html`.
 
-**Wraps:** `python3 -m llmwiki graph`.
+**Wraps:** `python3 -m sessionwiki graph`.
 
 **Example:**
 
@@ -307,7 +307,7 @@ Use sparingly; it's the most token-heavy command.
 
 **What:** regenerate the static HTML site.
 
-**Wraps:** `python3 -m llmwiki build`.
+**Wraps:** `python3 -m sessionwiki build`.
 
 **When to use:** after manual edits to `wiki/`, or when you want to see
 a fresh site without running the full sync pipeline.
@@ -326,7 +326,7 @@ a fresh site without running the full sync pipeline.
 
 **What:** start a local HTTP server for the built site.
 
-**Wraps:** `python3 -m llmwiki serve`.
+**Wraps:** `python3 -m sessionwiki serve`.
 
 **Example:**
 
@@ -344,7 +344,7 @@ Claude will pass `--host 0.0.0.0`.
 
 **What:** generate a Marp slide deck from wiki pages matching a topic.
 
-**Wraps:** `python3 -m llmwiki export-marp --topic …`.
+**Wraps:** `python3 -m sessionwiki export-marp --topic …`.
 
 **Example:**
 
@@ -359,7 +359,7 @@ Claude will pass `--host 0.0.0.0`.
 
 **What:** run the full pipeline end-to-end — build → graph → export all → lint.
 
-**Wraps:** `python3 -m llmwiki all`.
+**Wraps:** `python3 -m sessionwiki all`.
 
 **When to use:** after `/wiki-sync`, when you want a CI-ready site in one shot
 instead of chaining `/wiki-build` + `/wiki-graph` + `/wiki-lint` yourself.
@@ -382,7 +382,7 @@ when the optional Graphify backend is not installed.
 
 ### `/maintainer`
 
-Meta-skill that loads all llmwiki governance docs (`CONTRIBUTING.md`,
+Meta-skill that loads all sessionwiki governance docs (`CONTRIBUTING.md`,
 `CODE_OF_CONDUCT.md`, `docs/maintainers/*`) and exposes the three
 maintainer slash commands below.
 
@@ -390,13 +390,13 @@ Use before doing anything governance-related.
 
 ### `/release`
 
-Walk through the llmwiki release process step by step — tag, changelog
+Walk through the sessionwiki release process step by step — tag, changelog
 cut, GitHub Release note, PyPI publish (via OIDC), Homebrew tap bump,
 Docker image push.
 
 ### `/review-pr`
 
-Run the canonical llmwiki code review against a pull request and post
+Run the canonical sessionwiki code review against a pull request and post
 findings.
 
 **Example:**
@@ -411,7 +411,7 @@ checklist from `docs/maintainers/`, posts inline comments.
 ### `/triage-issue`
 
 Apply labels + milestone + priority to a new GitHub issue using the
-llmwiki triage rules.
+sessionwiki triage rules.
 
 **Example:**
 
@@ -450,6 +450,6 @@ To add a new slash command:
 
 ## Related
 
-- **[CLI reference](cli.md)** — the underlying `python3 -m llmwiki …` surface.
+- **[CLI reference](cli.md)** — the underlying `python3 -m sessionwiki …` surface.
 - **[UI reference](ui.md)** — every screen on the compiled site, with what's reachable from where.
 - **[Tutorial 03 — Use with Claude Code](../tutorials/03-use-with-claude-code.md)** — the minimum daily loop built on these commands.

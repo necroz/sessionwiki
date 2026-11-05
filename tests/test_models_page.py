@@ -1,4 +1,4 @@
-"""Tests for `llmwiki.models_page` — model-entity discovery + rendering (v0.7 · #55)."""
+"""Tests for `sessionwiki.models_page` — model-entity discovery + rendering (v0.7 · #55)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.models_page import (
+from sessionwiki.models_page import (
     discover_model_entities,
     render_model_info_card,
     render_models_index,

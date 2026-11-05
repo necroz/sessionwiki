@@ -1,12 +1,12 @@
 """Two-way Obsidian editing verification (v1.0, #158).
 
 Verifies that edits made in Obsidian to symlinked wiki files are:
-  1. Picked up by llmwiki tooling (lint, build, categories)
-  2. Not overwritten by subsequent llmwiki operations
+  1. Picked up by sessionwiki tooling (lint, build, categories)
+  2. Not overwritten by subsequent sessionwiki operations
   3. Preserved through round-trip: load → modify externally → reload
 
 This gives us confidence that the symlink approach (link-obsidian) is
-actually bidirectional, not just one-way (llmwiki → Obsidian).
+actually bidirectional, not just one-way (sessionwiki → Obsidian).
 """
 
 from __future__ import annotations
@@ -15,11 +15,11 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.lint import load_pages, run_all
-from llmwiki.categories import scan_tags, generate_static_categories
+from sessionwiki.lint import load_pages, run_all
+from sessionwiki.categories import scan_tags, generate_static_categories
 
 
-# ─── Obsidian edit → llmwiki reads it ──────────────────────────────────
+# ─── Obsidian edit → sessionwiki reads it ──────────────────────────────────
 
 
 def test_user_edit_visible_to_load_pages(tmp_path: Path):
@@ -27,7 +27,7 @@ def test_user_edit_visible_to_load_pages(tmp_path: Path):
     wiki = tmp_path / "wiki"
     (wiki / "entities").mkdir(parents=True)
 
-    # llmwiki creates the page
+    # sessionwiki creates the page
     page = wiki / "entities" / "Foo.md"
     page.write_text(
         '---\ntitle: "Foo"\ntype: entity\nentity_type: tool\n---\n\n# Foo\n',
@@ -39,14 +39,14 @@ def test_user_edit_visible_to_load_pages(tmp_path: Path):
     page.write_text(current + "\n## User Notes\n\nThis is my addition.\n",
                     encoding="utf-8")
 
-    # llmwiki reloads — user edit is visible
+    # sessionwiki reloads — user edit is visible
     pages = load_pages(wiki)
     assert "## User Notes" in pages["entities/Foo.md"]["body"]
     assert "This is my addition" in pages["entities/Foo.md"]["body"]
 
 
 def test_user_frontmatter_edit_visible(tmp_path: Path):
-    """User can change frontmatter values in Obsidian and llmwiki sees them."""
+    """User can change frontmatter values in Obsidian and sessionwiki sees them."""
     wiki = tmp_path / "wiki"
     (wiki / "entities").mkdir(parents=True)
     page = wiki / "entities" / "Foo.md"
@@ -136,7 +136,7 @@ def test_load_pages_follows_symlinks(tmp_path: Path):
 
 
 def test_external_edit_then_reload_cycle(tmp_path: Path):
-    """Simulate user editing in Obsidian between two llmwiki reads."""
+    """Simulate user editing in Obsidian between two sessionwiki reads."""
     wiki = tmp_path / "wiki"
     (wiki / "entities").mkdir(parents=True)
     page = wiki / "entities" / "Foo.md"
@@ -145,7 +145,7 @@ def test_external_edit_then_reload_cycle(tmp_path: Path):
         encoding="utf-8",
     )
 
-    # 1. llmwiki reads
+    # 1. sessionwiki reads
     pages1 = load_pages(wiki)
     assert "Original content" in pages1["entities/Foo.md"]["body"]
 
@@ -156,7 +156,7 @@ def test_external_edit_then_reload_cycle(tmp_path: Path):
         encoding="utf-8",
     )
 
-    # 3. llmwiki reads again — sees the update
+    # 3. sessionwiki reads again — sees the update
     pages2 = load_pages(wiki)
     assert "Modified by user" in pages2["entities/Foo.md"]["body"]
     assert "Human observations" in pages2["entities/Foo.md"]["body"]

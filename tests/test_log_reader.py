@@ -1,4 +1,4 @@
-"""Tests for llmwiki.log_reader (G-18 · #304).
+"""Tests for sessionwiki.log_reader (G-18 · #304).
 
 Exercises parse_log / recent_events against synthetic log.md fixtures
 covering the happy path, malformed entries, operation filters, and
@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import date
 from pathlib import Path
 
-from llmwiki.log_reader import LogEvent, parse_log, recent_events
+from sessionwiki.log_reader import LogEvent, parse_log, recent_events
 
 
 SAMPLE_LOG = """# Wiki Log

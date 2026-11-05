@@ -1,7 +1,7 @@
 /**
- * llm-wiki Obsidian plugin — minimal scaffold.
+ * sessionwiki Obsidian plugin — minimal scaffold.
  *
- * Syncs the wiki/ folder from an llm-wiki project into the current vault,
+ * Syncs the wiki/ folder from an sessionwiki project into the current vault,
  * preserving [[wikilinks]] which are already native Obsidian syntax.
  *
  * Build with esbuild (see Obsidian sample plugin for full setup):
@@ -22,8 +22,8 @@ import { exec } from "child_process";
 // Settings
 // ---------------------------------------------------------------------------
 
-interface LlmwikiSettings {
-  /** Absolute path to the llm-wiki project root (contains wiki/). */
+interface SessionwikiSettings {
+  /** Absolute path to the sessionwiki project root (contains wiki/). */
   projectRoot: string;
   /** Python executable. */
   pythonPath: string;
@@ -31,38 +31,38 @@ interface LlmwikiSettings {
   vaultFolder: string;
 }
 
-const DEFAULT_SETTINGS: LlmwikiSettings = {
+const DEFAULT_SETTINGS: SessionwikiSettings = {
   projectRoot: "",
   pythonPath: "python3",
-  vaultFolder: "llm-wiki",
+  vaultFolder: "sessionwiki",
 };
 
 // ---------------------------------------------------------------------------
 // Plugin
 // ---------------------------------------------------------------------------
 
-export default class LlmwikiPlugin extends Plugin {
-  settings: LlmwikiSettings = DEFAULT_SETTINGS;
+export default class SessionwikiPlugin extends Plugin {
+  settings: SessionwikiSettings = DEFAULT_SETTINGS;
 
   async onload() {
     await this.loadSettings();
 
     // Command: Wiki Sync
     this.addCommand({
-      id: "llmwiki-sync",
+      id: "sessionwiki-sync",
       name: "Wiki Sync",
       callback: () => this.syncWiki(),
     });
 
     // Command: Wiki Build
     this.addCommand({
-      id: "llmwiki-build",
+      id: "sessionwiki-build",
       name: "Wiki Build",
       callback: () => this.buildSite(),
     });
 
     // Settings tab
-    this.addSettingTab(new LlmwikiSettingTab(this.app, this));
+    this.addSettingTab(new SessionwikiSettingTab(this.app, this));
   }
 
   async onunload() {
@@ -82,38 +82,38 @@ export default class LlmwikiPlugin extends Plugin {
   }
 
   /**
-   * Run `python3 -m llmwiki sync` then copy wiki/ into the vault.
+   * Run `python3 -m sessionwiki sync` then copy wiki/ into the vault.
    */
   async syncWiki() {
     const { projectRoot, pythonPath, vaultFolder } = this.settings;
     if (!projectRoot) {
-      new Notice("llm-wiki: Set the project root in settings first.");
+      new Notice("sessionwiki: Set the project root in settings first.");
       return;
     }
 
-    new Notice("llm-wiki: syncing sessions...");
+    new Notice("sessionwiki: syncing sessions...");
 
     // Step 1: run sync in the project directory
-    await this.runCommand(pythonPath, ["-m", "llmwiki", "sync"], projectRoot);
+    await this.runCommand(pythonPath, ["-m", "sessionwiki", "sync"], projectRoot);
 
     // Step 2: copy wiki/ files into the vault
     await this.copyWikiToVault(projectRoot, vaultFolder);
 
-    new Notice("llm-wiki: sync complete.");
+    new Notice("sessionwiki: sync complete.");
   }
 
   /**
-   * Run `python3 -m llmwiki build` in the project directory.
+   * Run `python3 -m sessionwiki build` in the project directory.
    */
   async buildSite() {
     const { projectRoot, pythonPath } = this.settings;
     if (!projectRoot) {
-      new Notice("llm-wiki: Set the project root in settings first.");
+      new Notice("sessionwiki: Set the project root in settings first.");
       return;
     }
-    new Notice("llm-wiki: building site...");
-    await this.runCommand(pythonPath, ["-m", "llmwiki", "build"], projectRoot);
-    new Notice("llm-wiki: build complete.");
+    new Notice("sessionwiki: building site...");
+    await this.runCommand(pythonPath, ["-m", "sessionwiki", "build"], projectRoot);
+    new Notice("sessionwiki: build complete.");
   }
 
   // -----------------------------------------------------------------------
@@ -128,7 +128,7 @@ export default class LlmwikiPlugin extends Plugin {
     return new Promise((resolve, reject) => {
       exec(`${cmd} ${args.join(" ")}`, { cwd }, (err, stdout, stderr) => {
         if (err) {
-          new Notice(`llm-wiki error: ${stderr || err.message}`);
+          new Notice(`sessionwiki error: ${stderr || err.message}`);
           reject(err);
         } else {
           resolve(stdout);
@@ -170,7 +170,7 @@ export default class LlmwikiPlugin extends Plugin {
       const content = fs.readFileSync(wikiIndexPath, "utf-8");
       await adapter.write(`${vaultFolder}/index.md`, content);
     } catch (e) {
-      new Notice(`llm-wiki: failed to copy index.md — ${e}`);
+      new Notice(`sessionwiki: failed to copy index.md — ${e}`);
     }
   }
 }
@@ -179,10 +179,10 @@ export default class LlmwikiPlugin extends Plugin {
 // Settings Tab
 // ---------------------------------------------------------------------------
 
-class LlmwikiSettingTab extends PluginSettingTab {
-  plugin: LlmwikiPlugin;
+class SessionwikiSettingTab extends PluginSettingTab {
+  plugin: SessionwikiPlugin;
 
-  constructor(app: App, plugin: LlmwikiPlugin) {
+  constructor(app: App, plugin: SessionwikiPlugin) {
     super(app, plugin);
     this.plugin = plugin;
   }
@@ -190,14 +190,14 @@ class LlmwikiSettingTab extends PluginSettingTab {
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("h2", { text: "llm-wiki Settings" });
+    containerEl.createEl("h2", { text: "sessionwiki Settings" });
 
     new Setting(containerEl)
       .setName("Project root")
-      .setDesc("Absolute path to the llm-wiki repository root")
+      .setDesc("Absolute path to the sessionwiki repository root")
       .addText((text) =>
         text
-          .setPlaceholder("/path/to/llm-wiki")
+          .setPlaceholder("/path/to/sessionwiki")
           .setValue(this.plugin.settings.projectRoot)
           .onChange(async (value) => {
             this.plugin.settings.projectRoot = value;
@@ -207,7 +207,7 @@ class LlmwikiSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Python path")
-      .setDesc("Python interpreter used to run llmwiki CLI")
+      .setDesc("Python interpreter used to run sessionwiki CLI")
       .addText((text) =>
         text
           .setValue(this.plugin.settings.pythonPath)

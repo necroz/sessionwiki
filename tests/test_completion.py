@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.completion import (
+from sessionwiki.completion import (
     bash_script,
     zsh_script,
     fish_script,
@@ -26,17 +26,17 @@ def test_three_shells_supported():
 def test_generate_bash():
     script = generate("bash")
     assert isinstance(script, str)
-    assert "bash completion for llmwiki" in script
+    assert "bash completion for sessionwiki" in script
 
 
 def test_generate_zsh():
     script = generate("zsh")
-    assert script.startswith("#compdef llmwiki")
+    assert script.startswith("#compdef sessionwiki")
 
 
 def test_generate_fish():
     script = generate("fish")
-    assert "fish completion for llmwiki" in script
+    assert "fish completion for sessionwiki" in script
 
 
 def test_generate_invalid_shell():
@@ -49,12 +49,12 @@ def test_generate_invalid_shell():
 
 def test_bash_registers_completion():
     script = bash_script()
-    assert "complete -F _llmwiki llmwiki" in script
+    assert "complete -F _sessionwiki sessionwiki" in script
 
 
 def test_bash_defines_function():
     script = bash_script()
-    assert "_llmwiki()" in script
+    assert "_sessionwiki()" in script
 
 
 def test_bash_includes_every_subcommand():
@@ -77,7 +77,7 @@ def test_bash_handles_cword_1():
 
 def test_zsh_compdef_directive():
     script = zsh_script()
-    assert script.startswith("#compdef llmwiki")
+    assert script.startswith("#compdef sessionwiki")
 
 
 def test_zsh_describes_subcommands():
@@ -121,8 +121,8 @@ def test_fish_completes_flags_for_sync():
 
 
 def test_cli_completion_subcommand_removed():
-    """`llmwiki completion` subcommand has been removed."""
-    from llmwiki.cli import build_parser
+    """`sessionwiki completion` subcommand has been removed."""
+    from sessionwiki.cli import build_parser
     parser = build_parser()
     sub_action = None
     for a in parser._actions:

@@ -1,8 +1,8 @@
 # Cursor adapter
 
 **Status:** Production (v0.5)
-**Module:** `llmwiki.adapters.contrib.cursor`
-**Source:** [`llmwiki/adapters/contrib/cursor.py`](../../llmwiki/adapters/contrib/cursor.py)
+**Module:** `sessionwiki.adapters.contrib.cursor`
+**Source:** [`sessionwiki/adapters/contrib/cursor.py`](../../sessionwiki/adapters/contrib/cursor.py)
 **Tracking issue:** #37
 
 ## What it reads
@@ -56,7 +56,7 @@ Override roots in `config.json`:
 ## Testing the adapter
 
 ```bash
-python3 -m llmwiki adapters      # should list cursor as available (if installed)
+python3 -m sessionwiki adapters      # should list cursor as available (if installed)
 python3 -m pytest tests/test_adapter_graduation.py -k cursor -v
 ```
 
@@ -66,6 +66,6 @@ A minimal synthetic fixture is provided at `tests/fixtures/cursor/minimal.jsonl`
 
 ## Reference
 
-- [`llmwiki/adapters/contrib/cursor.py`](../../llmwiki/adapters/contrib/cursor.py) -- the adapter source
-- [`llmwiki/convert.py`](../../llmwiki/convert.py) -- the shared converter
+- [`sessionwiki/adapters/contrib/cursor.py`](../../sessionwiki/adapters/contrib/cursor.py) -- the adapter source
+- [`sessionwiki/convert.py`](../../sessionwiki/convert.py) -- the shared converter
 - [README](../../README.md) -- project overview

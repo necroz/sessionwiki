@@ -1,7 +1,7 @@
 name: Nightly synthetic
 
 # #637 (#pw-x9): nightly Playwright run against the deployed demo at
-# https://pratiyush.github.io/llm-wiki/. Catches post-deploy breakage
+# https://necroz.github.io/sessionwiki/. Catches post-deploy breakage
 # we can't see in regular CI: GitHub Pages publish corruption, CDN
 # issues, browser update breakage, broken third-party scripts.
 #
@@ -34,7 +34,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install llmwiki + e2e extras
+      - name: Install sessionwiki + e2e extras
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e '.[e2e]'
@@ -51,7 +51,7 @@ jobs:
           # site instead of spinning up its own local server. Each
           # test in the smoke is robust to a site that lacks specific
           # pages (uses request.get + 404-skip pattern).
-          export QA_SYNTHETIC_BASE_URL="https://pratiyush.github.io/llm-wiki"
+          export QA_SYNTHETIC_BASE_URL="https://necroz.github.io/sessionwiki"
           python -m pytest tests/e2e/test_cross_browser_smoke.py \
             --base-url="$QA_SYNTHETIC_BASE_URL" \
             --browser=chromium \

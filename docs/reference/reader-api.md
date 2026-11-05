@@ -8,7 +8,7 @@
 
 ## Why a contract first
 
-llmwiki is, and will stay, **static-site-first**. But a few near-term
+sessionwiki is, and will stay, **static-site-first**. But a few near-term
 bets depend on the data being reachable without HTML parsing:
 
 - A browser extension that answers "what do I know about X" from the
@@ -21,12 +21,12 @@ bets depend on the data being reachable without HTML parsing:
   answer questions without pulling HTML.
 
 Every one of those wants the same shape of data. This doc says what that
-shape is, so refactors of `llmwiki/build.py` can't silently break
+shape is, so refactors of `sessionwiki/build.py` can't silently break
 clients.
 
 ## Shipped today (v1.0+) — read-only, file-based
 
-The static build writes these to `site/` on every `llmwiki build`:
+The static build writes these to `site/` on every `sessionwiki build`:
 
 | Path | Shape | Purpose |
 |---|---|---|
@@ -55,7 +55,7 @@ no new content pipeline, just new transports.
 
 ## Future endpoint contract
 
-Every endpoint below maps 1:1 to a file that `llmwiki build` already
+Every endpoint below maps 1:1 to a file that `sessionwiki build` already
 produces. The server is a thin JSON wrapper; the content model is what's
 already on disk.
 
@@ -267,22 +267,22 @@ that way caches and proxies stay simple.
 
 ## Migration path — static → hosted
 
-1. **Today:** `llmwiki build` writes the JSON/txt files. External tools
+1. **Today:** `sessionwiki build` writes the JSON/txt files. External tools
    read them directly. (Done — #116 is this doc.)
-2. **v1.2:** Add a tiny `llmwiki serve --api` flag that wraps the same
+2. **v1.2:** Add a tiny `sessionwiki serve --api` flag that wraps the same
    files behind `/api/v1/*` paths so the reader SPA can fetch them
    uniformly in dev. No new data, just routing.
 3. **v1.3+:** If a hosted multi-tenant reader ships, the server reuses
    the same routes with per-user auth. The content pipeline doesn't
    change.
 
-At no point does the contract require a rewrite of `llmwiki/build.py` —
+At no point does the contract require a rewrite of `sessionwiki/build.py` —
 every endpoint maps to something build.py already emits.
 
 ## Related
 
-- `llmwiki/build.py` — produces every file referenced above
-- `llmwiki/exporters.py` — `llms.txt` + JSON-LD + per-page siblings
+- `sessionwiki/build.py` — produces every file referenced above
+- `sessionwiki/exporters.py` — `llms.txt` + JSON-LD + per-page siblings
 - `docs/reference/cache-tiers.md` — `cache_tier` invariant (#52)
 - `docs/design/brand-system.md` — theme tokens returned by `/bootstrap`
 - `#116` — this issue

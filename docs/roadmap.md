@@ -1,4 +1,4 @@
-# llmwiki Roadmap — Phase × Layer × Item, prioritised
+# sessionwiki Roadmap — Phase × Layer × Item, prioritised
 
 **Last updated:** 2026-04-08
 
@@ -81,15 +81,15 @@ Sorted **first by priority (M → S → C → W), then by layer (L0 → L7)**. E
 | M | L3 | M-L3-12 | **Focus rings** (a11y) + `prefers-reduced-motion` | |
 | M | L3 | M-L3-13 | Mobile responsive (320 / 768 / 1080 breakpoints) | |
 | M | L3 | M-L3-14 | Print-friendly CSS | `@media print` |
-| M | L3 | M-L3-15 | HTTP server (`python3 -m http.server` wrapper) bound to 127.0.0.1 | `llmwiki serve --port 8765` |
+| M | L3 | M-L3-15 | HTTP server (`python3 -m http.server` wrapper) bound to 127.0.0.1 | `sessionwiki serve --port 8765` |
 | M | L4 | M-L4-01 | **`setup.sh` / `setup.bat`** — install + first sync | Idempotent, tested |
-| M | L4 | M-L4-02 | **`sync.sh` / `sync.bat`** — convert new sessions | Wrapper over `python3 -m llmwiki sync` |
-| M | L4 | M-L4-03 | **`build.sh` / `build.bat`** — regenerate HTML | `python3 -m llmwiki build` |
-| M | L4 | M-L4-04 | **`serve.sh` / `serve.bat`** — start server | `python3 -m llmwiki serve` |
+| M | L4 | M-L4-02 | **`sync.sh` / `sync.bat`** — convert new sessions | Wrapper over `python3 -m sessionwiki sync` |
+| M | L4 | M-L4-03 | **`build.sh` / `build.bat`** — regenerate HTML | `python3 -m sessionwiki build` |
+| M | L4 | M-L4-04 | **`serve.sh` / `serve.bat`** — start server | `python3 -m sessionwiki serve` |
 | M | L4 | M-L4-05 | `upgrade.sh` / `upgrade.bat` — pull + re-run setup | |
-| M | L4 | M-L4-06 | `python3 -m llmwiki` module entry (`__main__.py`) | |
-| M | L4 | M-L4-07 | `llmwiki.cli.main()` argparse CLI with subcommands | `init`, `sync`, `build`, `serve`, `adapters`, `version` |
-| M | L4 | M-L4-08 | `python3 -m llmwiki adapters` lists available adapters | Shows which are installed on this machine |
+| M | L4 | M-L4-06 | `python3 -m sessionwiki` module entry (`__main__.py`) | |
+| M | L4 | M-L4-07 | `sessionwiki.cli.main()` argparse CLI with subcommands | `init`, `sync`, `build`, `serve`, `adapters`, `version` |
+| M | L4 | M-L4-08 | `python3 -m sessionwiki adapters` lists available adapters | Shows which are installed on this machine |
 | M | L5 | M-L5-01 | `CLAUDE.md` schema with Ingest / Query / Lint workflows | Karpathy-compliant |
 | M | L5 | M-L5-02 | `AGENTS.md` schema (mirror CLAUDE.md, agent-agnostic) | |
 | M | L5 | M-L5-03 | **`.kiro/steering/` always-loaded rules** | contributing, page-format, verification |
@@ -108,10 +108,10 @@ Sorted **first by priority (M → S → C → W), then by layer (L0 → L7)**. E
 | M | L5 | M-L5-16 | `README.md` with badges, pitch, demo link, install | |
 | M | L5 | M-L5-17 | `CHANGELOG.md` per Keep-a-Changelog | |
 | M | L5 | M-L5-18 | `LICENSE` (MIT) | |
-| M | L6 | M-L6-01 | `llmwiki.adapters.base.BaseAdapter` | Interface + defaults |
-| M | L6 | M-L6-02 | `llmwiki.adapters.claude_code.ClaudeCodeAdapter` | Production |
-| M | L6 | M-L6-03 | `llmwiki.adapters.codex_cli.CodexCliAdapter` | v0.1 **stub** |
-| M | L6 | M-L6-04 | **`llmwiki.adapters.obsidian.ObsidianAdapter`** | Reads `~/Documents/Obsidian Vault/` |
+| M | L6 | M-L6-01 | `sessionwiki.adapters.base.BaseAdapter` | Interface + defaults |
+| M | L6 | M-L6-02 | `sessionwiki.adapters.claude_code.ClaudeCodeAdapter` | Production |
+| M | L6 | M-L6-03 | `sessionwiki.adapters.codex_cli.CodexCliAdapter` | v0.1 **stub** |
+| M | L6 | M-L6-04 | **`sessionwiki.adapters.obsidian.ObsidianAdapter`** | Reads `~/Documents/Obsidian Vault/` |
 | M | L6 | M-L6-05 | Adapter auto-discovery | `REGISTRY` populated on import |
 | M | L6 | M-L6-06 | `SUPPORTED_SCHEMA_VERSIONS` constant per adapter | Schema-version rule |
 | M | L6 | M-L6-07 | Graceful degradation on unknown record types | Log DEBUG, never crash |
@@ -144,11 +144,11 @@ Sorted **first by priority (M → S → C → W), then by layer (L0 → L7)**. E
 | S | L3 | S-L3-04 | Scroll-spy for breadcrumbs | |
 | M | L4 | M-L4-09 | **Claude Code plugin packaging** (`.claude-plugin/plugin.json` + `marketplace.json`) | Promoted from S → M on 2026-04-08 |
 | M | L4 | M-L4-10 | `.claude/commands/wiki-sync.md`, `wiki-ingest.md`, `wiki-query.md`, `wiki-lint.md`, `wiki-build.md`, `wiki-serve.md` | 6 slash commands |
-| M | L4 | M-L4-11 | `.claude/skills/llmwiki-sync/SKILL.md` + `llmwiki-ingest/SKILL.md` + `llmwiki-query/SKILL.md` | Auto-discoverable skills |
+| M | L4 | M-L4-11 | `.claude/skills/sessionwiki-sync/SKILL.md` + `sessionwiki-ingest/SKILL.md` + `sessionwiki-query/SKILL.md` | Auto-discoverable skills |
 | M | L4 | M-L4-12 | **MCP server** exposing `wiki_query`, `wiki_ingest`, `wiki_search`, `wiki_lint` tools | Promoted from S → M on 2026-04-08. Stub in v0.1, full in v0.2. |
-| M | L4 | M-L4-13 | `.claude/launch.json` for Claude_Preview integration | Lets contributors preview llmwiki from inside Claude Code |
+| M | L4 | M-L4-13 | `.claude/launch.json` for Claude_Preview integration | Lets contributors preview sessionwiki from inside Claude Code |
 | S | L4 | S-L4-01 | Claude Code plugin packaging (`.claude-plugin/plugin.json`) | marketplace-ready |
-| S | L4 | S-L4-02 | `pip install llm-notebook` on PyPI | |
+| S | L4 | S-L4-02 | `pip install sessionwiki` on PyPI | |
 | S | L4 | S-L4-03 | Homebrew formula | |
 | S | L5 | S-L5-01 | Domain examples (personal / research / business) | |
 | S | L5 | S-L5-02 | Use-case examples (solo / team / multi-agent) | |

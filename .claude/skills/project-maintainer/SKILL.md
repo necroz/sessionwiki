@@ -1,6 +1,6 @@
 ---
 name: project-maintainer
-description: Maintain an llmwiki-style open-source project across the full framework pipeline. Use when the user says "maintain the project", "check my tasks", "update progress", "run phase gate", "do a monthly verify", "lint my wiki", "check stale entries", or invokes any form of ongoing project-keeping chore. Reads _progress.md, tasks.md, docs/roadmap.md, and .github issues to figure out what's next and what's drifted.
+description: Maintain an sessionwiki-style open-source project across the full framework pipeline. Use when the user says "maintain the project", "check my tasks", "update progress", "run phase gate", "do a monthly verify", "lint my wiki", "check stale entries", or invokes any form of ongoing project-keeping chore. Reads _progress.md, tasks.md, docs/roadmap.md, and .github issues to figure out what's next and what's drifted.
 ---
 
 # project-maintainer
@@ -15,7 +15,7 @@ The **Maintainer** owns the full Open Source Framework v4.1 pipeline on a projec
 4. **Triggers CI** — re-runs the privacy grep, performance budget check, and link checker.
 5. **Reports next action** — tells the user exactly what to do next and why.
 
-It works for any project that follows the framework — not just llmwiki.
+It works for any project that follows the framework — not just sessionwiki.
 
 ## When to invoke
 
@@ -73,7 +73,7 @@ It works for any project that follows the framework — not just llmwiki.
 
 6. **Run CI gates locally** (if configured):
    - Privacy grep: `grep -r "<real_username>" site/ wiki/` must be empty
-   - Link check: `python3 -m llmwiki lint-docs` (when implemented)
+   - Link check: `python3 -m sessionwiki lint-docs` (when implemented)
    - Performance budget: build time `<15s`, HTML `<50MB`
 
 7. **Write the report.** Structure:
@@ -109,5 +109,5 @@ It works for any project that follows the framework — not just llmwiki.
 ## Related skills
 
 - `self-learn` — when a new pattern emerges during maintenance, pipe it to `self-learn` to potentially add it to the framework.
-- `llmwiki-query` — when you need context from past sessions on why a decision was made.
-- `llmwiki-lint` — for wiki-specific lint work (overlaps with step 5).
+- `sessionwiki-query` — when you need context from past sessions on why a decision was made.
+- `sessionwiki-lint` — for wiki-specific lint work (overlaps with step 5).

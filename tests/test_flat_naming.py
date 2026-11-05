@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from llmwiki.convert import flat_output_name
+from sessionwiki.convert import flat_output_name
 
 
 def test_basic_flat_name():
@@ -83,7 +83,7 @@ def test_subagent_slug():
 
 def test_flat_output_name_with_disambiguator():
     from datetime import datetime, timezone
-    from llmwiki.convert import flat_output_name
+    from sessionwiki.convert import flat_output_name
     ts = datetime(2026, 4, 16, 10, 0, tzinfo=timezone.utc)
     out = flat_output_name(ts, "proj", "slug", disambiguator="ab12cd34")
     assert out == "2026-04-16T10-00-proj-slug--ab12cd34.md"
@@ -91,7 +91,7 @@ def test_flat_output_name_with_disambiguator():
 
 def test_flat_output_name_empty_disambiguator_stays_canonical():
     from datetime import datetime, timezone
-    from llmwiki.convert import flat_output_name
+    from sessionwiki.convert import flat_output_name
     ts = datetime(2026, 4, 16, 10, 0, tzinfo=timezone.utc)
     out_none = flat_output_name(ts, "proj", "slug")
     out_empty = flat_output_name(ts, "proj", "slug", disambiguator="")
@@ -101,7 +101,7 @@ def test_flat_output_name_empty_disambiguator_stays_canonical():
 
 def test_source_hash8_is_stable():
     from pathlib import Path
-    from llmwiki.convert import _source_hash8
+    from sessionwiki.convert import _source_hash8
     a1 = _source_hash8(Path("/a/b/c.jsonl"))
     a2 = _source_hash8(Path("/a/b/c.jsonl"))
     assert a1 == a2
@@ -112,7 +112,7 @@ def test_source_hash8_is_stable():
 
 def test_source_hash8_handles_unicode_path():
     from pathlib import Path
-    from llmwiki.convert import _source_hash8
+    from sessionwiki.convert import _source_hash8
     h = _source_hash8(Path("/home/日本語/session.jsonl"))
     assert len(h) == 8
     assert all(c in "0123456789abcdef" for c in h)
@@ -123,7 +123,7 @@ def test_collision_produces_distinct_filenames():
     distinct output names when both sources exist."""
     from datetime import datetime, timezone
     from pathlib import Path
-    from llmwiki.convert import flat_output_name, _source_hash8
+    from sessionwiki.convert import flat_output_name, _source_hash8
     ts = datetime(2026, 4, 16, 10, 0, tzinfo=timezone.utc)
 
     # Simulate: parent session + one subagent, same minute + slug.

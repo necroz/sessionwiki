@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.cli import _should_run_after_sync, _load_schedule_config
+from sessionwiki.cli import _should_run_after_sync, _load_schedule_config
 
 
 def test_on_sync_triggers():

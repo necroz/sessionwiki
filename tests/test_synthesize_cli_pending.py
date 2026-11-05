@@ -1,4 +1,4 @@
-"""Tests for the ``llmwiki synthesize --list-pending`` + ``--complete``
+"""Tests for the ``sessionwiki synthesize --list-pending`` + ``--complete``
 CLI subcommands (#316 follow-up).
 
 Covers:
@@ -27,9 +27,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _run_cli(*args: str, cwd: Path, input_text: str = "") -> subprocess.CompletedProcess:
-    """Run the `llmwiki` CLI in a subprocess so argparse + stdin behave
+    """Run the `sessionwiki` CLI in a subprocess so argparse + stdin behave
     like a real user invocation.  Always uses the current Python and
-    injects REPO_ROOT into PYTHONPATH so ``python -m llmwiki`` resolves
+    injects REPO_ROOT into PYTHONPATH so ``python -m sessionwiki`` resolves
     even when ``cwd`` is a scratch dir."""
     env = os.environ.copy()
     existing = env.get("PYTHONPATH", "")
@@ -37,7 +37,7 @@ def _run_cli(*args: str, cwd: Path, input_text: str = "") -> subprocess.Complete
         str(REPO_ROOT) + (os.pathsep + existing if existing else "")
     )
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         cwd=cwd,
         capture_output=True,
         text=True,
@@ -51,12 +51,12 @@ def _run_cli(*args: str, cwd: Path, input_text: str = "") -> subprocess.Complete
 
 @pytest.fixture
 def scratch_repo(tmp_path, monkeypatch):
-    """A sandbox that mirrors the layout enough for `llmwiki synthesize`
+    """A sandbox that mirrors the layout enough for `sessionwiki synthesize`
     to work on its pending-prompts subfolder.  We monkeypatch REPO_ROOT
     inside the subprocess by setting the CWD to ``tmp_path`` and
-    copying/linking the installed llmwiki package into ``sys.path``.
+    copying/linking the installed sessionwiki package into ``sys.path``.
 
-    Simpler: since ``llmwiki.REPO_ROOT`` is resolved from ``llmwiki/__init__.py``'s
+    Simpler: since ``sessionwiki.REPO_ROOT`` is resolved from ``sessionwiki/__init__.py``'s
     location (it is NOT driven by CWD), we can't point it at ``tmp_path`` via
     subprocess alone.  Instead, write the pending-prompts dir at the real
     REPO_ROOT and clean up afterwards.  This means we use the real module and
@@ -172,7 +172,7 @@ def test_complete_uuid_mismatch(tmp_path):
     page = tmp_path / "placeholder.md"
     page.write_text(
         "---\ntitle: x\n---\n\n"
-        f"<!-- llmwiki-pending: {actual_uid} -->\n\n"
+        f"<!-- sessionwiki-pending: {actual_uid} -->\n\n"
         "## Summary\n\nPending.\n",
         encoding="utf-8",
     )
@@ -194,7 +194,7 @@ def test_complete_with_body_file(tmp_path):
     page = tmp_path / "placeholder.md"
     page.write_text(
         "---\ntitle: x\ntags: [claude-code]\n---\n\n"
-        f"<!-- llmwiki-pending: {uid} -->\n\n"
+        f"<!-- sessionwiki-pending: {uid} -->\n\n"
         "## Summary\n\nPending.\n",
         encoding="utf-8",
     )
@@ -211,7 +211,7 @@ def test_complete_with_body_file(tmp_path):
     final = page.read_text(encoding="utf-8")
     assert "tags: [claude-code]" in final  # frontmatter preserved
     assert "Agent synthesis body." in final  # body in place
-    assert "llmwiki-pending" not in final  # sentinel gone
+    assert "sessionwiki-pending" not in final  # sentinel gone
 
 
 def test_complete_with_stdin(tmp_path):
@@ -219,7 +219,7 @@ def test_complete_with_stdin(tmp_path):
     page = tmp_path / "placeholder.md"
     page.write_text(
         "---\ntitle: x\n---\n\n"
-        f"<!-- llmwiki-pending: {uid} -->\n\n"
+        f"<!-- sessionwiki-pending: {uid} -->\n\n"
         "## Summary\n\nPending.\n",
         encoding="utf-8",
     )
@@ -233,4 +233,4 @@ def test_complete_with_stdin(tmp_path):
     assert result.returncode == 0, result.stderr
     final = page.read_text(encoding="utf-8")
     assert "Stdin-supplied body." in final
-    assert "llmwiki-pending" not in final
+    assert "sessionwiki-pending" not in final

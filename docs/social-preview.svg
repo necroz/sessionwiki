@@ -113,7 +113,7 @@
   <text x="640" y="235" text-anchor="middle"
         font-family="'SF Pro Display', 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif"
         font-size="72" font-weight="800" letter-spacing="-2" fill="#cdd6f4">
-    llm-wiki
+    sessionwiki
   </text>
 
   <!-- Accent underline -->
@@ -251,7 +251,7 @@
   <text x="640" y="600" text-anchor="middle"
         font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', monospace"
         font-size="16" fill="#585b70" letter-spacing="1">
-    github.com/Pratiyush/llm-wiki
+    github.com/necroz/sessionwiki
   </text>
 
   <!-- Top and bottom accent lines -->

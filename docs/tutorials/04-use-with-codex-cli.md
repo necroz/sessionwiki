@@ -7,7 +7,7 @@ docs_shell: true
 # 04 · Use with Codex CLI
 
 **Time:** 10 minutes
-**You'll need:** A working `llmwiki` CLI and Codex CLI installed with at least one session at `~/.codex/sessions/`.
+**You'll need:** A working `sessionwiki` CLI and Codex CLI installed with at least one session at `~/.codex/sessions/`.
 **Result:** Codex CLI sessions ingested alongside your Claude Code ones, searchable from the same wiki.
 
 ---
@@ -15,7 +15,7 @@ docs_shell: true
 ## Why this matters
 
 If you use Codex CLI alongside Claude Code, their session transcripts shouldn't
-live in separate silos. llmwiki's adapter registry pulls from every AI agent
+live in separate silos. sessionwiki's adapter registry pulls from every AI agent
 it recognises — your wiki becomes a unified view across agents.
 
 ---
@@ -23,7 +23,7 @@ it recognises — your wiki becomes a unified view across agents.
 ## Step 1 — Verify the adapter picks up your sessions
 
 ```bash
-python3 -m llmwiki adapters | grep codex_cli
+python3 -m sessionwiki adapters | grep codex_cli
 ```
 
 Expected:
@@ -55,13 +55,13 @@ Edit (or create) `sessions_config.json`:
 Or pass it explicitly to `sync`:
 
 ```bash
-python3 -m llmwiki sync --adapter claude_code codex_cli
+python3 -m sessionwiki sync --adapter claude_code codex_cli
 ```
 
 ## Step 3 — Sync
 
 ```bash
-python3 -m llmwiki sync
+python3 -m sessionwiki sync
 ```
 
 Expected addition to the output:
@@ -98,8 +98,8 @@ inline `[[wikilinks]]` back to the originals.
 
 ```
 1. Work in Codex CLI.
-2. llmwiki sync                      (or /wiki-sync from within Claude Code — it pulls both)
-3. llmwiki query "..."               (CLI) or /wiki-query (from Claude Code)
+2. sessionwiki sync                      (or /wiki-sync from within Claude Code — it pulls both)
+3. sessionwiki query "..."               (CLI) or /wiki-query (from Claude Code)
 ```
 
 ---
@@ -107,7 +107,7 @@ inline `[[wikilinks]]` back to the originals.
 ## Verify
 
 ```bash
-python3 -m llmwiki adapters | grep -E "claude_code|codex_cli"
+python3 -m sessionwiki adapters | grep -E "claude_code|codex_cli"
 grep -l 'model: codex' wiki/sources/**/*.md 2>/dev/null | wc -l   # ≥ 0 (0 is fine if no Codex sessions)
 ```
 

@@ -1,6 +1,6 @@
 # Architecture
 
-llmwiki has two overlapping structures:
+sessionwiki has two overlapping structures:
 
 1. The **Karpathy three-layer wiki** (conceptual): `raw/` → `wiki/` → `site/`
 2. The **eight-layer build** (implementation): how responsibilities are distributed across Python modules, HTML templates, scripts, CI, etc.
@@ -13,11 +13,11 @@ From the [original LLM Wiki gist](https://gist.github.com/karpathy/442a6bf555914
 
 ```
 raw/           IMMUTABLE source documents
-    ↓          (llmwiki converts .jsonl → .md here)
+    ↓          (sessionwiki converts .jsonl → .md here)
 wiki/          LLM-MAINTAINED pages
     ↓          (your coding agent writes here via /wiki-ingest)
 site/          GENERATED static HTML
-               (llmwiki builds here via `llmwiki build`)
+               (sessionwiki builds here via `sessionwiki build`)
 ```
 
 ### raw/ — immutable layer
@@ -45,7 +45,7 @@ Pages interlink via `[[wikilinks]]`. Contradictions are recorded, not silently o
 
 ### site/ — generated static layer
 
-`llmwiki build` reads `raw/` (and `wiki/` if populated) and renders a complete static HTML site. Nothing here is hand-maintained. Safe to delete and regenerate any time.
+`sessionwiki build` reads `raw/` (and `wiki/` if populated) and renders a complete static HTML site. Nothing here is hand-maintained. Safe to delete and regenerate any time.
 
 ## Layer 2: The eight-layer build
 
@@ -54,19 +54,19 @@ Internally the code is organised into eight functional layers. Each layer has on
 ```
 ┌──────────────────────────────────────────────────────┐
 │  L7  CI / ops          .github/workflows/            │
-│  L6  Adapters          llmwiki/adapters/             │
+│  L6  Adapters          sessionwiki/adapters/             │
 │  L5  Schema / docs     CLAUDE.md, AGENTS.md, docs/   │
 │  L4  Distribution      setup.sh, .bat, .claude/      │
 │  L3  Viewer            script.js in build.py         │
 │  L2  Site              build.py (HTML + CSS)         │
 │  L1  Wiki              CLAUDE.md workflows           │
-│  L0  Raw               llmwiki/convert.py            │
+│  L0  Raw               sessionwiki/convert.py            │
 └──────────────────────────────────────────────────────┘
 ```
 
 ### L0 — Raw
 
-Owner: `llmwiki/convert.py`
+Owner: `sessionwiki/convert.py`
 
 Reads .jsonl from the agent's session store (via an adapter), filters out noise records, runs redaction, normalises the output into markdown, and writes to `raw/sessions/`.
 
@@ -81,11 +81,11 @@ Key properties:
 
 Owner: your coding agent, following [CLAUDE.md](../CLAUDE.md) / [AGENTS.md](../AGENTS.md)
 
-llmwiki does NOT write to `wiki/` directly. The agent does, via slash commands (`/wiki-ingest`, `/wiki-query`, `/wiki-lint`) that execute the workflows in the schema file.
+sessionwiki does NOT write to `wiki/` directly. The agent does, via slash commands (`/wiki-ingest`, `/wiki-query`, `/wiki-lint`) that execute the workflows in the schema file.
 
 ### L2 — Site (HTML generator)
 
-Owner: `llmwiki/build.py`
+Owner: `sessionwiki/build.py`
 
 Converts every file under `raw/sessions/` (and any hand-authored files under `wiki/`) into static HTML. Uses `python-markdown` (the only runtime dep) — syntax highlighting runs in the browser via highlight.js loaded from a pinned jsdelivr CDN (v0.5, #73), so the build pipeline itself stays stdlib-only. Writes to `site/`.
 
@@ -125,17 +125,17 @@ Zero dependencies. No bundler. No framework. One file.
 
 Owner: the repo root + `.claude-plugin/`
 
-How users install and run llmwiki:
+How users install and run sessionwiki:
 
 - `setup.sh` / `setup.bat` — one-click install
-- `sync.sh` / `sync.bat` — wrappers around `python3 -m llmwiki sync`
-- `build.sh` / `build.bat` — wrappers around `python3 -m llmwiki build`
-- `serve.sh` / `serve.bat` — wrappers around `python3 -m llmwiki serve`
+- `sync.sh` / `sync.bat` — wrappers around `python3 -m sessionwiki sync`
+- `build.sh` / `build.bat` — wrappers around `python3 -m sessionwiki build`
+- `serve.sh` / `serve.bat` — wrappers around `python3 -m sessionwiki serve`
 - `upgrade.sh` / `upgrade.bat` — `git pull` + re-run setup
 - `.claude-plugin/plugin.json` + `marketplace.json` — Claude Code plugin packaging
 - `.claude/commands/` — 7 slash commands
 - `.claude/skills/` — 5 auto-discoverable skills
-- `llmwiki/mcp/` — MCP server stub
+- `sessionwiki/mcp/` — MCP server stub
 
 ### L5 — Schema / docs
 
@@ -146,14 +146,14 @@ Tells humans and agents how the system works:
 - `CLAUDE.md` — Claude Code schema with Ingest / Query / Lint workflows
 - `AGENTS.md` — Codex / OpenCode / Gemini mirror of the same
 - `.kiro/steering/` — always-loaded contribution / format / verification rules
-- `docs/framework.md` — Open Source Framework v4.1 adapted for llmwiki
+- `docs/framework.md` — Open Source Framework v4.1 adapted for sessionwiki
 - `docs/research.md` — Phase 1.25 research report
 - `docs/feature-matrix.md` — 161 features across 16 categories
 - `docs/roadmap.md` — Phase × Layer × Item MoSCoW table
 
 ### L6 — Adapters
 
-Owner: `llmwiki/adapters/`
+Owner: `sessionwiki/adapters/`
 
 One file per agent. Each subclass of `BaseAdapter` does three things:
 
@@ -176,7 +176,7 @@ Owner: `.github/workflows/` + `tests/`
 
 ## Adding an adapter
 
-See [framework.md §5.25 Adapter Flow](framework.md) for the full contract. TL;DR: one new file at `llmwiki/adapters/<agent>.py`, one fixture, one snapshot test, one doc page, one README line, one CHANGELOG entry.
+See [framework.md §5.25 Adapter Flow](framework.md) for the full contract. TL;DR: one new file at `sessionwiki/adapters/<agent>.py`, one fixture, one snapshot test, one doc page, one README line, one CHANGELOG entry.
 
 ## Design principles
 

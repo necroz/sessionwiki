@@ -1,8 +1,8 @@
 name: Bump Homebrew formula
 
-# After every version tag push, regenerate homebrew/llmwiki.rb against
+# After every version tag push, regenerate homebrew/sessionwiki.rb against
 # the new tag, then (if HOMEBREW_TAP_TOKEN is configured) commit and
-# push the updated formula to Pratiyush/homebrew-tap.
+# push the updated formula to necroz/homebrew-tap.
 #
 # If the secret is NOT set, the job runs the bump + prints the new
 # formula content, but skips the push so unconfigured repos don't
@@ -10,7 +10,7 @@ name: Bump Homebrew formula
 #
 # Requires secret:
 #   HOMEBREW_TAP_TOKEN  — fine-grained PAT with "Contents: write"
-#                         on Pratiyush/homebrew-tap
+#                         on necroz/homebrew-tap
 
 on:
   push:
@@ -48,8 +48,8 @@ jobs:
       - name: Regenerate formula
         run: |
           bash scripts/bump-homebrew-formula.sh "${{ steps.tag.outputs.tag }}"
-          echo "---- homebrew/llmwiki.rb after bump ----"
-          cat homebrew/llmwiki.rb
+          echo "---- homebrew/sessionwiki.rb after bump ----"
+          cat homebrew/sessionwiki.rb
 
       - name: Check for tap token
         id: check_token
@@ -79,10 +79,10 @@ jobs:
           echo "::add-mask::$TAP_TOKEN"
           tmp="$(mktemp -d)"
           git clone --depth 1 \
-            "https://x-access-token:${TAP_TOKEN}@github.com/Pratiyush/homebrew-tap.git" \
+            "https://x-access-token:${TAP_TOKEN}@github.com/necroz/homebrew-tap.git" \
             "$tmp"
           mkdir -p "$tmp/Formula"
-          cp homebrew/llmwiki.rb "$tmp/Formula/llmwiki.rb"
+          cp homebrew/sessionwiki.rb "$tmp/Formula/sessionwiki.rb"
           cd "$tmp"
           if git diff --quiet; then
             echo "No changes — formula already up-to-date for ${TAG}."
@@ -90,6 +90,6 @@ jobs:
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Formula/llmwiki.rb
-          git commit -m "llmwiki ${TAG}"
+          git add Formula/sessionwiki.rb
+          git commit -m "sessionwiki ${TAG}"
           git push

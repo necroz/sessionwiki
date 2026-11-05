@@ -38,7 +38,7 @@ def _spawn(extra_env: dict | None = None) -> subprocess.Popen:
     if extra_env:
         env.update(extra_env)
     return subprocess.Popen(
-        [sys.executable, "-m", "llmwiki.mcp"],
+        [sys.executable, "-m", "sessionwiki.mcp"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

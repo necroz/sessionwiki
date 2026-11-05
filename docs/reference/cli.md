@@ -6,7 +6,7 @@ docs_shell: true
 
 # CLI reference
 
-**Every** `python3 -m llmwiki <subcommand>` — with every flag, realistic
+**Every** `python3 -m sessionwiki <subcommand>` — with every flag, realistic
 examples, and expected output. If a command isn't listed here it isn't
 shipping. This page is generated against the live argparse tree, so
 adding a flag without documenting it will fail the guardrail test.
@@ -18,13 +18,13 @@ Global flags: `-h` / `--help` on every command, `--version` at the root.
 ## Top-level
 
 ```bash
-python3 -m llmwiki --version    # → llmwiki <version>
-python3 -m llmwiki --help       # list every subcommand
-python3 -m llmwiki              # same as --help
+python3 -m sessionwiki --version    # → sessionwiki <version>
+python3 -m sessionwiki --help       # list every subcommand
+python3 -m sessionwiki              # same as --help
 ```
 
-The shorter alias `llmwiki` works too once the package is installed
-(`pip install llm-notebook` or via Homebrew — see
+The shorter alias `sessionwiki` works too once the package is installed
+(`pip install sessionwiki` or via Homebrew — see
 [`deploy/pypi-publishing.md`](../deploy/pypi-publishing.md) /
 [`deploy/homebrew-setup.md`](../deploy/homebrew-setup.md)).
 
@@ -36,7 +36,7 @@ Creates the three data directories + seeds nine navigation files inside
 `wiki/`.
 
 ```bash
-python3 -m llmwiki init
+python3 -m sessionwiki init
 ```
 
 **Flags:** none.
@@ -65,16 +65,16 @@ The workhorse. Walks every configured adapter, converts new sessions
 into `raw/sessions/`, then (by default) auto-builds and auto-lints.
 
 ```bash
-python3 -m llmwiki sync
-python3 -m llmwiki sync --since 2026-04-01 --project llm-wiki
-python3 -m llmwiki sync --adapter claude_code codex_cli
-python3 -m llmwiki sync --no-auto-build --no-auto-lint
-python3 -m llmwiki sync --vault "~/Documents/Obsidian Vault"
-python3 -m llmwiki sync --vault ~/my-vault --allow-overwrite
-python3 -m llmwiki sync --force
-python3 -m llmwiki sync --dry-run
-python3 -m llmwiki sync --adapter zcode --no-zcode-export
-python3 -m llmwiki sync --adapter opencode --no-opencode-export
+python3 -m sessionwiki sync
+python3 -m sessionwiki sync --since 2026-04-01 --project llm-wiki
+python3 -m sessionwiki sync --adapter claude_code codex_cli
+python3 -m sessionwiki sync --no-auto-build --no-auto-lint
+python3 -m sessionwiki sync --vault "~/Documents/Obsidian Vault"
+python3 -m sessionwiki sync --vault ~/my-vault --allow-overwrite
+python3 -m sessionwiki sync --force
+python3 -m sessionwiki sync --dry-run
+python3 -m sessionwiki sync --adapter zcode --no-zcode-export
+python3 -m sessionwiki sync --adapter opencode --no-opencode-export
 ```
 
 ### Flags
@@ -109,8 +109,8 @@ python3 -m llmwiki sync --adapter opencode --no-opencode-export
 ### Common recipes
 
 - Nightly cron-style sync of one project only:
-  `llmwiki sync --project my-project --no-auto-lint --since $(date -v-1d +%Y-%m-%d)`
-- Vault-overlay round-trip: `llmwiki sync --vault "~/Documents/Obsidian Vault"`
+  `sessionwiki sync --project my-project --no-auto-lint --since $(date -v-1d +%Y-%m-%d)`
+- Vault-overlay round-trip: `sessionwiki sync --vault "~/Documents/Obsidian Vault"`
 
 ---
 
@@ -119,11 +119,11 @@ python3 -m llmwiki sync --adapter opencode --no-opencode-export
 Turns `wiki/` markdown into `site/` HTML.
 
 ```bash
-python3 -m llmwiki build
-python3 -m llmwiki build --out ~/public_html
-python3 -m llmwiki build --search-mode tree
-python3 -m llmwiki build --synthesize --claude /usr/local/bin/claude
-python3 -m llmwiki build --vault ~/my-vault --out ~/site
+python3 -m sessionwiki build
+python3 -m sessionwiki build --out ~/public_html
+python3 -m sessionwiki build --search-mode tree
+python3 -m sessionwiki build --synthesize --claude /usr/local/bin/claude
+python3 -m sessionwiki build --vault ~/my-vault --out ~/site
 ```
 
 ### Flags
@@ -152,10 +152,10 @@ python3 -m llmwiki build --vault ~/my-vault --out ~/site
 ## `serve` — start a local HTTP server
 
 ```bash
-python3 -m llmwiki serve
-python3 -m llmwiki serve --port 9000
-python3 -m llmwiki serve --dir ~/public_html
-python3 -m llmwiki serve --open
+python3 -m sessionwiki serve
+python3 -m sessionwiki serve --port 9000
+python3 -m sessionwiki serve --dir ~/public_html
+python3 -m sessionwiki serve --open
 ```
 
 ### Flags
@@ -175,7 +175,7 @@ don't expose to the public internet.
 ## `adapters` — list every adapter + its status
 
 ```bash
-python3 -m llmwiki adapters
+python3 -m sessionwiki adapters
 ```
 
 **Flags:** none.
@@ -208,16 +208,16 @@ Columns: **default** (runs when you don't pass `--adapter`), **configured**
 
 ZCode keeps sessions in a live SQLite database, not in per-session
 JSONL files. This command writes an incremental, Claude-style JSONL
-corpus that the `zcode` adapter can convert. `llmwiki sync` runs the
+corpus that the `zcode` adapter can convert. `sessionwiki sync` runs the
 same export automatically when the database exists and the `zcode`
 adapter is selected.
 
 ```bash
-python3 -m llmwiki zcode export
-python3 -m llmwiki zcode export --project demo_project --dry-run
-python3 -m llmwiki zcode export --since 2026-09-01
-python3 -m llmwiki zcode export --project-root ~/dev
-python3 -m llmwiki zcode export --include-subagents
+python3 -m sessionwiki zcode export
+python3 -m sessionwiki zcode export --project demo_project --dry-run
+python3 -m sessionwiki zcode export --since 2026-09-01
+python3 -m sessionwiki zcode export --project-root ~/dev
+python3 -m sessionwiki zcode export --include-subagents
 ```
 
 ### `zcode export` flags
@@ -245,9 +245,9 @@ Portable scheduler entry point. It uses an OS-level lock instead of
 `flock`, so it works on Linux, macOS, and Windows.
 
 ```bash
-python3 -m llmwiki zcode autosync
-python3 -m llmwiki zcode autosync --build
-python3 -m llmwiki zcode autosync --coalesce --build
+python3 -m sessionwiki zcode autosync
+python3 -m sessionwiki zcode autosync --build
+python3 -m sessionwiki zcode autosync --coalesce --build
 ```
 
 | Flag | What |
@@ -266,10 +266,10 @@ systemd user timer (Linux), launchd agent (macOS), or Task Scheduler
 (Windows). The hook is idempotent.
 
 ```bash
-python3 -m llmwiki zcode install --dry-run
-python3 -m llmwiki zcode install --scheduler systemd --at 03:30
-python3 -m llmwiki zcode install --scheduler launchd --coalesce
-python3 -m llmwiki zcode install --scheduler windows --no-build
+python3 -m sessionwiki zcode install --dry-run
+python3 -m sessionwiki zcode install --scheduler systemd --at 03:30
+python3 -m sessionwiki zcode install --scheduler launchd --coalesce
+python3 -m sessionwiki zcode install --scheduler windows --no-build
 ```
 
 | Flag | What |
@@ -291,14 +291,14 @@ python3 -m llmwiki zcode install --scheduler windows --no-build
 OpenCode V2 keeps sessions in a live SQLite database
 (`~/.local/share/opencode/opencode.db`). This command writes an
 incremental, Claude-style JSONL corpus under `~/.llmwiki/opencode/`.
-`llmwiki sync` runs the same export automatically when the database
+`sessionwiki sync` runs the same export automatically when the database
 exists and the `opencode` adapter is selected.
 
 ```bash
-python3 -m llmwiki opencode export
-python3 -m llmwiki opencode export --project demo --dry-run
-python3 -m llmwiki opencode export --since 2026-09-01
-python3 -m llmwiki opencode export --include-subagents
+python3 -m sessionwiki opencode export
+python3 -m sessionwiki opencode export --project demo --dry-run
+python3 -m sessionwiki opencode export --since 2026-09-01
+python3 -m sessionwiki opencode export --include-subagents
 ```
 
 ### `opencode export` flags
@@ -325,8 +325,8 @@ Portable scheduler entry point. It uses the shared OS-level lock, so
 concurrent `session.idle` events cannot overlap.
 
 ```bash
-python3 -m llmwiki opencode autosync
-python3 -m llmwiki opencode autosync --build
+python3 -m sessionwiki opencode autosync
+python3 -m sessionwiki opencode autosync --build
 ```
 
 | Flag | What |
@@ -342,22 +342,22 @@ python3 -m llmwiki opencode autosync --build
 Writes the OpenCode server plugin that runs autosync on `session.idle`:
 
 ```text
-$XDG_CONFIG_HOME/opencode/plugins/llmwiki-autosync/index.ts   # default: ~/.config/opencode/...
+$XDG_CONFIG_HOME/opencode/plugins/sessionwiki-autosync/index.ts   # default: ~/.config/opencode/...
 ```
 
 The plugin calls `opencode autosync --lock-timeout 0`, so an idle event
 that arrives while a cycle is running is skipped rather than queued.
 
 ```bash
-python3 -m llmwiki opencode install --dry-run
-python3 -m llmwiki opencode install
-python3 -m llmwiki opencode install --no-build --force
+python3 -m sessionwiki opencode install --dry-run
+python3 -m sessionwiki opencode install
+python3 -m sessionwiki opencode install --no-build --force
 ```
 
 | Flag | What |
 |---|---|
 | `--python PATH` | Interpreter for the plugin command. Default: current. |
-| `--repo-root PATH` | llmwiki checkout used as the plugin working directory. |
+| `--repo-root PATH` | sessionwiki checkout used as the plugin working directory. |
 | `--build` | Rebuild `site/` after each autosync (default: off). |
 | `--no-build` | Explicitly disable rebuilds. |
 | `--dry-run` | Print the path without writing. |
@@ -371,13 +371,13 @@ Prints Python, `markdown`, virtualenv, config files, and ZCode database /
 export paths. Exits `1` only when a required check fails.
 
 ```bash
-python3 -m llmwiki doctor
+python3 -m sessionwiki doctor
 ```
 
 Typical output:
 
 ```
-llmwiki doctor 1.3.82
+sessionwiki doctor 2.0.0
   [ok  ] python       3.12.4
   [ok  ] markdown     installed
   [ok  ] venv         active
@@ -394,9 +394,9 @@ Read-only pre-publish check over `raw/`, `wiki/`, and `site/`. It reports
 matches; it does not edit files.
 
 ```bash
-python3 -m llmwiki audit
-python3 -m llmwiki audit --path site --json
-python3 -m llmwiki audit --fail-on-findings
+python3 -m sessionwiki audit
+python3 -m sessionwiki audit --path site --json
+python3 -m sessionwiki audit --fail-on-findings
 ```
 
 | Flag | What |
@@ -415,10 +415,10 @@ in the preview.
 ## `graph` — build the knowledge graph
 
 ```bash
-python3 -m llmwiki graph                              # builtin wikilink graph
-python3 -m llmwiki graph --engine graphify             # AI-powered graph (requires graphifyy)
-python3 -m llmwiki graph --format json
-python3 -m llmwiki graph --format html
+python3 -m sessionwiki graph                              # builtin wikilink graph
+python3 -m sessionwiki graph --engine graphify             # AI-powered graph (requires graphifyy)
+python3 -m sessionwiki graph --format json
+python3 -m sessionwiki graph --format html
 ```
 
 ### Flags
@@ -436,7 +436,7 @@ auto-copied into `site/graph.html` on every `build`.
 tree-sitter AST extraction for code, semantic analysis for docs, Leiden community
 detection, god-node analysis. Outputs to `graphify-out/` (graph.json, graph.html,
 GRAPH_REPORT.md) and copies to `graph/` for build compatibility. Install:
-`pip install llm-notebook[graph]` or `pip install graphifyy`.
+`pip install sessionwiki[graph]` or `pip install graphifyy`.
 
 ---
 
@@ -445,14 +445,14 @@ GRAPH_REPORT.md) and copies to `graph/` for build compatibility. Install:
 Single positional argument picks the format.
 
 ```bash
-python3 -m llmwiki export llms-txt
-python3 -m llmwiki export llms-full-txt
-python3 -m llmwiki export jsonld
-python3 -m llmwiki export sitemap
-python3 -m llmwiki export rss
-python3 -m llmwiki export robots
-python3 -m llmwiki export ai-readme
-python3 -m llmwiki export all --out ~/custom-site
+python3 -m sessionwiki export llms-txt
+python3 -m sessionwiki export llms-full-txt
+python3 -m sessionwiki export jsonld
+python3 -m sessionwiki export sitemap
+python3 -m sessionwiki export rss
+python3 -m sessionwiki export robots
+python3 -m sessionwiki export ai-readme
+python3 -m sessionwiki export all --out ~/custom-site
 ```
 
 ### Positional
@@ -479,12 +479,12 @@ python3 -m llmwiki export all --out ~/custom-site
 ## `lint` — run 14 wiki-quality rules
 
 ```bash
-python3 -m llmwiki lint
-python3 -m llmwiki lint --json
-python3 -m llmwiki lint --fail-on-errors
-python3 -m llmwiki lint --rules link_integrity,orphan_detection
-python3 -m llmwiki lint --include-llm
-python3 -m llmwiki lint --wiki-dir ~/another-wiki
+python3 -m sessionwiki lint
+python3 -m sessionwiki lint --json
+python3 -m sessionwiki lint --fail-on-errors
+python3 -m sessionwiki lint --rules link_integrity,orphan_detection
+python3 -m sessionwiki lint --include-llm
+python3 -m sessionwiki lint --wiki-dir ~/another-wiki
 ```
 
 ### Flags
@@ -523,13 +523,13 @@ python3 -m llmwiki lint --wiki-dir ~/another-wiki
 Positional `action` picks `list` / `promote` / `merge` / `discard`.
 
 ```bash
-python3 -m llmwiki candidates list
-python3 -m llmwiki candidates list --stale --stale-days 60
-python3 -m llmwiki candidates list --json
-python3 -m llmwiki candidates promote --slug NewEntity
-python3 -m llmwiki candidates promote --slug NewEntity --kind concepts
-python3 -m llmwiki candidates merge --slug DuplicateFoo --into Foo
-python3 -m llmwiki candidates discard --slug BogusEntity --reason "LLM hallucinated"
+python3 -m sessionwiki candidates list
+python3 -m sessionwiki candidates list --stale --stale-days 60
+python3 -m sessionwiki candidates list --json
+python3 -m sessionwiki candidates promote --slug NewEntity
+python3 -m sessionwiki candidates promote --slug NewEntity --kind concepts
+python3 -m sessionwiki candidates merge --slug DuplicateFoo --into Foo
+python3 -m sessionwiki candidates discard --slug BogusEntity --reason "LLM hallucinated"
 ```
 
 ### Flags
@@ -553,11 +553,11 @@ round-trip semantics when a candidate lives inside a vault.
 ## `synthesize` — LLM-backed source-page synthesis
 
 ```bash
-python3 -m llmwiki synthesize --check            # probe the backend
-python3 -m llmwiki synthesize --estimate         # cost preview, no API calls
-python3 -m llmwiki synthesize --force            # re-synth everything
-python3 -m llmwiki synthesize --coalesce-only    # deterministic cleanup, no LLM
-python3 -m llmwiki synthesize                    # real run
+python3 -m sessionwiki synthesize --check            # probe the backend
+python3 -m sessionwiki synthesize --estimate         # cost preview, no API calls
+python3 -m sessionwiki synthesize --force            # re-synth everything
+python3 -m sessionwiki synthesize --coalesce-only    # deterministic cleanup, no LLM
+python3 -m sessionwiki synthesize                    # real run
 ```
 
 ### Flags
@@ -583,7 +583,7 @@ from the body, and merges the tags into frontmatter with:
 
 - **Baseline preserved** — adapter, project slug, model family stay.
 - **Maintainer wins** — on `--force`, whatever you added via
-  `llmwiki tag add` is kept at the front of the list.
+  `sessionwiki tag add` is kept at the front of the list.
 - **Stop-word filter** — the LLM can't re-add boilerplate tags
   (`session`, `summary`, `claude-code`, etc.).
 - **Cap 5** — max 5 AI tags per page to prevent drift.
@@ -601,19 +601,19 @@ ships with baseline tags.
 ## `version` — print the installed version
 
 ```bash
-python3 -m llmwiki version
-python3 -m llmwiki --version
+python3 -m sessionwiki version
+python3 -m sessionwiki --version
 ```
 
-Both print `llmwiki <version>`.
+Both print `sessionwiki <version>`.
 
 ---
 
 ## `query` — search the knowledge graph
 
 ```bash
-python3 -m llmwiki query "what projects is Pratiyush working on"
-python3 -m llmwiki query "Flutter mobile" --depth 2 --budget 1000
+python3 -m sessionwiki query "what projects am I working on"
+python3 -m sessionwiki query "Flutter mobile" --depth 2 --budget 1000
 ```
 
 ### Flags
@@ -623,7 +623,7 @@ python3 -m llmwiki query "Flutter mobile" --depth 2 --budget 1000
 | `--depth N` | BFS traversal depth. Default: `3`. |
 | `--budget N` | Max output tokens. Default: `2000`. |
 
-Requires Graphify (`pip install llm-notebook[graph]`). Run `llmwiki graph` first
+Requires Graphify (`pip install sessionwiki[graph]`). Run `sessionwiki graph` first
 to build the graph.
 
 ---
@@ -635,9 +635,9 @@ in order. This is the one command to run after `sync` to produce a
 CI-ready site.
 
 ```bash
-python3 -m llmwiki all
-python3 -m llmwiki all --graph-engine builtin   # skip optional graphify
-python3 -m llmwiki all --skip-graph --strict    # fail CI on any lint issue
+python3 -m sessionwiki all
+python3 -m sessionwiki all --graph-engine builtin   # skip optional graphify
+python3 -m sessionwiki all --skip-graph --strict    # fail CI on any lint issue
 ```
 
 ### Flags

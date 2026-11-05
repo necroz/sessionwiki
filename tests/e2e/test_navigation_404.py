@@ -91,7 +91,7 @@ def test_homepage_renders_without_console_errors(page: Page, base_url: str) -> N
     error is a real bug that's been shipping silently because no
     other test asserts on this exact page in isolation."""
     page.goto(f"{base_url}/index.html", wait_until="networkidle")
-    errors = getattr(page, "_llmwiki_console_errors", [])
+    errors = getattr(page, "_sessionwiki_console_errors", [])
     # Filter out hljs / CDN noise (non-actionable in our context).
     real = [e for e in errors if "highlight" not in e.lower() and "cdn" not in e.lower()]
     assert not real, f"homepage has console errors: {real}"

@@ -20,8 +20,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from llmwiki.build import render_sessions_index
-from llmwiki.render.css import CSS
+from sessionwiki.build import render_sessions_index
+from sessionwiki.render.css import CSS
 
 
 def _src(slug: str, date: str, project: str = "demo", title: str | None = None):

@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 
 def test_all_parser_accepts_with_synth_flag():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     args = build_parser().parse_args(["all", "--with-synth", "--synth-force"])
     assert args.with_synth is True
@@ -16,25 +16,25 @@ def test_all_parser_accepts_with_synth_flag():
 
 
 def test_synthesis_status_hint_for_dummy_backend():
-    from llmwiki.config_schedule import synthesis_status_hint
+    from sessionwiki.config_schedule import synthesis_status_hint
 
     hint = synthesis_status_hint("dummy")
     assert hint is not None
     assert "dummy" in hint
-    assert "llmwiki all --with-synth" in hint
+    assert "sessionwiki all --with-synth" in hint
 
 
 def test_synthesis_status_hint_for_ollama_backend():
-    from llmwiki.config_schedule import synthesis_status_hint
+    from sessionwiki.config_schedule import synthesis_status_hint
 
     hint = synthesis_status_hint("ollama")
     assert hint is not None
     assert "ollama" in hint
-    assert "llmwiki synthesize" in hint
+    assert "sessionwiki synthesize" in hint
 
 
 def test_cmd_all_with_synth_runs_synthesize_first():
-    from llmwiki import cli
+    from sessionwiki import cli
 
     order: list[str] = []
 
@@ -69,7 +69,7 @@ def test_cmd_all_with_synth_runs_synthesize_first():
 
 
 def test_cmd_all_with_synth_fail_fast_stops_after_synth_failure():
-    from llmwiki import cli
+    from sessionwiki import cli
 
     synth_fail = MagicMock(return_value=1)
     build_stub = MagicMock(return_value=0)
@@ -98,15 +98,15 @@ def test_cmd_all_with_synth_fail_fast_stops_after_synth_failure():
 
 
 def test_sync_status_prints_synthesis_hint(capsys, tmp_path, monkeypatch):
-    from llmwiki import cli as cli_mod
+    from sessionwiki import cli as cli_mod
 
     monkeypatch.setattr(
-        "llmwiki.config_schedule.load_synthesis_backend",
+        "sessionwiki.config_schedule.load_synthesis_backend",
         lambda *a, **k: "dummy",
     )
     state_file = tmp_path / ".llmwiki-state.json"
     state_file.write_text('{"_meta": {"last_sync": "2026-04-01T00:00:00Z"}}', encoding="utf-8")
-    monkeypatch.setattr("llmwiki.convert.DEFAULT_STATE_FILE", state_file)
+    monkeypatch.setattr("sessionwiki.convert.DEFAULT_STATE_FILE", state_file)
 
     rc = cli_mod.cmd_sync_status(argparse.Namespace(recent=0))
     out = capsys.readouterr().out

@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki.build import (
+from sessionwiki.build import (
     _MAX_OVERVIEW_PROMPT_BYTES,
     _validate_overview_slug,
     synthesize_overview,
@@ -80,8 +80,8 @@ def test_overview_passes_prompt_via_stdin_not_argv():
         from subprocess import CompletedProcess
         return CompletedProcess(args=args[0], returncode=0, stdout="overview text", stderr="")
 
-    with patch("llmwiki.build.subprocess.run", side_effect=fake_run), \
-         patch("llmwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
+    with patch("sessionwiki.build.subprocess.run", side_effect=fake_run), \
+         patch("sessionwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
         out = synthesize_overview(groups, claude_path="/usr/bin/claude")
 
     assert out == "overview text"
@@ -110,8 +110,8 @@ def test_malicious_slug_replaced_in_actual_call():
         from subprocess import CompletedProcess
         return CompletedProcess(args=args[0], returncode=0, stdout="ok", stderr="")
 
-    with patch("llmwiki.build.subprocess.run", side_effect=fake_run), \
-         patch("llmwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
+    with patch("sessionwiki.build.subprocess.run", side_effect=fake_run), \
+         patch("sessionwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
         synthesize_overview(groups, claude_path="/usr/bin/claude")
 
     assert "\x00" not in captured["input"]
@@ -135,8 +135,8 @@ def test_prompt_size_capped():
         from subprocess import CompletedProcess
         return CompletedProcess(args=args[0], returncode=0, stdout="ok", stderr="")
 
-    with patch("llmwiki.build.subprocess.run", side_effect=fake_run), \
-         patch("llmwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
+    with patch("sessionwiki.build.subprocess.run", side_effect=fake_run), \
+         patch("sessionwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
         synthesize_overview(groups, claude_path="/usr/bin/claude")
 
     assert len(captured["input"].encode("utf-8")) <= _MAX_OVERVIEW_PROMPT_BYTES, (
@@ -161,8 +161,8 @@ def test_prompt_injection_string_treated_as_data():
         from subprocess import CompletedProcess
         return CompletedProcess(args=args[0], returncode=0, stdout="ok", stderr="")
 
-    with patch("llmwiki.build.subprocess.run", side_effect=fake_run), \
-         patch("llmwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
+    with patch("sessionwiki.build.subprocess.run", side_effect=fake_run), \
+         patch("sessionwiki.build._resolve_claude_path", return_value=Path("/usr/bin/claude")):
         synthesize_overview(groups, claude_path="/usr/bin/claude")
 
     assert "ignore previous instructions" not in captured["input"]

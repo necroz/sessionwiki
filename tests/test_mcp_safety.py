@@ -20,7 +20,7 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki.mcp.server import (
+from sessionwiki.mcp.server import (
     tool_wiki_query,
     tool_wiki_search,
     tool_wiki_list_sources,
@@ -61,7 +61,7 @@ def test_search_caps_at_200_hits(tmp_path: Path):
     """A single search must not return more than 200 hits regardless
     of corpus size (#413)."""
     _seed_wiki(tmp_path, n_files=20, hits_per_file=50)  # 1000 potential
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
     assert len(payload["matches"]) == 200, payload["matches"][:3]
@@ -74,7 +74,7 @@ def test_search_with_include_raw_still_caps_at_200(tmp_path: Path):
     loop."""
     _seed_wiki(tmp_path, n_files=20, hits_per_file=50)
     _seed_raw_sessions(tmp_path, n_files=20, hits_per_file=50)
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle", "include_raw": True})
     payload = _result_json(result)
     assert len(payload["matches"]) == 200, (
@@ -86,7 +86,7 @@ def test_search_with_include_raw_still_caps_at_200(tmp_path: Path):
 def test_search_under_cap_returns_all(tmp_path: Path):
     """Under the cap, every match must come back (no early termination)."""
     _seed_wiki(tmp_path, n_files=3, hits_per_file=10)  # 30 hits total
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
     assert len(payload["matches"]) == 30
@@ -97,14 +97,14 @@ def test_search_term_case_insensitive(tmp_path: Path):
     """Case-insensitive match still works after the lowercase-once
     refactor (#413)."""
     _seed_wiki(tmp_path, n_files=2, hits_per_file=5, term="NeEdLe")
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
     assert len(payload["matches"]) == 10
 
 
 def test_search_empty_term_errors(tmp_path: Path):
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": ""})
     text = _result_text(result)
     assert "term is required" in text
@@ -112,7 +112,7 @@ def test_search_empty_term_errors(tmp_path: Path):
 
 def test_search_whitespace_only_term_errors(tmp_path: Path):
     """Whitespace-only term must be rejected the same as empty."""
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "   "})
     text = _result_text(result)
     assert "term is required" in text
@@ -126,7 +126,7 @@ def test_search_term_with_regex_metacharacters_treated_literally(tmp_path: Path)
         "line 1 normal text\nline 2 has [a literal] bracket\n",
         encoding="utf-8",
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "[a literal]"})
     payload = _result_json(result)
     assert len(payload["matches"]) == 1
@@ -137,10 +137,10 @@ def test_search_unicode_term(tmp_path: Path):
     wiki = tmp_path / "wiki"
     wiki.mkdir(parents=True)
     (wiki / "p.md").write_text("café 🚀 中文\n", encoding="utf-8")
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "🚀"})
     assert len(_result_json(result)["matches"]) == 1
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "中文"})
     assert len(_result_json(result)["matches"]) == 1
 
@@ -152,7 +152,7 @@ def test_search_one_file_with_many_hits_caps(tmp_path: Path):
     wiki.mkdir(parents=True)
     (wiki / "big.md").write_text("\n".join([f"needle {i}" for i in range(1000)]),
                                   encoding="utf-8")
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
     assert len(payload["matches"]) == 200
@@ -196,7 +196,7 @@ def test_list_sources_project_filter_is_substring_only_no_traversal(
         ("demo-blog-engine", ["s1.md"]),
         ("demo-todo-api", ["s2.md"]),
     ])
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_list_sources({"project": filter_value})
     payload = _result_json(result)
     assert payload == [], (
@@ -210,7 +210,7 @@ def test_list_sources_legitimate_filter_still_works(tmp_path: Path):
         ("demo-blog-engine", ["s1.md", "s2.md"]),
         ("demo-todo-api", ["s3.md"]),
     ])
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_list_sources({"project": "demo-blog"})
     payload = _result_json(result)
     assert len(payload) == 2
@@ -224,7 +224,7 @@ def test_list_sources_empty_project_returns_all(tmp_path: Path):
         ("demo-blog-engine", ["s1.md"]),
         ("demo-todo-api", ["s2.md"]),
     ])
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_list_sources({})
     payload = _result_json(result)
     assert len(payload) == 2
@@ -237,7 +237,7 @@ def test_list_sources_unicode_project_filter(tmp_path: Path):
         ("café-proj", ["s1.md"]),
         ("normal-proj", ["s2.md"]),
     ])
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_list_sources({"project": "café"})
     payload = _result_json(result)
     assert len(payload) == 1
@@ -251,7 +251,7 @@ def test_list_sources_filter_does_not_glob(tmp_path: Path):
     _seed_sessions(tmp_path, [
         ("demo-blog-engine", ["s1.md"]),
     ])
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_list_sources({"project": "demo*"})
     payload = _result_json(result)
     assert payload == []
@@ -300,7 +300,7 @@ def test_query_short_relevant_beats_long_incidental(tmp_path: Path):
         "concepts/Caching.md": short_relevant,
         "sources/log.md": long_incidental,
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "caching"})
     pages = _query_pages_in_order(result)
     assert pages, f"no pages returned: {_result_text(result)[:500]}"
@@ -323,7 +323,7 @@ def test_query_title_match_still_wins(tmp_path: Path):
         "sources/x.md": body_match,
         "entities/Foo.md": title_match,
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "foo"})
     pages = _query_pages_in_order(result)
     assert pages[0].endswith("Foo.md"), (
@@ -335,7 +335,7 @@ def test_query_empty_question_returns_no_results(tmp_path: Path):
     _seed_query_corpus(tmp_path, {
         "entities/Foo.md": '---\ntitle: "Foo"\n---\n\n# Foo\n',
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": ""})
     text = _result_text(result)
     # Either explicit empty-results message or just no `## ` page entries.
@@ -346,7 +346,7 @@ def test_query_no_matches_does_not_crash(tmp_path: Path):
     _seed_query_corpus(tmp_path, {
         "entities/Foo.md": '---\ntitle: "Foo"\n---\n\n# Foo\n',
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "completely-unrelated-xyz"})
     text = _result_text(result)
     assert "No matching pages" in text or "score:" not in text
@@ -360,7 +360,7 @@ def test_query_handles_frontmatter_only_pages(tmp_path: Path):
             '---\ntitle: "Real"\n---\n\n# Real\n\nA real body.\n'
         ),
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "Real"})
     # Must succeed (no crash on the empty-body page).
     pages = _query_pages_in_order(result)
@@ -374,7 +374,7 @@ def test_query_unicode_query_tokenises(tmp_path: Path):
             '---\ntitle: "Café"\n---\n\n# Café\n\nA page with café in body.\n'
         ),
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "café"})
     pages = _query_pages_in_order(result)
     assert pages, f"unicode query returned nothing: {_result_text(result)[:500]}"
@@ -386,7 +386,7 @@ def test_query_score_is_finite_no_nan(tmp_path: Path):
         "entities/Tiny.md": "x",  # 1-byte page
         "entities/Normal.md": '---\ntitle: "X"\n---\n\n# X\n\nSome x body.\n',
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "x"})
     text = _result_text(result)
     # No NaN/Infinity should appear in the rendered scores.
@@ -406,7 +406,7 @@ def test_query_short_floor_prevents_tiny_page_dominance(tmp_path: Path):
         "entities/Tiny.md": tiny,
         "entities/Normal.md": normal,
     })
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "match"})
     pages = _query_pages_in_order(result)
     # The page with title match should still win (titles aren't normalised).

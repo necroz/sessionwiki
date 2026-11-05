@@ -6,7 +6,7 @@ from datetime import datetime, timezone, timedelta
 
 import pytest
 
-from llmwiki.confidence import (
+from sessionwiki.confidence import (
     source_count_score,
     source_quality_score,
     avg_source_quality,

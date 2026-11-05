@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.skill_installer import (
+from sessionwiki.skill_installer import (
     install_all,
     install_skill,
     list_targets,
@@ -148,7 +148,7 @@ def test_list_installed_ignores_non_skills(tmp_path: Path):
 
 def test_real_skills_have_SKILL_md():
     """Verify the canonical .claude/skills/ in the actual repo has SKILL.md."""
-    from llmwiki import REPO_ROOT
+    from sessionwiki import REPO_ROOT
     canonical = REPO_ROOT / ".claude" / "skills"
     assert canonical.is_dir()
     for skill_dir in canonical.iterdir():

@@ -35,7 +35,7 @@ jobs:
         run: python -m pip install markdown
 
       - name: Scaffold wiki layout
-        run: python -m llmwiki init
+        run: python -m sessionwiki init
 
       - name: Seed demo sessions (no real user data)
         run: |
@@ -55,7 +55,7 @@ jobs:
           find raw/sessions -maxdepth 2 -type f | sort
 
       - name: Build static site
-        run: python -m llmwiki build --out ./site
+        run: python -m sessionwiki build --out ./site
 
       - name: Ensure .nojekyll for Pages
         run: touch ./site/.nojekyll

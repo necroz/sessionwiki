@@ -1,14 +1,14 @@
-"""End-to-end CLI smoke tests for every ``python -m llmwiki`` subcommand.
+"""End-to-end CLI smoke tests for every ``python -m sessionwiki`` subcommand.
 
 The existing unit suite (``tests/test_cli.py``) imports the CLI entry
 point and calls handlers directly, but never exercises the public
-``python -m llmwiki <cmd>`` surface that users and shell scripts rely on.
+``python -m sessionwiki <cmd>`` surface that users and shell scripts rely on.
 A regression where the argparse wiring breaks for one subcommand would
 slip through the unit tests because they bypass argparse entirely.
 
 This module fills that gap. For every subcommand we:
 
-1. Invoke ``python -m llmwiki <cmd> --help`` and assert exit 0 + a help
+1. Invoke ``python -m sessionwiki <cmd> --help`` and assert exit 0 + a help
    header. This catches argparse misconfiguration on every subcommand
    in a single pass — a broken ``add_argument`` typically raises at
    parser-build time, so even ``--help`` fails.
@@ -47,22 +47,22 @@ import pytest
 REPO_ROOT_FOR_CLI = Path(__file__).resolve().parents[2]
 """Repo root the CLI subprocess will resolve REPO_ROOT against. We pin
 it explicitly so a test that runs from a different cwd still hits the
-right module path. The CLI's REPO_ROOT comes from llmwiki/__init__.py
+right module path. The CLI's REPO_ROOT comes from sessionwiki/__init__.py
 (``Path(__file__).resolve().parent.parent``), so a subprocess invoked
-with ``-m llmwiki`` from any cwd resolves to the same repo root."""
+with ``-m sessionwiki`` from any cwd resolves to the same repo root."""
 
 
 def _run_cli(*args: str, timeout: int = 30, env_extra: dict[str, str] | None = None) -> subprocess.CompletedProcess:
-    """Invoke ``python -m llmwiki <args...>`` and capture output.
+    """Invoke ``python -m sessionwiki <args...>`` and capture output.
 
     We use the same Python that pytest is running under so we hit the
-    installed llmwiki package, not whatever happens to be on PATH.
+    installed sessionwiki package, not whatever happens to be on PATH.
     """
     env = dict(os.environ)
     if env_extra:
         env.update(env_extra)
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         timeout=timeout,
@@ -72,7 +72,7 @@ def _run_cli(*args: str, timeout: int = 30, env_extra: dict[str, str] | None = N
 
 
 # Every subcommand registered in build_parser(). Keep in sync with
-# llmwiki/cli.py — a new subcommand should be added here so its
+# sessionwiki/cli.py — a new subcommand should be added here so its
 # argparse wiring gets exercised.
 ALL_SUBCOMMANDS = (
     "init",
@@ -95,29 +95,29 @@ ALL_SUBCOMMANDS = (
 
 @pytest.mark.parametrize("cmd", ALL_SUBCOMMANDS)
 def test_subcommand_help_exits_clean(cmd: str) -> None:
-    """``llmwiki <cmd> --help`` exits 0 and prints something
+    """``sessionwiki <cmd> --help`` exits 0 and prints something
     help-shaped. Regressions in argparse configuration (e.g. duplicate
     flags, bad ``choices=`` values) surface here even though no real
     work runs."""
     result = _run_cli(cmd, "--help", timeout=15)
     assert result.returncode == 0, (
-        f"`llmwiki {cmd} --help` exited {result.returncode}\n"
+        f"`sessionwiki {cmd} --help` exited {result.returncode}\n"
         f"stdout: {result.stdout[:400]}\nstderr: {result.stderr[:400]}"
     )
     # ``argparse`` always prints "usage:" at the top of help output.
     assert "usage:" in result.stdout.lower(), (
-        f"`llmwiki {cmd} --help` did not print a usage line"
+        f"`sessionwiki {cmd} --help` did not print a usage line"
     )
 
 
 def test_top_level_help_lists_every_subcommand() -> None:
-    """``llmwiki --help`` mentions each subcommand. Catches the case
+    """``sessionwiki --help`` mentions each subcommand. Catches the case
     where a subparser is registered but not surfaced (or vice versa)."""
     result = _run_cli("--help", timeout=15)
     assert result.returncode == 0
     for cmd in ALL_SUBCOMMANDS:
         assert cmd in result.stdout, (
-            f"`llmwiki --help` does not mention subcommand {cmd!r}"
+            f"`sessionwiki --help` does not mention subcommand {cmd!r}"
         )
 
 
@@ -126,7 +126,7 @@ def test_no_args_prints_help_and_exits_clean() -> None:
     ``main()`` in cli.py). A non-zero exit here would be a regression."""
     result = _run_cli(timeout=15)
     assert result.returncode == 0, (
-        f"bare `python -m llmwiki` exited {result.returncode}"
+        f"bare `python -m sessionwiki` exited {result.returncode}"
     )
     assert "usage:" in result.stdout.lower()
 
@@ -147,23 +147,23 @@ def test_unknown_subcommand_fails_with_helpful_error() -> None:
 
 
 def test_version_subcommand_prints_semver() -> None:
-    """``llmwiki version`` prints ``llmwiki <version>``. We accept any
+    """``sessionwiki version`` prints ``sessionwiki <version>``. We accept any
     non-empty version string so a release bump doesn't break the test —
-    we only assert it's *something* that starts with ``llmwiki ``."""
+    we only assert it's *something* that starts with ``sessionwiki ``."""
     result = _run_cli("version", timeout=15)
     assert result.returncode == 0
-    assert result.stdout.strip().startswith("llmwiki "), (
+    assert result.stdout.strip().startswith("sessionwiki "), (
         f"unexpected version output: {result.stdout!r}"
     )
     # Version should look like NN.NN.NN (loosely).
-    rest = result.stdout.strip().removeprefix("llmwiki ").strip()
+    rest = result.stdout.strip().removeprefix("sessionwiki ").strip()
     assert re.match(r"^\d+\.\d+", rest), (
         f"version {rest!r} does not start with digits.digits"
     )
 
 
 def test_top_level_version_flag() -> None:
-    """``llmwiki --version`` (built into argparse) matches the
+    """``sessionwiki --version`` (built into argparse) matches the
     ``version`` subcommand. Both must agree — divergence here is a
     real bug for users who script around ``--version``."""
     sub = _run_cli("version", timeout=15).stdout.strip()
@@ -178,7 +178,7 @@ def test_top_level_version_flag() -> None:
 
 
 def test_adapters_lists_at_least_one_adapter() -> None:
-    """``llmwiki adapters`` discovers + lists adapters. The Claude Code
+    """``sessionwiki adapters`` discovers + lists adapters. The Claude Code
     adapter is always registered (it's the default), so even on a fresh
     checkout we expect to see at least one row."""
     result = _run_cli("adapters", timeout=20)
@@ -192,7 +192,7 @@ def test_adapters_lists_at_least_one_adapter() -> None:
 
 
 def test_adapters_wide_disables_truncation() -> None:
-    """``llmwiki adapters --wide`` prints the full description column
+    """``sessionwiki adapters --wide`` prints the full description column
     without ellipses. We can't assert on a specific description (the
     set of adapters is dynamic) but we *can* assert no row ends with
     the truncation marker '...'."""
@@ -215,7 +215,7 @@ def test_adapters_wide_disables_truncation() -> None:
 
 @pytest.fixture()
 def tmp_workspace(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """Build a tmp workspace shaped like a real llmwiki checkout
+    """Build a tmp workspace shaped like a real sessionwiki checkout
     (raw/sessions/<project>/<file>.md + wiki/) and monkeypatch the
     module-level paths so subsequent in-process build / lint calls
     target this directory instead of the user's actual repo.
@@ -294,7 +294,7 @@ Hello.
     # codepaths read from. Same trick as conftest.py uses for the e2e
     # session fixture, just folded into a per-test fixture so each CLI
     # subcommand test gets its own clean workspace.
-    from llmwiki import build as build_mod
+    from sessionwiki import build as build_mod
 
     monkeypatch.setattr(build_mod, "RAW_DIR", raw)
     monkeypatch.setattr(build_mod, "RAW_SESSIONS", raw / "sessions")
@@ -306,7 +306,7 @@ def test_build_emits_index_html(tmp_workspace: Path) -> None:
     """``build_site()`` emits ``site/index.html``. We call the public
     API directly rather than spawning a subprocess so the test is fast
     and we can use ``tmp_workspace``'s monkeypatched paths."""
-    from llmwiki.build import build_site
+    from sessionwiki.build import build_site
 
     out = tmp_workspace / "site"
     rc = build_site(out_dir=out, synthesize=False)
@@ -324,7 +324,7 @@ def test_build_emits_search_index(tmp_workspace: Path) -> None:
     palette consumes. Validating its shape here saves us from a class
     of palette-can't-find-anything bugs that would otherwise only show
     up in browser tests."""
-    from llmwiki.build import build_site
+    from sessionwiki.build import build_site
 
     out = tmp_workspace / "site"
     build_site(out_dir=out, synthesize=False)
@@ -348,7 +348,7 @@ def test_lint_runs_and_reports(tmp_workspace: Path) -> None:
     A new project may have many violations; we don't care about the
     count, only that the runner doesn't crash and emits a parseable
     summary (X errors, Y warnings, Z info)."""
-    from llmwiki.lint import load_pages, run_all, summarize
+    from sessionwiki.lint import load_pages, run_all, summarize
 
     pages = load_pages(tmp_workspace / "wiki")
     issues = run_all(pages)
@@ -366,8 +366,8 @@ def test_export_all_writes_expected_artifacts(tmp_workspace: Path) -> None:
     llms.txt) all show up in one pass — a regression where one of the
     writers silently no-ops would slip through unit tests but breaks
     SEO + LLM-discoverability in production."""
-    from llmwiki.exporters import export_all
-    from llmwiki.build import discover_sources, group_by_project, RAW_SESSIONS
+    from sessionwiki.exporters import export_all
+    from sessionwiki.build import discover_sources, group_by_project, RAW_SESSIONS
 
     out = tmp_workspace / "site"
     out.mkdir(parents=True, exist_ok=True)
@@ -385,9 +385,9 @@ def test_export_all_writes_expected_artifacts(tmp_workspace: Path) -> None:
 
 
 def test_graph_subcommand_accepts_engine_flag() -> None:
-    """``llmwiki graph --help`` exposes the ``--engine`` flag with
+    """``sessionwiki graph --help`` exposes the ``--engine`` flag with
     ``builtin`` and ``graphify`` choices. We verify the CLI surface
-    here rather than running the graph because ``llmwiki.graph``
+    here rather than running the graph because ``sessionwiki.graph``
     captures ``REPO_ROOT`` at import time and writes there
     unconditionally — invoking it under a tmp workspace would pollute
     the user's actual repo. The functional graph behavior is already
@@ -403,7 +403,7 @@ def test_graph_subcommand_accepts_engine_flag() -> None:
 
 
 def test_graph_run_against_real_repo_produces_well_formed_json() -> None:
-    """Run ``llmwiki graph`` against the real repo and assert the
+    """Run ``sessionwiki graph`` against the real repo and assert the
     resulting ``graph/graph.json`` parses + has the right shape.
 
     This is the only test in the suite that touches the real repo
@@ -413,7 +413,7 @@ def test_graph_run_against_real_repo_produces_well_formed_json() -> None:
     one-off side-effect on a gitignored output dir."""
     result = _run_cli("graph", "--engine", "builtin", "--format", "json", timeout=60)
     assert result.returncode == 0, (
-        f"`llmwiki graph --engine builtin` failed: {result.stderr[:400]}"
+        f"`sessionwiki graph --engine builtin` failed: {result.stderr[:400]}"
     )
     graph_json = REPO_ROOT_FOR_CLI / "graph" / "graph.json"
     if not graph_json.is_file():
@@ -429,7 +429,7 @@ def test_graph_run_against_real_repo_produces_well_formed_json() -> None:
 
 
 def test_synthesize_check_runs_or_skips() -> None:
-    """``llmwiki synthesize --check`` probes backend availability.
+    """``sessionwiki synthesize --check`` probes backend availability.
     With no backend configured it exits non-zero — we accept any exit
     code as long as the command doesn't crash with a Python traceback."""
     result = _run_cli("synthesize", "--check", timeout=20)
@@ -446,7 +446,7 @@ def test_synthesize_check_runs_or_skips() -> None:
 
 
 def test_query_without_graphify_exits_cleanly() -> None:
-    """``llmwiki query`` requires the optional ``graphify`` package.
+    """``sessionwiki query`` requires the optional ``graphify`` package.
     Without it, the command must print a friendly install hint and
     exit 2, *not* crash with ImportError. This is a real UX contract:
     optional deps must degrade gracefully."""
@@ -470,7 +470,7 @@ def test_candidates_list_on_empty_workspace(tmp_workspace: Path) -> None:
     """``cmd_candidates list`` should return 0 with an empty count
     when no candidates exist. Catches the case where a fresh project
     triggers a 'directory not found' error instead of an empty list."""
-    from llmwiki.candidates import list_candidates
+    from sessionwiki.candidates import list_candidates
 
     items = list_candidates(tmp_workspace / "wiki")
     assert isinstance(items, list), f"list_candidates returned {type(items).__name__}, not list"
@@ -495,5 +495,5 @@ def test_subcommand_has_nonempty_help_text(cmd: str) -> None:
     body = result.stdout.split("\n\n", 1)[1] if "\n\n" in result.stdout else result.stdout
     # We expect at least 20 chars of human-readable text after the usage block.
     assert len(body.strip()) >= 20, (
-        f"`llmwiki {cmd} --help` body is suspiciously short:\n{result.stdout}"
+        f"`sessionwiki {cmd} --help` body is suspiciously short:\n{result.stdout}"
     )

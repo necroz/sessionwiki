@@ -56,14 +56,14 @@ shared site via GitHub Pages on every master push.
 
 ```
 Each dev:
-  clone the llm-wiki repo, run ./setup.sh
+  clone the sessionwiki repo, run ./setup.sh
   /wiki-sync at the end of each work block
   git add wiki/ && git commit -S -m "wiki: <short summary>"
   git push
 
 CI (on master push):
-  python3 -m llmwiki build      (GitHub Pages workflow)
-  → site/ published to <team>.github.io/llm-wiki
+  python3 -m sessionwiki build      (GitHub Pages workflow)
+  → site/ published to <team>.github.io/sessionwiki
 
 Everyone else:
   bookmark the published URL; search from Cmd+K
@@ -86,7 +86,7 @@ the reading + editing surface.
 
 ```
 Daily:
-  llmwiki sync --vault "~/Documents/Obsidian Vault"
+  sessionwiki sync --vault "~/Documents/Obsidian Vault"
 
 When a new entity lands:
   open Obsidian → navigate to Wiki/Entities/<name>.md → add prose
@@ -98,7 +98,7 @@ Next day's sync:
 
 **What you get:** auto-generated entity pages that become
 human-curated over time. Obsidian's graph view + backlinks + full-text
-search now cover your llmwiki output without any migration.
+search now cover your sessionwiki output without any migration.
 
 **Deep dive:** **[`tutorials/06-bring-your-obsidian-vault.md`](06-bring-your-obsidian-vault.md)**.
 
@@ -115,10 +115,10 @@ whether to enable Ollama or a cloud synthesis backend.
 
 ```
 1. First sync uses the DummySynthesizer (local, free, canned text):
-     llmwiki sync
+     sessionwiki sync
 
 2. Preview what an Anthropic-backed re-synthesis would cost:
-     llmwiki synthesize --estimate
+     sessionwiki synthesize --estimate
 
    Output (numbers vary):
      627 new sessions, prefix 3,944 tok
@@ -133,14 +133,14 @@ whether to enable Ollama or a cloud synthesis backend.
 3. If the number is acceptable, configure a real backend:
      # For local / free: install Ollama + set synthesis.backend = "ollama"
      # For Anthropic: set synthesis.backend = "anthropic" (v1.2+)
-     llmwiki synthesize
+     sessionwiki synthesize
 
 4. If the number is too high, stay on the DummySynthesizer. Your wiki
    still works end-to-end — pages are just seeded with canned prose
    until you're ready to pay.
 ```
 
-**Cache-control plumbing** in `llmwiki/cache.py` ensures Anthropic
+**Cache-control plumbing** in `sessionwiki/cache.py` ensures Anthropic
 prompt-caching reuses the stable prefix (CLAUDE.md schema + index +
 overview) across every session — that's where the 50-90 % savings
 come from.

@@ -37,8 +37,8 @@ export default defineConfig({
   ],
   webServer: {
     // CI builds + serves before invoking `playwright test`; we don't
-    // auto-build here. Local dev: run `python3 -m llmwiki build &&
-    // python3 -m llmwiki serve` in another terminal first.
+    // auto-build here. Local dev: run `python3 -m sessionwiki build &&
+    // python3 -m sessionwiki serve` in another terminal first.
     command: "true",
     url: baseURL,
     reuseExistingServer: true,

@@ -1,6 +1,6 @@
 # Security Policy
 
-llmwiki processes session transcripts that often contain API keys,
+sessionwiki processes session transcripts that often contain API keys,
 passwords, tokens, file paths, and other sensitive information. Its
 redaction layer and the surrounding privacy guarantees are the single
 most important thing about the project.
@@ -18,13 +18,13 @@ report it privately** before filing a public issue:
 - **Path traversal** — file writes outside the output directory via
   crafted frontmatter fields or slugs
 - **Supply-chain** — dependency CVEs in `markdown` (or anything else
-  llmwiki calls into)
+  sessionwiki calls into)
 
 ## Scope
 
 In scope:
 
-- `llmwiki/` — every Python module
+- `sessionwiki/` — every Python module
 - `.github/workflows/` — CI workflows that run on user PRs
 - `site/` — generated HTML served to users
 - `.claude/commands/`, `.claude/skills/`, `.claude/plugins/` — anything
@@ -41,7 +41,7 @@ Out of scope:
 
 ## How to report
 
-Email the maintainer directly: `pratiyush1 [at] gmail [dot] com`
+Use GitHub's private vulnerability reporting: <https://github.com/necroz/sessionwiki/security/advisories/new>
 
 Include:
 
@@ -63,7 +63,7 @@ Include:
 
 ## Privacy-first architecture
 
-llmwiki is built around privacy. Before reporting, it helps to know
+sessionwiki is built around privacy. Before reporting, it helps to know
 what's already in place:
 
 - **Redaction is on by default** — username, API keys, tokens,

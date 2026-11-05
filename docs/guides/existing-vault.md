@@ -1,11 +1,11 @@
-# Running llmwiki on an existing Obsidian / Logseq vault
+# Running sessionwiki on an existing Obsidian / Logseq vault
 
-> Status: shipped in v1.2.0 (#54). Use `llmwiki sync --vault <path>`
+> Status: shipped in v1.2.0 (#54). Use `sessionwiki sync --vault <path>`
 > to point the pipeline at an existing knowledge vault instead of the
 > repo's `wiki/` directory.
 
 Already have hundreds of Obsidian or Logseq pages? You don't have to
-migrate them. llmwiki can **read + write inside the vault in place**:
+migrate them. sessionwiki can **read + write inside the vault in place**:
 
 - Session transcripts still land in the repo's local `raw/sessions/`
   (so the vault isn't polluted with auto-generated junk).
@@ -14,17 +14,17 @@ migrate them. llmwiki can **read + write inside the vault in place**:
 - Wikilinks respect the vault's format (Obsidian bare slugs, Logseq
   namespace paths).
 - Your existing pages are **never overwritten** unless you pass
-  `--allow-overwrite`. When llmwiki wants to merge new info into a
+  `--allow-overwrite`. When sessionwiki wants to merge new info into a
   page you own, it appends under a `## Connections` heading.
 
 ## Quick start
 
 ```bash
 # Obsidian vault at ~/Documents/Obsidian Vault
-llmwiki sync --vault "~/Documents/Obsidian Vault"
+sessionwiki sync --vault "~/Documents/Obsidian Vault"
 
 # Logseq vault
-llmwiki sync --vault ~/src/my-logseq-graph
+sessionwiki sync --vault ~/src/my-logseq-graph
 ```
 
 Output you'll see:
@@ -35,12 +35,12 @@ Output you'll see:
 ...
 ```
 
-If the path doesn't exist or isn't a directory, llmwiki fails fast
+If the path doesn't exist or isn't a directory, sessionwiki fails fast
 with a clear error (exit code 2).
 
 ## Format detection
 
-llmwiki auto-detects the vault format from its contents — no config
+sessionwiki auto-detects the vault format from its contents — no config
 file required:
 
 | Marker | Format |
@@ -81,7 +81,7 @@ pass a custom `VaultLayout` when calling the Python API:
 
 ```python
 from pathlib import Path
-from llmwiki.vault import VaultLayout, resolve_vault, vault_page_path
+from sessionwiki.vault import VaultLayout, resolve_vault, vault_page_path
 
 layout = VaultLayout(
     entities="Knowledge/People",
@@ -99,7 +99,7 @@ common case.
 
 ## Non-destructive writes — what happens when a page already exists
 
-**Default**: `llmwiki sync --vault <path>` refuses to overwrite any
+**Default**: `sessionwiki sync --vault <path>` refuses to overwrite any
 page that already exists in the vault. If the pipeline wants to write
 `Wiki/Entities/RAG.md` and you already have a note there, it:
 
@@ -123,11 +123,11 @@ data). The log line announces it loudly:
 
 The workflow that makes vault-overlay worth using:
 
-1. llmwiki writes `Wiki/Entities/RAG.md` with basic frontmatter + a
+1. sessionwiki writes `Wiki/Entities/RAG.md` with basic frontmatter + a
    two-line description.
 2. You open it in Obsidian/Logseq, add prose, rearrange headings, link
    out to five more pages.
-3. Next `llmwiki sync --vault <path>`:
+3. Next `sessionwiki sync --vault <path>`:
    - Sees the page already exists.
    - Skips the write (non-destructive default).
    - If it found new `[[RAG]]` references in newly-synthesized source
@@ -139,7 +139,7 @@ The workflow that makes vault-overlay worth using:
 ## Building a static site from the vault
 
 ```bash
-llmwiki build --vault ~/my-vault --out ~/my-vault-site
+sessionwiki build --vault ~/my-vault --out ~/my-vault-site
 ```
 
 This compiles pages *from* the vault into a gitignorable static site.
@@ -150,7 +150,7 @@ The same `site/graph.html`, `search-index.json`, and per-page `.txt` /
 
 ```python
 from pathlib import Path
-from llmwiki.vault import (
+from sessionwiki.vault import (
     VaultFormat,
     append_section,
     detect_vault_format,
@@ -211,7 +211,7 @@ API `append_section()` directly for per-page control.
 ## Related
 
 - `#54` — the issue
-- `llmwiki/vault.py` — implementation
+- `sessionwiki/vault.py` — implementation
 - `docs/guides/obsidian-integration.md` — the original symlink-based
   integration (still works; vault-overlay is the "no-symlink"
   alternative)

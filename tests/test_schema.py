@@ -1,10 +1,10 @@
-"""Tests for `llmwiki.schema` — structured entity schema (v0.7 · #55)."""
+"""Tests for `sessionwiki.schema` — structured entity schema (v0.7 · #55)."""
 
 from __future__ import annotations
 
 import pytest
 
-from llmwiki.schema import (
+from sessionwiki.schema import (
     ENTITY_KIND_AI_MODEL,
     KNOWN_BENCHMARKS,
     benchmark_label,

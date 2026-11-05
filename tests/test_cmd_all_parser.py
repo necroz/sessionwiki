@@ -1,4 +1,4 @@
-"""Tests for the `llmwiki all` orchestrator (closes #422 and #583).
+"""Tests for the `sessionwiki all` orchestrator (closes #422 and #583).
 
 #422: `cmd_all` was calling `build_parser()` once *per step* (4× per
 invocation). Wasteful argparse work AND a coupling smell.
@@ -47,7 +47,7 @@ def test_cmd_all_does_not_use_global_parser():
     contract; adding a flag to any unrelated subcommand could regress
     cmd_all if defaults shifted.
     """
-    from llmwiki import cli
+    from sessionwiki import cli
 
     call_count = {"n": 0}
     original_build_parser = cli.build_parser
@@ -71,7 +71,7 @@ def test_cmd_all_does_not_use_global_parser():
 
 def test_cmd_all_default_returns_zero():
     """Smoke: with all sub-steps stubbed to succeed, cmd_all returns 0."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     stub = MagicMock(return_value=0)
     with patch.object(cli, "cmd_build", stub):
@@ -85,7 +85,7 @@ def test_cmd_all_default_returns_zero():
 def test_cmd_all_propagates_failure_when_not_fail_fast():
     """Without --fail-fast, a non-zero step shouldn't abort early but
     the overall exit reflects the failure."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     failing_build = MagicMock(return_value=2)
     succeeding_other = MagicMock(return_value=0)
@@ -102,7 +102,7 @@ def test_cmd_all_propagates_failure_when_not_fail_fast():
 
 def test_cmd_all_fail_fast_aborts_on_first_failure():
     """With --fail-fast, the first non-zero step short-circuits."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     failing_build = MagicMock(return_value=2)
     other = MagicMock(return_value=0)
@@ -119,7 +119,7 @@ def test_cmd_all_fail_fast_aborts_on_first_failure():
 
 def test_cmd_all_skip_graph_omits_graph_step():
     """--skip-graph (default in our test) → graph step never invoked."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     graph_stub = MagicMock(return_value=0)
     other = MagicMock(return_value=0)
@@ -135,7 +135,7 @@ def test_cmd_all_skip_graph_omits_graph_step():
 
 def test_cmd_all_includes_graph_step_when_not_skipped():
     """Without --skip-graph, the graph step runs."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     graph_stub = MagicMock(return_value=0)
     other = MagicMock(return_value=0)
@@ -151,7 +151,7 @@ def test_cmd_all_includes_graph_step_when_not_skipped():
 
 def test_cmd_all_strict_propagates_fail_on_errors_to_lint():
     """#py-h4 (#583): --strict sets fail_on_errors=True on the lint step."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     lint_stub = MagicMock(return_value=0)
     other = MagicMock(return_value=0)
@@ -167,7 +167,7 @@ def test_cmd_all_strict_propagates_fail_on_errors_to_lint():
 
 def test_cmd_all_strict_false_keeps_lint_permissive():
     """Without --strict, lint runs without fail_on_errors."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     lint_stub = MagicMock(return_value=0)
     other = MagicMock(return_value=0)
@@ -182,7 +182,7 @@ def test_cmd_all_strict_false_keeps_lint_permissive():
 
 def test_cmd_all_out_dir_propagates_to_build_and_export():
     """#py-h4 (#583): --out flows through to both build and export Namespaces."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     build_stub = MagicMock(return_value=0)
     export_stub = MagicMock(return_value=0)
@@ -197,7 +197,7 @@ def test_cmd_all_out_dir_propagates_to_build_and_export():
 
 def test_cmd_all_search_mode_propagates_to_build():
     """#py-h4 (#583): --search-mode flows through to build's Namespace."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     build_stub = MagicMock(return_value=0)
     other = MagicMock(return_value=0)
@@ -211,7 +211,7 @@ def test_cmd_all_search_mode_propagates_to_build():
 
 def test_cmd_all_runs_all_four_steps_by_default():
     """build → graph → export → lint, in that order."""
-    from llmwiki import cli
+    from sessionwiki import cli
 
     order: list[str] = []
     def make_stub(name: str):

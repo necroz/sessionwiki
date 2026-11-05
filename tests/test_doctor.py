@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from llmwiki import doctor
+from sessionwiki import doctor
 
 
 def test_collect_report_reports_core_environment(tmp_path):

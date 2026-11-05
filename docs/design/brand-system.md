@@ -1,20 +1,20 @@
 # Editorial brand system
 
-> Status: canonical reference for llmwiki's visual system (v1.2.0 · #115).
+> Status: canonical reference for sessionwiki's visual system (v1.2.0 · #115).
 > If you're changing how any part of the generated site looks — or exporting a
 > screenshot / OG image / PDF / slide deck — this document is the source of truth.
 
-llmwiki is a **reading-first product**. The site is rendered locally from
+sessionwiki is a **reading-first product**. The site is rendered locally from
 markdown, then handed to the user like a book they wrote. The brand does three
 things in service of that:
 
 1. Get out of the way of the prose.
-2. Make every page feel unmistakably like "an llmwiki page" — so the static
+2. Make every page feel unmistakably like "an sessionwiki page" — so the static
    site, the PDF export, a screenshot in a tweet, and a slide deck all read
    as a single product.
 3. Work identically in light mode, dark mode, print, and Obsidian.
 
-All tokens live in [`llmwiki/render/css.py`](../../llmwiki/render/css.py) as CSS
+All tokens live in [`sessionwiki/render/css.py`](../../sessionwiki/render/css.py) as CSS
 custom properties on `:root` + `[data-theme="dark"]`. This doc mirrors them so
 contributors don't have to grep the CSS.
 
@@ -144,7 +144,7 @@ Used inline, not as tokens (small surface area, low reuse):
 
 ## 4. Motion
 
-llmwiki is a reading surface — motion should be almost invisible. Every
+sessionwiki is a reading surface — motion should be almost invisible. Every
 timing, duration, and easing choice below is deliberately boring.
 
 | Token | Value | Use |
@@ -195,12 +195,12 @@ All generated artifacts must inherit the same tokens:
 
 | Artifact | Inherits |
 |---|---|
-| Static HTML site (`site/`) | Full CSS from `llmwiki/render/css.py` |
+| Static HTML site (`site/`) | Full CSS from `sessionwiki/render/css.py` |
 | Graph viewer (`site/graph.html`) | `--g-*` palette mirroring the main site |
 | PDF export (future) | Print stylesheet adds explicit black-on-white + page breaks |
 | Marp slide export | Keeps Inter + JetBrains Mono + `#7C3AED` accent |
 | QMD export | Quarto theme sets body = Inter, mono = JetBrains Mono |
-| Obsidian vault (via symlink) | Reads `.obsidian/themes/llmwiki.css` (future) |
+| Obsidian vault (via symlink) | Reads `.obsidian/themes/sessionwiki.css` (future) |
 | Screenshots in README | Taken in light mode for consistency |
 
 ### Social preview image
@@ -245,7 +245,7 @@ the release notes.
 
 ## Related
 
-- `llmwiki/render/css.py` — source of truth for every CSS variable
-- `llmwiki/render/js.py` — theme toggle + palette sync logic
+- `sessionwiki/render/css.py` — source of truth for every CSS variable
+- `sessionwiki/render/js.py` — theme toggle + palette sync logic
 - `docs/reference/cache-tiers.md` — also uses the accent palette for badges
 - `#115` — this issue

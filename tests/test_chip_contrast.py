@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 
-from llmwiki.render.css import CSS
+from sessionwiki.render.css import CSS
 
 
 # ─── W3C relative-luminance + contrast (no external deps) ──────────────

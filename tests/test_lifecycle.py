@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from llmwiki.lifecycle import (
+from sessionwiki.lifecycle import (
     LifecycleState,
     can_transition,
     transition,

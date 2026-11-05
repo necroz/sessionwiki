@@ -1,6 +1,6 @@
 # Windows setup
 
-llmwiki ships Windows `.bat` files alongside the Unix shell scripts. Most things just work. This doc covers the Windows-specific gotchas.
+sessionwiki ships Windows `.bat` files alongside the Unix shell scripts. Most things just work. This doc covers the Windows-specific gotchas.
 
 ## Prerequisites
 
@@ -13,8 +13,8 @@ llmwiki ships Windows `.bat` files alongside the Unix shell scripts. Most things
 Open a fresh **Command Prompt** or **PowerShell** window after installing Python (to pick up the new PATH).
 
 ```cmd
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 setup.bat
 ```
 
@@ -37,10 +37,10 @@ serve.bat
 Or run the Python module directly through the venv:
 
 ```cmd
-.venv\Scripts\python.exe -m llmwiki sync
-.venv\Scripts\python.exe -m llmwiki build
-.venv\Scripts\python.exe -m llmwiki serve
-.venv\Scripts\python.exe -m llmwiki doctor
+.venv\Scripts\python.exe -m sessionwiki sync
+.venv\Scripts\python.exe -m sessionwiki build
+.venv\Scripts\python.exe -m sessionwiki serve
+.venv\Scripts\python.exe -m sessionwiki doctor
 ```
 
 Note: on Windows the command is `python`, not `python3`. The `.bat` files
@@ -54,7 +54,7 @@ Windows paths use backslashes (`C:\Users\...`) but Claude Code on Windows stores
 C:\Users\<you>\.claude\projects\<project>\<uuid>.jsonl
 ```
 
-llmwiki handles this automatically. You don't need to do anything.
+sessionwiki handles this automatically. You don't need to do anything.
 
 ## Redaction of Windows paths
 
@@ -75,7 +75,7 @@ The default redaction config covers `/Users/<you>/` and `/home/<you>/` (Unix), b
 Replace `<YOUR_WINDOWS_USERNAME>` with your actual Windows username. Note the quadruple backslashes — JSON string escaping + regex escaping.
 
 Every CLI command merges `examples/sessions_config.json` → `config.json`
-→ `config.local.json`, so `llmwiki sync` applies these patterns to new
+→ `config.local.json`, so `sessionwiki sync` applies these patterns to new
 conversions. The `extra_patterns` list replaces the default list, so copy
 the default patterns into your override if you want to keep both.
 
@@ -111,10 +111,10 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ## Known limitations
 
 - **Claude Code SessionStart hook is still manual.** Add it to `%USERPROFILE%\.claude\settings.json` yourself.
-- **ZCode autosync is supported.** Run `.venv\Scripts\python.exe -m llmwiki zcode install --scheduler windows`. It writes `%USERPROFILE%\.llmwiki\zcode\autosync.cmd`, adds the Stop hook, and prints the `schtasks` command to register the daily task. No bash or `flock` is required.
-- **No GPG signing setup.** llmwiki doesn't require signed commits for contributions, but if you want them on Windows, install Git for Windows with the GPG support option.
+- **ZCode autosync is supported.** Run `.venv\Scripts\python.exe -m sessionwiki zcode install --scheduler windows`. It writes `%USERPROFILE%\.llmwiki\zcode\autosync.cmd`, adds the Stop hook, and prints the `schtasks` command to register the daily task. No bash or `flock` is required.
+- **No GPG signing setup.** sessionwiki doesn't require signed commits for contributions, but if you want them on Windows, install Git for Windows with the GPG support option.
 - **Emoji in terminal output** may render as boxes. This is a Windows terminal font issue — everything still works, it just looks odd.
 
 ## Getting help
 
-If you hit a Windows-specific issue, open a [bug report](https://github.com/Pratiyush/llm-wiki/issues/new?template=bug_report.md) with the `windows` label.
+If you hit a Windows-specific issue, open a [bug report](https://github.com/necroz/sessionwiki/issues/new?template=bug_report.md) with the `windows` label.

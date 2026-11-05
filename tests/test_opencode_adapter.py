@@ -6,14 +6,14 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.adapters.opencode import OpenCodeAdapter
+from sessionwiki.adapters.opencode import OpenCodeAdapter
 
 
 # ─── Adapter registration ─────────────────────────────────────────────
 
 
 def test_adapter_registered():
-    from llmwiki.adapters import REGISTRY, discover_adapters
+    from sessionwiki.adapters import REGISTRY, discover_adapters
     discover_adapters()
     assert "opencode" in REGISTRY
 
@@ -25,7 +25,7 @@ def test_adapter_has_schema_versions():
 def test_adapter_has_default_roots_for_all_platforms():
     roots = OpenCodeAdapter.DEFAULT_ROOTS
     root_strs = [str(r) for r in roots]
-    # llmwiki export corpus is the primary source
+    # sessionwiki export corpus is the primary source
     assert roots[0] == Path.home() / ".llmwiki" / "opencode"
     # macOS
     assert any("Library/Application Support/opencode" in r for r in root_strs)

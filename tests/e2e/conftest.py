@@ -1,10 +1,10 @@
-"""Shared pytest + Playwright + pytest-bdd harness for llmwiki E2E tests
+"""Shared pytest + Playwright + pytest-bdd harness for sessionwiki E2E tests
 (v0.4.x · closes #45).
 
 Responsibilities:
 
 * **Build a minimal demo site once per test session** into a tmp
-  directory. We monkeypatch `llmwiki.build.RAW_DIR` / `RAW_SESSIONS`
+  directory. We monkeypatch `sessionwiki.build.RAW_DIR` / `RAW_SESSIONS`
   the same way `tests/test_highlightjs.py` does for its smoke test,
   so the harness never touches the user's real `raw/sessions/`.
 
@@ -290,9 +290,9 @@ def site_root(tmp_path_factory: pytest.TempPathFactory) -> Path:
     the user's real `raw/sessions/`. This fixture is session-scoped
     so all scenarios share a single built site — a full rebuild per
     scenario would make E2E unusable."""
-    from llmwiki import build as build_mod
+    from sessionwiki import build as build_mod
 
-    workspace = tmp_path_factory.mktemp("llmwiki_e2e")
+    workspace = tmp_path_factory.mktemp("sessionwiki_e2e")
     raw = workspace / "raw"
     raw_sessions = raw / "sessions"
     _seed_raw(raw_sessions)
@@ -375,7 +375,7 @@ def _attach_console_listener(page):  # type: ignore[no-untyped-def]
     scenarios. Uses a simple attribute to avoid monkeypatching the
     Playwright Page class."""
     errors: list[str] = []
-    page._llmwiki_console_errors = errors  # type: ignore[attr-defined]
+    page._sessionwiki_console_errors = errors  # type: ignore[attr-defined]
 
     def _on_console(msg) -> None:  # type: ignore[no-untyped-def]
         if msg.type == "error":

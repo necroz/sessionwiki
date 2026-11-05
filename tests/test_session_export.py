@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import session_export as common
-from llmwiki.opencode import export as opencode_export
-from llmwiki.zcode import export as zcode_export
+from sessionwiki import session_export as common
+from sessionwiki.opencode import export as opencode_export
+from sessionwiki.zcode import export as zcode_export
 
 
 def test_both_exporters_use_the_shared_helpers() -> None:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.tag_utils import NOISE_TAGS, parse_tags_field, scan_tags
+from sessionwiki.tag_utils import NOISE_TAGS, parse_tags_field, scan_tags
 
 
 # ─── NOISE_TAGS ──────────────────────────────────────────────────────
@@ -121,12 +121,12 @@ def test_scan_filters_noise_from_each_page():
 def test_categories_module_still_exposes_scan_tags():
     """categories.py must continue to expose scan_tags + NOISE_TAGS
     for backwards compatibility with existing callers + tests."""
-    from llmwiki.categories import scan_tags as cat_scan_tags
-    from llmwiki.categories import NOISE_TAGS as cat_noise
+    from sessionwiki.categories import scan_tags as cat_scan_tags
+    from sessionwiki.categories import NOISE_TAGS as cat_noise
     assert cat_scan_tags is scan_tags
     assert cat_noise is NOISE_TAGS
 
 
 def test_search_facets_module_still_exposes_noise_tags():
-    from llmwiki.search_facets import NOISE_TAGS as sf_noise
+    from sessionwiki.search_facets import NOISE_TAGS as sf_noise
     assert sf_noise is NOISE_TAGS

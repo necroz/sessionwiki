@@ -1,4 +1,4 @@
-"""pytest-bdd step definitions for the llmwiki E2E feature files.
+"""pytest-bdd step definitions for the sessionwiki E2E feature files.
 
 The `ui_steps` module registers every `@given` / `@when` / `@then`
 decorator the Gherkin scenarios need. Import it once here so the

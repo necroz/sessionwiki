@@ -1,7 +1,7 @@
 """Print sessions as a tree from `site/graph.jsonld`.
 
 Demonstrates programmatic access to the AI-consumable JSON-LD graph
-that `llmwiki build` emits. Stdlib-only, runs anywhere.
+that `sessionwiki build` emits. Stdlib-only, runs anywhere.
 
 Usage:
     python3 examples/scripts/tree_from_graph.py [path/to/graph.jsonld]
@@ -20,12 +20,12 @@ from pathlib import Path
 def main(graph_path: str = "site/graph.jsonld") -> int:
     path = Path(graph_path)
     if not path.is_file():
-        print(f"error: {path} not found — run `llmwiki build` first", file=sys.stderr)
+        print(f"error: {path} not found — run `sessionwiki build` first", file=sys.stderr)
         return 1
 
     nodes = json.loads(path.read_text(encoding="utf-8"))["@graph"]
 
-    root = next((n for n in nodes if n["@id"] == "llmwiki"), {})
+    root = next((n for n in nodes if n["@id"] == "sessionwiki"), {})
     projects = {n["@id"]: n for n in nodes if n["@id"].startswith("project/")}
     sessions = [n for n in nodes if n["@id"].startswith("session/")]
 
@@ -39,7 +39,7 @@ def main(graph_path: str = "site/graph.jsonld") -> int:
     print(f"   ({path} v{root.get('version', '?')})")
     print()
 
-    print(f"{root.get('name', 'llmwiki')}/")
+    print(f"{root.get('name', 'sessionwiki')}/")
     proj_items = sorted(projects.items(), key=lambda kv: -kv[1].get("numberOfItems", 0))
     for pi, (pid, p) in enumerate(proj_items):
         last_proj = pi == len(proj_items) - 1

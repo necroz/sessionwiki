@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 GUIDE = REPO_ROOT / "docs" / "tutorials" / "setup-guide.md"
@@ -25,9 +25,9 @@ def test_part1_has_core_steps():
     assert "git clone" in text
     assert "setup.sh" in text
     assert "setup.bat" in text
-    assert "llmwiki sync" in text
-    assert "llmwiki build" in text
-    assert "llmwiki serve" in text
+    assert "sessionwiki sync" in text
+    assert "sessionwiki build" in text
+    assert "sessionwiki serve" in text
 
 
 def test_part2_explains_three_layers():
@@ -91,5 +91,5 @@ def test_guide_shows_new_v1_cli_commands():
     + `install-skills` were removed in v1.2.0 (#362); `all` is the new
     one-shot command users should know about."""
     text = GUIDE.read_text(encoding="utf-8")
-    for cmd in ["llmwiki adapters"]:
+    for cmd in ["sessionwiki adapters"]:
         assert cmd in text, f"missing {cmd}"

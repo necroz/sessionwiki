@@ -13,7 +13,7 @@ cache_tier: L2
 
 Reference project for the FastAPI track. Small REST API with the
 standard CRUD four (create/read/update/delete) plus token-based
-authentication. Good example of how llmwiki preserves the two-step
+authentication. Good example of how sessionwiki preserves the two-step
 shape of a real project: "bootstrap the app" on day one, then "add
 auth" a week later — two sessions, one project.
 

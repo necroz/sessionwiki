@@ -1,4 +1,4 @@
-"""Tests for `llmwiki.viz_tokens` — token usage visualizations (v0.8 · #66)."""
+"""Tests for `sessionwiki.viz_tokens` — token usage visualizations (v0.8 · #66)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from llmwiki.viz_tokens import (
+from sessionwiki.viz_tokens import (
     _hit_ratio_tier,
     cache_hit_ratio,
     compute_site_stats,

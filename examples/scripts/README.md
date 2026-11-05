@@ -1,8 +1,8 @@
 # examples/scripts
 
-Stdlib-only Python recipes that consume the artefacts `llmwiki build` emits.
+Stdlib-only Python recipes that consume the artefacts `sessionwiki build` emits.
 
-Each script is fully self-contained — no third-party deps, no llmwiki import — so you can copy one into your own project as a starting point for whatever aggregation you need.
+Each script is fully self-contained — no third-party deps, no sessionwiki import — so you can copy one into your own project as a starting point for whatever aggregation you need.
 
 ## Scripts
 
@@ -13,7 +13,7 @@ Each script is fully self-contained — no third-party deps, no llmwiki import �
 ## Run
 
 ```bash
-# from the repo root, after `llmwiki build`
+# from the repo root, after `sessionwiki build`
 python3 examples/scripts/tree_from_graph.py
 ```
 

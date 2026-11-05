@@ -12,10 +12,10 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.adapters import REGISTRY, discover_all
-from llmwiki.adapters.base import BaseAdapter
-from llmwiki.adapters.contrib.copilot_chat import CopilotChatAdapter
-from llmwiki.adapters.contrib.copilot_cli import CopilotCliAdapter
+from sessionwiki.adapters import REGISTRY, discover_all
+from sessionwiki.adapters.base import BaseAdapter
+from sessionwiki.adapters.contrib.copilot_chat import CopilotChatAdapter
+from sessionwiki.adapters.contrib.copilot_cli import CopilotCliAdapter
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -66,7 +66,7 @@ class TestCopilotChatContract:
     def test_registered_as_copilot_chat(self):
         # #v1378-review: REGISTRY is canonical-only; aliases live in
         # REGISTRY_ALIASES and resolve via resolve_adapter_name.
-        from llmwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
+        from sessionwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
         discover_all()
         assert "copilot_chat" in REGISTRY
         assert REGISTRY["copilot_chat"] is CopilotChatAdapter
@@ -273,7 +273,7 @@ class TestCopilotCliContract:
         assert len(desc) > 0
 
     def test_registered_as_copilot_cli(self):
-        from llmwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
+        from sessionwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
         discover_all()
         assert "copilot_cli" in REGISTRY
         assert REGISTRY["copilot_cli"] is CopilotCliAdapter
@@ -302,7 +302,7 @@ class TestCopilotCliCrossPlatform:
         custom.mkdir()
         monkeypatch.setenv("COPILOT_HOME", str(custom))
         # Re-import to pick up env var at build time
-        from llmwiki.adapters.contrib.copilot_cli import _build_default_roots
+        from sessionwiki.adapters.contrib.copilot_cli import _build_default_roots
         roots = _build_default_roots()
         custom_roots = [r for r in roots if str(custom) in str(r)]
         assert len(custom_roots) >= 1
@@ -425,7 +425,7 @@ class TestCopilotCrossAdapter:
         # #v1378-review: aliases moved out of REGISTRY into
         # REGISTRY_ALIASES so a canonical iteration of REGISTRY hits
         # each adapter once. Lookup-by-alias goes through resolve_adapter_name.
-        from llmwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
+        from sessionwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
         discover_all()
         assert "copilot_chat" in REGISTRY
         assert "copilot_cli" in REGISTRY

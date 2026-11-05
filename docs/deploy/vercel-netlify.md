@@ -1,12 +1,12 @@
 # Deploying to Vercel or Netlify
 
-llmwiki produces a plain static site under `site/`. Any static hosting platform can serve it. This guide covers Vercel and Netlify.
+sessionwiki produces a plain static site under `site/`. Any static hosting platform can serve it. This guide covers Vercel and Netlify.
 
 ## General approach
 
 Both platforms need:
 
-1. A Python runtime to run `llmwiki build`
+1. A Python runtime to run `sessionwiki build`
 2. Session data committed to the repo (or seeded from examples)
 3. The output directory pointed at `site/`
 
@@ -14,14 +14,14 @@ Both platforms need:
 
 ### Quick setup
 
-1. Push your llm-wiki repo to GitHub/GitLab/Bitbucket.
+1. Push your sessionwiki repo to GitHub/GitLab/Bitbucket.
 2. Go to [vercel.com](https://vercel.com), import the repo.
 3. Configure the build:
 
 | Setting | Value |
 |---|---|
 | Framework Preset | Other |
-| Build Command | `pip install markdown && python3 -m llmwiki init && python3 -m llmwiki build --out ./site` |
+| Build Command | `pip install markdown && python3 -m sessionwiki init && python3 -m sessionwiki build --out ./site` |
 | Output Directory | `site` |
 | Install Command | (leave empty) |
 
@@ -33,7 +33,7 @@ Drop this in the repo root for explicit configuration:
 
 ```json
 {
-  "buildCommand": "pip install markdown && python3 -m llmwiki init && python3 -m llmwiki build --out ./site",
+  "buildCommand": "pip install markdown && python3 -m sessionwiki init && python3 -m sessionwiki build --out ./site",
   "outputDirectory": "site",
   "framework": null
 }
@@ -52,7 +52,7 @@ python-3.12
 If your sessions are not committed, seed from the demo data in the build command:
 
 ```
-pip install markdown && python3 -m llmwiki init && cp -r examples/demo-sessions/* raw/sessions/ 2>/dev/null; python3 -m llmwiki build --out ./site
+pip install markdown && python3 -m sessionwiki init && cp -r examples/demo-sessions/* raw/sessions/ 2>/dev/null; python3 -m sessionwiki build --out ./site
 ```
 
 ## Netlify
@@ -65,7 +65,7 @@ pip install markdown && python3 -m llmwiki init && cp -r examples/demo-sessions/
 
 | Setting | Value |
 |---|---|
-| Build command | `pip install markdown && python3 -m llmwiki init && python3 -m llmwiki build --out ./site` |
+| Build command | `pip install markdown && python3 -m sessionwiki init && python3 -m sessionwiki build --out ./site` |
 | Publish directory | `site` |
 
 4. Deploy.
@@ -76,7 +76,7 @@ Drop this in the repo root for reproducible configuration:
 
 ```toml
 [build]
-  command = "pip install markdown && python3 -m llmwiki init && python3 -m llmwiki build --out ./site"
+  command = "pip install markdown && python3 -m sessionwiki init && python3 -m sessionwiki build --out ./site"
   publish = "site"
 
 [build.environment]
@@ -120,14 +120,14 @@ Both platforms support custom domains:
 
 ## Troubleshooting
 
-### Build fails with "No module named 'llmwiki'"
+### Build fails with "No module named 'sessionwiki'"
 
-Make sure the build command includes `pip install markdown` (not `pip install -e .`, which requires the repo to be a proper Python package). The `python3 -m llmwiki` invocation works from the repo root without a pip install of the package itself, as long as `markdown` is available.
+Make sure the build command includes `pip install markdown` (not `pip install -e .`, which requires the repo to be a proper Python package). The `python3 -m sessionwiki` invocation works from the repo root without a pip install of the package itself, as long as `markdown` is available.
 
 Alternatively, use:
 
 ```
-pip install -e . && python3 -m llmwiki init && python3 -m llmwiki build --out ./site
+pip install -e . && python3 -m sessionwiki init && python3 -m sessionwiki build --out ./site
 ```
 
 ### Build fails with "no sources found"
@@ -135,7 +135,7 @@ pip install -e . && python3 -m llmwiki init && python3 -m llmwiki build --out ./
 Session data needs to be present at build time. Either:
 - Commit `raw/sessions/` to the repo
 - Seed from `examples/demo-sessions/` in the build command
-- Run `llmwiki sync` as part of the build (requires agent session stores, unlikely in CI)
+- Run `sessionwiki sync` as part of the build (requires agent session stores, unlikely in CI)
 
 ### Site loads but styles are missing
 

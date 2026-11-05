@@ -21,7 +21,7 @@ Feature: Regression locks for UI bugs #452–#460
   # bug violated, not the full page spec. (#466 / parent #462)
 
   Background:
-    Given a built llmwiki site is served
+    Given a built sessionwiki site is served
 
   # ─── #452 — sessions table column layout ─────────────────────────────
   Scenario: Sessions table Session column shows a unique id, not a duplicated date
@@ -57,7 +57,7 @@ Feature: Regression locks for UI bugs #452–#460
   # ─── #457 — docs hub version + sidebar ───────────────────────────────
   Scenario: Docs hub version line matches package version
     When I visit "/docs/index.html"
-    Then the page contains the substring "v" + the current llmwiki version
+    Then the page contains the substring "v" + the current sessionwiki version
     And the version line is NOT the literal string "v1.2.0" (regression of #457)
 
   # ─── #458 — theme persists across /docs/ navigation ──────────────────

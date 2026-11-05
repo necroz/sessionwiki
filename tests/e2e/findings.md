@@ -1,8 +1,8 @@
-# llmwiki — Test Suite + Audit Findings
+# sessionwiki — Test Suite + Audit Findings
 
 **Date:** 2026-04-25
 **Scope:** Playwright automated tests + visual regression + UX/UI/naming critique + source review.
-**Site under audit:** `python3 -m llmwiki build` against the synthetic E2E corpus, served on `127.0.0.1:8765`.
+**Site under audit:** `python3 -m sessionwiki build` against the synthetic E2E corpus, served on `127.0.0.1:8765`.
 
 ---
 
@@ -28,7 +28,7 @@ None — no data loss, no XSS, no auth bypass, no CLI subcommand crashes.
 
 **Where:** Surfaces during the cross-page navigation flow (home → projects → sessions → session page → palette open/close → graph → home). The exact source line wasn't pinpointed — the `pageerror` only carries the message, not the script location.
 
-**Likely root cause:** A boot script in `llmwiki/render/js.py` calls `getElementById(...).addEventListener(...)` on an element that exists on some page types but not others. Most likely culprits: a session-page-only handler (e.g. copy-as-markdown, TOC scroll-spy) running on the projects index where the target `<button>` is absent.
+**Likely root cause:** A boot script in `sessionwiki/render/js.py` calls `getElementById(...).addEventListener(...)` on an element that exists on some page types but not others. Most likely culprits: a session-page-only handler (e.g. copy-as-markdown, TOC scroll-spy) running on the projects index where the target `<button>` is absent.
 
 **Fix sketch:**
 
@@ -39,7 +39,7 @@ btn?.addEventListener('click', copyMarkdown);  // optional chaining
 if (btn) btn.addEventListener('click', copyMarkdown);
 ```
 
-A grep for `getElementById\(.*\)\.addEventListener` in `llmwiki/render/js.py` should find every offender.
+A grep for `getElementById\(.*\)\.addEventListener` in `sessionwiki/render/js.py` should find every offender.
 
 ### S2. Color-contrast violations on session pages (axe-core: 7 nodes)
 
@@ -49,7 +49,7 @@ A grep for `getElementById\(.*\)\.addEventListener` in `llmwiki/render/js.py` sh
 
 **Issue:** The hljs token coloring (built-ins, keywords) is too light against the code-block background to meet WCAG AA contrast (4.5:1 for normal text). 7 distinct tokens fail on the synthetic Python demo session.
 
-**Fix:** Either pick a more accessible hljs theme (the GitHub light/dark themes pass WCAG by default — see `https://github.com/highlightjs/highlight.js/tree/main/src/styles`) or override the offending classes in `llmwiki/render/css.py` with darker tokens.
+**Fix:** Either pick a more accessible hljs theme (the GitHub light/dark themes pass WCAG by default — see `https://github.com/highlightjs/highlight.js/tree/main/src/styles`) or override the offending classes in `sessionwiki/render/css.py` with darker tokens.
 
 ### S3. Color-contrast violation on active nav link in dark mode (axe-core: 2 nodes)
 
@@ -59,7 +59,7 @@ A grep for `getElementById\(.*\)\.addEventListener` in `llmwiki/render/js.py` sh
 
 **Issue:** The `.active` state in dark mode uses an accent-on-dark color that doesn't meet 4.5:1 contrast.
 
-**Fix:** Brighten the active-nav-link color in the dark theme block of `llmwiki/render/css.py`. The accent color `--accent: #7C3AED` is the same in both themes; either bump it (e.g. `#9F7AEA` for dark) or use a dark-mode-specific underline/border style instead of color alone.
+**Fix:** Brighten the active-nav-link color in the dark theme block of `sessionwiki/render/css.py`. The accent color `--accent: #7C3AED` is the same in both themes; either bump it (e.g. `#9F7AEA` for dark) or use a dark-mode-specific underline/border style instead of color alone.
 
 ---
 
@@ -67,19 +67,19 @@ A grep for `getElementById\(.*\)\.addEventListener` in `llmwiki/render/js.py` sh
 
 ### M1. Inline `onclick` handler in built HTML
 
-**Where:** `llmwiki/build.py:742`
+**Where:** `sessionwiki/build.py:742`
 
 ```html
 <button class="btn btn-primary" onclick="copyMarkdown(this)">Copy as markdown</button>
 ```
 
-**Issue:** Inline event handlers prevent strict CSP (`script-src 'self'` rejects them). Not a security bug per se, but blocks any consumer who wants to deploy llmwiki sites behind a strict CSP — and a strict CSP is itself a defense-in-depth layer.
+**Issue:** Inline event handlers prevent strict CSP (`script-src 'self'` rejects them). Not a security bug per se, but blocks any consumer who wants to deploy sessionwiki sites behind a strict CSP — and a strict CSP is itself a defense-in-depth layer.
 
 **Fix:** Move the handler to `render/js.py` and attach via `addEventListener` after DOMContentLoaded.
 
 ### M2. Search index relies on a single CDN for highlight.js
 
-**Where:** `llmwiki/render/css.py` and `js.py` reference `cdnjs.cloudflare.com`.
+**Where:** `sessionwiki/render/css.py` and `js.py` reference `cdnjs.cloudflare.com`.
 
 **Issue:** A CDN outage = no syntax highlighting on every session page. For a static-site generator that's intended to be self-contained, embedding hljs locally would be more robust. Probably out of scope for this task.
 
@@ -102,7 +102,7 @@ The `cmd_init` help is "Scaffold raw/, wiki/, site/ directories" — clear, scop
 
 ### U2. Adapter table column names
 
-The `llmwiki adapters` output uses `default | configured | will_fire` columns. A first-time user has to read the legend at the bottom of the output to understand them. A more immediately legible naming would be `present | enabled | active`. ("Will fire" reads as future tense; "active" reads as state.)
+The `sessionwiki adapters` output uses `default | configured | will_fire` columns. A first-time user has to read the legend at the bottom of the output to understand them. A more immediately legible naming would be `present | enabled | active`. ("Will fire" reads as future tense; "active" reads as state.)
 
 ### U3. Sync `--auto-build` / `--auto-lint` flag wording
 
@@ -150,7 +150,7 @@ The docs hub at 5097px is ~6× a laptop viewport. With 81 editorial pages enumer
 - Card-grid layout (like the projects index) instead of a flat list
 - A scroll-progress indicator (the build already ships `#progress-bar` for session pages — extend to docs)
 
-Same 16 screenshots are at `/tmp/llmwiki-audit/findings/*.png` for visual review (gitignored).
+Same 16 screenshots are at `/tmp/sessionwiki-audit/findings/*.png` for visual review (gitignored).
 
 ---
 
@@ -159,7 +159,7 @@ Same 16 screenshots are at `/tmp/llmwiki-audit/findings/*.png` for visual review
 | Surface | Before | After |
 |---|---|---|
 | CLI `--help` for every subcommand | partial (unit tests via direct call) | 13 subcommands + top-level + bare invoke (`tests/e2e/test_cli_smoke.py`) |
-| `llmwiki version` output shape | no test | covered |
+| `sessionwiki version` output shape | no test | covered |
 | Adapter listing output | no test | covered (incl. `--wide` truncation) |
 | `search-index.json` shape | no test | schema validation (`tests/e2e/test_build_artifacts.py`) |
 | `sitemap.xml` well-formedness | no test | covered |
@@ -198,7 +198,7 @@ Same 16 screenshots are at `/tmp/llmwiki-audit/findings/*.png` for visual review
 
 ## Source review summary
 
-`grep` across `llmwiki/` for known smell patterns:
+`grep` across `sessionwiki/` for known smell patterns:
 
 - **TODO/FIXME/HACK**: 1 occurrence (`docs_pages.py:511` — a hardcoded filename `TODO.md`, not a code marker)
 - **Bare `except:` / `except Exception: pass`**: 0 occurrences — exception handling is everywhere targeted

@@ -1,4 +1,4 @@
-"""Tests for `llmwiki.compare` — auto-generated vs-comparison pages (v0.7 · #58)."""
+"""Tests for `sessionwiki.compare` — auto-generated vs-comparison pages (v0.7 · #58)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.compare import (
+from sessionwiki.compare import (
     compare_pair_score,
     discover_user_overrides,
     generate_pairs,

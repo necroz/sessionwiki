@@ -5,7 +5,7 @@ Feature: Accessibility + keyboard-only navigation
   So the wiki is usable without a pointing device
 
   Background:
-    Given a built llmwiki site is served
+    Given a built sessionwiki site is served
 
   Scenario: Every nav link has text content (no icon-only links)
     When I visit the homepage

@@ -31,6 +31,6 @@
 # confidential-client/
 # !confidential-client/public-2026-*
 
-# ─── Example for the llmwiki repo itself ─────────────────────────────────
-# (Uncomment if you want to exclude the llm-wiki's own sessions from itself.)
-# llm-wiki/
+# ─── Example for the sessionwiki repo itself ─────────────────────────────────
+# (Uncomment if you want to exclude the sessionwiki's own sessions from itself.)
+# sessionwiki/

@@ -1,6 +1,6 @@
 # Privacy
 
-llmwiki processes session transcripts that can contain PII, API keys, file paths, and internal URLs. Privacy is baked into the core design. This document is the full story on what llmwiki does to protect you — and where you're still responsible.
+sessionwiki processes session transcripts that can contain PII, API keys, file paths, and internal URLs. Privacy is baked into the core design. This document is the full story on what sessionwiki does to protect you — and where you're still responsible.
 
 ## Hard rules
 
@@ -83,19 +83,19 @@ ai-newsletter/2026-04-04-secret-deal-*
 | Path | What's there | Gitignored? |
 |---|---|---|
 | `~/.claude/projects/*/*.jsonl` | Raw session transcripts | N/A (outside repo) |
-| `llm-wiki/raw/sessions/` | Converted, redacted markdown | ✅ |
-| `llm-wiki/wiki/` | LLM-maintained wiki pages | ✅ |
-| `llm-wiki/site/` | Generated HTML site | ✅ |
-| `llm-wiki/.ingestion-state.json` | Mtime tracker | ✅ |
-| `llm-wiki/.framework/` | Personal framework notes | ✅ |
-| `llm-wiki/.temp/` | Research corpus (cloned repos) | ✅ |
-| `llm-wiki/config.json` | Your config override | ✅ |
+| `sessionwiki/raw/sessions/` | Converted, redacted markdown | ✅ |
+| `sessionwiki/wiki/` | LLM-maintained wiki pages | ✅ |
+| `sessionwiki/site/` | Generated HTML site | ✅ |
+| `sessionwiki/.ingestion-state.json` | Mtime tracker | ✅ |
+| `sessionwiki/.framework/` | Personal framework notes | ✅ |
+| `sessionwiki/.temp/` | Research corpus (cloned repos) | ✅ |
+| `sessionwiki/config.json` | Your config override | ✅ |
 
 Everything with a ✅ stays on your machine. None of it is committed, uploaded, or synced.
 
 ## The `claude -p` synthesis exception
 
-`llmwiki build --synthesize` is the one feature that sends data off your machine. It does exactly this:
+`sessionwiki build --synthesize` is the one feature that sends data off your machine. It does exactly this:
 
 1. Builds a JSON summary of your projects (project names, session counts, dates, models — no content)
 2. Calls the local `claude` binary (which Claude Code installed)
@@ -106,7 +106,7 @@ Even this is off by default. You have to pass `--synthesize` explicitly. If you 
 
 ## Localhost server
 
-`llmwiki serve` binds to `127.0.0.1:8765` by default. This means **only processes on your machine** can reach the server. Other machines on your LAN **cannot** see it. The browser tab is the only client.
+`sessionwiki serve` binds to `127.0.0.1:8765` by default. This means **only processes on your machine** can reach the server. Other machines on your LAN **cannot** see it. The browser tab is the only client.
 
 If you want to share with a colleague on the same network:
 
@@ -118,7 +118,7 @@ Note: this exposes `site/` (which may contain redacted transcripts of your sessi
 
 ## GitHub Pages (Self-Demo)
 
-The `.github/workflows/pages.yml` workflow deploys a public demo site to `https://pratiyush.github.io/llm-wiki/` on every tag push. It uses **synthetic fixtures** from `tests/fixtures/demo/`, not your real session history. Your actual wiki is never touched by this workflow.
+The `.github/workflows/pages.yml` workflow deploys a public demo site to `https://necroz.github.io/sessionwiki/` on every tag push. It uses **synthetic fixtures** from `tests/fixtures/demo/`, not your real session history. Your actual wiki is never touched by this workflow.
 
 ## Incident response
 

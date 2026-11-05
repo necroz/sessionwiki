@@ -1,6 +1,6 @@
 name: Wiki checks
 
-# Runs llmwiki lint + build on PRs and pushes to verify wiki-related code
+# Runs sessionwiki lint + build on PRs and pushes to verify wiki-related code
 # still produces valid output. Seeded from examples/demo-sessions/ so CI
 # never touches personal data.
 
@@ -8,13 +8,13 @@ on:
   push:
     branches: ["master"]
     paths:
-      - "llmwiki/**"
+      - "sessionwiki/**"
       - "wiki/**"
       - "examples/**"
       - ".github/workflows/wiki-checks.yml"
   pull_request:
     paths:
-      - "llmwiki/**"
+      - "sessionwiki/**"
       - "wiki/**"
       - "examples/**"
       - ".github/workflows/wiki-checks.yml"
@@ -35,7 +35,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install llmwiki
+      - name: Install sessionwiki
         run: |
           python -m pip install --upgrade pip
           pip install -e .
@@ -48,23 +48,23 @@ jobs:
             echo "Seeded raw/sessions/ from examples/demo-sessions/"
           fi
 
-      - name: llmwiki eval (structural quality checks)
+      - name: sessionwiki eval (structural quality checks)
         run: |
-          python -m llmwiki eval --fail-below 60 || true
+          python -m sessionwiki eval --fail-below 60 || true
           # Don't fail CI on eval score — it's informational. Just log it.
 
-      - name: llmwiki lint (11 rules)
+      - name: sessionwiki lint (11 rules)
         run: |
           # Run lint but don't fail on warnings/info.
           # Errors WILL fail the build (--fail-on-errors).
-          python -m llmwiki lint --fail-on-errors || {
-            echo "::warning::llmwiki lint found errors. Review output above."
+          python -m sessionwiki lint --fail-on-errors || {
+            echo "::warning::sessionwiki lint found errors. Review output above."
             exit 1
           }
 
-      - name: llmwiki build (smoke test)
+      - name: sessionwiki build (smoke test)
         run: |
-          python -m llmwiki build --out /tmp/site-test
+          python -m sessionwiki build --out /tmp/site-test
           # Verify output exists
           test -f /tmp/site-test/index.html || {
             echo "::error::build did not produce index.html"
@@ -72,13 +72,13 @@ jobs:
           }
           echo "Build produced $(find /tmp/site-test -name '*.html' | wc -l) HTML files"
 
-      - name: llmwiki check-links (internal link integrity)
+      - name: sessionwiki check-links (internal link integrity)
         run: |
           # Informational — demo content has intentional broken wikilinks
           # to non-seeded entities. Log them, don't fail the build.
-          python -m llmwiki check-links --site-dir /tmp/site-test || true
+          python -m sessionwiki check-links --site-dir /tmp/site-test || true
 
-      - name: llmwiki adapters (dry-run listing)
+      - name: sessionwiki adapters (dry-run listing)
         run: |
           # Verify the adapter registry still enumerates correctly.
-          python -m llmwiki adapters
+          python -m sessionwiki adapters

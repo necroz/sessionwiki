@@ -1,23 +1,23 @@
 # Deploying to GitHub Pages
 
-Host your llmwiki site on GitHub Pages for free, with automatic builds on every push to master.
+Host your sessionwiki site on GitHub Pages for free, with automatic builds on every push to master.
 
-Live example: [pratiyush.github.io/llm-wiki/](https://pratiyush.github.io/llm-wiki/)
+Live example: [necroz.github.io/sessionwiki/](https://necroz.github.io/sessionwiki/)
 
 ## Prerequisites
 
-- A GitHub repository (fork or clone of [Pratiyush/llm-wiki](https://github.com/Pratiyush/llm-wiki))
-- Python 3.9+ (only needed locally for `llmwiki sync`)
+- A GitHub repository (fork or clone of [necroz/sessionwiki](https://github.com/necroz/sessionwiki))
+- Python 3.9+ (only needed locally for `sessionwiki sync`)
 - Some session data already synced (or demo sessions under `examples/demo-sessions/`)
 
 ## Step 1: Fork or clone the repo
 
 ```bash
 # Option A: fork on GitHub, then clone your fork
-git clone https://github.com/<you>/llm-wiki.git
+git clone https://github.com/<you>/sessionwiki.git
 
 # Option B: clone directly
-git clone https://github.com/Pratiyush/llm-wiki.git
+git clone https://github.com/necroz/sessionwiki.git
 ```
 
 ## Step 2: Enable GitHub Pages
@@ -35,9 +35,9 @@ The repo ships with `.github/workflows/pages.yml` which:
 
 1. Checks out the code
 2. Installs Python 3.12 and the `markdown` dependency
-3. Runs `llmwiki init` to scaffold directories
+3. Runs `sessionwiki init` to scaffold directories
 4. Seeds demo sessions from `examples/demo-sessions/` (or `tests/fixtures/demo/`)
-5. Runs `llmwiki build --out ./site`
+5. Runs `sessionwiki build --out ./site`
 6. Creates a `.nojekyll` file (prevents Jekyll processing)
 7. Uploads `site/` as a Pages artifact
 8. Deploys to GitHub Pages
@@ -60,7 +60,7 @@ https://<username>.github.io/<repo-name>/
 
 By default the workflow builds from demo sessions. To deploy your real sessions:
 
-1. Run `llmwiki sync` locally to populate `raw/sessions/`
+1. Run `sessionwiki sync` locally to populate `raw/sessions/`
 2. Commit the `raw/sessions/` directory (remove it from `.gitignore` first)
 3. Push to master
 

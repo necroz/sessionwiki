@@ -16,10 +16,10 @@ from __future__ import annotations
 
 import re
 
-from llmwiki.build import nav_bar, page_head
-from llmwiki.graph import HTML_TEMPLATE
-from llmwiki.render.css import CSS
-from llmwiki.render.js import JS
+from sessionwiki.build import nav_bar, page_head
+from sessionwiki.graph import HTML_TEMPLATE
+from sessionwiki.render.css import CSS
+from sessionwiki.render.js import JS
 
 
 # ─── #565 — skip-link focus ring ──────────────────────────────────────

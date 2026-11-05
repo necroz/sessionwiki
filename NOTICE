@@ -1,0 +1,14 @@
+sessionwiki
+Copyright (c) 2026 Igor Lashkevich
+
+This product is based on llmwiki by Pratiyush
+  https://github.com/Pratiyush/llm-wiki
+  Copyright (c) 2026 Pratiyush
+  Licensed under the MIT License.
+
+sessionwiki started as a fork of llmwiki v1.3.82 (commit b108889) and keeps
+its MIT license. The full upstream history is preserved in this repository.
+See docs/differences-from-llmwiki.md for what sessionwiki adds or changes.
+
+The LLM Wiki pattern itself is Andrej Karpathy's idea:
+  https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f

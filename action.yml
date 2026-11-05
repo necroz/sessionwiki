@@ -1,13 +1,13 @@
 # GitHub Action metadata — lets other repos use this as:
 #
-#   - uses: Pratiyush/llm-wiki@v0.9
+#   - uses: necroz/sessionwiki@v0.9
 #     with:
 #       python-version: "3.12"
 #       additional-args: "--adapter claude-code"
 
-name: llm-wiki
+name: sessionwiki
 description: Build an LLM wiki from your AI coding sessions
-author: Pratiyush
+author: Igor Lashkevich
 
 branding:
   icon: book-open
@@ -19,7 +19,7 @@ inputs:
     required: false
     default: "3.12"
   additional-args:
-    description: "Extra arguments forwarded to `llmwiki sync`"
+    description: "Extra arguments forwarded to `sessionwiki sync`"
     required: false
     default: ""
 
@@ -36,21 +36,21 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
 
-    - name: Install llmwiki
+    - name: Install sessionwiki
       shell: bash
-      run: pip install llm-notebook
+      run: pip install sessionwiki
 
     - name: Initialise directory structure
       shell: bash
-      run: llmwiki init
+      run: sessionwiki init
 
     - name: Sync sessions
       shell: bash
-      run: llmwiki sync ${{ inputs.additional-args }}
+      run: sessionwiki sync ${{ inputs.additional-args }}
 
     - name: Build static site
       shell: bash
-      run: llmwiki build
+      run: sessionwiki build
 
     - name: Expose output paths
       id: paths

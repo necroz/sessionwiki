@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from llmwiki import cli
-from llmwiki.zcode import install
+from sessionwiki import cli
+from sessionwiki.zcode import install
 
 
 def _hook_config(home: Path) -> Path:
@@ -67,13 +67,13 @@ def test_install_systemd_writes_service_and_timer(tmp_path):
     )
 
     unit_dir = tmp_path / ".config" / "systemd" / "user"
-    service = (unit_dir / "llmwiki-zcode.service").read_text(encoding="utf-8")
-    timer = (unit_dir / "llmwiki-zcode.timer").read_text(encoding="utf-8")
+    service = (unit_dir / "sessionwiki-zcode.service").read_text(encoding="utf-8")
+    timer = (unit_dir / "sessionwiki-zcode.timer").read_text(encoding="utf-8")
 
     assert f"WorkingDirectory={tmp_path}" in service
-    assert "/venv/bin/python -m llmwiki zcode autosync --build" in service
+    assert "/venv/bin/python -m sessionwiki zcode autosync --build" in service
     assert "OnCalendar=*-*-* 03:30:00" in timer
-    assert "Unit=llmwiki-zcode.service" in timer
+    assert "Unit=sessionwiki-zcode.service" in timer
 
 
 def test_install_launchd_writes_plist(tmp_path):
@@ -86,7 +86,7 @@ def test_install_launchd_writes_plist(tmp_path):
     )
 
     text = path.read_text(encoding="utf-8")
-    assert "com.llmwiki.zcode.autosync" in text
+    assert "com.sessionwiki.zcode.autosync" in text
     assert "<string>/venv/bin/python</string>" in text
     assert "<string>autosync</string>" in text
     assert "<key>Hour</key>" in text
@@ -106,7 +106,7 @@ def test_install_windows_task_writes_cmd_and_prints_schtasks(tmp_path):
     cmd = (tmp_path / ".llmwiki" / "zcode" / "autosync.cmd").read_text(
         encoding="utf-8"
     )
-    assert "-m llmwiki zcode autosync --build" in cmd
+    assert "-m sessionwiki zcode autosync --build" in cmd
     assert any("schtasks" in message.lower() for message in messages)
 
 
@@ -124,7 +124,7 @@ def test_windows_task_runs_the_wrapper_not_python_directly(tmp_path):
     cmd_path = tmp_path / ".llmwiki" / "zcode" / "autosync.cmd"
     line = _schtasks_line(messages)
     assert f'/TR "\\"{cmd_path}\\""' in line
-    assert "-m llmwiki" not in line
+    assert "-m sessionwiki" not in line
 
 
 def test_windows_task_quotes_paths_with_spaces(tmp_path):
@@ -143,7 +143,7 @@ def test_windows_task_quotes_paths_with_spaces(tmp_path):
 
     script = cmd_path.read_text(encoding="utf-8")
     assert f'cd /d "{tmp_path / "my repo"}"' in script
-    assert '"C:\\Program Files\\Python312\\python.exe" -m llmwiki' in script
+    assert '"C:\\Program Files\\Python312\\python.exe" -m sessionwiki' in script
 
 
 def test_windows_wrapper_escapes_percent_signs(tmp_path):
@@ -221,7 +221,7 @@ def test_scheduled_autosync_still_waits_for_the_lock(tmp_path):
     # The nightly timer is the catch-up run: it should wait, not skip.
     install.install_systemd(home=tmp_path, python_exe="/venv/bin/python", repo_root=tmp_path)
 
-    service = (tmp_path / ".config" / "systemd" / "user" / "llmwiki-zcode.service").read_text(
+    service = (tmp_path / ".config" / "systemd" / "user" / "sessionwiki-zcode.service").read_text(
         encoding="utf-8"
     )
     assert "--lock-timeout" not in service

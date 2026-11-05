@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.adapters import REGISTRY, discover_all
-from llmwiki.adapters.base import BaseAdapter
-from llmwiki.adapters.contrib.cursor import CursorAdapter
-from llmwiki.adapters.contrib.gemini_cli import GeminiCliAdapter
+from sessionwiki.adapters import REGISTRY, discover_all
+from sessionwiki.adapters.base import BaseAdapter
+from sessionwiki.adapters.contrib.cursor import CursorAdapter
+from sessionwiki.adapters.contrib.gemini_cli import GeminiCliAdapter
 
 from tests.conftest import REPO_ROOT
 
@@ -52,7 +52,7 @@ def test_gemini_adapter_slug_fallback():
 
 
 def test_graph_build_function_exists():
-    from llmwiki.graph import build_graph, scan_pages
+    from sessionwiki.graph import build_graph, scan_pages
 
     # scan_pages should be callable even if wiki is empty
     pages = scan_pages()
@@ -66,7 +66,7 @@ def test_graph_build_function_exists():
 
 
 def test_graph_nodes_have_expected_keys():
-    from llmwiki.graph import build_graph
+    from sessionwiki.graph import build_graph
 
     g = build_graph()
     if not g["nodes"]:
@@ -80,27 +80,27 @@ def test_graph_nodes_have_expected_keys():
 
 
 def test_obsidian_output_imports():
-    from llmwiki.obsidian_output import export_to_vault, _add_source_backlink, _build_readme
+    from sessionwiki.obsidian_output import export_to_vault, _add_source_backlink, _build_readme
     assert callable(export_to_vault)
     assert callable(_add_source_backlink)
     assert callable(_build_readme)
 
 
 def test_obsidian_output_adds_backlink():
-    from llmwiki.obsidian_output import _add_source_backlink
+    from sessionwiki.obsidian_output import _add_source_backlink
 
     source = REPO_ROOT / "wiki" / "index.md"
     content = "# Hello\n\nSome content.\n"
     out = _add_source_backlink(content, source)
-    assert "## llmwiki Source" in out
+    assert "## sessionwiki Source" in out
     assert "Hello" in out
     # Idempotent: calling again doesn't duplicate the backlink
     out2 = _add_source_backlink(out, source)
-    assert out2.count("## llmwiki Source") == 1
+    assert out2.count("## sessionwiki Source") == 1
 
 
 def test_obsidian_output_refuses_missing_vault(tmp_path):
-    from llmwiki.obsidian_output import export_to_vault
+    from sessionwiki.obsidian_output import export_to_vault
 
     missing = tmp_path / "does-not-exist"
     rc = export_to_vault(vault=missing, dry_run=True)
@@ -111,7 +111,7 @@ def test_obsidian_output_refuses_missing_vault(tmp_path):
 
 
 def test_mcp_tools_list():
-    from llmwiki.mcp.server import TOOLS
+    from sessionwiki.mcp.server import TOOLS
 
     names = {t["name"] for t in TOOLS}
     expected = {"wiki_query", "wiki_search", "wiki_list_sources", "wiki_read_page", "wiki_lint", "wiki_sync"}
@@ -119,7 +119,7 @@ def test_mcp_tools_list():
 
 
 def test_mcp_initialize_handler():
-    from llmwiki.mcp.server import handle_initialize, PROTOCOL_VERSION
+    from sessionwiki.mcp.server import handle_initialize, PROTOCOL_VERSION
 
     result = handle_initialize({})
     assert result["protocolVersion"] == PROTOCOL_VERSION
@@ -128,7 +128,7 @@ def test_mcp_initialize_handler():
 
 
 def test_mcp_tools_list_handler():
-    from llmwiki.mcp.server import handle_tools_list
+    from sessionwiki.mcp.server import handle_tools_list
 
     result = handle_tools_list({})
     assert "tools" in result
@@ -136,14 +136,14 @@ def test_mcp_tools_list_handler():
 
 
 def test_mcp_tool_call_unknown_tool():
-    from llmwiki.mcp.server import handle_tools_call
+    from sessionwiki.mcp.server import handle_tools_call
 
     result = handle_tools_call({"name": "does_not_exist", "arguments": {}})
     assert result.get("isError") is True
 
 
 def test_mcp_tool_wiki_list_sources():
-    from llmwiki.mcp.server import tool_wiki_list_sources
+    from sessionwiki.mcp.server import tool_wiki_list_sources
 
     result = tool_wiki_list_sources({})
     assert result["isError"] is False
@@ -153,7 +153,7 @@ def test_mcp_tool_wiki_list_sources():
 
 
 def test_mcp_tool_wiki_lint():
-    from llmwiki.mcp.server import tool_wiki_lint
+    from sessionwiki.mcp.server import tool_wiki_lint
 
     result = tool_wiki_lint({})
     if result["isError"]:
@@ -164,7 +164,7 @@ def test_mcp_tool_wiki_lint():
 
 
 def test_mcp_tool_wiki_read_page_path_traversal_guard():
-    from llmwiki.mcp.server import tool_wiki_read_page
+    from sessionwiki.mcp.server import tool_wiki_read_page
 
     result = tool_wiki_read_page({"path": "../../../etc/passwd"})
     assert result["isError"] is True
@@ -174,14 +174,14 @@ def test_mcp_tool_wiki_read_page_path_traversal_guard():
 
 
 def test_watch_module_imports():
-    from llmwiki.watch import watch, scan_mtimes, run_sync
+    from sessionwiki.watch import watch, scan_mtimes, run_sync
     assert callable(watch)
     assert callable(scan_mtimes)
     assert callable(run_sync)
 
 
 def test_watch_scan_mtimes_returns_dict():
-    from llmwiki.watch import scan_mtimes
+    from sessionwiki.watch import scan_mtimes
 
     mtimes = scan_mtimes(adapters=None)
     assert isinstance(mtimes, dict)
@@ -195,7 +195,7 @@ def test_watch_scan_mtimes_returns_dict():
 
 
 def test_cli_has_v02_subcommands():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     help_text = parser.format_help()

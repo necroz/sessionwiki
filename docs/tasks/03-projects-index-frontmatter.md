@@ -3,15 +3,15 @@
 - Priority: P1
 - Depends on: none
 - Size: S (15–30 min)
-- Files: `llmwiki/build.py`, `tests/test_graph_session.py`
+- Files: `sessionwiki/build.py`, `tests/test_graph_session.py`
 - PR title: `fix: emit valid frontmatter for projects index`
 
 ## Read first
 
-- `llmwiki/build.py`, function `ensure_projects_index` (around line 338)
+- `sessionwiki/build.py`, function `ensure_projects_index` (around line 338)
 - `tests/test_graph_session.py`, function
   `test_ensure_projects_index_links_stubs` (around line 181)
-- `llmwiki/lint/rules/frontmatter_validity.py`, `VALID_TYPES`
+- `sessionwiki/lint/rules/frontmatter_validity.py`, `VALID_TYPES`
 
 ## Problem
 
@@ -31,12 +31,12 @@ Two problems:
    `topics:`, not `tags:`.
 
 `ensure_projects_index()` is called by `build_site(..., seed_project_stubs=True)`,
-which `llmwiki sync --auto-build` uses. So a normal sync can turn a
+which `sessionwiki sync --auto-build` uses. So a normal sync can turn a
 clean wiki into a lint error.
 
 ## Required change
 
-In `llmwiki/build.py` replace the two lines:
+In `sessionwiki/build.py` replace the two lines:
 
 ```python
 "type: index",
@@ -78,7 +78,7 @@ below is enough.
 
 ```bash
 .venv/bin/python -m pytest tests/test_graph_session.py -q
-.venv/bin/python -m llmwiki lint
+.venv/bin/python -m sessionwiki lint
 ```
 
 Then reproduce the original failure path without touching the real
@@ -88,7 +88,7 @@ wiki:
 .venv/bin/python - <<'PY'
 import tempfile
 from pathlib import Path
-from llmwiki.build import ensure_projects_index
+from sessionwiki.build import ensure_projects_index
 
 with tempfile.TemporaryDirectory() as d:
     meta = Path(d)
@@ -105,7 +105,7 @@ with tempfile.TemporaryDirectory() as d:
 PY
 ```
 
-Expected: the assertions pass and `llmwiki lint` reports `0 errors`.
+Expected: the assertions pass and `sessionwiki lint` reports `0 errors`.
 
 ## Acceptance criteria
 
@@ -113,7 +113,7 @@ Expected: the assertions pass and `llmwiki lint` reports `0 errors`.
 - [ ] It emits `topics: [projects]`.
 - [ ] It no longer emits `tags: [index, projects]`.
 - [ ] The updated test passes.
-- [ ] `llmwiki lint` reports `0 errors`.
+- [ ] `sessionwiki lint` reports `0 errors`.
 - [ ] `CHANGELOG.md` updated.
 
 ## Out of scope

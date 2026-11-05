@@ -1,4 +1,4 @@
-Walk the llmwiki release process step by step.
+Walk the sessionwiki release process step by step.
 
 Usage: /release <version>        # e.g. /release 0.9.0
 
@@ -16,7 +16,7 @@ releases ship.
 2. **Run the pre-flight** — confirm all of:
    - Master is green (`gh run list --branch master --limit 5`)
    - `python3 -m pytest tests/ -q` passes on a clean checkout
-   - `python3 -m llmwiki build` completes without new warnings
+   - `python3 -m sessionwiki build` completes without new warnings
    - Preview the built site and click through every nav item
    - No open `priority:critical` bugs
      (`gh issue list --label priority:critical --state open`)
@@ -24,11 +24,11 @@ releases ship.
    If any of these fail, stop and fix them first.
 
 3. **Bump the version** — three files must agree:
-   - `llmwiki/__init__.py` → `__version__ = "<NEW>"`
+   - `sessionwiki/__init__.py` → `__version__ = "<NEW>"`
    - `pyproject.toml` → `version = "<NEW>"`
    - `README.md` → version badge
      (`Version-v<NEW>-7C3AED.svg`)
-   Run `python3 -m llmwiki --version` to confirm.
+   Run `python3 -m sessionwiki --version` to confirm.
 
 4. **Update CHANGELOG** — for every entry:
    - Move from `## [Unreleased]` into `## [<NEW>] — YYYY-MM-DD`
@@ -42,7 +42,7 @@ releases ship.
 
 6. **Commit and tag** — use these exact commands:
    ```bash
-   git add llmwiki/__init__.py pyproject.toml README.md CHANGELOG.md
+   git add sessionwiki/__init__.py pyproject.toml README.md CHANGELOG.md
    git commit -m "release(v<NEW>): bump version + CHANGELOG"
    git tag v<NEW>
    git push origin master v<NEW>
@@ -62,7 +62,7 @@ releases ship.
    ```
    The new tag + the master push should both trigger the workflow.
    Watch both runs. Visit
-   `https://pratiyush.github.io/llm-wiki/` and confirm the new
+   `https://necroz.github.io/sessionwiki/` and confirm the new
    version badge is visible.
 
 9. **Announce (optional)** — post to X / LinkedIn if it's a

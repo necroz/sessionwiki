@@ -8,7 +8,7 @@ Common errors and how to fix them.
 
 **Fix:**
 
-1. Run `python3 -m llmwiki adapters` to see which agents are detected.
+1. Run `python3 -m sessionwiki adapters` to see which agents are detected.
 2. If the agent shows `available: no`, verify the session store path exists:
    - Claude Code: `~/.claude/projects/`
    - Codex CLI: `~/.codex/sessions/`
@@ -31,7 +31,7 @@ Common errors and how to fix them.
 4. If you have sessions but they are very recent (< 60 minutes old), the converter skips them as "live sessions." Use `--include-current` to override:
 
 ```bash
-python3 -m llmwiki sync --include-current
+python3 -m sessionwiki sync --include-current
 ```
 
 ## "UnicodeDecodeError" during sync
@@ -49,7 +49,7 @@ If you still see this error, the file may be severely corrupted. Identify it wit
 
 ## Build fails with import error
 
-**Cause:** The `llmwiki` package is not installed in your Python environment.
+**Cause:** The `sessionwiki` package is not installed in your Python environment.
 
 **Fix:**
 
@@ -67,8 +67,8 @@ The `setup.sh` script does this automatically. If you skipped setup, install man
 
 **Fix:**
 
-1. Run `llmwiki sync` first to convert agent sessions into markdown.
-2. Then run `llmwiki build`.
+1. Run `sessionwiki sync` first to convert agent sessions into markdown.
+2. Then run `sessionwiki build`.
 3. Check that `raw/sessions/` contains `.md` files:
 
 ```bash
@@ -91,7 +91,7 @@ If empty, see "No sessions found" above.
 
 ```bash
 # Use a different port
-python3 -m llmwiki serve --port 9000
+python3 -m sessionwiki serve --port 9000
 
 # Or find and kill the process using 8765
 lsof -i :8765
@@ -113,13 +113,13 @@ head -10 raw/sessions/*/2026-*.md
 2. If dates are missing, the converter may have failed to extract timestamps. Re-sync with `--force`:
 
 ```bash
-python3 -m llmwiki sync --force
+python3 -m sessionwiki sync --force
 ```
 
 3. Rebuild the site after re-syncing:
 
 ```bash
-python3 -m llmwiki build
+python3 -m sessionwiki build
 ```
 
 ## Search returns nothing
@@ -129,7 +129,7 @@ python3 -m llmwiki build
 **Fix:** Rebuild the site. The build step regenerates the search index from all current content.
 
 ```bash
-python3 -m llmwiki build
+python3 -m sessionwiki build
 ```
 
 If the search index file exists but search still fails, open the browser console (F12) and check for JavaScript errors.
@@ -138,11 +138,11 @@ If the search index file exists but search still fails, open the browser console
 
 **Cause:** The visualization components require session frontmatter with `total_tokens`, `tools_used`, or similar metadata fields.
 
-**Fix:** These fields are populated during `llmwiki sync`. If you have older sessions that predate the metadata extraction, re-sync with `--force`:
+**Fix:** These fields are populated during `sessionwiki sync`. If you have older sessions that predate the metadata extraction, re-sync with `--force`:
 
 ```bash
-python3 -m llmwiki sync --force
-python3 -m llmwiki build
+python3 -m sessionwiki sync --force
+python3 -m sessionwiki build
 ```
 
 ## `.llmwikiignore` patterns not working
@@ -177,7 +177,7 @@ For large session stores (1000+ sessions), the initial sync can take a few minut
 **Fix:**
 
 1. Use `.llmwikiignore` to exclude projects or date ranges you don't need.
-2. Check the perf budget with `llmwiki manifest --fail-on-violations`.
+2. Check the perf budget with `sessionwiki manifest --fail-on-violations`.
 3. The truncation settings in `config.json` control how much of each session is rendered:
 
 ```json

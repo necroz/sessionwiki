@@ -1,6 +1,6 @@
 # Documentation translations
 
-Translations of llmwiki's user-facing documentation. All translations track
+Translations of sessionwiki's user-facing documentation. All translations track
 the English master in `docs/`. If a translation falls behind, a note at the
 top of the file says so.
 

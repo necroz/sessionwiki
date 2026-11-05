@@ -12,7 +12,7 @@
 │  raw/sessions/             IMMUTABLE            │
 │    • converted .jsonl → .md                     │
 │    • gitignored — never lands in a PR          │
-│    • owned by llmwiki/convert.py + adapters    │
+│    • owned by sessionwiki/convert.py + adapters    │
 └───────────────────┬─────────────────────────────┘
                     ▼ reads
 ┌─────────────────────────────────────────────────┐
@@ -28,7 +28,7 @@
 │  site/                     GENERATED            │
 │    • static HTML + AI exports                   │
 │    • gitignored                                 │
-│    • owned by llmwiki/build.py                  │
+│    • owned by sessionwiki/build.py                  │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -36,13 +36,13 @@
 
 | Layer | What lives here | PR surface |
 |---|---|---|
-| L0 Raw | Converters + adapters | `llmwiki/convert.py`, `llmwiki/adapters/` |
+| L0 Raw | Converters + adapters | `sessionwiki/convert.py`, `sessionwiki/adapters/` |
 | L1 Wiki | Slash commands + conventions | `CLAUDE.md`, `.claude/commands/`, seed files |
-| L2 Site | HTML builder + CSS/JS strings | `llmwiki/build.py`, `llmwiki/viz_*.py` |
+| L2 Site | HTML builder + CSS/JS strings | `sessionwiki/build.py`, `sessionwiki/viz_*.py` |
 | L3 Viewer | Browser-side JS baked into `build.py` | inline JS string inside `build.py` |
 | L4 Distribution | Setup scripts, packaging | `setup.sh`, `setup.bat`, `pyproject.toml` |
 | L5 Schema | Steering + schemas + reference docs | `docs/`, `AGENTS.md`, `.kiro/` |
-| L6 Adapters | Session-store parsers | `llmwiki/adapters/<agent>.py` |
+| L6 Adapters | Session-store parsers | `sessionwiki/adapters/<agent>.py` |
 | L7 CI/Ops | Workflows + tests + release automation | `.github/workflows/`, `tests/` |
 
 ## What must NEVER land in a PR

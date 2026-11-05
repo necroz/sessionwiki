@@ -6,7 +6,7 @@ docs_shell: true
 
 # Pick your mode
 
-llmwiki runs in **two modes** that share the same three-layer
+sessionwiki runs in **two modes** that share the same three-layer
 pipeline (`raw/` → `wiki/` → `site/`) but differ on *who calls the LLM*:
 
 | | **Mode A — API** | **Mode B — Agent** |
@@ -22,7 +22,7 @@ pipeline (`raw/` → `wiki/` → `site/`) but differ on *who calls the LLM*:
 
 - **You have an Anthropic API key and want to batch-ingest 647 sessions once, then schedule a daily top-up:** Mode A.
 - **You use Claude Code or Codex CLI daily and don't want to pay an extra API bill:** Mode B.
-- **You're evaluating llmwiki locally and just want the dummy / Ollama backend:** neither — see [Tutorial 08](../tutorials/08-synthesize-with-ollama.md) which works with no agent + no API key.
+- **You're evaluating sessionwiki locally and just want the dummy / Ollama backend:** neither — see [Tutorial 08](../tutorials/08-synthesize-with-ollama.md) which works with no agent + no API key.
 
 ## The two modes share
 

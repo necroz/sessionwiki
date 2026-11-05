@@ -1,6 +1,6 @@
 # Accessibility (WCAG 2.1 AA)
 
-llmwiki targets **WCAG 2.1 Level AA** for all generated HTML pages.
+sessionwiki targets **WCAG 2.1 Level AA** for all generated HTML pages.
 
 ## Automated audit
 

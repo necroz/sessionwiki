@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
-from llmwiki.adapters import (
+from sessionwiki import REPO_ROOT
+from sessionwiki.adapters import (
     REGISTRY,
     REGISTRY_ALIASES,
     discover_adapters,
@@ -83,7 +83,7 @@ def test_build_site_sibling_failure_isolation_is_documented_in_source():
     flag. The good pattern: append to a `sibling_failures` list and
     let the loop keep running.
     """
-    build_path = REPO_ROOT / "llmwiki" / "build.py"
+    build_path = REPO_ROOT / "sessionwiki" / "build.py"
     text = build_path.read_text(encoding="utf-8")
 
     # The new contract: there's a sibling_failures list (or equivalent
@@ -106,13 +106,13 @@ def test_build_site_sibling_failure_isolation_is_documented_in_source():
 
 
 def test_cli_module_has_no_E402_imports():
-    """cli.py must not have `from llmwiki.X import Y` lines AFTER any
+    """cli.py must not have `from sessionwiki.X import Y` lines AFTER any
     `def ` or `class ` statement at module scope (PEP 8 E402).
 
     Underscore-prefixed re-export imports + `# noqa` lines are still
     OK as long as they're at the TOP of the file before any def/class.
     """
-    cli_path = REPO_ROOT / "llmwiki" / "cli.py"
+    cli_path = REPO_ROOT / "sessionwiki" / "cli.py"
     lines = cli_path.read_text(encoding="utf-8").splitlines()
 
     # Find the line of the first top-level `def ` or `class `.
@@ -128,12 +128,12 @@ def test_cli_module_has_no_E402_imports():
     for i in range(first_def_line + 1, len(lines)):
         # Only top-level lines starting at column 0; function-internal
         # imports are indented and don't violate E402 in the same way.
-        if not lines[i].startswith("from llmwiki."):
+        if not lines[i].startswith("from sessionwiki."):
             continue
         offending.append((i + 1, lines[i]))
 
     assert not offending, (
-        "cli.py has top-level `from llmwiki.X` imports after a def/class "
+        "cli.py has top-level `from sessionwiki.X` imports after a def/class "
         f"statement (PEP 8 E402): {offending}"
     )
 
@@ -145,7 +145,7 @@ def test_timeline_label_uses_textcontent_not_innerhtml():
     """The timeline-block builder must NOT interpolate `labelText` into
     `tl.innerHTML` — that's a future-XSS hazard. Verify the JS source
     builds a real text node."""
-    js_path = REPO_ROOT / "llmwiki" / "render" / "js.py"
+    js_path = REPO_ROOT / "sessionwiki" / "render" / "js.py"
     text = js_path.read_text(encoding="utf-8")
 
     # The old pattern was: tl.innerHTML = '<div...>' + labelText + '</div>' + svg
@@ -167,7 +167,7 @@ def test_timeline_label_uses_textcontent_not_innerhtml():
 def test_nav_hamburger_aria_label_toggles_with_state():
     """The hamburger setOpen() must update aria-label to mirror the
     drawer state — screen readers should hear "Close" when open."""
-    js_path = REPO_ROOT / "llmwiki" / "render" / "js.py"
+    js_path = REPO_ROOT / "sessionwiki" / "render" / "js.py"
     text = js_path.read_text(encoding="utf-8")
     # Look for the dynamic aria-label inside setOpen.
     assert 'open ? "Close navigation menu" : "Open navigation menu"' in text
@@ -181,7 +181,7 @@ def test_theme_toggle_uses_aria_label_for_tristate():
     into binary — a screen reader user can't distinguish system from
     light. Verify aria-label is set dynamically too, on BOTH the
     desktop button and the mobile menu button."""
-    js_path = REPO_ROOT / "llmwiki" / "render" / "js.py"
+    js_path = REPO_ROOT / "sessionwiki" / "render" / "js.py"
     text = js_path.read_text(encoding="utf-8")
 
     # Desktop and mobile both need to set aria-label dynamically.
@@ -198,7 +198,7 @@ def test_nav_hamburger_has_forced_colors_fallback():
     """Windows High Contrast Mode (forced-colors) overrides our custom
     palette; without the fallback the hamburger button visually
     disappears."""
-    css_path = REPO_ROOT / "llmwiki" / "render" / "css.py"
+    css_path = REPO_ROOT / "sessionwiki" / "render" / "css.py"
     text = css_path.read_text(encoding="utf-8")
     assert "@media (forced-colors: active)" in text
     assert ".nav-hamburger { border: 2px solid ButtonText; }" in text

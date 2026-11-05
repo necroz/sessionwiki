@@ -1,4 +1,4 @@
-"""Tests for `llmwiki.changelog_timeline` — append-only page changelog (v0.7 · #56)."""
+"""Tests for `sessionwiki.changelog_timeline` — append-only page changelog (v0.7 · #56)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from datetime import date
 
 import pytest
 
-from llmwiki.changelog_timeline import (
+from sessionwiki.changelog_timeline import (
     extract_price_points,
     find_recently_updated,
     parse_changelog,
@@ -105,7 +105,7 @@ def test_parse_changelog_malformed_json_warns():
 
 
 def test_parse_changelog_handles_frontmatter_parser_mangling():
-    """The llmwiki lightweight frontmatter parser naively splits
+    """The sessionwiki lightweight frontmatter parser naively splits
     `[{"a":1, "b":2}, {"c":3}]` on commas, producing a list of strings
     like `['{"a":1', '"b":2}', '{"c":3}']`. `parse_changelog` must
     stitch these back together before validating, otherwise every real

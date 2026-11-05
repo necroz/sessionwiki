@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 
-from llmwiki.build import page_head, page_head_article
+from sessionwiki.build import page_head, page_head_article
 
 
 _VIEWPORT_RE = re.compile(r'<meta name="viewport" content="([^"]+)">')

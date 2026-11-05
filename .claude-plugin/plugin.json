@@ -1,13 +1,13 @@
 {
-  "name": "llmwiki",
+  "name": "sessionwiki",
   "version": "0.1.0",
   "description": "LLM-powered knowledge base from Claude Code and Codex CLI sessions. Follows Karpathy's LLM Wiki pattern.",
   "author": {
-    "name": "Pratiyush",
-    "url": "https://github.com/Pratiyush"
+    "name": "Igor Lashkevich",
+    "url": "https://github.com/necroz"
   },
-  "homepage": "https://github.com/Pratiyush/llmwiki",
-  "repository": "https://github.com/Pratiyush/llmwiki",
+  "homepage": "https://github.com/necroz/sessionwiki",
+  "repository": "https://github.com/necroz/sessionwiki",
   "license": "MIT",
   "keywords": [
     "llm-wiki",
@@ -28,17 +28,17 @@
     "commands/wiki-serve.md"
   ],
   "skills": [
-    "skills/llmwiki-sync/SKILL.md",
-    "skills/llmwiki-ingest/SKILL.md",
-    "skills/llmwiki-query/SKILL.md"
+    "skills/sessionwiki-sync/SKILL.md",
+    "skills/sessionwiki-ingest/SKILL.md",
+    "skills/sessionwiki-query/SKILL.md"
   ],
   "hooks": {
     "SessionStart": "hooks/session-start.sh"
   },
   "mcpServers": {
-    "llmwiki": {
+    "sessionwiki": {
       "command": "python3",
-      "args": ["-m", "llmwiki.mcp"]
+      "args": ["-m", "sessionwiki.mcp"]
     }
   },
   "requirements": {

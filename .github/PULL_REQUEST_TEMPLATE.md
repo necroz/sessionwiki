@@ -26,8 +26,8 @@ Closes #<issue>
 
 ```bash
 python3 -m pytest tests/ -q
-python3 -m llmwiki build
-python3 -m llmwiki lint --fail-on-errors
+python3 -m sessionwiki build
+python3 -m sessionwiki lint --fail-on-errors
 ```
 
 ## Pre-merge checklist
@@ -46,7 +46,7 @@ Every box below must be checked (or have a one-line waiver explaining why it doe
 - [ ] **No machine-specific paths** or secrets in committed files (check `.env`, `*.key`, home paths, usernames)
 - [ ] **Docs updated** — `README.md`, `docs/tutorials/*`, `docs/reference/*` (CLI / slash / UI tables), inline `--help`, design docs — every user-visible change reflected. PRs adding a new CLI subcommand / slash / config key / lint rule MUST grow the matching `docs/reference/*.md` row in the same PR.
 - [ ] **Release notes drafted** — one line suitable for the next `gh release create --notes` text, either in the Unreleased CHANGELOG section or in this PR body.
-- [ ] **UI verified** (light AND dark mode) — for any change to `llmwiki/build.py` CSS or static site. Paste screenshots below.
+- [ ] **UI verified** (light AND dark mode) — for any change to `sessionwiki/build.py` CSS or static site. Paste screenshots below.
 - [ ] **A11y verified** — keyboard nav works, focus rings visible, `axe` clean (for UI changes). WCAG 2.1 AA minimum (contrast ≥ 4.5:1).
 - [ ] **Commits GPG-signed** by the repo author; no AI co-author trailers; atomic commits (one logical change each)
 - [ ] **Reviewer has read every changed line** — no rubber-stamping

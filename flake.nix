@@ -1,5 +1,5 @@
 {
-  description = "llmwiki — Karpathy-style LLM wiki from your AI coding sessions";
+  description = "sessionwiki — Karpathy-style LLM wiki from your AI coding sessions";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -12,8 +12,8 @@
         pkgs = nixpkgs.legacyPackages.${system};
         python = pkgs.python312;
 
-        llmwiki = python.pkgs.buildPythonApplication {
-          pname = "llmwiki";
+        sessionwiki = python.pkgs.buildPythonApplication {
+          pname = "sessionwiki";
           version = "0.9.0";
           format = "pyproject";
 
@@ -41,15 +41,15 @@
 
           meta = with pkgs.lib; {
             description = "LLM Wiki — Karpathy-style knowledge base from your AI coding sessions";
-            homepage = "https://github.com/Pratiyush/llm-wiki";
+            homepage = "https://github.com/necroz/sessionwiki";
             license = licenses.mit;
             maintainers = [ ];
           };
         };
       in
       {
-        packages.default = llmwiki;
-        packages.llmwiki = llmwiki;
+        packages.default = sessionwiki;
+        packages.sessionwiki = sessionwiki;
 
         devShells.default = pkgs.mkShell {
           packages = [
@@ -60,7 +60,7 @@
           ];
 
           shellHook = ''
-            echo "llmwiki dev shell — Python ${python.version}"
+            echo "sessionwiki dev shell — Python ${python.version}"
             echo "  pytest, ruff available"
           '';
         };

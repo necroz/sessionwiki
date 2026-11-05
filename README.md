@@ -1,20 +1,22 @@
-# llmwiki
+# sessionwiki
 
-> **LLM-powered knowledge base from your Claude Code, Codex CLI, Cursor, Gemini CLI, and Obsidian sessions.**
+> **A searchable, interlinked wiki of your AI coding sessions** — Claude Code, Codex CLI, Cursor, Gemini CLI, ZCode, OpenCode and Obsidian — with LLM synthesis, a session graph, and MCP access for other agents.
 > Built on [Andrej Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f).
 
-## 👉 Live demo: **[pratiyush.github.io/llm-wiki](https://pratiyush.github.io/llm-wiki/)**
+> **Based on [llmwiki](https://github.com/Pratiyush/llm-wiki) by [Pratiyush](https://github.com/Pratiyush)** (MIT). sessionwiki forked from llmwiki v1.3.82, keeps its full history and license, and adds ZCode and OpenCode sources with autosync, an OpenAI-compatible synthesis backend, low-signal session coalescing, locked and atomic state, `doctor` / `audit`, and a session graph. See **[what's different](docs/differences-from-llmwiki.md)** and how to [migrate from llmwiki](docs/differences-from-llmwiki.md#migrating-from-llmwiki).
+
+## 👉 Live demo: **[necroz.github.io/sessionwiki](https://necroz.github.io/sessionwiki/)**
 
 Rebuilt on every `master` push from the synthetic sessions in [`examples/demo-sessions/`](examples/demo-sessions). No personal data. Shows every feature of the real tool (activity heatmap, tool charts, token usage, model info cards, vs-comparisons, project topics) running against safe reference data.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-v1.3.82-10B981.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v2.0.0-10B981.svg)](CHANGELOG.md)
 [![Tests](https://img.shields.io/badge/tests-2651%20passing-10B981.svg)](tests/)
-[![CI](https://github.com/Pratiyush/llm-wiki/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Pratiyush/llm-wiki/actions/workflows/ci.yml)
-[![Link check](https://github.com/Pratiyush/llm-wiki/actions/workflows/link-check.yml/badge.svg?branch=master)](https://github.com/Pratiyush/llm-wiki/actions/workflows/link-check.yml)
-[![Wiki checks](https://github.com/Pratiyush/llm-wiki/actions/workflows/wiki-checks.yml/badge.svg?branch=master)](https://github.com/Pratiyush/llm-wiki/actions/workflows/wiki-checks.yml)
-[![Docker](https://github.com/Pratiyush/llm-wiki/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/Pratiyush/llm-wiki/pkgs/container/llm-wiki)
+[![CI](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml)
+[![Link check](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml)
+[![Wiki checks](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml)
+[![Docker](https://github.com/necroz/sessionwiki/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/necroz/sessionwiki/pkgs/container/sessionwiki)
 [![Works with Claude Code](https://img.shields.io/badge/Claude%20Code-✓-7C3AED.svg)](https://claude.com/claude-code)
 [![Works with Codex CLI](https://img.shields.io/badge/Codex%20CLI-✓-7C3AED.svg)](https://github.com/openai/codex)
 [![Works with Copilot](https://img.shields.io/badge/GitHub%20Copilot-✓-7C3AED.svg)](https://github.com/features/copilot)
@@ -26,21 +28,21 @@ Rebuilt on every `master` push from the synthetic sessions in [`examples/demo-se
 
 Every Claude Code, Codex CLI, Copilot, Cursor, and Gemini CLI session writes a full transcript to disk. You already have hundreds of them and never look at them again.
 
-**llmwiki** turns that dormant history into a beautiful, searchable, interlinked knowledge base — locally, in two commands. Plus, it produces AI-consumable exports (`llms.txt`, `llms-full.txt`, JSON-LD graph, per-page `.txt` + `.json` siblings) so other AI agents can query your wiki directly.
+**sessionwiki** turns that dormant history into a beautiful, searchable, interlinked knowledge base — locally, in two commands. Plus, it produces AI-consumable exports (`llms.txt`, `llms-full.txt`, JSON-LD graph, per-page `.txt` + `.json` siblings) so other AI agents can query your wiki directly.
 
 ```bash
 ./setup.sh                         # one-time install
 ./build.sh && ./serve.sh           # build + serve at http://127.0.0.1:8765
 ```
 
-**Want LLM-enriched wiki pages from the CLI?** After `./setup.sh`, `llmwiki sync` only fills `raw/`. To populate `wiki/sources/` (semantic summaries), set `synthesis.backend` in `examples/sessions_config.json` (`ollama` for local Ollama, or keep `dummy` for stubs), then run `llmwiki synthesize` or chain it with `llmwiki all --with-synth`. See [docs/modes/api/](docs/modes/api/) and `llmwiki sync --status` for the current backend hint.
+**Want LLM-enriched wiki pages from the CLI?** After `./setup.sh`, `sessionwiki sync` only fills `raw/`. To populate `wiki/sources/` (semantic summaries), set `synthesis.backend` in `examples/sessions_config.json` (`ollama` for local Ollama, or keep `dummy` for stubs), then run `sessionwiki synthesize` or chain it with `sessionwiki all --with-synth`. See [docs/modes/api/](docs/modes/api/) and `sessionwiki sync --status` for the current backend hint.
 
 ```bash
-llmwiki sync
-llmwiki all --with-synth --graph-engine builtin   # synthesize → build → graph → export → lint
+sessionwiki sync
+sessionwiki all --with-synth --graph-engine builtin   # synthesize → build → graph → export → lint
 ```
 
-![llmwiki — 70-second demo](docs/demo.gif)
+![sessionwiki — 70-second demo](docs/demo.gif)
 
 
 **Contributing in one line:** read [`CONTRIBUTING.md`](CONTRIBUTING.md), keep PRs focused (one concern each), use `feat:` / `fix:` / `docs:` / `chore:` / `test:` commit prefixes, never commit real session data (`raw/` is gitignored), no new runtime deps. CI must be green to merge.
@@ -50,19 +52,19 @@ llmwiki all --with-synth --graph-engine builtin   # synthesize → build → gra
 All screenshots below are from the **public demo site** which is built on every `master` push from the dummy example sessions. Your own wiki will look identical — just with your real work.
 
 ### Home — projects overview with activity heatmap
-![llmwiki home page — LLM Wiki header, activity heatmap, and a grid of three demo projects (demo-blog-engine, demo-ml-pipeline, demo-todo-api)](docs/images/home.png)
+![sessionwiki home page — LLM Wiki header, activity heatmap, and a grid of three demo projects (demo-blog-engine, demo-ml-pipeline, demo-todo-api)](docs/images/home.png)
 
 ### All sessions — filterable table across every project
-![llmwiki sessions index — activity timeline above a table of eight demo sessions with project, model, date, message count, and tool-call columns](docs/images/sessions.png)
+![sessionwiki sessions index — activity timeline above a table of eight demo sessions with project, model, date, message count, and tool-call columns](docs/images/sessions.png)
 
 ### Session detail — full conversation + tool calls
-![llmwiki session detail — Rust blog engine scaffolding session showing summary, breadcrumbs, a TOML Cargo.toml block and a Rust main.rs block, both highlighted by highlight.js](docs/images/session-rust.png)
+![sessionwiki session detail — Rust blog engine scaffolding session showing summary, breadcrumbs, a TOML Cargo.toml block and a Rust main.rs block, both highlighted by highlight.js](docs/images/session-rust.png)
 
 ### Changelog — renders `CHANGELOG.md` as a first-class page
-![llmwiki changelog page — keep-a-changelog format with colored headings for Added / Fixed / Changed and auto-linked PR references](docs/images/changelog.png)
+![sessionwiki changelog page — keep-a-changelog format with colored headings for Added / Fixed / Changed and auto-linked PR references](docs/images/changelog.png)
 
 ### Projects index — freshness badges + per-project stats
-![llmwiki projects index — three demo project cards with green/yellow/red freshness badges showing how recently each project was touched](docs/images/projects.png)
+![sessionwiki projects index — three demo project cards with green/yellow/red freshness badges showing how recently each project was touched](docs/images/projects.png)
 
 ## What you get
 
@@ -112,7 +114,7 @@ Site-level AI-agent entry points:
 | `/ai-readme.md` | AI-specific navigation instructions |
 | `/manifest.json` | Build manifest with SHA-256 hashes + perf budget |
 
-Every page also includes an `<!-- llmwiki:metadata -->` HTML comment that AI agents can parse without fetching the separate `.json` sibling.
+Every page also includes an `<!-- sessionwiki:metadata -->` HTML comment that AI agents can parse without fetching the separate `.json` sibling.
 
 #### Recipe — query `graph.jsonld` from your terminal
 
@@ -128,7 +130,7 @@ Output:
 📚 8 sessions across 3 projects
    (site/graph.jsonld v1.3.0)
 
-llmwiki/
+sessionwiki/
 ├── demo-blog-engine/  (4 sessions)
 │   ├── 2026-03-12  scaffolding-the-rust-blog-engine
 │   ├── 2026-03-18  adding-syntax-highlighting
@@ -161,7 +163,7 @@ The full script is **stdlib-only** at [`examples/scripts/tree_from_graph.py`](ex
 ### Automation
 - **SessionStart hook** — auto-syncs new sessions in the background on every Claude Code launch
 - **Auto-build on sync** — `/wiki-sync` triggers `/wiki-build` (configurable; default on)
-- **One-shot pipeline** — `llmwiki all` runs build → graph → export → lint in a single command (`--strict` for CI)
+- **One-shot pipeline** — `sessionwiki all` runs build → graph → export → lint in a single command (`--strict` for CI)
 - **MCP server** — 12 production tools (query, search, list, read, lint, sync, export, + confidence, lifecycle, dashboard, entity search, category browse) queryable from any MCP client (Claude Desktop, Cline, Cursor, ChatGPT desktop)
 - **Pending ingest queue** — SessionStart hook converts + queues; `/wiki-sync` processes queue
 - **No servers, no database, no npm** — Python stdlib + `markdown`. Syntax highlighting loads from a highlight.js CDN at view time.
@@ -174,28 +176,28 @@ A scripted recording of the same flow ships at [`docs/videos/cli-tutorial.gif`](
 
 ```bash
 # 1. One-time scaffold (≈1 sec). Creates raw/, wiki/, site/, seed nav files.
-llmwiki init
+sessionwiki init
 
 # 2. Pull in your sessions (≈1 sec / 100 sessions). Walks every adapter
 #    that's "available" on this machine (Claude Code, Codex CLI, Cursor,
 #    Gemini, Obsidian, Copilot Chat / CLI), converts new .jsonl files to
 #    raw/sessions/*.md, then runs build + lint by default.
-llmwiki sync
+sessionwiki sync
 
 # 3. Compile the static HTML site (≈3 sec on a 500-session corpus).
 #    Already runs as part of `sync`; call directly when you're iterating
 #    on a wiki/ page and don't need a fresh sync.
-llmwiki build
+sessionwiki build
 
 # 4. Browse it locally. Cmd+K opens the search palette; / focuses the
 #    filter bar on /sessions/. Press Ctrl+C to stop.
-llmwiki serve
+sessionwiki serve
 
 # 5. (Optional) Generate the knowledge graph + AI-consumable exports.
 #    `all` runs build → graph → export → lint in one shot.
-llmwiki graph
-llmwiki export all
-llmwiki all     # one-shot equivalent of build + graph + export + lint
+sessionwiki graph
+sessionwiki export all
+sessionwiki all     # one-shot equivalent of build + graph + export + lint
 ```
 
 That's the entire happy path. Two more commands you'll reach for occasionally:
@@ -203,12 +205,12 @@ That's the entire happy path. Two more commands you'll reach for occasionally:
 ```bash
 # Inspect what's installed + configured. Prints a per-adapter table:
 # (available: yes/no, configured: yes/no, session-store path).
-llmwiki adapters
+sessionwiki adapters
 
 # Lint the wiki. 16 rules — broken wikilinks, orphaned pages, stale
 # summaries, duplicate detection, freshness, missing entities, etc.
 # Runs as part of `sync` by default; call directly for a one-shot check.
-llmwiki lint
+sessionwiki lint
 ```
 
 Three optional flags you'll discover later:
@@ -230,7 +232,7 @@ Each subcommand has its own `--help` with the rest. The CLI reference table belo
 │  ~/.gemini/                         │  ← Gemini CLI
 └──────────────┬──────────────────────┘
                │
-               ▼   python3 -m llmwiki sync
+               ▼   python3 -m sessionwiki sync
 ┌─────────────────────────────────────┐
 │  raw/sessions/<project>/            │  ← immutable markdown (Karpathy layer 1)
 │     2026-04-08-<slug>.md            │
@@ -247,7 +249,7 @@ Each subcommand has its own `--help` with the rest. The CLI reference table belo
 │  wiki/index.md, overview.md, log.md │
 └──────────────┬──────────────────────┘
                │
-               ▼   python3 -m llmwiki build
+               ▼   python3 -m sessionwiki build
 ┌─────────────────────────────────────┐
 │  site/                              │  ← static HTML + AI exports
 │  ├── index.html, style.css, ...     │
@@ -276,10 +278,10 @@ reference, and deployment, all in one place.
 | Goal | Read |
 |---|---|
 | Install and build your first site in 10 minutes | [Tutorial 01 → 02](docs/tutorials/01-installation.md) |
-| Use llmwiki with Claude Code | [Tutorial 03](docs/tutorials/03-use-with-claude-code.md) |
-| Use llmwiki with Codex CLI | [Tutorial 04](docs/tutorials/04-use-with-codex-cli.md) |
+| Use sessionwiki with Claude Code | [Tutorial 03](docs/tutorials/03-use-with-claude-code.md) |
+| Use sessionwiki with Codex CLI | [Tutorial 04](docs/tutorials/04-use-with-codex-cli.md) |
 | Query / lint / review your wiki daily | [Tutorial 05](docs/tutorials/05-querying-your-wiki.md) |
-| Point llmwiki at an existing Obsidian / Logseq vault | [Tutorial 06](docs/tutorials/06-bring-your-obsidian-vault.md) |
+| Point sessionwiki at an existing Obsidian / Logseq vault | [Tutorial 06](docs/tutorials/06-bring-your-obsidian-vault.md) |
 | See four real end-to-end workflows | [Tutorial 07](docs/tutorials/07-example-workflows.md) |
 
 Contributing to docs? See the **[style guide](docs/style-guide.md)**.
@@ -289,16 +291,16 @@ Contributing to docs? See the **[style guide](docs/style-guide.md)**.
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ./setup.sh
 ```
 
 ### Windows
 
 ```cmd
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 setup.bat
 ```
 
@@ -318,19 +320,19 @@ pip install -e '.[all]'         # graph + everything
 
 The wrapper scripts (`sync.sh`, `build.sh`, `serve.sh`) automatically use
 `.venv/bin/python` when it exists, so they keep working in a fresh shell
-without activation. To use the `llmwiki` console command directly, either
+without activation. To use the `sessionwiki` console command directly, either
 activate the venv (`source .venv/bin/activate`) or call
-`.venv/bin/llmwiki`.
+`.venv/bin/sessionwiki`.
 
 Syntax highlighting is now powered by [highlight.js](https://highlightjs.org/), loaded from a CDN at view time — no optional deps required.
 
 ### What setup does
 
 1. Creates a checkout-local `.venv` (avoids PEP 668 / system-Python conflicts)
-2. Installs the `llmwiki` package in-place into that venv
+2. Installs the `sessionwiki` package in-place into that venv
 3. Creates `raw/`, `wiki/`, `site/` data directories
 4. Detects your coding agents and enables matching adapters
-5. Runs a first sync-status probe and `llmwiki doctor`
+5. Runs a first sync-status probe and `sessionwiki doctor`
 6. Prints the optional `SessionStart` hook for Claude Code
 
 ### ZCode
@@ -340,18 +342,18 @@ sync as usual:
 
 ```bash
 source .venv/bin/activate
-llmwiki zcode export
-llmwiki sync
+sessionwiki zcode export
+sessionwiki sync
 ```
 
-`llmwiki sync` refreshes the ZCode JSONL corpus automatically when
+`sessionwiki sync` refreshes the ZCode JSONL corpus automatically when
 `~/.zcode/cli/db/db.sqlite` exists. To install the Stop-hook and a
 native scheduler (systemd, launchd, or Task Scheduler):
 
 ```bash
-llmwiki zcode install --dry-run     # inspect
-llmwiki zcode install               # auto-detect scheduler
-llmwiki zcode autosync --build      # run one cycle manually
+sessionwiki zcode install --dry-run     # inspect
+sessionwiki zcode install               # auto-detect scheduler
+sessionwiki zcode autosync --build      # run one cycle manually
 ```
 
 See [ZCODE.md](ZCODE.md) for details.
@@ -363,22 +365,22 @@ OpenCode V2 also stores sessions in SQLite
 
 ```bash
 source .venv/bin/activate
-llmwiki opencode export
-llmwiki sync
+sessionwiki opencode export
+sessionwiki sync
 ```
 
-`llmwiki sync` refreshes the OpenCode JSONL corpus automatically when the
+`sessionwiki sync` refreshes the OpenCode JSONL corpus automatically when the
 OpenCode database exists. To install the OpenCode `session.idle` plugin
 that runs autosync after each finished turn:
 
 ```bash
-llmwiki opencode install --dry-run   # inspect
-llmwiki opencode install             # write the plugin
-llmwiki opencode autosync --build    # run one cycle manually
+sessionwiki opencode install --dry-run   # inspect
+sessionwiki opencode install             # write the plugin
+sessionwiki opencode autosync --build    # run one cycle manually
 ```
 
 The plugin lives at
-`~/.config/opencode/plugins/llmwiki-autosync/index.ts`. See
+`~/.config/opencode/plugins/sessionwiki-autosync/index.ts`. See
 [docs/adapters/opencode.md](docs/adapters/opencode.md) for details.
 
 ## For maintainers
@@ -474,34 +476,34 @@ stdout/stderr, screenshot on failure.
 
 ## Scheduled sync
 
-For a daily / weekly cron-style sync, schedule `llmwiki sync` directly via your OS's native job runner (`launchd` on macOS, `systemd` on Linux, Task Scheduler on Windows). Paths and adapter selection come from `examples/sessions_config.json`.
+For a daily / weekly cron-style sync, schedule `sessionwiki sync` directly via your OS's native job runner (`launchd` on macOS, `systemd` on Linux, Task Scheduler on Windows). Paths and adapter selection come from `examples/sessions_config.json`.
 
 ## CLI reference
 
 ```bash
-llmwiki init                    # scaffold raw/ wiki/ site/ + seed nav files
-llmwiki sync                    # export ZCode/OpenCode + convert .jsonl → markdown (auto-build/lint if configured)
-llmwiki build                   # compile static HTML + AI exports
-llmwiki serve                   # local HTTP server on 127.0.0.1:8765
-llmwiki adapters                # list available adapters + configured state (v1.0)
-llmwiki doctor                  # check Python, deps, config, and ZCode paths
-llmwiki audit                   # scan for usernames/secrets before publishing
-llmwiki zcode export            # export ZCode's SQLite store to JSONL
-llmwiki zcode autosync          # portable export → convert → build
-llmwiki zcode install           # Stop hook + systemd/launchd/Task Scheduler
-llmwiki opencode export         # export OpenCode's SQLite store to JSONL
-llmwiki opencode autosync       # portable export → convert → build
-llmwiki opencode install        # session.idle autosync plugin
-llmwiki graph                   # build knowledge graph (v0.2)
-llmwiki lint                    # 16-rule wiki lint (v1.2)
-llmwiki export <format>         # AI-consumable exports (v0.4)
-llmwiki synthesize              # auto-ingest synthesis pipeline (v0.5)
-llmwiki all                     # build → graph → export → lint in one shot (v1.2)
-llmwiki version
+sessionwiki init                    # scaffold raw/ wiki/ site/ + seed nav files
+sessionwiki sync                    # export ZCode/OpenCode + convert .jsonl → markdown (auto-build/lint if configured)
+sessionwiki build                   # compile static HTML + AI exports
+sessionwiki serve                   # local HTTP server on 127.0.0.1:8765
+sessionwiki adapters                # list available adapters + configured state (v1.0)
+sessionwiki doctor                  # check Python, deps, config, and ZCode paths
+sessionwiki audit                   # scan for usernames/secrets before publishing
+sessionwiki zcode export            # export ZCode's SQLite store to JSONL
+sessionwiki zcode autosync          # portable export → convert → build
+sessionwiki zcode install           # Stop hook + systemd/launchd/Task Scheduler
+sessionwiki opencode export         # export OpenCode's SQLite store to JSONL
+sessionwiki opencode autosync       # portable export → convert → build
+sessionwiki opencode install        # session.idle autosync plugin
+sessionwiki graph                   # build knowledge graph (v0.2)
+sessionwiki lint                    # 16-rule wiki lint (v1.2)
+sessionwiki export <format>         # AI-consumable exports (v0.4)
+sessionwiki synthesize              # auto-ingest synthesis pipeline (v0.5)
+sessionwiki all                     # build → graph → export → lint in one shot (v1.2)
+sessionwiki version
 ```
 
 Each subcommand has its own `--help`. After `setup.sh`, either activate
-`.venv` (`source .venv/bin/activate`) or call `.venv/bin/llmwiki`; the
+`.venv` (`source .venv/bin/activate`) or call `.venv/bin/sessionwiki`; the
 one-click wrappers (`sync.sh`/`.bat`, `build.sh`/`.bat`, `serve.sh`/`.bat`,
 `upgrade.sh`/`.bat`) select the venv interpreter automatically.
 
@@ -509,24 +511,24 @@ one-click wrappers (`sync.sh`/`.bat`, `build.sh`/`.bat`, `serve.sh`/`.bat`,
 
 | Agent | Adapter | Status | Added in |
 |---|---|---|---|
-| [Claude Code](https://claude.com/claude-code) | `llmwiki.adapters.claude_code` | ✅ Production | v0.1 |
-| [Obsidian](https://obsidian.md) (input) | `llmwiki.adapters.obsidian` | ✅ Production | v0.1 |
-| [Obsidian](https://obsidian.md) (output) | `llmwiki.obsidian_output` | ✅ Production | v0.2 |
-| [Codex CLI](https://github.com/openai/codex) | `llmwiki.adapters.codex_cli` | ✅ Production | v0.3 |
-| [Cursor](https://cursor.com) | `llmwiki.adapters.cursor` | 🧪 Beta — needs verification against current Cursor session format | v0.5 |
-| [Gemini CLI](https://ai.google.dev/gemini-api) | `llmwiki.adapters.gemini_cli` | 🧪 Beta — layout TBC | v0.5 |
-| [Copilot Chat](https://github.com/features/copilot) | `llmwiki.adapters.copilot_chat` | 🧪 Beta | v0.9 |
-| [Copilot CLI](https://github.com/features/copilot) | `llmwiki.adapters.copilot_cli` | 🧪 Beta | v0.9 |
-| [OpenCode](https://github.com/sst/opencode) / OpenClaw | `llmwiki.adapters.opencode` | ✅ Production (V2 SQLite export) | v1.4 |
+| [Claude Code](https://claude.com/claude-code) | `sessionwiki.adapters.claude_code` | ✅ Production | v0.1 |
+| [Obsidian](https://obsidian.md) (input) | `sessionwiki.adapters.obsidian` | ✅ Production | v0.1 |
+| [Obsidian](https://obsidian.md) (output) | `sessionwiki.obsidian_output` | ✅ Production | v0.2 |
+| [Codex CLI](https://github.com/openai/codex) | `sessionwiki.adapters.codex_cli` | ✅ Production | v0.3 |
+| [Cursor](https://cursor.com) | `sessionwiki.adapters.cursor` | 🧪 Beta — needs verification against current Cursor session format | v0.5 |
+| [Gemini CLI](https://ai.google.dev/gemini-api) | `sessionwiki.adapters.gemini_cli` | 🧪 Beta — layout TBC | v0.5 |
+| [Copilot Chat](https://github.com/features/copilot) | `sessionwiki.adapters.copilot_chat` | 🧪 Beta | v0.9 |
+| [Copilot CLI](https://github.com/features/copilot) | `sessionwiki.adapters.copilot_cli` | 🧪 Beta | v0.9 |
+| [OpenCode](https://github.com/sst/opencode) / OpenClaw | `sessionwiki.adapters.opencode` | ✅ Production (V2 SQLite export) | v1.4 |
 
 Adding a new agent is [one small file](docs/framework.md) — subclass `BaseAdapter`, declare `SUPPORTED_SCHEMA_VERSIONS`, ship a fixture + snapshot test.
 
 ## MCP server
 
-llmwiki ships its own MCP server (stdio transport, no SDK dependency) so any MCP client can query your wiki directly.
+sessionwiki ships its own MCP server (stdio transport, no SDK dependency) so any MCP client can query your wiki directly.
 
 ```bash
-python3 -m llmwiki.mcp   # runs on stdin/stdout
+python3 -m sessionwiki.mcp   # runs on stdin/stdout
 ```
 
 Twelve production tools (7 core + 5 added in v1.0 `#159`):
@@ -551,10 +553,10 @@ Register in your MCP client's config — e.g. for Claude Desktop, add to `~/Libr
 ```json
 {
   "mcpServers": {
-    "llmwiki": {
-      "command": "/absolute/path/to/llm-wiki/.venv/bin/python",
-      "args": ["-m", "llmwiki.mcp"],
-      "cwd": "/absolute/path/to/llm-wiki"
+    "sessionwiki": {
+      "command": "/absolute/path/to/sessionwiki/.venv/bin/python",
+      "args": ["-m", "sessionwiki.mcp"],
+      "cwd": "/absolute/path/to/sessionwiki"
     }
   }
 }
@@ -662,6 +664,12 @@ Per-adapter docs:
 
 | Version | Focus | Tag |
 |---|---|---|
+| **v2.0.0** (sessionwiki) | First sessionwiki release — renamed from llmwiki; ZCode + OpenCode sources with autosync, OpenAI-compatible synthesis, session coalescing, locked/atomic state, `doctor` / `audit`, session graph. See [differences](docs/differences-from-llmwiki.md). | `v2.0.0` |
+
+Upstream llmwiki releases (history this project is built on):
+
+| Version | Focus | Tag |
+|---|---|---|
 | [v0.1.0](https://github.com/Pratiyush/llm-wiki/releases/tag/v0.1.0) | Core release — Claude Code adapter, god-level HTML UI, schema, CI, plugin scaffolding | `v0.1.0` |
 | [v0.2.0](https://github.com/Pratiyush/llm-wiki/releases/tag/v0.2.0) | Extensions — 3 new slash commands, 3 new adapters, Obsidian bidirectional, full MCP server | `v0.2.0` |
 | [v0.3.0](https://github.com/Pratiyush/llm-wiki/releases/tag/v0.3.0) | PyPI packaging, eval framework, i18n scaffold | `v0.3.0` |
@@ -676,16 +684,16 @@ Per-adapter docs:
 | [v1.1.0-rc1](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc1) | Solo quick-win sprint — candidates workflow, Ollama scaffold, prompt-cache scaffold | `v1.1.0-rc1` |
 | [v1.1.0-rc2](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc2) | Session E — interactive graph viewer + remaining code-only v1.1 work | `v1.1.0-rc2` |
 | [v1.1.0-rc3](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc3) | Gap-sweep bundle — state portability, quarantine, sync --status, log CLI, synthesize --estimate breakdown, tag family, stale references, graph context menu, raw immutability, AI-sessions default | `v1.1.0-rc3` |
-| [v1.1.0-rc4](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc4) | Navigation + quality — graph `site_url` resolver (99.7% → 0% dead clicks), `llmwiki backlinks` CLI (95% → 0% orphan pages), source-code → GitHub link rewriter (471 → 100 broken), verify-before-fixing contribution rule | `v1.1.0-rc4` |
+| [v1.1.0-rc4](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc4) | Navigation + quality — graph `site_url` resolver (99.7% → 0% dead clicks), `sessionwiki backlinks` CLI (95% → 0% orphan pages), source-code → GitHub link rewriter (471 → 100 broken), verify-before-fixing contribution rule | `v1.1.0-rc4` |
 | [v1.1.0-rc5](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc5) | Site audit + 5 closed batches — session-local ref stripping (351 → 247 broken), cheatsheet, README/CONTRIBUTING compile, expanded E2E, slash-CLI parity test, 4 adapter docs, Ollama tutorial, dual-mode docs skeleton, `/wiki-synthesize` slash | `v1.1.0-rc5` |
 | [v1.1.0-rc6](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc6) | rc6 batch — fixed adapter tag hardcoded to `claude-code` for every adapter (#346), tutorial UX polish with in-page TOC + prev/next + edit-on-GitHub (#282), command palette now indexes 107 doc pages + 17 slash commands (#277), content-hash cache for `md_to_html` (#283) | `v1.1.0-rc6` |
 | [v1.1.0-rc7](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc7) | rc7 batch — automatic AI-suggested tags during synthesis (#351), link-checker config fix (#348, #350, #353) | `v1.1.0-rc7` |
-| [v1.1.0-rc8](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc8) | rc8 batch — complete Mode B agent-delegate backend (#316): new `llmwiki synthesize --list-pending` + `--complete <uuid>` CLI subcommands, `/wiki-sync` step 6 auto-detects pending prompts, Mode B ships end-to-end without an API key | `v1.1.0-rc8` |
-| [**v1.2.0**](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.2.0) | **First stable on the 1.x line** — `llmwiki all` one-shot pipeline runner, Playwright + axe-core E2E suite (#384), project-stub auto-seeding, 2 new lint rules, critical export-fidelity + sync-collision fixes, 10 UX-critique items (#387). PyPI distribution name: `llm-notebook`. | `v1.2.0` |
+| [v1.1.0-rc8](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.1.0-rc8) | rc8 batch — complete Mode B agent-delegate backend (#316): new `sessionwiki synthesize --list-pending` + `--complete <uuid>` CLI subcommands, `/wiki-sync` step 6 auto-detects pending prompts, Mode B ships end-to-end without an API key | `v1.1.0-rc8` |
+| [**v1.2.0**](https://github.com/Pratiyush/llm-wiki/releases/tag/v1.2.0) | **First stable on the 1.x line** — `sessionwiki all` one-shot pipeline runner, Playwright + axe-core E2E suite (#384), project-stub auto-seeding, 2 new lint rules, critical export-fidelity + sync-collision fixes, 10 UX-critique items (#387). PyPI distribution name: `sessionwiki`. | `v1.2.0` |
 
 ## Roadmap
 
-Shipped milestones:
+Shipped upstream llmwiki milestones:
 
 - **v0.5.0** — Folder-level `_context.md`, auto-ingest, adapter graduations, lazy search index, scheduled sync, WCAG, E2E tests ([milestone](https://github.com/Pratiyush/llm-wiki/milestone/4))
 - **v0.6.0** — qmd export, GitLab Pages CI, PyPI release automation, maintainer governance scaffold ([milestone](https://github.com/Pratiyush/llm-wiki/milestone/5))
@@ -694,24 +702,19 @@ Shipped milestones:
 - **v0.9.0** — Project topics, agent labels, Copilot adapters, image pipeline, highlight.js, public demo deployment
 - **v0.9.x** — Sprint 1-4 foundation for v1.0.0 Obsidian integration: confidence scoring, lifecycle state machine, 9 navigation files, 11 lint rules, Auto Dream, Dataview dashboard, multi-agent skills, 12-tool MCP server, meeting + Jira adapters
 
-Active milestones:
-
-| Milestone | Focus | Tracking |
-|---|---|---|
-| **v1.0.0** | Final docs polish + PyPI trusted publisher + release | [Milestone](https://github.com/Pratiyush/llm-wiki/milestone/9) |
-| **v1.1.0** | Ollama backend, prompt caching, interactive graph viewer, Homebrew tap | [Milestone](https://github.com/Pratiyush/llm-wiki/milestone/10) |
-| **v1.2.0** | ChatGPT + OpenCode adapters, vault-overlay mode, tree-aware search, cache tiers | [Milestone](https://github.com/Pratiyush/llm-wiki/milestone/11) |
+Planned work for sessionwiki is tracked in [issues](https://github.com/necroz/sessionwiki/issues). The milestone list above is upstream llmwiki history.
 
 ### Deployment targets
 
 - **GitHub Pages** — shipped in v0.1 via `.github/workflows/pages.yml` (triggers on push to master). See [`docs/deploy/github-pages.md`](docs/deploy/github-pages.md).
-- **Docker / GHCR** — pull and run: `docker compose pull && docker compose up -d`. Image published to `ghcr.io/pratiyush/llm-wiki` on every tag push. See [`docs/deploy/docker.md`](docs/deploy/docker.md).
+- **Docker / GHCR** — pull and run: `docker compose pull && docker compose up -d`. Image published to `ghcr.io/necroz/sessionwiki` on every tag push. See [`docs/deploy/docker.md`](docs/deploy/docker.md).
 - **GitLab Pages** — copy [`.gitlab-ci.yml.example`](.gitlab-ci.yml.example) → `.gitlab-ci.yml`. See [`docs/deploy/gitlab-pages.md`](docs/deploy/gitlab-pages.md).
-- **Vercel / Netlify** — static deploy after `llmwiki build`. See [`docs/deploy/vercel-netlify.md`](docs/deploy/vercel-netlify.md).
-- **Any static host** — `llmwiki build` writes to `site/`, which you can `rsync`/`scp` anywhere.
+- **Vercel / Netlify** — static deploy after `sessionwiki build`. See [`docs/deploy/vercel-netlify.md`](docs/deploy/vercel-netlify.md).
+- **Any static host** — `sessionwiki build` writes to `site/`, which you can `rsync`/`scp` anywhere.
 
 ## Acknowledgements
 
+- [Pratiyush](https://github.com/Pratiyush) for [llmwiki](https://github.com/Pratiyush/llm-wiki), the project sessionwiki is based on — most of the code, docs and tests here are his work. See [NOTICE](NOTICE).
 - [Andrej Karpathy](https://twitter.com/karpathy) for [the LLM Wiki idea](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
 - [SamurAIGPT/llm-wiki-agent](https://github.com/SamurAIGPT/llm-wiki-agent), [lucasastorian/llmwiki](https://github.com/lucasastorian/llmwiki), [xoai/sage-wiki](https://github.com/xoai/sage-wiki), and [bashiraziz/llm-wiki-template](https://github.com/bashiraziz/llm-wiki-template) — prior art that shaped this.
 - [Python Markdown](https://python-markdown.github.io/) for the rendering pipeline, and [highlight.js](https://highlightjs.org/) for client-side syntax highlighting.
@@ -719,4 +722,4 @@ Active milestones:
 
 ## License
 
-[MIT](LICENSE) © Pratiyush
+[MIT](LICENSE) © 2026 Igor Lashkevich (sessionwiki) · © 2026 Pratiyush (original llmwiki). See [NOTICE](NOTICE).

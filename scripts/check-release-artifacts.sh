@@ -13,7 +13,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 echo "→ Cleaning old build output…"
-rm -rf build dist llmwiki.egg-info
+rm -rf build dist sessionwiki.egg-info
 
 echo "→ Installing build + twine in a throwaway venv…"
 python3 -m venv .release-smoke

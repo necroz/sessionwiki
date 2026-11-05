@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from llmwiki.build import render_sessions_index
+from sessionwiki.build import render_sessions_index
 
 
 def _src(slug: str = "x", project: str = "demo", date: str = "2026-04-01"):

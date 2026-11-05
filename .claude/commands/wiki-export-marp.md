@@ -9,4 +9,4 @@ per matching page, and a summary slide.
 
 Output goes to `wiki/exports/<topic-slug>.marp.md` by default.
 
-Run: `python3 -m llmwiki export-marp --topic "$ARGUMENTS"`
+Run: `python3 -m sessionwiki export-marp --topic "$ARGUMENTS"`

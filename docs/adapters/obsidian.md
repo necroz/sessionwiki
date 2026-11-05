@@ -1,8 +1,8 @@
 # Obsidian adapter
 
 **Status:** ✅ Production (v0.1) — input mode
-**Module:** `llmwiki.adapters.contrib.obsidian`
-**Source:** [`llmwiki/adapters/contrib/obsidian.py`](../../llmwiki/adapters/contrib/obsidian.py)
+**Module:** `sessionwiki.adapters.contrib.obsidian`
+**Source:** [`sessionwiki/adapters/contrib/obsidian.py`](../../sessionwiki/adapters/contrib/obsidian.py)
 
 ## What it does
 
@@ -89,15 +89,15 @@ raw/sessions/02---projects/ai-newsletter-design.md
 
 ## Frontmatter handling
 
-If your Obsidian notes have YAML frontmatter, llmwiki preserves it verbatim. If they don't, the adapter leaves the file unchanged — the wiki build will render it as plain markdown.
+If your Obsidian notes have YAML frontmatter, sessionwiki preserves it verbatim. If they don't, the adapter leaves the file unchanged — the wiki build will render it as plain markdown.
 
 Obsidian-specific frontmatter (like `dataview` queries or `cssclass`) is passed through untouched and may not render correctly in the HTML build. This is intentional — we don't want to clobber your notes.
 
 ## Wikilinks
 
-Obsidian's `[[wikilink]]` syntax is native to the llmwiki format, so your existing wikilinks will work. However:
+Obsidian's `[[wikilink]]` syntax is native to the sessionwiki format, so your existing wikilinks will work. However:
 
-- Wikilinks pointing to notes outside the current project slug may not resolve in the built site (llmwiki groups by project).
+- Wikilinks pointing to notes outside the current project slug may not resolve in the built site (sessionwiki groups by project).
 - Aliased wikilinks (`[[target|alias]]`) render with the alias.
 - Embed wikilinks (`![[attachment.png]]`) are treated as images and will 404 in the built site unless you also copy the attachments.
 
@@ -105,18 +105,18 @@ Obsidian's `[[wikilink]]` syntax is native to the llmwiki format, so your existi
 
 ## Bidirectional sync (v0.2 roadmap)
 
-Currently the Obsidian adapter is **input-only**: it reads your vault into llmwiki's `raw/` layer.
+Currently the Obsidian adapter is **input-only**: it reads your vault into sessionwiki's `raw/` layer.
 
-In v0.2 we plan to add **output mode**: write the compiled wiki (`wiki/sources/`, `wiki/entities/`, `wiki/concepts/`) back into your vault so you can browse llmwiki's output alongside your other notes, with Obsidian's graph view, backlinks panel, and search.
+In v0.2 we plan to add **output mode**: write the compiled wiki (`wiki/sources/`, `wiki/entities/`, `wiki/concepts/`) back into your vault so you can browse sessionwiki's output alongside your other notes, with Obsidian's graph view, backlinks panel, and search.
 
-Tracking: [LMW-107 Obsidian output (bidirectional sync)](https://github.com/Pratiyush/llm-wiki/issues).
+Tracking: [LMW-107 Obsidian output (bidirectional sync)](https://github.com/necroz/sessionwiki/issues).
 
 ## Testing the adapter
 
 ```bash
-python3 -m llmwiki adapters                           # should list obsidian as available
-python3 -m llmwiki sync --adapter obsidian --dry-run  # preview conversion
-python3 -m llmwiki sync --adapter obsidian            # run it
+python3 -m sessionwiki adapters                           # should list obsidian as available
+python3 -m sessionwiki sync --adapter obsidian --dry-run  # preview conversion
+python3 -m sessionwiki sync --adapter obsidian            # run it
 ```
 
 ## Troubleshooting

@@ -1,7 +1,7 @@
 """Tests for docs/design/brand-system.md (v1.2.0 · #115).
 
 The doc is the canonical reference for typography/palette/motion, so it
-must stay aligned with the actual CSS tokens in ``llmwiki/render/css.py``.
+must stay aligned with the actual CSS tokens in ``sessionwiki/render/css.py``.
 If someone renames ``--accent`` or bumps ``--radius`` without updating
 the doc, these tests fail and point at the drift.
 """
@@ -13,8 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
-from llmwiki.render.css import CSS
+from sessionwiki import REPO_ROOT
+from sessionwiki.render.css import CSS
 
 
 BRAND_DOC = REPO_ROOT / "docs" / "design" / "brand-system.md"
@@ -76,7 +76,7 @@ PALETTE_TOKENS_IN_DOC = [
 def test_doc_references_every_core_token(doc: str, token: str):
     # Backticked in markdown
     assert f"`{token}`" in doc, (
-        f"brand doc should document `{token}` (defined in llmwiki/render/css.py)"
+        f"brand doc should document `{token}` (defined in sessionwiki/render/css.py)"
     )
 
 
@@ -167,4 +167,4 @@ def test_doc_has_do_dont_section(doc: str):
 def test_doc_links_to_css_source(doc: str):
     # The whole point is "tokens live in css.py, this is a mirror" —
     # make sure the link is there for drift investigation.
-    assert "llmwiki/render/css.py" in doc
+    assert "sessionwiki/render/css.py" in doc

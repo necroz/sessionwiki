@@ -64,7 +64,7 @@ Builders populate a :class:`ShellSlots` instance and pass it to
 
 ### Auto-extracted infobox fields
 
-From `llmwiki/reader_shell.py :: INFOBOX_FIELDS_IN_ORDER`:
+From `sessionwiki/reader_shell.py :: INFOBOX_FIELDS_IN_ORDER`:
 
 | Frontmatter key | Label |
 |---|---|
@@ -85,7 +85,7 @@ you want them surfaced.
 ## Python API
 
 ```python
-from llmwiki.reader_shell import (
+from sessionwiki.reader_shell import (
     ShellSlots,
     build_slots,
     extract_infobox_fields,
@@ -115,7 +115,7 @@ else:
 
 ## CSS
 
-Inline CSS lives in `llmwiki/reader_shell.py :: READER_SHELL_CSS` and is
+Inline CSS lives in `sessionwiki/reader_shell.py :: READER_SHELL_CSS` and is
 appended to the main site CSS at build time. All selectors namespace
 under `.reader-shell`:
 
@@ -164,7 +164,7 @@ under `.reader-shell`:
 - **Automatic `see_also` extraction from `## Connections`.** Callers
   pass the list in explicitly; the parser landing with #112 is scope
   creep. (Parsed on the caller side, using `WIKILINK_RE` from
-  `llmwiki/lint/__init__.py`.)
+  `sessionwiki/lint/__init__.py`.)
 - **Converting all 647 session pages.** The scaffold ships opt-in so
   the first real adopter is a maintainer-chosen page. Bulk migration is
   a follow-up.
@@ -178,12 +178,12 @@ Pages with `reader_shell: true` as of v1.1.0-rc8:
 | [`wiki/entities/ClaudeSonnet4.md`](../../wiki/entities/ClaudeSonnet4.md) | Flagship model entity — has infobox-worthy pricing, benchmarks, modalities that map cleanly to the Wikipedia-style shell |
 | [`wiki/projects/llm-wiki.md`](../../wiki/projects/llm-wiki.md) | Meta project page — showcases `reader_shell` on the framework's own canonical page |
 
-To opt a page in, add `reader_shell: true` to its frontmatter and rebuild with `llmwiki build`. The shell renders infobox + table of contents + references rail automatically from the page's existing frontmatter + wikilinks.
+To opt a page in, add `reader_shell: true` to its frontmatter and rebuild with `sessionwiki build`. The shell renders infobox + table of contents + references rail automatically from the page's existing frontmatter + wikilinks.
 
 ## Related
 
-- `llmwiki/reader_shell.py` — implementation
-- `llmwiki/render/css.py` — where `READER_SHELL_CSS` gets appended
+- `sessionwiki/reader_shell.py` — implementation
+- `sessionwiki/render/css.py` — where `READER_SHELL_CSS` gets appended
 - `docs/design/brand-system.md` — the CSS tokens this shell inherits
 - `docs/reference/cache-tiers.md` — sibling opt-in feature, now also has live adopters (#285)
 - `#112` — this issue

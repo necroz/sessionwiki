@@ -6,7 +6,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from llmwiki.synth.pipeline import (
+from sessionwiki.synth.pipeline import (
     _cluster_filename,
     _coalesce_low_signal_sessions,
     _render_cluster_page,
@@ -306,7 +306,7 @@ def test_synthesize_coalesce_only_needs_no_backend(tmp_path):
 
 
 def test_synthesize_parser_accepts_coalesce_only():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     args = build_parser().parse_args(["synthesize", "--coalesce-only"])
 
@@ -317,7 +317,7 @@ def test_cmd_synthesize_coalesce_only_skips_backend_probe(monkeypatch):
     import argparse
     from unittest.mock import MagicMock
 
-    from llmwiki import cli
+    from sessionwiki import cli
 
     args = argparse.Namespace(
         coalesce_only=True,
@@ -330,7 +330,7 @@ def test_cmd_synthesize_coalesce_only_skips_backend_probe(monkeypatch):
     )
     monkeypatch.setattr(cli, "_load_run_config", lambda: {"synthesis": {}})
     monkeypatch.setattr(
-        "llmwiki.synth.pipeline.resolve_backend",
+        "sessionwiki.synth.pipeline.resolve_backend",
         MagicMock(side_effect=AssertionError("backend must not be resolved")),
     )
     synth = MagicMock(
@@ -344,7 +344,7 @@ def test_cmd_synthesize_coalesce_only_skips_backend_probe(monkeypatch):
             "backend": "none",
         }
     )
-    monkeypatch.setattr("llmwiki.synth.pipeline.synthesize_new_sessions", synth)
+    monkeypatch.setattr("sessionwiki.synth.pipeline.synthesize_new_sessions", synth)
 
     rc = cli.cmd_synthesize(args)
 

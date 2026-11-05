@@ -64,7 +64,7 @@ The `cache_tier_consistency` rule catches:
 ## Python API
 
 ```python
-from llmwiki.cache_tiers import (
+from sessionwiki.cache_tiers import (
     parse_cache_tier,
     is_preloaded,
     summary_excerpt,
@@ -90,7 +90,7 @@ if is_preloaded(tier):
   repeatedly.
 - **Demote rather than delete.** When a page stops being relevant, tag
   it L4 instead of archiving — you keep history searchable for
-  `llmwiki lint` + explicit queries, but pay zero context cost for
+  `sessionwiki lint` + explicit queries, but pay zero context cost for
   typical questions.
 
 ## Live adopters (#285)
@@ -112,8 +112,8 @@ This exercises `CacheTierConsistency` in real conditions.  To opt a page in, add
 
 - `#52` — the issue that shipped this
 - `#285` — live-adoption polish
-- `llmwiki/cache_tiers.py` — implementation
-- `llmwiki/lint/rules.py :: CacheTierConsistency` — lint rule
+- `sessionwiki/cache_tiers.py` — implementation
+- `sessionwiki/lint/rules.py :: CacheTierConsistency` — lint rule
 - `docs/reference/reader-shell.md` — sibling opt-in feature, see "Live adopters" there
 - `docs/reference/prompt-caching.md` — sibling: Anthropic-level prompt
   cache control

@@ -4,7 +4,7 @@
 > step-by-step checklist. Run the `/release <version>` slash command
 > for a guided walkthrough that follows the same steps.
 
-llmwiki uses [semantic versioning](https://semver.org/) with a
+sessionwiki uses [semantic versioning](https://semver.org/) with a
 pre-`1.0.0` caveat: every `0.x.y` release can break compatibility
 freely. `1.0.0` will be the first stable release.
 
@@ -17,7 +17,7 @@ lands (heatmap + tool chart + token usage = v0.8). Patch bumps
 - [ ] Master is green (all tests pass, all recent CI runs passed)
 - [ ] `python3 -m pytest tests/ -q` on a clean checkout — local
       pass beats CI-only pass
-- [ ] `python3 -m llmwiki build` succeeds end-to-end, no warnings
+- [ ] `python3 -m sessionwiki build` succeeds end-to-end, no warnings
       that weren't there before
 - [ ] Preview the built site locally and click through every nav
       item — look for broken links, missing icons, crashed JS
@@ -26,17 +26,17 @@ lands (heatmap + tool chart + token usage = v0.8). Patch bumps
 
 ## Bump version
 
-The single source of truth is `llmwiki/__init__.py`. Every other
+The single source of truth is `sessionwiki/__init__.py`. Every other
 place that mentions the version is derivative and must match.
 
-- [ ] Update `__version__ = "X.Y.Z"` in `llmwiki/__init__.py`
+- [ ] Update `__version__ = "X.Y.Z"` in `sessionwiki/__init__.py`
 - [ ] Update `version = "X.Y.Z"` in `pyproject.toml` (the test
       `test_pyproject_version_matches_package` enforces this)
 - [ ] Update the version badge in `README.md`
       (`Version-vX.Y.Z-7C3AED.svg`)
 - [ ] Update the tests badge in `README.md` with the new passing count
       from `python3 -m pytest tests/`
-- [ ] Run `python3 -m llmwiki --version` and confirm it prints the
+- [ ] Run `python3 -m sessionwiki --version` and confirm it prints the
       new version
 
 ## Update CHANGELOG
@@ -55,7 +55,7 @@ place that mentions the version is derivative and must match.
 ## Commit + tag
 
 ```bash
-git add llmwiki/__init__.py pyproject.toml README.md CHANGELOG.md
+git add sessionwiki/__init__.py pyproject.toml README.md CHANGELOG.md
 git commit -m "release(vX.Y.Z): bump version + CHANGELOG"
 git tag vX.Y.Z
 git push origin master vX.Y.Z
@@ -73,9 +73,9 @@ The tag push triggers `.github/workflows/release.yml` which automatically:
 4. Creates a GitHub Release with build artifacts + signature bundles
 
 - [ ] Confirm the release workflow ran: `gh run list --workflow=release.yml --limit=3`
-- [ ] Confirm the package is on PyPI: `pip install llm-notebook==X.Y.Z`
+- [ ] Confirm the package is on PyPI: `pip install sessionwiki==X.Y.Z`
 - [ ] Confirm the release shows up at
-      `https://github.com/Pratiyush/llm-wiki/releases`
+      `https://github.com/necroz/sessionwiki/releases`
 - [ ] If the workflow failed, check the "release" environment protection rules
 
 **Manual fallback** (if automation is broken):
@@ -89,7 +89,7 @@ gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes --prerelease
 - [ ] `.github/workflows/pages.yml` fires on both `master` push and
       the new tag. Watch the run with `gh run list --workflow=pages.yml
       --limit=3`
-- [ ] Visit `https://pratiyush.github.io/llm-wiki/` and confirm the
+- [ ] Visit `https://necroz.github.io/sessionwiki/` and confirm the
       new version badge + any new features are visible
 - [ ] If the deploy failed, fix master first; don't hotfix the tag
 

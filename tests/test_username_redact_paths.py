@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.convert import Redactor
+from sessionwiki.convert import Redactor
 
 
 @pytest.fixture

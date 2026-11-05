@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.build import (
+from sessionwiki.build import (
     HLJS_DARK_CSS,
     HLJS_LIGHT_CSS,
     HLJS_SCRIPT,
@@ -198,12 +198,12 @@ def test_md_to_html_preserves_fenced_code_with_html():
 
 def test_md_to_html_preserves_html_comments():
     """`<!-- ... -->` is NOT escaped — build.py emits an
-    `<!-- llmwiki:metadata ... -->` comment that AI agents parse directly
+    `<!-- sessionwiki:metadata ... -->` comment that AI agents parse directly
     from the HTML body. The preprocessor regex only matches `<[letter]`,
     never `<!`, so comments survive."""
-    body = "text\n\n<!-- llmwiki:metadata\nslug: foo\n-->\nmore text\n"
+    body = "text\n\n<!-- sessionwiki:metadata\nslug: foo\n-->\nmore text\n"
     html_out = md_to_html(body)
-    assert "<!-- llmwiki:metadata" in html_out
+    assert "<!-- sessionwiki:metadata" in html_out
     assert "&lt;!" not in html_out
 
 
@@ -250,7 +250,7 @@ def test_md_to_html_session_tail_script_survives_raw_tag():
 def test_build_py_drops_pygments_codepath():
     # If these symbols leak back in, someone re-introduced the server-side
     # highlighter alongside hljs, which would double-style every <code>.
-    src = (REPO_ROOT / "llmwiki" / "build.py").read_text(encoding="utf-8")
+    src = (REPO_ROOT / "sessionwiki" / "build.py").read_text(encoding="utf-8")
     assert "HAS_PYGMENTS" not in src
     # The old Pygments CSS had `.codehilite { background: ...` rules.
     # Comments that merely mention the word are fine; actual CSS selectors
@@ -267,7 +267,7 @@ def test_site_build_emits_hljs_markup(tmp_path, monkeypatch):
     """Run the real builder against a minimal raw/ layout and confirm the
     output HTML actually carries the highlight.js tags. This is the
     smoke-test for the whole swap — if it passes, deploy is safe."""
-    from llmwiki import build as build_mod
+    from sessionwiki import build as build_mod
 
     raw_root = tmp_path / "raw"
     raw_sessions = raw_root / "sessions"

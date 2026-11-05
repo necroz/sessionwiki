@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 DOCKERFILE = REPO_ROOT / "Dockerfile"
@@ -77,7 +77,7 @@ def test_compose_exists():
 
 def test_compose_pulls_ghcr_image():
     text = COMPOSE.read_text(encoding="utf-8")
-    assert "image: ghcr.io/pratiyush/llm-wiki" in text
+    assert "image: ghcr.io/necroz/sessionwiki" in text
 
 
 def test_compose_has_build_fallback():
@@ -93,7 +93,7 @@ def test_compose_maps_default_port():
 
 def test_compose_bind_mounts_user_dirs():
     text = COMPOSE.read_text(encoding="utf-8")
-    # Bind-mount raw/, wiki/, site/ so llmwiki reads/writes host data
+    # Bind-mount raw/, wiki/, site/ so sessionwiki reads/writes host data
     assert "./raw:/wiki/raw" in text
     assert "./wiki:/wiki/wiki" in text
     assert "./site:/wiki/site" in text

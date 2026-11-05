@@ -1,10 +1,10 @@
 {
-  "id": "llmwiki-sync",
-  "name": "llm-wiki Sync",
+  "id": "sessionwiki-sync",
+  "name": "sessionwiki Sync",
   "version": "0.1.0",
   "minAppVersion": "1.4.0",
-  "description": "Sync your llm-wiki knowledge base into Obsidian as a vault folder",
-  "author": "Pratiyush",
+  "description": "Sync your sessionwiki knowledge base into Obsidian as a vault folder",
+  "author": "Igor Lashkevich",
   "authorUrl": "https://github.com/nicobailey",
   "isDesktopOnly": false
 }

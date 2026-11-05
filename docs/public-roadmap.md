@@ -1,4 +1,4 @@
-# llmwiki Public Roadmap
+# sessionwiki Public Roadmap
 
 > Track what shipped, what's in progress, and what's next.
 > Last updated: 2026-04-09.
@@ -19,7 +19,7 @@
 
 ## In progress
 
-- **Changelog timeline module** (`llmwiki/changelog_timeline.py`) -- append-only changelog field on model entities with timeline widget, pricing sparkline, and recently-updated card
+- **Changelog timeline module** (`sessionwiki/changelog_timeline.py`) -- append-only changelog field on model entities with timeline widget, pricing sparkline, and recently-updated card
 - **Documentation expansion** -- SEO guide, benchmarks, accessibility report, competitor landscape
 
 ## Planned: v1.0
@@ -32,8 +32,8 @@ The v1.0 release is a stability pass. No new features -- just hardening.
 | Upgrade guide | Migration recipes for every breaking change between 0.x and 1.0 |
 | LTS branch | v1.x gets security fixes for 12 months |
 | Docs polish | Every feature documented, every tutorial up to date |
-| PyPI stable | `pip install llm-notebook` with stable version |
-| Homebrew formula | `brew install llmwiki` |
+| PyPI stable | `pip install sessionwiki` with stable version |
+| Homebrew formula | `brew install sessionwiki` |
 
 ## Planned: post-v1.0
 
@@ -46,7 +46,7 @@ The v1.0 release is a stability pass. No new features -- just hardening.
 | Local LLM via Ollama | Optional synthesis backend for offline users |
 | Plugin marketplace | `.claude-plugin/marketplace.json` community entries |
 | Hosted demo mode | One-click deploy without `git clone` |
-| Docker image | `docker run llmwiki` |
+| Docker image | `docker run sessionwiki` |
 | Web clipper / URL ingestion | Save web pages directly into the wiki |
 | SQLite FTS5 search | Server-side full-text search fallback |
 

@@ -1,6 +1,6 @@
 # Multi-Agent Setup
 
-llmwiki reads sessions from multiple coding agents simultaneously. One `llmwiki sync` pulls from every agent installed on your machine.
+sessionwiki reads sessions from multiple coding agents simultaneously. One `sessionwiki sync` pulls from every agent installed on your machine.
 
 ## Supported agents
 
@@ -16,9 +16,9 @@ llmwiki reads sessions from multiple coding agents simultaneously. One `llmwiki 
 
 ## How auto-detection works
 
-When you run `llmwiki sync`, the system:
+When you run `sessionwiki sync`, the system:
 
-1. Imports every adapter in `llmwiki/adapters/`
+1. Imports every adapter in `sessionwiki/adapters/`
 2. Calls `is_available()` on each — this checks whether the session store path exists on disk
 3. Runs only the available adapters (or those you specify with `--adapter`)
 
@@ -27,7 +27,7 @@ No configuration file is needed. If you have Claude Code and Codex CLI installed
 ## Checking detected agents
 
 ```bash
-python3 -m llmwiki adapters
+python3 -m sessionwiki adapters
 ```
 
 Example output:
@@ -81,13 +81,13 @@ Requires Google's Gemini CLI. The adapter checks `~/.gemini/`, `~/.config/gemini
 
 ```bash
 # Sync everything
-python3 -m llmwiki sync
+python3 -m sessionwiki sync
 
 # Sync only specific adapters
-python3 -m llmwiki sync --adapter claude_code codex_cli
+python3 -m sessionwiki sync --adapter claude_code codex_cli
 
 # Dry run to preview
-python3 -m llmwiki sync --dry-run
+python3 -m sessionwiki sync --dry-run
 ```
 
 The sync is idempotent. State is tracked in `.llmwiki-state.json` by file mtime, so re-running on unchanged files is a fast no-op.
@@ -126,5 +126,5 @@ Override adapter paths in `config.json`:
 1. **Use `--adapter` to test one agent at a time** when debugging sync issues.
 2. **Each agent gets its own project slug** derived from its session store layout, so sessions from different agents never collide.
 3. **The wiki layer is agent-agnostic.** Once sessions are in `raw/`, the wiki ingest treats them identically regardless of which agent produced them.
-4. **Schedule `llmwiki sync`** via `launchd` / `systemd` / Task Scheduler for periodic auto-sync across all agents (the `llmwiki watch` daemon was removed in v1.2.0 — see `docs/UPGRADING.md`).
+4. **Schedule `sessionwiki sync`** via `launchd` / `systemd` / Task Scheduler for periodic auto-sync across all agents (the `sessionwiki watch` daemon was removed in v1.2.0 — see `docs/UPGRADING.md`).
 5. **Combine with `.llmwikiignore`** to skip noisy agents or specific projects from any adapter.

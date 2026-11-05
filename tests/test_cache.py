@@ -1,4 +1,4 @@
-"""Tests for llmwiki/cache.py (v1.1.0 · #50)."""
+"""Tests for sessionwiki/cache.py (v1.1.0 · #50)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.cache import (
+from sessionwiki.cache import (
     BATCH_STATE_FILENAME,
     CACHE_CONTROL_EPHEMERAL,
     CHARS_PER_TOKEN,
@@ -428,7 +428,7 @@ def test_cost_estimate_breakdown_sums_to_total():
 
 
 def test_synthesize_parser_accepts_estimate_flag():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     args = parser.parse_args(["synthesize", "--estimate"])
@@ -436,7 +436,7 @@ def test_synthesize_parser_accepts_estimate_flag():
 
 
 def test_synthesize_parser_estimate_defaults_false():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     args = parser.parse_args(["synthesize"])
@@ -448,7 +448,7 @@ def test_estimate_command_emits_total(tmp_path, monkeypatch, capsys):
     # _discover_raw_sessions() / _load_state() for the per-session bodies.
     # Swap the discovery hook so the test runs in tmp_path with a known
     # body and no dependency on the real raw/ tree.
-    from llmwiki import cli as cli_mod
+    from sessionwiki import cli as cli_mod
 
     class _FakePath:
         def __init__(self, name: str, text: str | None = None):
@@ -465,7 +465,7 @@ def test_estimate_command_emits_total(tmp_path, monkeypatch, capsys):
     # Seed a prefix so the token estimator has something to chew on.
     (tmp_path / "CLAUDE.md").write_text("x" * 4000, encoding="utf-8")
 
-    import llmwiki.synth.pipeline as pipe
+    import sessionwiki.synth.pipeline as pipe
 
     def _fake_discover(raw_dir=None):
         return [
@@ -488,8 +488,8 @@ def test_estimate_command_emits_total(tmp_path, monkeypatch, capsys):
 
 
 def test_estimate_command_no_new_sessions(tmp_path, monkeypatch, capsys):
-    from llmwiki import cli as cli_mod
-    import llmwiki.synth.pipeline as pipe
+    from sessionwiki import cli as cli_mod
+    import sessionwiki.synth.pipeline as pipe
 
     monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path)
     monkeypatch.setattr(pipe, "_discover_raw_sessions", lambda raw_dir=None: [])

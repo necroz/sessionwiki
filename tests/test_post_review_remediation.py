@@ -40,8 +40,8 @@ from __future__ import annotations
 
 import re
 
-from llmwiki.build import nav_bar, render_models_section, render_vs_section
-from llmwiki.render.js import JS
+from sessionwiki.build import nav_bar, render_models_section, render_vs_section
+from sessionwiki.render.js import JS
 
 
 # 1. Per-dialog focus stash.
@@ -103,7 +103,7 @@ def test_mbn_theme_has_aria_pressed_in_markup() -> None:
     """page_foot emits the mobile bottom nav. Its theme button now
     ships with `aria-pressed="false"` baked in (JS overwrites on
     page load so the initial value is just a placeholder)."""
-    from llmwiki.build import page_foot
+    from sessionwiki.build import page_foot
     foot = page_foot()
     # Find the mbn-theme button + its attrs.
     m = re.search(r'id="mbn-theme"[^>]*', foot)
@@ -123,7 +123,7 @@ def test_mbn_theme_js_handler_calls_sync_pressed() -> None:
 # 6. Palette input has accessible label.
 
 def test_palette_input_has_aria_label() -> None:
-    from llmwiki.build import page_foot
+    from sessionwiki.build import page_foot
     foot = page_foot()
     m = re.search(r'id="palette-input"[^>]*', foot)
     assert m, "palette-input missing from page_foot output"

@@ -1,4 +1,4 @@
-# docker-compose.yml — the canonical "run llmwiki in a container" setup.
+# docker-compose.yml — the canonical "run sessionwiki in a container" setup.
 #
 # Two modes:
 #   • Pull published image (recommended):
@@ -9,18 +9,18 @@
 # See docs/deploy/docker.md for the full walk-through.
 
 services:
-  llmwiki:
-    image: ghcr.io/pratiyush/llm-wiki:latest
+  sessionwiki:
+    image: ghcr.io/necroz/sessionwiki:latest
     # Fall back to local build if the image isn't available (e.g. before
     # v1.1.0 publishes to ghcr for the first time).
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: llmwiki
+    container_name: sessionwiki
     ports:
       - "8765:8765"
     volumes:
-      # Bind-mount the repo's user-data dirs so llmwiki reads/writes them
+      # Bind-mount the repo's user-data dirs so sessionwiki reads/writes them
       # on the host instead of inside the container.
       - ./raw:/wiki/raw
       - ./wiki:/wiki/wiki
@@ -28,9 +28,9 @@ services:
       - ./examples:/wiki/examples:ro
     # Default command: serve the pre-built site on 0.0.0.0:8765.
     # Override at runtime:
-    #   docker compose run --rm llmwiki build
-    #   docker compose run --rm llmwiki sync
-    #   docker compose run --rm llmwiki lint --fail-on-errors
+    #   docker compose run --rm sessionwiki build
+    #   docker compose run --rm sessionwiki sync
+    #   docker compose run --rm sessionwiki lint --fail-on-errors
     command: ["serve", "--host", "0.0.0.0", "--port", "8765", "--dir", "site"]
     restart: unless-stopped
     healthcheck:

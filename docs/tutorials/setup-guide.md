@@ -1,11 +1,11 @@
 # Setup Guide — Your First LLM Wiki in 15 Minutes
 
-This is the end-to-end tutorial for getting llmwiki running on your machine
+This is the end-to-end tutorial for getting sessionwiki running on your machine
 and deployed to GitHub Pages. By the end you'll have:
 
 - A local wiki of your Claude Code / Codex / Cursor / Gemini / Copilot sessions
 - A static HTML site you can browse at `http://127.0.0.1:8765`
-- (Optional) A public GitHub Pages deploy at `https://<user>.github.io/llm-wiki/`
+- (Optional) A public GitHub Pages deploy at `https://<user>.github.io/sessionwiki/`
 - Your own project topics, model entities, and Obsidian view of the wiki
 
 **Prerequisites:** Python 3.9+, git. That's it. No Node, no Docker, no database.
@@ -17,8 +17,8 @@ and deployed to GitHub Pages. By the end you'll have:
 ### 1.1 Clone the repo
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ```
 
 ### 1.2 Run the setup script
@@ -41,7 +41,7 @@ The setup script does 5 things:
    - `raw/` — immutable session transcripts (Layer 1)
    - `wiki/` — LLM-maintained pages (Layer 2)
    - `site/` — generated HTML (Layer 3)
-2. **Installs `llmwiki`** in editable mode (`pip install -e .`)
+2. **Installs `sessionwiki`** in editable mode (`pip install -e .`)
 3. **Detects your coding agents** and enables matching adapters
    - Looks for `~/.claude/projects/`, `~/.codex/sessions/`, `~/Documents/Obsidian Vault`, etc.
    - Lists which ones are ready, which need paths configured
@@ -52,7 +52,7 @@ The setup script does 5 things:
 ### 1.4 First sync
 
 ```bash
-llmwiki sync
+sessionwiki sync
 ```
 
 Output looks like:
@@ -70,7 +70,7 @@ file per session.
 ### 1.5 First build
 
 ```bash
-llmwiki build
+sessionwiki build
 ```
 
 Output:
@@ -83,13 +83,13 @@ Output:
 ### 1.6 First serve
 
 ```bash
-llmwiki serve
+sessionwiki serve
 # → http://127.0.0.1:8765
 ```
 
 Open that URL in your browser. You should see:
 
-![llmwiki home page](../images/home.png)
+![sessionwiki home page](../images/home.png)
 
 ---
 
@@ -98,7 +98,7 @@ Open that URL in your browser. You should see:
 ### 2.1 Directory anatomy
 
 ```
-llm-wiki/
+sessionwiki/
 ├── raw/                          # Layer 1: immutable session transcripts
 │   └── sessions/
 │       └── 2026-04-15T10-30-my-project-feature-x.md
@@ -156,11 +156,11 @@ llm-wiki/
 
 ```bash
 # If you forked the repo
-git remote set-url origin https://github.com/<your-user>/llm-wiki.git
+git remote set-url origin https://github.com/<your-user>/sessionwiki.git
 git push
 
 # Or create a new repo for your wiki
-gh repo create my-llm-wiki --public --source=. --push
+gh repo create my-sessionwiki --public --source=. --push
 ```
 
 ### 3.2 Enable Pages
@@ -174,7 +174,7 @@ gh repo create my-llm-wiki --public --source=. --push
 The repo ships `.github/workflows/pages.yml`. On every push to `master`:
 
 1. Seeds `raw/sessions/` from `examples/demo-sessions/` (never your personal data)
-2. Runs `llmwiki build`
+2. Runs `sessionwiki build`
 3. Uploads `site/` as a Pages artifact
 4. Deploys to `https://<user>.github.io/<repo>/`
 
@@ -185,7 +185,7 @@ ship screenshots/examples publicly — your sessions stay local.
 ### 3.4 Visit your site
 
 ```
-https://<your-user>.github.io/llm-wiki/
+https://<your-user>.github.io/sessionwiki/
 ```
 
 First deploy takes 30-60 seconds. Check Actions tab for progress.
@@ -214,7 +214,7 @@ Rebuild and reload — the project card now shows topic chips.
 
 ### 4.2 Add a model entity
 
-llmwiki ships structured model schemas. Create `wiki/entities/MyModel.md`:
+sessionwiki ships structured model schemas. Create `wiki/entities/MyModel.md`:
 
 ```markdown
 ---
@@ -241,7 +241,7 @@ auto-rendered at `/vs/` for benchmark comparison.
 ### 4.3 Use Obsidian
 
 ```bash
-llmwiki link-obsidian --vault ~/Documents/"Obsidian Vault"
+sessionwiki link-obsidian --vault ~/Documents/"Obsidian Vault"
 ```
 
 This symlinks the whole project into your vault. Now:
@@ -268,10 +268,10 @@ Press `Cmd+K` (macOS) or `Ctrl+K` (Linux/Windows). Try:
 ### 4.5 Export for other tools
 
 ```bash
-llmwiki sync --vault ~/Documents/"Obsidian Vault"   # vault sync (replaces removed export-obsidian)
-llmwiki export llms-full-txt                          # paste into any LLM
-llmwiki export jsonld                                 # schema.org graph
-llmwiki export rss                                    # RSS 2.0 feed
+sessionwiki sync --vault ~/Documents/"Obsidian Vault"   # vault sync (replaces removed export-obsidian)
+sessionwiki export llms-full-txt                          # paste into any LLM
+sessionwiki export jsonld                                 # schema.org graph
+sessionwiki export rss                                    # RSS 2.0 feed
 ```
 
 > The `export-obsidian`, `export-qmd`, and `export-marp` subcommands were removed in v1.2.0. See `docs/UPGRADING.md` for migration paths.
@@ -280,7 +280,7 @@ llmwiki export rss                                    # RSS 2.0 feed
 
 ## Part 5: Multi-agent setup
 
-llmwiki works with Claude Code, Codex CLI, Copilot Chat, Copilot CLI, Cursor,
+sessionwiki works with Claude Code, Codex CLI, Copilot Chat, Copilot CLI, Cursor,
 Gemini CLI, Obsidian, and PDFs — all in one wiki. Each session gets an agent
 badge on the site so you know which AI produced which transcript.
 
@@ -289,7 +289,7 @@ badge on the site so you know which AI produced which transcript.
 The setup script detects what's installed. To force-enable:
 
 ```bash
-llmwiki adapters
+sessionwiki adapters
 ```
 
 Shows default availability + configured state. Enable opt-in adapters in
@@ -325,7 +325,7 @@ is portable.
 | Linux | `~/.claude/projects/` | `~/.codex/sessions/` | `~/.config/Cursor/User/workspaceStorage/` |
 | Windows | `%USERPROFILE%\.claude\projects\` | `%USERPROFILE%\.codex\sessions\` | `%APPDATA%\Cursor\User\workspaceStorage\` |
 
-llmwiki auto-detects all of these — you usually don't need to configure paths
+sessionwiki auto-detects all of these — you usually don't need to configure paths
 manually.
 
 ---
@@ -337,4 +337,4 @@ manually.
 - **[Configuration](../configuration.md)** — every tuning knob
 - **[Privacy](../privacy.md)** — redaction rules + `.llmwikiignore`
 
-If you hit a snag, check [GitHub Issues](https://github.com/Pratiyush/llm-wiki/issues) or file a new one.
+If you hit a snag, check [GitHub Issues](https://github.com/necroz/sessionwiki/issues) or file a new one.

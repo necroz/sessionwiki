@@ -1,4 +1,4 @@
-"""Comprehensive edge-case tests across all llmwiki modules.
+"""Comprehensive edge-case tests across all sessionwiki modules.
 
 These tests focus on the boundaries and degenerate inputs that are most
 likely to cause silent data corruption or crashes in production:
@@ -22,7 +22,7 @@ import pytest
 # build.py: md_to_html edge cases
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.build import md_to_html, parse_frontmatter, normalize_markdown
+from sessionwiki.build import md_to_html, parse_frontmatter, normalize_markdown
 
 
 class TestMdToHtmlEdgeCases:
@@ -76,9 +76,9 @@ class TestMdToHtmlEdgeCases:
         assert len(html) >= 100_000
 
     def test_html_comment_preserved(self):
-        body = "text\n\n<!-- llmwiki:metadata foo -->\n\nmore\n"
+        body = "text\n\n<!-- sessionwiki:metadata foo -->\n\nmore\n"
         html = md_to_html(body)
-        assert "<!-- llmwiki:metadata" in html
+        assert "<!-- sessionwiki:metadata" in html
 
     def test_table_with_pipes_in_content(self):
         body = "| a \\| b | c |\n|---|---|\n| d \\| e | f |\n"
@@ -143,7 +143,7 @@ class TestNormalizeMarkdownEdgeCases:
 # viz_heatmap: degenerate data
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.viz_heatmap import (
+from sessionwiki.viz_heatmap import (
     collect_session_counts,
     compute_quantile_thresholds,
     render_heatmap,
@@ -168,7 +168,7 @@ class TestHeatmapEdgeCases:
         counts = {date(2026, 4, d): 1 for d in range(1, 8)}
         thresholds = compute_quantile_thresholds(counts)
         # All same → single distinct value → level 4 for all non-zero
-        from llmwiki.viz_heatmap import level_for
+        from sessionwiki.viz_heatmap import level_for
         assert level_for(1, thresholds) == 4
 
     def test_massive_count_value(self):
@@ -186,7 +186,7 @@ class TestHeatmapEdgeCases:
 # viz_tools: degenerate data
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.viz_tools import parse_tool_counts, render_tool_chart
+from sessionwiki.viz_tools import parse_tool_counts, render_tool_chart
 
 
 class TestToolChartEdgeCases:
@@ -221,7 +221,7 @@ class TestToolChartEdgeCases:
 # viz_tokens: degenerate data
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.viz_tokens import (
+from sessionwiki.viz_tokens import (
     cache_hit_ratio,
     format_tokens,
     parse_token_totals,
@@ -254,7 +254,7 @@ class TestTokenEdgeCases:
 # schema: validation boundary cases
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.schema import parse_model_profile
+from sessionwiki.schema import parse_model_profile
 
 
 class TestSchemaEdgeCases:
@@ -302,7 +302,7 @@ class TestSchemaEdgeCases:
 # compare: degenerate pairs
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.compare import compare_pair_score, generate_pairs
+from sessionwiki.compare import compare_pair_score, generate_pairs
 
 
 class TestCompareEdgeCases:
@@ -338,7 +338,7 @@ class TestCompareEdgeCases:
 # changelog_timeline: degenerate entries
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.changelog_timeline import parse_changelog, render_changelog_timeline
+from sessionwiki.changelog_timeline import parse_changelog, render_changelog_timeline
 
 
 class TestChangelogEdgeCases:
@@ -372,7 +372,7 @@ class TestChangelogEdgeCases:
 # project_topics: degenerate inputs
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.project_topics import extract_session_topics, render_topic_chips
+from sessionwiki.project_topics import extract_session_topics, render_topic_chips
 
 
 class TestTopicsEdgeCases:
@@ -401,7 +401,7 @@ class TestTopicsEdgeCases:
 # context_md: filesystem edge cases
 # ═══════════════════════════════════════════════════════════════════════
 
-from llmwiki.context_md import (
+from sessionwiki.context_md import (
     folder_context_summary,
     is_context_file,
     load_folder_context,

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.categories import (
+from sessionwiki.categories import (
     _parse_tags,
     scan_tags,
     dataview_page,

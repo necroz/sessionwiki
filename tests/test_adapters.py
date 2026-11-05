@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from llmwiki.adapters import REGISTRY, discover_all
-from llmwiki.adapters.base import BaseAdapter
-from llmwiki.adapters.claude_code import ClaudeCodeAdapter
-from llmwiki.adapters.codex_cli import CodexCliAdapter
-from llmwiki.adapters.contrib.copilot_chat import CopilotChatAdapter
-from llmwiki.adapters.contrib.copilot_cli import CopilotCliAdapter
-from llmwiki.adapters.contrib.cursor import CursorAdapter
-from llmwiki.adapters.contrib.gemini_cli import GeminiCliAdapter
-from llmwiki.adapters.contrib.obsidian import ObsidianAdapter
+from sessionwiki.adapters import REGISTRY, discover_all
+from sessionwiki.adapters.base import BaseAdapter
+from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
+from sessionwiki.adapters.codex_cli import CodexCliAdapter
+from sessionwiki.adapters.contrib.copilot_chat import CopilotChatAdapter
+from sessionwiki.adapters.contrib.copilot_cli import CopilotCliAdapter
+from sessionwiki.adapters.contrib.cursor import CursorAdapter
+from sessionwiki.adapters.contrib.gemini_cli import GeminiCliAdapter
+from sessionwiki.adapters.contrib.obsidian import ObsidianAdapter
 
 
 def test_registry_discovers_all_adapters():
@@ -23,7 +23,7 @@ def test_registry_discovers_all_adapters():
     assert "copilot_cli" in REGISTRY
     # #v1378-review: aliases moved to REGISTRY_ALIASES so REGISTRY
     # stays canonical-only. Alias resolution is via resolve_adapter_name.
-    from llmwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
+    from sessionwiki.adapters import REGISTRY_ALIASES, resolve_adapter_name
     assert REGISTRY_ALIASES.get("copilot-chat") == "copilot_chat"
     assert REGISTRY_ALIASES.get("copilot-cli") == "copilot_cli"
     assert resolve_adapter_name("copilot-chat") == "copilot_chat"

@@ -1,4 +1,4 @@
-Ingest a source document (or folder) into the llmwiki.
+Ingest a source document (or folder) into the sessionwiki.
 
 Usage: /wiki-ingest <path>
 

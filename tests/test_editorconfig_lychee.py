@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 EDITORCONFIG = REPO_ROOT / ".editorconfig"
@@ -100,7 +100,7 @@ def test_lychee_skips_known_future_urls():
 def test_lychee_skips_pypi_and_homebrew_placeholders():
     text = LYCHEE.read_text(encoding="utf-8")
     assert "pypi" in text
-    assert "homebrew-llmwiki" in text
+    assert "homebrew-sessionwiki" in text
 
 
 # ─── workflow ─────────────────────────────────────────────────────────

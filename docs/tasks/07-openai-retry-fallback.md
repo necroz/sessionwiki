@@ -3,15 +3,15 @@
 - Priority: P2
 - Depends on: none
 - Size: M (1–2 hours)
-- Files: `llmwiki/synth/openai_compat.py`, new `tests/test_openai_compat.py`
+- Files: `sessionwiki/synth/openai_compat.py`, new `tests/test_openai_compat.py`
 - PR title: `fix: retry only transient OpenAI-compatible errors`
 
 ## Read first
 
-- `llmwiki/synth/openai_compat.py`, class `OpenAICompatSynthesizer`,
+- `sessionwiki/synth/openai_compat.py`, class `OpenAICompatSynthesizer`,
   method `_post_chat` (around line 218)
 - The module docstring, especially the `chat_template_kwargs` paragraph
-- `llmwiki/synth/ollama.py`, `_call_generate`, for the existing retry
+- `sessionwiki/synth/ollama.py`, `_call_generate`, for the existing retry
   style
 
 ## Problem
@@ -138,7 +138,7 @@ Use `backoff_base=0` so the tests do not sleep.
 ```bash
 .venv/bin/python -m pytest tests/test_openai_compat.py -q
 .venv/bin/python -m pytest tests/ -q
-.venv/bin/python -m llmwiki synthesize --check
+.venv/bin/python -m sessionwiki synthesize --check
 ```
 
 Expected: all tests pass, and `--check` still reports `Available: True`
@@ -150,7 +150,7 @@ for the configured server.
 - [ ] 400 with `chat_template_kwargs` retries once without the key.
 - [ ] 429 and 5xx still retry with backoff.
 - [ ] Four new tests pass.
-- [ ] `llmwiki synthesize --check` still works.
+- [ ] `sessionwiki synthesize --check` still works.
 - [ ] `CHANGELOG.md` updated.
 
 ## Out of scope

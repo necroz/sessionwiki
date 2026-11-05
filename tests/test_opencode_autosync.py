@@ -5,8 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from llmwiki.lock import FileLock
-from llmwiki.opencode import autosync
+from sessionwiki.lock import FileLock
+from sessionwiki.opencode import autosync
 
 
 def _db(tmp_path: Path) -> Path:
@@ -21,7 +21,7 @@ def test_autosync_runs_export_convert_and_build(tmp_path, monkeypatch):
     builder = MagicMock(return_value=[])
     monkeypatch.setattr(autosync, "run_export", exporter)
     monkeypatch.setattr(autosync, "convert_all", converter)
-    monkeypatch.setattr("llmwiki.build.build_site", builder)
+    monkeypatch.setattr("sessionwiki.build.build_site", builder)
 
     rc = autosync.run_autosync(
         db_path=_db(tmp_path),

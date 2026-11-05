@@ -8,19 +8,19 @@ name: Cross-browser smoke
 on:
   pull_request:
     paths:
-      - "llmwiki/build.py"
-      - "llmwiki/render/css.py"
-      - "llmwiki/render/js.py"
-      - "llmwiki/graph.py"
+      - "sessionwiki/build.py"
+      - "sessionwiki/render/css.py"
+      - "sessionwiki/render/js.py"
+      - "sessionwiki/graph.py"
       - "tests/e2e/test_cross_browser_smoke.py"
       - ".github/workflows/cross-browser.yml"
   push:
     branches: ["master"]
     paths:
-      - "llmwiki/build.py"
-      - "llmwiki/render/css.py"
-      - "llmwiki/render/js.py"
-      - "llmwiki/graph.py"
+      - "sessionwiki/build.py"
+      - "sessionwiki/render/css.py"
+      - "sessionwiki/render/js.py"
+      - "sessionwiki/graph.py"
       - "tests/e2e/test_cross_browser_smoke.py"
       - ".github/workflows/cross-browser.yml"
   workflow_dispatch:
@@ -42,7 +42,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install llmwiki + e2e extras
+      - name: Install sessionwiki + e2e extras
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e '.[e2e]'

@@ -21,7 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 def search_index() -> dict:
     idx = REPO_ROOT / "site" / "search-index.json"
     if not idx.is_file():
-        pytest.skip("site/search-index.json missing — run `llmwiki build` first")
+        pytest.skip("site/search-index.json missing — run `sessionwiki build` first")
     return json.loads(idx.read_text(encoding="utf-8"))
 
 

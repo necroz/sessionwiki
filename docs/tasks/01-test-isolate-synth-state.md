@@ -9,7 +9,7 @@
 ## Read first
 
 - `tests/test_synth_pipeline.py` (the whole file, ~450 lines)
-- `llmwiki/synth/pipeline.py`, functions `_resolve_state_file`,
+- `sessionwiki/synth/pipeline.py`, functions `_resolve_state_file`,
   `_load_state`, `_save_state` (around lines 115–180)
 
 ## Problem
@@ -32,7 +32,7 @@ proj/2026-04-01-slug-0.md
 ```
 
 The real file has 800+ keys. After a test run, the next
-`llmwiki synthesize` re-processes the whole corpus. That is ~45 minutes
+`sessionwiki synthesize` re-processes the whole corpus. That is ~45 minutes
 and about $55 by the current estimate.
 
 Reproduced with:
@@ -55,7 +55,7 @@ after the imports:
 def _isolated_synth_state(tmp_path, monkeypatch):
     """Keep the real .llmwiki-synth-state.json out of test runs."""
     monkeypatch.setattr(
-        "llmwiki.synth.pipeline.STATE_FILE",
+        "sessionwiki.synth.pipeline.STATE_FILE",
         tmp_path / "synth-state.json",
     )
 ```
@@ -67,12 +67,12 @@ Add one regression test in the same file:
 
 ```python
 def test_synth_state_is_isolated(tmp_path):
-    from llmwiki.synth import pipeline
+    from sessionwiki.synth import pipeline
 
     assert pipeline.STATE_FILE.parent == tmp_path
 ```
 
-Do not change `llmwiki/synth/pipeline.py`. The production fallback is
+Do not change `sessionwiki/synth/pipeline.py`. The production fallback is
 correct; the tests must isolate themselves.
 
 ## Verification

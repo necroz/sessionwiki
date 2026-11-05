@@ -4,22 +4,22 @@ Complete reference for all CLI subcommands, flags, environment variables, and co
 
 ## CLI subcommands
 
-### `llmwiki init`
+### `sessionwiki init`
 
 Scaffold the `raw/`, `wiki/`, `site/` directory structure and seed initial wiki files.
 
 ```bash
-python3 -m llmwiki init
+python3 -m sessionwiki init
 ```
 
 No options. Creates directories and seeds `wiki/index.md`, `wiki/log.md`, `wiki/overview.md` if they don't already exist.
 
-### `llmwiki sync`
+### `sessionwiki sync`
 
 Convert agent session transcripts (`.jsonl`) into markdown under `raw/sessions/`.
 
 ```bash
-python3 -m llmwiki sync [options]
+python3 -m sessionwiki sync [options]
 ```
 
 | Flag | Type | Default | Description |
@@ -34,12 +34,12 @@ python3 -m llmwiki sync [options]
 | `--dry-run` | flag | off | Preview what would be written |
 | `--download-images` | flag | off | Download remote images in `.md` files to `raw/assets/` |
 
-### `llmwiki build`
+### `sessionwiki build`
 
 Compile the static HTML site from `raw/` and `wiki/`.
 
 ```bash
-python3 -m llmwiki build [options]
+python3 -m sessionwiki build [options]
 ```
 
 | Flag | Type | Default | Description |
@@ -48,12 +48,12 @@ python3 -m llmwiki build [options]
 | `--synthesize` | flag | off | Call `claude` CLI to generate an Overview synthesis |
 | `--claude` | `path` | `/usr/local/bin/claude` | Path to the claude binary |
 
-### `llmwiki serve`
+### `sessionwiki serve`
 
 Start a local HTTP server for the built site.
 
 ```bash
-python3 -m llmwiki serve [options]
+python3 -m sessionwiki serve [options]
 ```
 
 | Flag | Type | Default | Description |
@@ -63,34 +63,34 @@ python3 -m llmwiki serve [options]
 | `--host` | `string` | `127.0.0.1` | Host to bind (use `0.0.0.0` to expose to network) |
 | `--open` | flag | off | Open browser after starting |
 
-### `llmwiki adapters`
+### `sessionwiki adapters`
 
 List every registered adapter and whether its session store is present.
 
 ```bash
-python3 -m llmwiki adapters
+python3 -m sessionwiki adapters
 ```
 
 No options.
 
-### `llmwiki graph`
+### `sessionwiki graph`
 
 Build the knowledge graph from `wiki/` wikilinks.
 
 ```bash
-python3 -m llmwiki graph [options]
+python3 -m sessionwiki graph [options]
 ```
 
 | Flag | Type | Default | Description |
 |---|---|---|---|
 | `--format` | `json\|html\|both` | `both` | Output format |
 
-### `llmwiki export`
+### `sessionwiki export`
 
 Export AI-consumable formats from the built site.
 
 ```bash
-python3 -m llmwiki export <format> [options]
+python3 -m sessionwiki export <format> [options]
 ```
 
 | Positional | Values |
@@ -102,12 +102,12 @@ python3 -m llmwiki export <format> [options]
 | `--out` | `path` | `./site` | Output directory |
 | `--topic` | `string` | none | Topic filter (used by `marp` format) |
 
-### `llmwiki all` (v1.2)
+### `sessionwiki all` (v1.2)
 
 Run the full pipeline: build → graph → export all → lint.
 
 ```bash
-python3 -m llmwiki all [options]
+python3 -m sessionwiki all [options]
 ```
 
 | Flag | Type | Default | Description |
@@ -119,12 +119,12 @@ python3 -m llmwiki all [options]
 | `--strict` | flag | off | Exit 2 on any lint error or warning (CI gate) |
 | `--fail-fast` | flag | off | Stop at first non-zero step |
 
-### `llmwiki version`
+### `sessionwiki version`
 
 Print the current version.
 
 ```bash
-python3 -m llmwiki version
+python3 -m sessionwiki version
 ```
 
 ## Config file (`config.json`)

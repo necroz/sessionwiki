@@ -6,13 +6,13 @@ docs_shell: true
 
 # Upgrade guide
 
-How to upgrade between `llmwiki` releases.  Most releases are drop-in
-(`pip install -U llmwiki` or `brew upgrade llmwiki`) — this page
+How to upgrade between `sessionwiki` releases.  Most releases are drop-in
+(`pip install -U sessionwiki` or `brew upgrade sessionwiki`) — this page
 documents the exceptions: schema migrations, config changes, and
 behaviour flips that affect what happens on your next `sync`.
 
 The canonical per-release detail is
-[CHANGELOG.md](https://github.com/Pratiyush/llm-wiki/blob/master/CHANGELOG.md)
+[CHANGELOG.md](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
 — this guide focuses on "what might break".
 
 ## v1.3.0 — consolidated 1.2.x patch roll-up
@@ -26,8 +26,8 @@ patch versions (1.2.1 → 1.2.38) under one minor release tag — no
 breaking API changes, no schema migrations, no config changes.
 
 ```bash
-pip install -U llm-notebook   # → 1.3.0
-llmwiki --version             # → 1.3.0
+pip install -U sessionwiki   # → 1.3.0
+sessionwiki --version             # → 1.3.0
 ```
 
 ### What's in it
@@ -70,13 +70,13 @@ State files written by 1.2.x are read verbatim by 1.3.0.
 
 ### Install changes
 
-- **PyPI distribution name is `llm-notebook`** — the `llmwiki` name was
-  taken on PyPI. The Python module + CLI command stay `llmwiki`, only
-  the `pip install` line changes:
+- **PyPI distribution name** — upstream llmwiki was published as
+  `llm-notebook` because `llmwiki` was taken on PyPI. sessionwiki uses one
+  name everywhere (distribution, module, CLI):
   ```bash
-  pip install llm-notebook        # was: pip install llmwiki
-  llmwiki --version               # → 1.2.0  (CLI name unchanged)
-  python3 -c "import llmwiki"     # still works (import name unchanged)
+  pip install sessionwiki        # upstream: pip install llm-notebook
+  sessionwiki --version          # upstream CLI: llmwiki --version
+  python3 -c "import sessionwiki"     # still works (import name unchanged)
   ```
 
 ### Removed CLI subcommands
@@ -84,17 +84,17 @@ State files written by 1.2.x are read verbatim by 1.3.0.
 The CLI was slimmed in #362. If you scripted any of these, replace as
 noted:
 
-- `llmwiki schedule` — removed. Schedule `llmwiki sync` directly via
+- `sessionwiki schedule` — removed. Schedule `sessionwiki sync` directly via
   your OS's job runner (launchd / systemd / Task Scheduler).
-- `llmwiki install-skills` — removed. Manually copy
+- `sessionwiki install-skills` — removed. Manually copy
   `.claude/commands/wiki-*.md` into `~/.claude/commands/` for global
   availability.
-- `llmwiki check-links` — removed. Use the GitHub Actions link-check
+- `sessionwiki check-links` — removed. Use the GitHub Actions link-check
   workflow instead.
-- `llmwiki watch`, `llmwiki manifest`, `llmwiki link-obsidian`,
-  `llmwiki export-obsidian`, `llmwiki export-marp`, `llmwiki export-qmd`,
-  `llmwiki eval` — also removed.
-- `llmwiki export marp` is the new path for Marp slide export.
+- `sessionwiki watch`, `sessionwiki manifest`, `sessionwiki link-obsidian`,
+  `sessionwiki export-obsidian`, `sessionwiki export-marp`, `sessionwiki export-qmd`,
+  `sessionwiki eval` — also removed.
+- `sessionwiki export marp` is the new path for Marp slide export.
 
 ### Removed adapters
 
@@ -117,13 +117,13 @@ was silently overwritten. Fix: per-run filename tracking now
 disambiguates regardless of `--force`. Affected ~200 of 495 sessions
 on a real corpus we tested.
 
-### New: `llmwiki all`
+### New: `sessionwiki all`
 
 One-shot pipeline runner for CI:
 
 ```bash
-llmwiki all                  # build → graph → export → lint
-llmwiki all --strict         # exit 2 on any lint warning
+sessionwiki all                  # build → graph → export → lint
+sessionwiki all --strict         # exit 2 on any lint warning
 ```
 
 ### Schema migrations
@@ -150,10 +150,10 @@ downstream that string-compared `is_subagent == "false"` now needs
   `changelog.html`. Link rewriter routes to the compiled page instead
   of GitHub for these two files.
 
-- **`/wiki-synthesize` slash command** — wraps `llmwiki synthesize`
+- **`/wiki-synthesize` slash command** — wraps `sessionwiki synthesize`
   with natural-language flags ("estimate cost", "dry run", "force").
   Copy `.claude/commands/wiki-synthesize.md` into `~/.claude/commands/`
-  for global availability. (`llmwiki install-skills` was removed in
+  for global availability. (`sessionwiki install-skills` was removed in
   v1.2.0; manual copy is the supported path.)
 
 - **Dual-mode docs landing pages.** `docs/modes/api/` and
@@ -183,21 +183,21 @@ None.
   ```
 
   Context: [#326](https://github.com/Pratiyush/llm-wiki/issues/326).
-  Runs as of rc3; surfaced in `llmwiki adapters` column `will_fire`.
+  Runs as of rc3; surfaced in `sessionwiki adapters` column `will_fire`.
 
 - **Graph clicks respect compiled-site existence.** Nodes whose
   corresponding page wasn't rendered to HTML show a tooltip instead
   of opening a 404. No action needed — if you see the tooltip on
   entity / concept / nav pages that's the new design.
 
-- **Backlinks now propagate.** Run `llmwiki backlinks` once to inject
+- **Backlinks now propagate.** Run `sessionwiki backlinks` once to inject
   managed `## Referenced by` sections into every linked-to page.
   Idempotent, dry-runnable, prune-able:
 
   ```bash
-  llmwiki backlinks --dry-run --verbose   # preview
-  llmwiki backlinks                       # commit writes
-  llmwiki backlinks --prune               # strip every block
+  sessionwiki backlinks --dry-run --verbose   # preview
+  sessionwiki backlinks                       # commit writes
+  sessionwiki backlinks --prune               # strip every block
   ```
 
 ### Schema migrations
@@ -209,12 +209,12 @@ None.
 
 - `.llmwiki-quarantine.json` is a new local file (gitignored). First
   appears when a convert error happens. Inspect with
-  `llmwiki quarantine list`.
+  `sessionwiki quarantine list`.
 
 - Frontmatter `tags:` / `topics:` convention is lint-enforced (rule
   #14 `tags_topics_convention`) — projects use `topics:`, everything
-  else uses `tags:`. Run `llmwiki tag convention` to see violations.
-  `llmwiki tag rename <old> <new>` rewrites across every page.
+  else uses `tags:`. Run `sessionwiki tag convention` to see violations.
+  `sessionwiki tag rename <old> <new>` rewrites across every page.
 
 ### Breaking — none
 
@@ -240,5 +240,5 @@ when it sees a brand-new entity/concept. Triage with `/wiki-candidates`
 
 Pre-v1.0 milestones shipped under internal sprint tags. Upgrade from
 v0.9.x to v1.0.0 in one step — no intermediate migration required. If
-you're on a pre-0.9 build, start fresh: `llmwiki init` in a new tree
+you're on a pre-0.9 build, start fresh: `sessionwiki init` in a new tree
 and re-run `sync`.

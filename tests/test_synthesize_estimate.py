@@ -1,4 +1,4 @@
-"""Tests for ``llmwiki synthesize --estimate`` breakdown (G-07 · #293).
+"""Tests for ``sessionwiki synthesize --estimate`` breakdown (G-07 · #293).
 
 Covers:
 * Empty corpus → zeros with no divide-by-zero errors.
@@ -27,7 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def _run_cli(*args):
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         check=False,
@@ -58,7 +58,7 @@ def _sessions(*rels: str) -> list:
 
 
 def test_empty_corpus_reports_zero():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=[],
         state_keys=set(),
@@ -72,7 +72,7 @@ def test_empty_corpus_reports_zero():
 
 
 def test_fresh_corpus_incremental_equals_full_force():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=_sessions("a.md", "b.md", "c.md"),
         state_keys=set(),
@@ -86,7 +86,7 @@ def test_fresh_corpus_incremental_equals_full_force():
 
 
 def test_fully_synthesized_corpus_incremental_is_zero():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=_sessions("a.md", "b.md"),
         state_keys={"a.md", "b.md"},
@@ -100,7 +100,7 @@ def test_fully_synthesized_corpus_incremental_is_zero():
 
 
 def test_partial_progress_incremental_less_than_full_force():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=_sessions("a.md", "b.md", "c.md"),
         state_keys={"a.md"},  # one already synthesized
@@ -112,7 +112,7 @@ def test_partial_progress_incremental_less_than_full_force():
 
 
 def test_money_numbers_are_non_negative():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=_sessions("x.md"),
         state_keys=set(),
@@ -123,7 +123,7 @@ def test_money_numbers_are_non_negative():
 
 
 def test_prefix_too_small_warning():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=[],
         state_keys=set(),
@@ -134,7 +134,7 @@ def test_prefix_too_small_warning():
 
 
 def test_healthy_prefix_no_warning():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=[],
         state_keys=set(),
@@ -144,7 +144,7 @@ def test_healthy_prefix_no_warning():
 
 
 def test_custom_model_propagates():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=_sessions("a.md"),
         state_keys=set(),
@@ -155,7 +155,7 @@ def test_custom_model_propagates():
 
 
 def test_custom_output_tokens_affects_cost():
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt_small = synthesize_estimate_report(
         raw_sessions=_sessions("a.md"),
         state_keys=set(),
@@ -174,7 +174,7 @@ def test_custom_output_tokens_affects_cost():
 def test_state_key_matching_accepts_multiple_forms():
     """State keys come from different call sites — match bare-name,
     rel-path, or full-str."""
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=_sessions("proj/abc.md"),
         state_keys={"proj/abc.md"},  # rel-path form
@@ -185,7 +185,7 @@ def test_state_key_matching_accepts_multiple_forms():
 
 def test_report_is_serialisable_to_json():
     """The JSON-able shape lets downstream tools consume the report."""
-    from llmwiki.cli import synthesize_estimate_report
+    from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(
         raw_sessions=_sessions("a.md"),
         state_keys=set(),
@@ -199,7 +199,7 @@ def test_report_is_serialisable_to_json():
 def test_prefix_tokens_auto_computed_from_real_files(tmp_path, monkeypatch):
     """When prefix_tokens isn't provided, it's computed from the three
     cached-prefix files in REPO_ROOT."""
-    import llmwiki.cli as cli_mod
+    import sessionwiki.cli as cli_mod
     monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path)
     (tmp_path / "CLAUDE.md").write_text("CLAUDE\n" * 2000, encoding="utf-8")
     (tmp_path / "wiki").mkdir()
@@ -233,9 +233,9 @@ def _stub_report(**_kwargs) -> dict:
 def test_estimate_notes_openai_backend_with_unpriced_model(capsys, monkeypatch):
     """Card 06: an openai-compatible backend must not present Claude
     dollars as if they were real."""
-    from llmwiki.cli import _synthesize_estimate
+    from sessionwiki.cli import _synthesize_estimate
 
-    monkeypatch.setattr("llmwiki.cli.synthesize_estimate_report", _stub_report)
+    monkeypatch.setattr("sessionwiki.cli.synthesize_estimate_report", _stub_report)
     _synthesize_estimate({"synthesis": {"backend": "openai", "model": "qwen3.8"}})
     out = capsys.readouterr().out
     assert "note: cost estimate uses Claude API pricing" in out
@@ -243,9 +243,9 @@ def test_estimate_notes_openai_backend_with_unpriced_model(capsys, monkeypatch):
 
 
 def test_estimate_notes_dummy_backend(capsys, monkeypatch):
-    from llmwiki.cli import _synthesize_estimate
+    from sessionwiki.cli import _synthesize_estimate
 
-    monkeypatch.setattr("llmwiki.cli.synthesize_estimate_report", _stub_report)
+    monkeypatch.setattr("sessionwiki.cli.synthesize_estimate_report", _stub_report)
     _synthesize_estimate({"synthesis": {"backend": "dummy"}})
     out = capsys.readouterr().out
     assert "note: cost estimate uses Claude API pricing" in out
@@ -255,8 +255,8 @@ def test_estimate_notes_dummy_backend(capsys, monkeypatch):
 def test_estimate_silent_for_priced_claude_backend(capsys, monkeypatch):
     """No note when the backend is Claude and the model is priced; the
     configured model is passed through to the report."""
-    from llmwiki.cache import MODEL_PRICING
-    from llmwiki.cli import _synthesize_estimate
+    from sessionwiki.cache import MODEL_PRICING
+    from sessionwiki.cli import _synthesize_estimate
 
     seen: dict = {}
 
@@ -264,7 +264,7 @@ def test_estimate_silent_for_priced_claude_backend(capsys, monkeypatch):
         seen.update(kwargs)
         return _stub_report(**kwargs)
 
-    monkeypatch.setattr("llmwiki.cli.synthesize_estimate_report", _capture)
+    monkeypatch.setattr("sessionwiki.cli.synthesize_estimate_report", _capture)
     model = next(iter(MODEL_PRICING))
     _synthesize_estimate({"synthesis": {"backend": "anthropic", "model": model}})
     out = capsys.readouterr().out

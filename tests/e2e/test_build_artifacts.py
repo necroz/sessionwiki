@@ -163,7 +163,7 @@ def test_build_manifest_has_perf_budget_data(site_root: Path) -> None:
     data = json.loads(f.read_text(encoding="utf-8"))
     assert isinstance(data, dict), "manifest.json root is not an object"
 
-    # Perf-manifest shape (per llmwiki/build.py).
+    # Perf-manifest shape (per sessionwiki/build.py).
     expected = {"version", "total_files", "total_bytes", "perf_budget", "budget_violations"}
     missing = expected - set(data.keys())
     assert not missing, (

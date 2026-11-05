@@ -16,9 +16,9 @@ from typing import Any
 
 import pytest
 
-from llmwiki.adapters import REGISTRY
-from llmwiki.adapters.base import BaseAdapter
-from llmwiki.convert import convert_all
+from sessionwiki.adapters import REGISTRY
+from sessionwiki.adapters.base import BaseAdapter
+from sessionwiki.convert import convert_all
 
 
 class _CountingAdapter(BaseAdapter):

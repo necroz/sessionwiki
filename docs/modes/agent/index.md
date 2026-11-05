@@ -17,11 +17,11 @@ incremental cost beyond your existing agent subscription.
 **Shipping in v1.1.0-rc8 (#316).** Every slash command is prompt-
 driven — `/wiki-sync`, `/wiki-ingest`, `/wiki-query`, `/wiki-reflect`,
 `/wiki-update`, `/wiki-lint`.  The new `agent-delegate` synthesize
-backend closes the last remaining gap: `llmwiki synthesize` now writes
+backend closes the last remaining gap: `sessionwiki synthesize` now writes
 rendered prompts to `.llmwiki-pending-prompts/<uuid>.md` and returns a
-placeholder page with a `<!-- llmwiki-pending: <uuid> -->` sentinel.
+placeholder page with a `<!-- sessionwiki-pending: <uuid> -->` sentinel.
 The running agent picks the pending prompts up on the next turn and
-calls `llmwiki synthesize --complete <uuid>` to rewrite the page with
+calls `sessionwiki synthesize --complete <uuid>` to rewrite the page with
 the actual synthesis.
 
 Zero incremental API cost.  Zero bytes of session content leave your
@@ -42,7 +42,7 @@ That's it.  Open Claude Code, type `/wiki-sync`, and it runs.
 
 ```
 You: /wiki-sync
-Claude: (runs python3 -m llmwiki sync, ingests new pages)
+Claude: (runs python3 -m sessionwiki sync, ingests new pages)
 
 You: /wiki-query when did I last change the convert pipeline?
 Claude: (reads wiki/index.md + the relevant source pages, synthesizes)

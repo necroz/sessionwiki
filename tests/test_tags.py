@@ -1,4 +1,4 @@
-"""Tests for ``llmwiki/tags.py`` + ``llmwiki tag`` CLI + G-16 lint rule.
+"""Tests for ``sessionwiki/tags.py`` + ``sessionwiki tag`` CLI + G-16 lint rule.
 
 Covers:
 * Frontmatter parsing: inline list, block list, mixed, absent, malformed.
@@ -26,7 +26,7 @@ from textwrap import dedent
 
 import pytest
 
-from llmwiki import tags as t
+from sessionwiki import tags as t
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -34,7 +34,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def _run_cli(*args):
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         check=False,
@@ -444,12 +444,12 @@ def test_cli_tag_convention_on_good_wiki(tmp_path):
 
 
 def test_lint_rule_registered():
-    from llmwiki.lint import REGISTRY, rules  # noqa: F401
+    from sessionwiki.lint import REGISTRY, rules  # noqa: F401
     assert "tags_topics_convention" in REGISTRY
 
 
 def test_lint_rule_flags_project_with_tags():
-    from llmwiki.lint import REGISTRY, rules  # noqa: F401
+    from sessionwiki.lint import REGISTRY, rules  # noqa: F401
 
     rule_cls = REGISTRY["tags_topics_convention"]
     rule = rule_cls()
@@ -465,7 +465,7 @@ def test_lint_rule_flags_project_with_tags():
 
 
 def test_lint_rule_flags_source_with_topics():
-    from llmwiki.lint import REGISTRY, rules  # noqa: F401
+    from sessionwiki.lint import REGISTRY, rules  # noqa: F401
 
     rule_cls = REGISTRY["tags_topics_convention"]
     rule = rule_cls()
@@ -480,7 +480,7 @@ def test_lint_rule_flags_source_with_topics():
 
 
 def test_lint_rule_silent_on_correct_usage():
-    from llmwiki.lint import REGISTRY, rules  # noqa: F401
+    from sessionwiki.lint import REGISTRY, rules  # noqa: F401
 
     rule_cls = REGISTRY["tags_topics_convention"]
     rule = rule_cls()

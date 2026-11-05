@@ -1,11 +1,11 @@
-Start a local HTTP server for the built llmwiki site.
+Start a local HTTP server for the built sessionwiki site.
 
 Usage: /wiki-serve [port]
 
 Run:
 
 ```bash
-python3 -m llmwiki serve --port ${ARGUMENTS:-8765}
+python3 -m sessionwiki serve --port ${ARGUMENTS:-8765}
 ```
 
 The server binds to `127.0.0.1` only by default (localhost-only). Report the URL to the user.

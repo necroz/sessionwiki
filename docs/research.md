@@ -1,5 +1,9 @@
 # Phase 1.25 — Research Report
 
+> **Historical document.** This is the competitive research written for the original
+> [llmwiki](https://github.com/Pratiyush/llm-wiki) project, which sessionwiki is based on.
+> Here "llmwiki" means that original project; `lucasastorian/llmwiki` is an unrelated third-party project.
+
 **Date:** 2026-04-08
 **Method:** Cloned every referenced implementation from [Karpathy's gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) and the top related GitHub searches into `.temp/` (gitignored) for side-by-side comparison.
 

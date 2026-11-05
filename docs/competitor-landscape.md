@@ -1,6 +1,6 @@
 # Competitor Landscape
 
-How llmwiki compares to other tools in the AI session history and
+How sessionwiki compares to other tools in the AI session history and
 personal knowledge management space.
 
 ## The problem
@@ -15,7 +15,7 @@ philosophy.
 
 ## Comparison table
 
-| Feature | llmwiki | mem0 | Rewind | Pieces | Manual notes |
+| Feature | sessionwiki | mem0 | Rewind | Pieces | Manual notes |
 |---|---|---|---|---|---|
 | **Approach** | Compile sessions into a wiki + static site | Memory layer API for LLM apps | System-wide screen recording + OCR | Snippet manager with AI context | Write it yourself |
 | **Input sources** | Claude Code, Codex CLI, Cursor, Copilot, Gemini CLI, PDF, Obsidian | Any LLM API call (programmatic) | Everything on screen | Code snippets, links, screenshots | Whatever you type |
@@ -34,7 +34,7 @@ philosophy.
 
 ## Detailed comparisons
 
-### llmwiki vs mem0
+### sessionwiki vs mem0
 
 [mem0](https://github.com/mem0ai/mem0) is a "memory layer for AI
 applications" -- it stores and retrieves memories from LLM conversations
@@ -44,20 +44,20 @@ by end users directly.
 **When to use mem0:** You are building an AI application and want it to
 remember things across conversations. mem0 is a library, not a tool.
 
-**When to use llmwiki:** You are a developer who uses AI coding agents
-and wants to browse, search, and learn from your past sessions. llmwiki
+**When to use sessionwiki:** You are a developer who uses AI coding agents
+and wants to browse, search, and learn from your past sessions. sessionwiki
 is a tool, not a library.
 
 **Key differences:**
 - mem0 requires a vector database (Qdrant, Pinecone, etc.) and API keys.
-  llmwiki uses Python stdlib only.
-- mem0 stores memories as embeddings. llmwiki stores sessions as
+  sessionwiki uses Python stdlib only.
+- mem0 stores memories as embeddings. sessionwiki stores sessions as
   readable markdown with YAML frontmatter.
-- mem0 has no UI. llmwiki generates a complete static HTML site.
-- mem0 is for machines. llmwiki is for humans (with AI-consumable
+- mem0 has no UI. sessionwiki generates a complete static HTML site.
+- mem0 is for machines. sessionwiki is for humans (with AI-consumable
   exports as a secondary output).
 
-### llmwiki vs Rewind (now Limitless)
+### sessionwiki vs Rewind (now Limitless)
 
 Rewind (later rebranded to [Limitless](https://www.limitless.ai/))
 records everything on your screen, indexes it with OCR, and lets
@@ -67,20 +67,20 @@ you search your visual history.
 activity, not just AI coding sessions. You're on macOS and comfortable
 with a cloud-connected subscription app.
 
-**When to use llmwiki:** You want structured, deep extraction from AI
+**When to use sessionwiki:** You want structured, deep extraction from AI
 coding sessions specifically. You want a local-only, open-source tool
 that produces a deployable site.
 
 **Key differences:**
-- Rewind captures everything (meetings, browsing, typing). llmwiki
+- Rewind captures everything (meetings, browsing, typing). sessionwiki
   focuses on AI coding agent sessions.
-- Rewind is macOS-only and proprietary. llmwiki is cross-platform,
+- Rewind is macOS-only and proprietary. sessionwiki is cross-platform,
   open-source, and MIT-licensed.
-- Rewind stores data in a proprietary format. llmwiki produces standard
+- Rewind stores data in a proprietary format. sessionwiki produces standard
   markdown and HTML.
-- Rewind costs $24.95/month. llmwiki is free.
+- Rewind costs $24.95/month. sessionwiki is free.
 
-### llmwiki vs Pieces
+### sessionwiki vs Pieces
 
 [Pieces](https://pieces.app/) is a snippet manager that captures code
 context from your IDE and provides AI-powered search and suggestions.
@@ -88,19 +88,19 @@ context from your IDE and provides AI-powered search and suggestions.
 **When to use Pieces:** You want a general-purpose snippet manager that
 integrates with your IDE and captures code as you write it.
 
-**When to use llmwiki:** You want to compile complete AI session
+**When to use sessionwiki:** You want to compile complete AI session
 transcripts into a navigable knowledge base, not just snippets.
 
 **Key differences:**
-- Pieces captures snippets. llmwiki captures entire sessions with full
+- Pieces captures snippets. sessionwiki captures entire sessions with full
   conversation context.
-- Pieces is an Electron app with cloud features. llmwiki is a CLI tool
+- Pieces is an Electron app with cloud features. sessionwiki is a CLI tool
   that produces static files.
-- Pieces has IDE plugins (VS Code, JetBrains). llmwiki integrates at
+- Pieces has IDE plugins (VS Code, JetBrains). sessionwiki integrates at
   the session-transcript level.
-- Pieces has a freemium model. llmwiki is free and open source.
+- Pieces has a freemium model. sessionwiki is free and open source.
 
-### llmwiki vs manual notes
+### sessionwiki vs manual notes
 
 Writing your own notes in Obsidian, Notion, or plain text files.
 
@@ -108,22 +108,22 @@ Writing your own notes in Obsidian, Notion, or plain text files.
 of note-taking, or need to capture information beyond what's in your
 AI session transcripts.
 
-**When to use llmwiki:** You have dozens or hundreds of sessions and
+**When to use sessionwiki:** You have dozens or hundreds of sessions and
 want automated extraction, cross-referencing, and a browsable site
 without manual effort.
 
 **Key differences:**
-- Manual notes require discipline and time. llmwiki is automated.
-- Manual notes capture what you think is important. llmwiki captures
+- Manual notes require discipline and time. sessionwiki is automated.
+- Manual notes capture what you think is important. sessionwiki captures
   everything (and lets you search later).
-- Manual notes are as organized as you make them. llmwiki enforces a
+- Manual notes are as organized as you make them. sessionwiki enforces a
   consistent schema (Karpathy's LLM Wiki pattern).
 - Manual notes don't produce a static site, activity heatmaps, or
   AI-consumable exports.
 
-## llmwiki's positioning
+## sessionwiki's positioning
 
-llmwiki occupies a specific niche:
+sessionwiki occupies a specific niche:
 
 1. **Local-first.** No cloud, no API keys, no accounts. Your data stays
    on your machine (or your own GitHub Pages).
@@ -147,10 +147,10 @@ llmwiki occupies a specific niche:
 6. **Static output.** The result is a static site you can browse locally
    or deploy anywhere. No server to maintain, no database to back up.
 
-## When llmwiki is NOT the right tool
+## When sessionwiki is NOT the right tool
 
 - You need real-time memory for an AI application you're building (use mem0)
 - You want to record everything on your screen, not just AI sessions (use Rewind)
 - You want a snippet manager integrated into your IDE (use Pieces)
 - You want collaborative editing on a shared wiki (use Notion, Obsidian Publish, or Confluence)
-- You need server-side search or a database backend (llmwiki is static-only by design)
+- You need server-side search or a database backend (sessionwiki is static-only by design)

@@ -1,5 +1,5 @@
 """Tests for state-file portability (G-04 · #290) and the int-coerce
-fix for sub-agent tool args (G-05 · #291) in ``llmwiki/convert.py``.
+fix for sub-agent tool args (G-05 · #291) in ``sessionwiki/convert.py``.
 
 Covers:
 * ``_portable_state_key`` — home-relative formatting, adapter scoping,
@@ -21,7 +21,7 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki.convert import (
+from sessionwiki.convert import (
     Redactor,
     DEFAULT_CONFIG,
     _coerce_int,

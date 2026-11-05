@@ -35,9 +35,9 @@ unrelated code.
 
 Optional follow-ups, not carded yet:
 
-- **09 — Coalesce-only hook.** Done: `llmwiki synthesize --coalesce-only`
-  runs without an LLM backend, and `llmwiki zcode autosync --coalesce`
-  runs it after sync. `llmwiki zcode install --coalesce` enables it in
+- **09 — Coalesce-only hook.** Done: `sessionwiki synthesize --coalesce-only`
+  runs without an LLM backend, and `sessionwiki zcode autosync --coalesce`
+  runs it after sync. `sessionwiki zcode install --coalesce` enables it in
   the scheduled hook/timer.
 - **10 — Seed page cleanup.** Eight seed pages (`concepts/*`,
   `entities/*`, `overview`) produce stale-content warnings. Archive them
@@ -49,20 +49,20 @@ Until card 01 is merged, running the test suite mutates the real
 synthesis state. Back it up before every test run:
 
 ```bash
-cp .llmwiki-synth-state.json /tmp/llmwiki-synth-state.bak
+cp .llmwiki-synth-state.json /tmp/sessionwiki-synth-state.bak
 ```
 
 After the test run:
 
 ```bash
-cmp .llmwiki-synth-state.json /tmp/llmwiki-synth-state.bak
+cmp .llmwiki-synth-state.json /tmp/sessionwiki-synth-state.bak
 ```
 
 `cmp` must print nothing. If it prints a difference, the test suite
 touched production state; restore it:
 
 ```bash
-cp /tmp/llmwiki-synth-state.bak .llmwiki-synth-state.json
+cp /tmp/sessionwiki-synth-state.bak .llmwiki-synth-state.json
 ```
 
 ## Verification baseline
@@ -71,8 +71,8 @@ Run from the repository root:
 
 ```bash
 .venv/bin/python -m pytest tests/ -q
-.venv/bin/python -m llmwiki lint
-.venv/bin/python -m llmwiki --version
+.venv/bin/python -m sessionwiki lint
+.venv/bin/python -m sessionwiki --version
 ```
 
 Expected:

@@ -1,0 +1,73 @@
+# Reusable GitHub Action workflow for sessionwiki.
+#
+# Other repositories can call this with:
+#
+#   jobs:
+#     wiki:
+#       uses: necroz/sessionwiki/.github/workflows/sessionwiki-action.yml@master
+#       with:
+#         python-version: "3.12"
+#         sync-args: "--adapter claude-code"
+#         build-args: "--out site"
+
+name: sessionwiki reusable workflow
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: "Python version to use"
+        required: false
+        type: string
+        default: "3.12"
+      sync-args:
+        description: "Extra arguments passed to `sessionwiki sync`"
+        required: false
+        type: string
+        default: ""
+      build-args:
+        description: "Extra arguments passed to `sessionwiki build`"
+        required: false
+        type: string
+        default: ""
+    outputs:
+      site-dir:
+        description: "Path to the generated site directory"
+        value: ${{ jobs.build.outputs.site-dir }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      site-dir: ${{ steps.paths.outputs.site-dir }}
+
+    steps:
+      - name: Checkout calling repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install sessionwiki
+        run: pip install sessionwiki
+
+      - name: Initialise directory structure
+        run: sessionwiki init
+
+      - name: Sync sessions
+        run: sessionwiki sync ${{ inputs.sync-args }}
+
+      - name: Build static site
+        run: sessionwiki build ${{ inputs.build-args }}
+
+      - name: Expose output paths
+        id: paths
+        run: echo "site-dir=$(pwd)/site" >> "$GITHUB_OUTPUT"
+
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sessionwiki-site
+          path: site/

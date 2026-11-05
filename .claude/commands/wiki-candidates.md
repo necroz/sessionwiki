@@ -10,11 +10,11 @@ Usage: `/wiki-review`
 
 1. List all pending candidates:
    ```
-   python3 -m llmwiki candidates list
+   python3 -m sessionwiki candidates list
    ```
    Or filter to stale (age > 30 days):
    ```
-   python3 -m llmwiki candidates list --stale
+   python3 -m sessionwiki candidates list --stale
    ```
 
 2. For each candidate, decide:
@@ -23,21 +23,21 @@ Usage: `/wiki-review`
      Moves it into the trusted tree (`wiki/entities/` or `wiki/concepts/`)
      and rewrites `status: candidate` → `status: reviewed`.
      ```
-     python3 -m llmwiki candidates promote --slug MyEntity
+     python3 -m sessionwiki candidates promote --slug MyEntity
      ```
 
    - **merge** — candidate is essentially a duplicate of an existing page.
      Appends the candidate's body under a `## Candidate merge — <date>`
      heading in the target page, then archives the candidate.
      ```
-     python3 -m llmwiki candidates merge --slug DuplicateFoo --into Foo
+     python3 -m sessionwiki candidates merge --slug DuplicateFoo --into Foo
      ```
 
    - **discard** — candidate is a hallucination or noise.
      Moves it to `wiki/archive/candidates/<timestamp>/` with a
      `.reason.txt` audit-trail file.
      ```
-     python3 -m llmwiki candidates discard --slug BogusEntity \
+     python3 -m sessionwiki candidates discard --slug BogusEntity \
        --reason "not a real company; LLM hallucinated"
      ```
 

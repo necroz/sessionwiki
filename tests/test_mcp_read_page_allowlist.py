@@ -18,8 +18,8 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
-from llmwiki.mcp.server import (
+from sessionwiki import REPO_ROOT
+from sessionwiki.mcp.server import (
     _is_read_page_allowed,
     tool_wiki_read_page,
 )
@@ -58,7 +58,7 @@ def test_allowlisted_paths_pass(rel: str):
     ".venv/lib/python3.12/something.py",
     "node_modules/some-pkg/index.js",
     "tests/test_secret_helper.py",   # tests/ deliberately not allowlisted
-    "llmwiki/cli.py",                 # source code not allowlisted
+    "sessionwiki/cli.py",                 # source code not allowlisted
     "pyproject.toml",                 # root config not allowlisted
 ])
 def test_blocked_paths_rejected(rel: str):

@@ -1,6 +1,6 @@
 # Performance Benchmarks
 
-Representative build-time and output-size numbers for llmwiki. Measured
+Representative build-time and output-size numbers for sessionwiki. Measured
 on an M2 MacBook Air (8 GB RAM, Python 3.12). Actual performance depends
 on session length, code-block density, and disk speed.
 
@@ -63,7 +63,7 @@ page transfer by 50%+ compared to a monolithic index.
 | 100 sessions | 65 MB |
 | 337 sessions | 120 MB |
 
-llmwiki processes one session at a time and does not load the entire
+sessionwiki processes one session at a time and does not load the entire
 corpus into memory. The peak RSS is dominated by the Python markdown
 library's internal state for the largest single session.
 

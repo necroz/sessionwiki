@@ -2,7 +2,7 @@
 
 > Status: scaffold (v1.1.0 · #50). The plumbing — cache-block
 > construction, token estimator, batch-state store — lives in
-> `llmwiki/cache.py`. The actual Anthropic backend that consumes it
+> `sessionwiki/cache.py`. The actual Anthropic backend that consumes it
 > lands in v1.2 behind a separate PR.
 
 ## Why cache prompts?
@@ -24,7 +24,7 @@ sage-wiki reports **50–90 % savings** on bulk ingest with this pattern.
 ## Build a cached prompt
 
 ```python
-from llmwiki.cache import CachedPrompt, build_messages
+from sessionwiki.cache import CachedPrompt, build_messages
 
 prompt = CachedPrompt(
     stable_prefix=claude_md_schema + current_index + current_overview,
@@ -50,7 +50,7 @@ The cache header lives on the *last* block you want cached, so
 ## Estimate cost before you spend
 
 ```
-$ llmwiki synthesize --estimate
+$ sessionwiki synthesize --estimate
 627 new sessions, prefix 3,944 tok
 Model: claude-sonnet-4-6 (first write)
   Prefix:   3,944 tok  $0.0148
@@ -82,7 +82,7 @@ tracks in-flight batches on disk:
 
 ```python
 from pathlib import Path
-from llmwiki.cache import (
+from sessionwiki.cache import (
     BatchJob,
     BatchState,
     add_pending,
@@ -91,7 +91,7 @@ from llmwiki.cache import (
     save_batch_state,
 )
 
-repo = Path("/path/to/llm-wiki")
+repo = Path("/path/to/sessionwiki")
 state = load_batch_state(repo)
 
 add_pending(state, BatchJob(
@@ -111,7 +111,7 @@ grep, diff, and commit if you want to audit what's been submitted.
 
 ## Rate card
 
-From `llmwiki/cache.py :: MODEL_PRICING` (USD per 1 M tokens, as of
+From `sessionwiki/cache.py :: MODEL_PRICING` (USD per 1 M tokens, as of
 v1.1.0):
 
 | Model             | input | cached_input | cache_write | output |
@@ -127,7 +127,7 @@ These are the rates `estimate_cost()` uses. Update them in one place
 
 - The actual Anthropic backend that wires `CachedPrompt` into
   `client.messages.create(...)`.
-- `llmwiki sync --batch` that submits through `message_batches` and
+- `sessionwiki sync --batch` that submits through `message_batches` and
   polls for completion.
 - Write-through updating of `MODEL_PRICING` from Anthropic's pricing
   JSON.

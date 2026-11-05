@@ -1,10 +1,10 @@
 # SEO Optimization Guide
 
-How to make your llmwiki site discoverable by search engines and AI agents.
+How to make your sessionwiki site discoverable by search engines and AI agents.
 
 ## What the build already generates
 
-Every `llmwiki build` run emits these SEO artifacts automatically — no
+Every `sessionwiki build` run emits these SEO artifacts automatically — no
 configuration required.
 
 ### Meta tags on every page
@@ -85,7 +85,7 @@ These are not strictly SEO but help AI crawlers index your content:
 
 GitHub Pages auto-provisions a Let's Encrypt certificate. The canonical
 URLs in `sitemap.xml` and `<link rel="canonical">` will use whatever
-base URL you configure in `llmwiki.toml`:
+base URL you configure in `sessionwiki.toml`:
 
 ```toml
 [site]
@@ -103,7 +103,7 @@ See [`deploy/gitlab-pages.md`](deploy/gitlab-pages.md) for the full
 1. Go to [search.google.com/search-console](https://search.google.com/search-console)
 2. Add your property (URL prefix method is simplest)
 3. Verify ownership:
-   - **GitHub Pages**: use the HTML tag method — add a `<meta name="google-site-verification">` tag via `llmwiki.toml`:
+   - **GitHub Pages**: use the HTML tag method — add a `<meta name="google-site-verification">` tag via `sessionwiki.toml`:
      ```toml
      [site]
      head_extra = '<meta name="google-site-verification" content="your-code-here" />'
@@ -115,9 +115,9 @@ See [`deploy/gitlab-pages.md`](deploy/gitlab-pages.md) for the full
 ### What to check after indexing starts
 
 - **Coverage report**: look for "Excluded" pages — these are usually
-  pagination artifacts or duplicate URLs. llmwiki's canonical tags should
+  pagination artifacts or duplicate URLs. sessionwiki's canonical tags should
   prevent most issues.
-- **Core Web Vitals**: llmwiki's static HTML with no JS framework
+- **Core Web Vitals**: sessionwiki's static HTML with no JS framework
   typically scores 95+ on Lighthouse. If you see regressions, check
   whether a large `search-index.json` is blocking first paint.
 - **Sitemaps**: confirm all submitted URLs are "Discovered" and trending

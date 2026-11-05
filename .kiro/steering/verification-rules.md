@@ -12,8 +12,8 @@ Before marking anything as done, verify it per the rules below. These map to the
 
 Before marking a code PR as done:
 
-- [ ] `python3 -m llmwiki --version` prints the version
-- [ ] `python3 -m llmwiki adapters` lists the expected adapters
+- [ ] `python3 -m sessionwiki --version` prints the version
+- [ ] `python3 -m sessionwiki adapters` lists the expected adapters
 - [ ] All tests pass: `python3 -m pytest tests/ -q`
 - [ ] Privacy grep returns zero: `grep -r "<your_username>" site/ wiki/`
 - [ ] CI is green on the PR
@@ -50,7 +50,7 @@ Before marking a wiki ingest as done:
 
 Before marking a docs PR as done:
 
-- [ ] Every internal link resolves (`python3 -m llmwiki lint-docs` or grep)
+- [ ] Every internal link resolves (`python3 -m sessionwiki lint-docs` or grep)
 - [ ] Every code snippet in the docs runs unchanged
 - [ ] Every file path referenced in docs exists in the repo
 - [ ] README badges render (no broken shields.io URLs)

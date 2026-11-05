@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.docs_pages import (
+from sessionwiki.docs_pages import (
     _is_session_local_ref,
     strip_dead_session_refs,
 )
@@ -90,7 +90,7 @@ def test_bare_build_files_stripped(href):
 
 @pytest.mark.parametrize("href", [
     "http://example.com/x.md",
-    "https://github.com/Pratiyush/llm-wiki/blob/master/README.md",
+    "https://github.com/necroz/sessionwiki/blob/master/README.md",
     "mailto:user@example.com",
     "/absolute/site/path.html",
     "projects/index.html",

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import __version__
+from sessionwiki import __version__
 
 from tests.conftest import REPO_ROOT
 
@@ -29,9 +29,9 @@ def test_pyproject_exists():
     assert p.exists()
     content = p.read_text(encoding="utf-8")
     # Minimal sanity
-    # Distribution name is `llm-notebook` (the `llmwiki` name was taken on
-    # PyPI). Python module + CLI command remain `llmwiki`.
-    assert 'name = "llm-notebook"' in content
+    # Distribution, Python module and CLI command are all `sessionwiki`
+    # (upstream llmwiki shipped as `llm-notebook` because `llmwiki` was taken on PyPI).
+    assert 'name = "sessionwiki"' in content
     # Accept any valid semver — bumped to 1.0 in v1.0.0 release
     import re
     assert re.search(r'version = "\d+\.\d+\.\d+', content), "missing version string"

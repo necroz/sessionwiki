@@ -17,8 +17,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llmwiki.build import render_index
-from llmwiki.render.css import CSS
+from sessionwiki.build import render_index
+from sessionwiki.render.css import CSS
 
 
 def _meta(date: str, project: str = "demo", model: str = "claude-sonnet-4-6") -> dict:

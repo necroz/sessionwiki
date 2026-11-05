@@ -1,13 +1,13 @@
 {
-  "name": "llmwiki",
-  "displayName": "llm-wiki",
-  "description": "Browse and sync your llm-wiki knowledge base from VS Code",
+  "name": "sessionwiki",
+  "displayName": "sessionwiki",
+  "description": "Browse and sync your sessionwiki knowledge base from VS Code",
   "version": "0.1.0",
-  "publisher": "pratiyush",
+  "publisher": "necroz",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nicobailey/llm-wiki"
+    "url": "https://github.com/nicobailey/sessionwiki"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -20,47 +20,47 @@
   "contributes": {
     "commands": [
       {
-        "command": "llmwiki.openSite",
-        "title": "Open llm-wiki",
-        "category": "llm-wiki"
+        "command": "sessionwiki.openSite",
+        "title": "Open sessionwiki",
+        "category": "sessionwiki"
       },
       {
-        "command": "llmwiki.sync",
+        "command": "sessionwiki.sync",
         "title": "Sync Sessions",
-        "category": "llm-wiki"
+        "category": "sessionwiki"
       },
       {
-        "command": "llmwiki.build",
+        "command": "sessionwiki.build",
         "title": "Build Site",
-        "category": "llm-wiki"
+        "category": "sessionwiki"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "llmwiki",
-          "title": "llm-wiki",
+          "id": "sessionwiki",
+          "title": "sessionwiki",
           "icon": "$(book)"
         }
       ]
     },
     "views": {
-      "llmwiki": [
+      "sessionwiki": [
         {
-          "id": "llmwikiPages",
+          "id": "sessionwikiPages",
           "name": "Wiki Pages"
         }
       ]
     },
     "configuration": {
-      "title": "llm-wiki",
+      "title": "sessionwiki",
       "properties": {
-        "llmwiki.serverPort": {
+        "sessionwiki.serverPort": {
           "type": "number",
           "default": 8765,
-          "description": "Port for the llm-wiki local server"
+          "description": "Port for the sessionwiki local server"
         },
-        "llmwiki.pythonPath": {
+        "sessionwiki.pythonPath": {
           "type": "string",
           "default": "python3",
           "description": "Path to the Python interpreter"

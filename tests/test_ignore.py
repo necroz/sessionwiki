@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llmwiki.convert import IgnoreMatcher
+from sessionwiki.convert import IgnoreMatcher
 
 
 def test_empty_matcher():

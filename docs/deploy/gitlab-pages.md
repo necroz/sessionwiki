@@ -1,6 +1,6 @@
 # Deploying to GitLab Pages
 
-Host your llmwiki site on GitLab Pages for free, with automatic builds
+Host your sessionwiki site on GitLab Pages for free, with automatic builds
 on every push to the default branch.
 
 ## Quick start
@@ -38,7 +38,7 @@ The pipeline has three stages:
 
 | Stage | What it does |
 |---|---|
-| `build_site` | Installs llmwiki, runs `llmwiki build`, moves output to `public/` |
+| `build_site` | Installs sessionwiki, runs `sessionwiki build`, moves output to `public/` |
 | `privacy_check` | Greps build output for PII patterns (usernames, API keys) |
 | `pages` | Deploys `public/` to GitLab Pages (default branch only) |
 
@@ -95,8 +95,8 @@ the `image` field in the `build_site` job.
 **Privacy check fails:**
 - The `privacy_check` stage found potential PII in the build output
 - Check your `config.json` redaction rules
-- Run `llmwiki build` locally and grep for the flagged patterns
+- Run `sessionwiki build` locally and grep for the flagged patterns
 
 **Build fails with "no sources found":**
-- Run `llmwiki init` and `llmwiki sync` locally first
+- Run `sessionwiki init` and `sessionwiki sync` locally first
 - Commit the `raw/sessions/` directory (or configure the CI to run sync)

@@ -6,7 +6,7 @@ The bug: `convert_all`'s state-write block was guarded by
 observability snapshot (`_meta.last_sync`, `_counters`) were discarded.
 That means:
 
-1. ``llmwiki sync --status`` after a ``sync --force`` shows the
+1. ``sessionwiki sync --status`` after a ``sync --force`` shows the
    *previous* run's `last_sync`, silently losing the audit trail.
 2. The next plain `sync` re-processes every file because no state
    was recorded for the just-completed forced run.
@@ -28,8 +28,8 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki import convert as convert_mod
-from llmwiki.convert import convert_all, load_state, save_state
+from sessionwiki import convert as convert_mod
+from sessionwiki.convert import convert_all, load_state, save_state
 
 
 # ─── Fixtures ────────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ def fake_repo(tmp_path, monkeypatch):
     home. We override the class attribute directly so discovery walks
     our tmp tree on every CI runner.
     """
-    from llmwiki.adapters.claude_code import ClaudeCodeAdapter
+    from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
 
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
     monkeypatch.setattr(

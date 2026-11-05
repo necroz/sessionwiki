@@ -4,7 +4,7 @@
 
 No. Everything runs locally. There is no telemetry, no analytics, no phoning home. The only network request the built site makes is loading highlight.js from a CDN for syntax highlighting, and that degrades gracefully if blocked.
 
-The `--synthesize` flag on `llmwiki build` calls the local `claude` binary on your machine for overview generation. It is opt-in and does not use any external API directly.
+The `--synthesize` flag on `sessionwiki build` calls the local `claude` binary on your machine for overview generation. It is opt-in and does not use any external API directly.
 
 ## Which agents are supported?
 
@@ -24,7 +24,7 @@ See [multi-agent-setup.md](multi-agent-setup.md) for per-agent details.
 
 ## Do I need an API key?
 
-No. llmwiki reads existing session files from your agents' local session stores. It does not call any LLM API. The wiki layer (`/wiki-ingest`, `/wiki-query`) uses your existing Claude Code (or other agent) session to do the LLM work.
+No. sessionwiki reads existing session files from your agents' local session stores. It does not call any LLM API. The wiki layer (`/wiki-ingest`, `/wiki-query`) uses your existing Claude Code (or other agent) session to do the LLM work.
 
 ## Can I use it offline?
 
@@ -89,14 +89,14 @@ Python 3.9 or later. The only runtime dependency is the `markdown` package. Ever
 
 ## Can I export to other formats?
 
-Yes. llmwiki supports several export formats:
+Yes. sessionwiki supports several export formats:
 
-- `llmwiki export llms-txt` -- llms.txt format for AI consumption
-- `llmwiki export jsonld` -- JSON-LD knowledge graph
-- `llmwiki export sitemap` -- XML sitemap
-- `llmwiki export rss` -- RSS feed
-- `llmwiki sync --vault PATH` -- write through to an Obsidian vault as part of the regular sync (replaces the removed `export-obsidian` subcommand)
+- `sessionwiki export llms-txt` -- llms.txt format for AI consumption
+- `sessionwiki export jsonld` -- JSON-LD knowledge graph
+- `sessionwiki export sitemap` -- XML sitemap
+- `sessionwiki export rss` -- RSS feed
+- `sessionwiki sync --vault PATH` -- write through to an Obsidian vault as part of the regular sync (replaces the removed `export-obsidian` subcommand)
 
-Run `llmwiki export all` to generate everything at once.
+Run `sessionwiki export all` to generate everything at once.
 
 > The `export-obsidian`, `export-qmd`, `export-marp`, and `watch` subcommands were removed in v1.2.0. See `docs/UPGRADING.md` for the migration path.

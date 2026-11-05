@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 DASHBOARD_TEMPLATE = REPO_ROOT / "examples" / "wiki_dashboard.md"
@@ -68,7 +68,7 @@ def test_dashboard_has_connections_section():
 
 def test_cmd_init_seeds_dashboard(tmp_path: Path, monkeypatch):
     """cmd_init should copy the dashboard template to wiki/dashboard.md."""
-    monkeypatch.setattr("llmwiki.cli.REPO_ROOT", tmp_path)
+    monkeypatch.setattr("sessionwiki.cli.REPO_ROOT", tmp_path)
     # Copy the template into the tmp REPO_ROOT
     (tmp_path / "examples").mkdir()
     (tmp_path / "examples" / "wiki_dashboard.md").write_text(
@@ -76,7 +76,7 @@ def test_cmd_init_seeds_dashboard(tmp_path: Path, monkeypatch):
     )
 
     import argparse
-    from llmwiki.cli import cmd_init
+    from sessionwiki.cli import cmd_init
     args = argparse.Namespace()
     rc = cmd_init(args)
     assert rc == 0

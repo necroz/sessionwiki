@@ -1,4 +1,4 @@
-"""Tests for `llmwiki.project_topics` — project topics/tag chips."""
+"""Tests for `sessionwiki.project_topics` — project topics/tag chips."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.project_topics import (
+from sessionwiki.project_topics import (
     _NOISE_TAGS,
     extract_session_topics,
     get_project_topics,

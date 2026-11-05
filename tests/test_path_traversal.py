@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.build import _safe_slug, discover_sources
+from sessionwiki.build import _safe_slug, discover_sources
 
 
 # ─── _safe_slug unit tests ───────────────────────────────────────────────

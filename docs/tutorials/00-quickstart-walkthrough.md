@@ -21,15 +21,15 @@ This walks through every feature using `/wiki-*` slash commands from Claude Code
 ## 1. Install
 
 ```bash
-cd ~/Desktop/2026/production-draft/llm-wiki
+cd ~/path/to/sessionwiki
 pip install ".[graph]"
 ```
 
 Verify:
 
 ```
-llmwiki --version
-# -> llmwiki 1.3.0
+sessionwiki --version
+# -> sessionwiki 1.3.0
 ```
 
 ---
@@ -68,7 +68,7 @@ summary: 488 converted, 0 unchanged, ...
 Check status anytime:
 
 ```
-llmwiki sync --status
+sessionwiki sync --status
 ```
 
 ---
@@ -102,7 +102,7 @@ head -50 graphify-out/GRAPH_REPORT.md
 Query the graph:
 
 ```
-llmwiki query "what projects is Pratiyush working on"
+sessionwiki query "what projects am I working on"
 ```
 
 ---
@@ -150,7 +150,7 @@ Key rules:
 
 ## 8. Ask the wiki
 
-Run `/wiki-query "what is the architecture of llm-wiki?"`. Claude reads the relevant wiki pages and synthesizes an answer with [[wikilink]] citations.
+Run `/wiki-query "what is the architecture of sessionwiki?"`. Claude reads the relevant wiki pages and synthesizes an answer with [[wikilink]] citations.
 
 ---
 
@@ -159,13 +159,13 @@ Run `/wiki-query "what is the architecture of llm-wiki?"`. Claude reads the rele
 All AI-consumable formats are built automatically with `/wiki-build`. You can also export individually:
 
 ```
-llmwiki export llms-txt        # machine-readable index
-llmwiki export llms-full-txt   # full text corpus (2.2 MB)
-llmwiki export jsonld           # schema.org graph
-llmwiki export sitemap          # sitemap.xml (1,276 URLs)
-llmwiki export rss              # RSS feed (50 items)
-llmwiki export marp             # slide deck
-llmwiki export all              # everything
+sessionwiki export llms-txt        # machine-readable index
+sessionwiki export llms-full-txt   # full text corpus (2.2 MB)
+sessionwiki export jsonld           # schema.org graph
+sessionwiki export sitemap          # sitemap.xml (1,276 URLs)
+sessionwiki export rss              # RSS feed (50 items)
+sessionwiki export marp             # slide deck
+sessionwiki export all              # everything
 ```
 
 ---
@@ -176,7 +176,7 @@ After building the graph, export to your Obsidian vault:
 
 ```python
 python3 -c "
-from llmwiki.graphify_bridge import export_to_obsidian
+from sessionwiki.graphify_bridge import export_to_obsidian
 from pathlib import Path
 export_to_obsidian(Path.home() / 'Documents/Obsidian Vault/Temp/Graph')
 "
@@ -194,9 +194,9 @@ Open `~/Documents/Obsidian Vault/Temp/` in Obsidian:
 Quick sanity check:
 
 ```bash
-llmwiki --version              # prints version
-llmwiki adapters               # 2 core adapters
-llmwiki sync --status          # last sync time
+sessionwiki --version              # prints version
+sessionwiki adapters               # 2 core adapters
+sessionwiki sync --status          # last sync time
 ls site/index.html             # site exists
 ls graphify-out/GRAPH_REPORT.md # graph exists
 ```
@@ -207,7 +207,7 @@ ls graphify-out/GRAPH_REPORT.md # graph exists
 
 | Problem | Fix |
 |---|---|
-| `command not found: llmwiki` | Run `pip install ".[graph]"` from the repo root |
+| `command not found: sessionwiki` | Run `pip install ".[graph]"` from the repo root |
 | `graphifyy not installed` | Run `pip install ".[graph]"` |
 | `0 sessions discovered` | Check `~/.claude/projects/` has `.jsonl` files |
 | `build` produces 0 HTML | Run `/wiki-sync` first |

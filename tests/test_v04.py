@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import __version__
+from sessionwiki import __version__
 
 from tests.conftest import REPO_ROOT
 
@@ -30,9 +30,9 @@ def test_version_is_valid_semver_0x():
 
 
 def test_pyproject_version_matches_package():
-    """Whatever version `llmwiki/__init__.py` sets, `pyproject.toml`
+    """Whatever version `sessionwiki/__init__.py` sets, `pyproject.toml`
     must match — otherwise `pip install .` ships a different number
-    than `llmwiki --version` reports."""
+    than `sessionwiki --version` reports."""
     content = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert f'version = "{__version__}"' in content, (
         f"pyproject.toml version does not match __version__ ({__version__})"
@@ -43,7 +43,7 @@ def test_pyproject_version_matches_package():
 
 
 def test_exporters_module_imports():
-    from llmwiki.exporters import (
+    from sessionwiki.exporters import (
         export_all,
         write_llms_txt,
         write_llms_full_txt,
@@ -67,7 +67,7 @@ def test_exporters_module_imports():
 
 
 def test_plain_text_strips_markdown():
-    from llmwiki.exporters import _plain_text
+    from sessionwiki.exporters import _plain_text
 
     md = "# Heading\n\nSome **bold** and `code` and [link](http://x).\n\n```py\nprint('x')\n```\n\n- Bullet\n- [[wikilink]]\n"
     text = _plain_text(md)
@@ -82,7 +82,7 @@ def test_plain_text_strips_markdown():
 
 
 def test_sha256_16_stable():
-    from llmwiki.exporters import _sha256_16
+    from sessionwiki.exporters import _sha256_16
 
     h1 = _sha256_16("hello")
     h2 = _sha256_16("hello")
@@ -92,26 +92,26 @@ def test_sha256_16_stable():
 
 
 def test_page_id_format():
-    from llmwiki.exporters import _page_id
+    from sessionwiki.exporters import _page_id
 
     assert _page_id("ai-newsletter", "my-slug") == "ai-newsletter/my-slug"
 
 
 def test_write_llms_txt(tmp_path):
-    from llmwiki.exporters import write_llms_txt
+    from sessionwiki.exporters import write_llms_txt
 
     groups = {"proj-a": [], "proj-b": []}
     p = write_llms_txt(tmp_path, groups, total_sessions=42)
     assert p.exists()
     content = p.read_text(encoding="utf-8")
-    assert content.startswith("# llmwiki")
+    assert content.startswith("# sessionwiki")
     assert "42 sessions" in content
     assert "proj-a" in content
     assert "proj-b" in content
 
 
 def test_write_robots_txt(tmp_path):
-    from llmwiki.exporters import write_robots_txt
+    from sessionwiki.exporters import write_robots_txt
 
     p = write_robots_txt(tmp_path)
     assert p.exists()
@@ -122,7 +122,7 @@ def test_write_robots_txt(tmp_path):
 
 
 def test_write_ai_readme(tmp_path):
-    from llmwiki.exporters import write_ai_readme
+    from sessionwiki.exporters import write_ai_readme
 
     p = write_ai_readme(tmp_path, groups={"a": []}, total_sessions=5)
     assert p.exists()
@@ -136,11 +136,11 @@ def test_write_ai_readme(tmp_path):
 
 def test_build_produces_ai_exports():
     site = REPO_ROOT / "site"
-    # `llmwiki init` creates an empty site/ dir with just .gitkeep, which would
+    # `sessionwiki init` creates an empty site/ dir with just .gitkeep, which would
     # make a `site.exists()` skip return False even though no real build has
     # happened. Key on manifest.json — it's only written by a full build.
     if not (site / "manifest.json").exists():
-        pytest.skip("site/ not built (no manifest.json — run `llmwiki build`)")
+        pytest.skip("site/ not built (no manifest.json — run `sessionwiki build`)")
     for expected in (
         "llms.txt",
         "llms-full.txt",
@@ -202,7 +202,7 @@ def test_session_page_has_schema_org_microdata():
         pytest.skip("no session HTML files")
     content = html_files[0].read_text(encoding="utf-8")
     assert 'itemtype="https://schema.org/Article"' in content
-    assert "llmwiki:metadata" in content
+    assert "sessionwiki:metadata" in content
 
 
 def test_session_page_has_canonical_link():
@@ -220,7 +220,7 @@ def test_session_page_has_canonical_link():
 
 
 def test_manifest_module_imports():
-    from llmwiki.manifest import build_manifest, write_manifest, sha256_hex, PERF_BUDGET
+    from sessionwiki.manifest import build_manifest, write_manifest, sha256_hex, PERF_BUDGET
 
     assert callable(build_manifest)
     assert callable(write_manifest)
@@ -231,7 +231,7 @@ def test_manifest_module_imports():
 
 
 def test_manifest_sha256_hex_is_16_chars(tmp_path):
-    from llmwiki.manifest import sha256_hex
+    from sessionwiki.manifest import sha256_hex
 
     f = tmp_path / "hello.txt"
     f.write_text("hello world", encoding="utf-8")
@@ -241,7 +241,7 @@ def test_manifest_sha256_hex_is_16_chars(tmp_path):
 
 
 def test_manifest_missing_file_returns_empty_hash(tmp_path):
-    from llmwiki.manifest import sha256_hex
+    from sessionwiki.manifest import sha256_hex
 
     h = sha256_hex(tmp_path / "nonexistent.txt")
     assert h == ""
@@ -251,7 +251,7 @@ def test_manifest_missing_file_returns_empty_hash(tmp_path):
 
 
 def test_link_checker_imports():
-    from llmwiki.link_checker import check_site, is_external, resolve_target
+    from sessionwiki.link_checker import check_site, is_external, resolve_target
 
     assert callable(check_site)
     assert callable(is_external)
@@ -259,7 +259,7 @@ def test_link_checker_imports():
 
 
 def test_link_checker_is_external():
-    from llmwiki.link_checker import is_external
+    from sessionwiki.link_checker import is_external
 
     assert is_external("http://example.com")
     assert is_external("https://example.com")
@@ -273,7 +273,7 @@ def test_link_checker_is_external():
 
 
 def test_mcp_has_wiki_export_tool():
-    from llmwiki.mcp.server import TOOLS, TOOL_IMPLS
+    from sessionwiki.mcp.server import TOOLS, TOOL_IMPLS
 
     names = {t["name"] for t in TOOLS}
     assert "wiki_export" in names
@@ -281,7 +281,7 @@ def test_mcp_has_wiki_export_tool():
 
 
 def test_mcp_wiki_export_list_format():
-    from llmwiki.mcp.server import tool_wiki_export
+    from sessionwiki.mcp.server import tool_wiki_export
 
     result = tool_wiki_export({"format": "list"})
     assert "content" in result
@@ -289,7 +289,7 @@ def test_mcp_wiki_export_list_format():
 
 
 def test_mcp_wiki_export_unknown_format():
-    from llmwiki.mcp.server import tool_wiki_export
+    from sessionwiki.mcp.server import tool_wiki_export
 
     result = tool_wiki_export({"format": "bogus"})
     assert result["isError"] is True
@@ -299,7 +299,7 @@ def test_mcp_wiki_export_unknown_format():
 
 
 def test_cli_has_v04_subcommands():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     help_text = parser.format_help()

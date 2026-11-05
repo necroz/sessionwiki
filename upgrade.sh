@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# llmwiki — pull latest from git and re-run setup.
+# sessionwiki — pull latest from git and re-run setup.
 # Usage: ./upgrade.sh
 set -eu
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

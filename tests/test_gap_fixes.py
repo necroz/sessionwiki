@@ -21,7 +21,7 @@ def test_log_archive_gets_frontmatter_on_first_write(tmp_path: Path):
     """When log.md exceeds the archival threshold, the first write to
     log-archive-<year>.md must include the standard nav frontmatter so
     lint's frontmatter_completeness rule doesn't fail."""
-    from llmwiki.synth.pipeline import _auto_archive_log, LOG_ARCHIVE_THRESHOLD
+    from sessionwiki.synth.pipeline import _auto_archive_log, LOG_ARCHIVE_THRESHOLD
 
     log = tmp_path / "log.md"
     # Write past the 50 KB threshold with real-looking headings so the
@@ -45,7 +45,7 @@ def test_log_archive_gets_frontmatter_on_first_write(tmp_path: Path):
 
 
 def test_log_archive_below_threshold_is_noop(tmp_path: Path):
-    from llmwiki.synth.pipeline import _auto_archive_log
+    from sessionwiki.synth.pipeline import _auto_archive_log
 
     log = tmp_path / "log.md"
     log.write_text("# Wiki Log\n\n## [2026-04-19] synthesize | small\n", encoding="utf-8")
@@ -67,7 +67,7 @@ def _page(rel: str, *, title: str, project: str = "", ptype: str = "source",
 
 def test_duplicate_detection_respects_project_scope():
     """Same-titled pages in DIFFERENT projects must not be flagged."""
-    from llmwiki.lint.rules import DuplicateDetection
+    from sessionwiki.lint.rules import DuplicateDetection
 
     pages = dict([
         _page("sources/proj-a/CHANGELOG.md", title="CHANGELOG",
@@ -82,7 +82,7 @@ def test_duplicate_detection_respects_project_scope():
 def test_duplicate_detection_requires_body_overlap():
     """Same-titled same-project pages with distinct bodies must NOT
     flag — previously the 1.0 title match alone fired."""
-    from llmwiki.lint.rules import DuplicateDetection
+    from sessionwiki.lint.rules import DuplicateDetection
 
     body_a = "alpha " * 500
     body_b = "omega " * 500  # zero overlap
@@ -96,7 +96,7 @@ def test_duplicate_detection_requires_body_overlap():
 
 def test_duplicate_detection_flags_true_duplicates():
     """Same project, same title, same body → MUST flag."""
-    from llmwiki.lint.rules import DuplicateDetection
+    from sessionwiki.lint.rules import DuplicateDetection
 
     body = "exact same content here for duplicate test " * 50
     pages = dict([
@@ -112,7 +112,7 @@ def test_duplicate_detection_flags_true_duplicates():
 
 def test_duplicate_detection_cross_type_never_flags():
     """An entity page must not be compared against a source page."""
-    from llmwiki.lint.rules import DuplicateDetection
+    from sessionwiki.lint.rules import DuplicateDetection
     body = "same body for both"
     pages = dict([
         _page("sources/proj/a.md", title="X", project="proj",
@@ -128,13 +128,13 @@ def test_duplicate_detection_cross_type_never_flags():
 
 
 def test_render_recent_activity_empty_returns_empty_string():
-    from llmwiki.changelog_timeline import render_recent_activity
+    from sessionwiki.changelog_timeline import render_recent_activity
     assert render_recent_activity([]) == ""
 
 
 def test_render_recent_activity_renders_rows():
-    from llmwiki.changelog_timeline import render_recent_activity
-    from llmwiki.log_reader import LogEvent
+    from sessionwiki.changelog_timeline import render_recent_activity
+    from sessionwiki.log_reader import LogEvent
 
     events = [
         LogEvent(
@@ -155,13 +155,13 @@ def test_render_recent_activity_renders_rows():
     assert "[[" not in html
 
 
-# ─── G-02 (#288): llmwiki adapters --wide ────────────────────────────────
+# ─── G-02 (#288): sessionwiki adapters --wide ────────────────────────────────
 
 
 def _run_cli(*args: str) -> subprocess.CompletedProcess:
     """Invoke the CLI in a subprocess so we exercise argparse end-to-end."""
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         check=False,

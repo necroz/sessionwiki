@@ -4,7 +4,7 @@ Feature: Edge cases that break first in production
   So no future PR reintroduces a UX regression
 
   Background:
-    Given a built llmwiki site is served
+    Given a built sessionwiki site is served
 
   Scenario: Empty-query palette still renders the initial result set
     When I visit the homepage

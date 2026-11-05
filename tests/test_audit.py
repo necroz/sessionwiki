@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llmwiki import audit
+from sessionwiki import audit
 
 
 def test_audit_finds_username_and_secret(tmp_path):
@@ -36,7 +36,7 @@ def test_audit_clean_tree_has_no_findings(tmp_path):
 
 
 def test_cli_audit_json_and_fail_flag(tmp_path, capsys, monkeypatch):
-    from llmwiki import cli
+    from sessionwiki import cli
 
     root = tmp_path / "raw"
     root.mkdir()
@@ -54,7 +54,7 @@ def test_cli_audit_json_and_fail_flag(tmp_path, capsys, monkeypatch):
 
 
 def test_audit_parser_accepts_flags():
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     args = build_parser().parse_args(
         ["audit", "--path", "/tmp/raw", "--json", "--fail-on-findings"]

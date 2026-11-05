@@ -8,7 +8,7 @@ from unittest.mock import patch
 import pytest
 
 
-from llmwiki.mcp.server import (
+from sessionwiki.mcp.server import (
     TOOLS,
     TOOL_IMPLS,
     tool_wiki_confidence,
@@ -49,7 +49,7 @@ def test_confidence_filter_by_min(tmp_path: Path):
     (wiki / "b.md").write_text(
         '---\ntitle: "B"\ntype: entity\nconfidence: 0.3\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_confidence({"min_confidence": 0.8})
     text = result["content"][0]["text"]
     assert "a.md" in text
@@ -62,7 +62,7 @@ def test_confidence_filter_by_max(tmp_path: Path):
     (wiki / "low.md").write_text(
         '---\ntitle: "L"\ntype: entity\nconfidence: 0.3\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_confidence({"max_confidence": 0.5})
     assert "low.md" in result["content"][0]["text"]
 
@@ -73,7 +73,7 @@ def test_confidence_skips_pages_without_field(tmp_path: Path):
     (wiki / "a.md").write_text(
         '---\ntitle: "A"\ntype: entity\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_confidence({})
     assert "0 pages" in result["content"][0]["text"]
 
@@ -84,7 +84,7 @@ def test_confidence_handles_invalid_value(tmp_path: Path):
     (wiki / "a.md").write_text(
         '---\ntitle: "A"\ntype: entity\nconfidence: high\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_confidence({})
     assert "0 pages" in result["content"][0]["text"]
 
@@ -106,7 +106,7 @@ def test_lifecycle_filters_by_state(tmp_path: Path):
     (wiki / "b.md").write_text(
         '---\ntitle: "B"\nlifecycle: verified\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_lifecycle({"state": "draft"})
     text = result["content"][0]["text"]
     assert "a.md" in text
@@ -116,7 +116,7 @@ def test_lifecycle_filters_by_state(tmp_path: Path):
 def test_lifecycle_empty_state(tmp_path: Path):
     wiki = tmp_path / "wiki"
     wiki.mkdir()
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_lifecycle({"state": "verified"})
     assert "0 pages" in result["content"][0]["text"]
 
@@ -133,7 +133,7 @@ def test_dashboard_counts_by_type(tmp_path: Path):
     (wiki / "b.md").write_text(
         '---\ntitle: "B"\ntype: concept\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_dashboard({})
     text = result["content"][0]["text"]
     assert "entity" in text
@@ -152,7 +152,7 @@ def test_dashboard_confidence_buckets(tmp_path: Path):
     (wiki / "none.md").write_text(
         '---\ntitle: "N"\ntype: entity\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_dashboard({})
     text = result["content"][0]["text"]
     assert "high" in text
@@ -162,7 +162,7 @@ def test_dashboard_confidence_buckets(tmp_path: Path):
 def test_dashboard_handles_empty_wiki(tmp_path: Path):
     wiki = tmp_path / "wiki"
     wiki.mkdir()
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_dashboard({})
     text = result["content"][0]["text"]
     assert "0 pages" in text
@@ -180,7 +180,7 @@ def test_entity_search_by_type(tmp_path: Path):
     (wiki / "entities" / "Person1.md").write_text(
         '---\ntitle: "Person1"\ntype: entity\nentity_type: person\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_entity_search({"entity_type": "tool"})
     text = result["content"][0]["text"]
     assert "Tool1" in text
@@ -196,7 +196,7 @@ def test_entity_search_by_name(tmp_path: Path):
     (wiki / "entities" / "GPT.md").write_text(
         '---\ntitle: "GPT"\ntype: entity\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_entity_search({"name": "claude"})
     text = result["content"][0]["text"]
     assert "Claude" in text
@@ -209,7 +209,7 @@ def test_entity_search_skips_non_entities(tmp_path: Path):
     (wiki / "concept.md").write_text(
         '---\ntitle: "Concept"\ntype: concept\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_entity_search({})
     assert "0 matching" in result["content"][0]["text"]
 
@@ -226,7 +226,7 @@ def test_category_browse_lists_all(tmp_path: Path):
     (wiki / "b.md").write_text(
         '---\ntitle: "B"\ntags: [flutter]\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_category_browse({})
     text = result["content"][0]["text"]
     assert "flutter" in text
@@ -242,7 +242,7 @@ def test_category_browse_specific_tag(tmp_path: Path):
     (wiki / "b.md").write_text(
         '---\ntitle: "B"\ntags: [python]\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_category_browse({"tag": "flutter"})
     text = result["content"][0]["text"]
     assert "a.md" in text
@@ -261,7 +261,7 @@ def test_category_browse_min_count(tmp_path: Path):
     (wiki / "c.md").write_text(
         '---\ntitle: "C"\ntags: [lonely]\n---\n', encoding="utf-8"
     )
-    with patch("llmwiki.mcp.server.REPO_ROOT", tmp_path):
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_category_browse({"min_count": 2})
     text = result["content"][0]["text"]
     assert "popular" in text

@@ -3,7 +3,7 @@
 The doc describes a contract the future hosted reader will meet. We can't
 test a server that doesn't exist, but we CAN keep the doc honest:
 
-- Every file path it claims `llmwiki build` writes must still be a real
+- Every file path it claims `sessionwiki build` writes must still be a real
   emission target (grep the source, not the `site/` output — the build
   shouldn't have to have been run for the tests to pass).
 - Every invariant it locks in (cache_tier enum, lifecycle enum,
@@ -18,9 +18,9 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
-from llmwiki.lifecycle import LifecycleState
-from llmwiki.schema import ENTITY_TYPES
+from sessionwiki import REPO_ROOT
+from sessionwiki.lifecycle import LifecycleState
+from sessionwiki.schema import ENTITY_TYPES
 
 CACHE_TIERS = ("L1", "L2", "L3", "L4")
 
@@ -96,11 +96,11 @@ def test_every_shipped_path_is_emitted_by_build():
 
     # Collect the source of the build pipeline once.
     src_roots = [
-        REPO_ROOT / "llmwiki" / "build.py",
-        REPO_ROOT / "llmwiki" / "exporters.py",
-        REPO_ROOT / "llmwiki" / "graph.py",
-        REPO_ROOT / "llmwiki" / "manifest.py",
-        REPO_ROOT / "llmwiki" / "search_facets.py",
+        REPO_ROOT / "sessionwiki" / "build.py",
+        REPO_ROOT / "sessionwiki" / "exporters.py",
+        REPO_ROOT / "sessionwiki" / "graph.py",
+        REPO_ROOT / "sessionwiki" / "manifest.py",
+        REPO_ROOT / "sessionwiki" / "search_facets.py",
     ]
     haystack = "\n".join(
         p.read_text(encoding="utf-8")
@@ -117,7 +117,7 @@ def test_every_shipped_path_is_emitted_by_build():
             missing.append(path)
     assert not missing, (
         "reader-api doc lists these `Shipped today` paths, but no "
-        f"llmwiki/*.py source emits them: {missing}"
+        f"sessionwiki/*.py source emits them: {missing}"
     )
 
 

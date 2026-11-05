@@ -23,27 +23,27 @@ pause() { sleep "${1:-1.5}"; }
 clear
 echo "╔══════════════════════════════════════════════════════╗"
 echo "║  llm-wiki — Turn AI coding sessions into a wiki     ║"
-echo "║  github.com/Pratiyush/llm-wiki                      ║"
+echo "║  github.com/necroz/sessionwiki                      ║"
 echo "╚══════════════════════════════════════════════════════╝"
 pause 2
 
 # 1. Version + adapters
-type_cmd "llmwiki --version"
-python3 -m llmwiki --version
+type_cmd "sessionwiki --version"
+python3 -m sessionwiki --version
 pause
 
-type_cmd "llmwiki adapters"
-python3 -m llmwiki adapters
+type_cmd "sessionwiki adapters"
+python3 -m sessionwiki adapters
 pause 2
 
 # 2. Sync sessions
-type_cmd "llmwiki sync --dry-run"
-python3 -m llmwiki sync --dry-run
+type_cmd "sessionwiki sync --dry-run"
+python3 -m sessionwiki sync --dry-run
 pause 2
 
 # 3. Build the site
-type_cmd "llmwiki build"
-python3 -m llmwiki build 2>&1
+type_cmd "sessionwiki build"
+python3 -m sessionwiki build 2>&1
 pause 2
 
 # 4. Show what was generated
@@ -66,18 +66,18 @@ ls raw/sessions/ | head -10
 pause
 
 # 7. v1.1 — Preview API cost before synthesis (#50)
-type_cmd "llmwiki synthesize --estimate"
-python3 -m llmwiki synthesize --estimate 2>&1 | head -12
+type_cmd "sessionwiki synthesize --estimate"
+python3 -m sessionwiki synthesize --estimate 2>&1 | head -12
 pause 2
 
 # 8. v1.1 — List candidate pages awaiting human review (#51)
-type_cmd "llmwiki candidates list"
-python3 -m llmwiki candidates list 2>&1 || echo "  (no candidates pending)"
+type_cmd "sessionwiki candidates list"
+python3 -m sessionwiki candidates list 2>&1 || echo "  (no candidates pending)"
 pause 2
 
 # 9. Start server
-type_cmd "llmwiki serve --port 8765 &"
-python3 -m llmwiki serve --port 8765 &
+type_cmd "sessionwiki serve --port 8765 &"
+python3 -m sessionwiki serve --port 8765 &
 SERVER_PID=$!
 sleep 1
 echo "→ Server running at http://localhost:8765"
@@ -92,8 +92,8 @@ echo "          Ollama-ready synthesis pipeline."
 pause 2
 
 echo ""
-echo "★ Star the repo: github.com/Pratiyush/llm-wiki"
-echo "★ Live demo: pratiyush.github.io/llm-wiki"
+echo "★ Star the repo: github.com/necroz/sessionwiki"
+echo "★ Live demo: necroz.github.io/sessionwiki"
 pause 2
 
 # Cleanup

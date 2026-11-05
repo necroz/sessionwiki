@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from llmwiki.build import _is_subagent
+from sessionwiki.build import _is_subagent
 
 
 def test_explicit_true_returns_true():

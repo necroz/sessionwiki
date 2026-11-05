@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki.cli import cmd_graph
+from sessionwiki.cli import cmd_graph
 
 
 def _make_args(engine="graphify", fmt="both"):
@@ -24,10 +24,10 @@ def _make_args(engine="graphify", fmt="both"):
 
 def test_graphify_exception_falls_back_to_builtin(monkeypatch, capsys):
     """graphify crashing must log + fall through, not propagate."""
-    with patch("llmwiki.graphify_bridge.is_available", return_value=True), \
-         patch("llmwiki.graphify_bridge.build_graphify_graph",
+    with patch("sessionwiki.graphify_bridge.is_available", return_value=True), \
+         patch("sessionwiki.graphify_bridge.build_graphify_graph",
                side_effect=RuntimeError("graphify exploded")), \
-         patch("llmwiki.graph.build_and_report", return_value=0) as builtin:
+         patch("sessionwiki.graph.build_and_report", return_value=0) as builtin:
         rc = cmd_graph(_make_args())
     assert rc == 0
     builtin.assert_called_once()
@@ -39,10 +39,10 @@ def test_graphify_exception_falls_back_to_builtin(monkeypatch, capsys):
 def test_graphify_empty_result_falls_back_to_builtin(monkeypatch, capsys):
     """When graphify returns {graph: None} (e.g. tiny corpus with no
     edges), fall through instead of returning 1."""
-    with patch("llmwiki.graphify_bridge.is_available", return_value=True), \
-         patch("llmwiki.graphify_bridge.build_graphify_graph",
+    with patch("sessionwiki.graphify_bridge.is_available", return_value=True), \
+         patch("sessionwiki.graphify_bridge.build_graphify_graph",
                return_value={"graph": None}), \
-         patch("llmwiki.graph.build_and_report", return_value=0) as builtin:
+         patch("sessionwiki.graph.build_and_report", return_value=0) as builtin:
         rc = cmd_graph(_make_args())
     assert rc == 0
     builtin.assert_called_once()
@@ -52,10 +52,10 @@ def test_graphify_empty_result_falls_back_to_builtin(monkeypatch, capsys):
 
 def test_graphify_success_short_circuits(monkeypatch):
     """When graphify produces a real graph, builtin is NOT called."""
-    with patch("llmwiki.graphify_bridge.is_available", return_value=True), \
-         patch("llmwiki.graphify_bridge.build_graphify_graph",
+    with patch("sessionwiki.graphify_bridge.is_available", return_value=True), \
+         patch("sessionwiki.graphify_bridge.build_graphify_graph",
                return_value={"graph": {"nodes": [{"id": "x"}], "edges": []}}), \
-         patch("llmwiki.graph.build_and_report") as builtin:
+         patch("sessionwiki.graph.build_and_report") as builtin:
         rc = cmd_graph(_make_args())
     assert rc == 0
     builtin.assert_not_called()
@@ -63,8 +63,8 @@ def test_graphify_success_short_circuits(monkeypatch):
 
 def test_graphify_unavailable_falls_back_to_builtin(monkeypatch, capsys):
     """When graphify isn't installed, fall through cleanly (no crash)."""
-    with patch("llmwiki.graphify_bridge.is_available", return_value=False), \
-         patch("llmwiki.graph.build_and_report", return_value=0) as builtin:
+    with patch("sessionwiki.graphify_bridge.is_available", return_value=False), \
+         patch("sessionwiki.graph.build_and_report", return_value=0) as builtin:
         rc = cmd_graph(_make_args())
     assert rc == 0
     builtin.assert_called_once()

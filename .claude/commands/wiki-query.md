@@ -1,4 +1,4 @@
-Query the llmwiki and synthesise an answer.
+Query the sessionwiki and synthesise an answer.
 
 Usage: /wiki-query <your question>
 

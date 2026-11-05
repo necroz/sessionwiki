@@ -2,7 +2,7 @@
 
 These markdown files are the **Planner pass** for the Playwright Test
 Agents epic (#462, ADR-001). Each spec captures the expected behavior
-of one page type (or one cross-cutting concern) on the built llmwiki
+of one page type (or one cross-cutting concern) on the built sessionwiki
 site, in a format the Generator agent can consume.
 
 While the agents bootstrap (#464) is still gated on Node-install

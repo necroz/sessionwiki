@@ -2,7 +2,7 @@
 #
 # Used by .github/workflows/link-check.yml to scan repo markdown
 # weekly for broken external links. Internal links (site/) have a
-# dedicated checker — `llmwiki check-links` — that runs on build.
+# dedicated checker — `sessionwiki check-links` — that runs on build.
 
 # ─── network ─────────────────────────────────────────────────────────
 timeout = 20
@@ -15,7 +15,7 @@ retry_wait_time = 2
 accept = [200, 201, 202, 203, 204, 206, 301, 302, 303, 307, 308, 401, 403]
 
 # ─── exclude paths ──────────────────────────────────────────────────
-# site/ is the built output (already link-checked by llmwiki check-links).
+# site/ is the built output (already link-checked by sessionwiki check-links).
 # .github/ISSUE_TEMPLATE/ contains tag URLs that resolve post-release.
 # docs/content-drafts/ is unpublished marketing — skip.
 exclude_path = [
@@ -36,14 +36,14 @@ exclude = [
   "^https://github\\.com/Pratiyush/llm-wiki/releases/tag/v1\\.1",
   "^https://github\\.com/Pratiyush/llm-wiki/releases/tag/v1\\.2",
   # Security advisory template (only resolves when filed)
-  "^https://github\\.com/Pratiyush/llm-wiki/security/advisories/new",
+  "^https://github\\.com/necroz/sessionwiki/security/advisories/new",
   # PyPI (pre-first-release)
-  "^https://pypi\\.org/project/llmwiki/",
+  "^https://pypi\\.org/project/sessionwiki/",
   # Homebrew tap (pre-creation)
-  "^https://github\\.com/Pratiyush/homebrew-llmwiki",
+  "^https://github\\.com/necroz/homebrew-sessionwiki",
   # Repo settings URLs (auth-gated, only visible to admins — CI runner
   # can't authenticate so every settings link 404s)
-  "^https://github\\.com/Pratiyush/llm-wiki/settings",
+  "^https://github\\.com/necroz/sessionwiki/settings",
   # Localhost references in docs
   "^http://127\\.0\\.0\\.1",
   "^http://localhost",

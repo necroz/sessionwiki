@@ -12,7 +12,7 @@ cache_tier: L2
 # demo-blog-engine
 
 Reference project for the Rust SSG track. Source under `content/*.md`,
-output under `public/`. Good example of how llmwiki's session logs
+output under `public/`. Good example of how sessionwiki's session logs
 capture a realistic build-from-scratch trajectory: scaffolding the
 crate, picking the markdown library, adding syntax highlighting, then
 the final polish passes (RSS + dark mode).

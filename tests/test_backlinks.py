@@ -1,4 +1,4 @@
-"""Tests for ``llmwiki/backlinks.py`` + ``llmwiki backlinks`` CLI (#328).
+"""Tests for ``sessionwiki/backlinks.py`` + ``sessionwiki backlinks`` CLI (#328).
 
 Covers:
 * Sentinel-bounded block insertion + idempotent replacement
@@ -22,7 +22,7 @@ from textwrap import dedent
 
 import pytest
 
-from llmwiki import backlinks as b
+from sessionwiki import backlinks as b
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -30,7 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def _run(*args):
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         check=False,
@@ -159,7 +159,7 @@ def test_render_block_truncates_and_adds_footer():
     block = b._render_block(entries, max_entries=3)
     assert block.count("[[s") == 3
     assert "and 7 more referrer" in block
-    assert "llmwiki references" in block
+    assert "sessionwiki references" in block
 
 
 def test_render_block_no_footer_when_under_cap():

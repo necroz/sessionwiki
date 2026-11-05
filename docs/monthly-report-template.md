@@ -5,7 +5,7 @@ GitHub Insights, the issue tracker, and PyPI stats.
 
 ---
 
-## llmwiki Monthly Report -- YYYY-MM
+## sessionwiki Monthly Report -- YYYY-MM
 
 **Reporting period:** YYYY-MM-01 to YYYY-MM-DD
 **Prepared by:** ___
@@ -24,7 +24,7 @@ GitHub Insights, the issue tracker, and PyPI stats.
 **Data sources:**
 - Stars/forks: GitHub repo page
 - Cloners/visitors: GitHub Insights > Traffic
-- PyPI downloads: [pepy.tech/project/llmwiki](https://pepy.tech/project/llmwiki)
+- PyPI downloads: [pepy.tech/project/sessionwiki](https://pepy.tech/project/sessionwiki)
 
 ### Issues
 
@@ -135,11 +135,11 @@ Ranked by upvotes on open issues:
    gh pr list --state merged --search "merged:2026-MM-01..2026-MM-31" \
      --json author --jq '.[].author.login' | sort -u
    ```
-3. **PyPI downloads:** [pepy.tech](https://pepy.tech/project/llmwiki)
-   or `pip install pypistats && pypistats overall llmwiki --last-month`
-4. **Lighthouse:** run `npx lighthouse https://pratiyush.github.io/llm-wiki/ --output=json`
+3. **PyPI downloads:** [pepy.tech](https://pepy.tech/project/sessionwiki)
+   or `pip install pypistats && pypistats overall sessionwiki --last-month`
+4. **Lighthouse:** run `npx lighthouse https://necroz.github.io/sessionwiki/ --output=json`
    or check the Chrome DevTools Lighthouse tab
-5. **Stars:** `gh api repos/Pratiyush/llm-wiki --jq '.stargazers_count'`
+5. **Stars:** `gh api repos/necroz/sessionwiki --jq '.stargazers_count'`
 
 ## Where to publish
 

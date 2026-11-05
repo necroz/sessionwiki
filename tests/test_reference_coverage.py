@@ -1,10 +1,10 @@
 """Guardrail: every shipped command must be documented (v1.2.0 · #265).
 
-- Every CLI subcommand registered in ``llmwiki.cli.build_parser`` must
+- Every CLI subcommand registered in ``sessionwiki.cli.build_parser`` must
   appear as an ``## subcommand`` heading in ``docs/reference/cli.md``.
 - Every `.claude/commands/*.md` file must appear as an
   ``### /slash-command`` heading in ``docs/reference/slash-commands.md``.
-- Every top-level nav item in ``llmwiki/build.py`` must appear as a
+- Every top-level nav item in ``sessionwiki/build.py`` must appear as a
   row in ``docs/reference/ui.md``.
 
 When a maintainer adds a new subcommand / slash command / nav tab, these
@@ -18,14 +18,14 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 CLI_REF = REPO_ROOT / "docs" / "reference" / "cli.md"
 SLASH_REF = REPO_ROOT / "docs" / "reference" / "slash-commands.md"
 UI_REF = REPO_ROOT / "docs" / "reference" / "ui.md"
 CLAUDE_CMDS_DIR = REPO_ROOT / ".claude" / "commands"
-BUILD_PY = REPO_ROOT / "llmwiki" / "build.py"
+BUILD_PY = REPO_ROOT / "sessionwiki" / "build.py"
 
 
 # ─── CLI coverage ─────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ BUILD_PY = REPO_ROOT / "llmwiki" / "build.py"
 
 def _all_cli_subcommands() -> set[str]:
     """Walk the argparse tree + return every subcommand name."""
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     parser = build_parser()
     for action in parser._actions:

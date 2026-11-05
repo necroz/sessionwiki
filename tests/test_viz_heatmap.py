@@ -1,4 +1,4 @@
-"""Tests for `llmwiki.viz_heatmap` — GitLab/GitHub-style activity heatmap.
+"""Tests for `sessionwiki.viz_heatmap` — GitLab/GitHub-style activity heatmap.
 
 Covers:
 * data collection + project filtering
@@ -15,7 +15,7 @@ from datetime import date
 
 import pytest
 
-from llmwiki.viz_heatmap import (
+from sessionwiki.viz_heatmap import (
     CELL_SIZE,
     ROW_COUNT,
     WEEK_COLS,

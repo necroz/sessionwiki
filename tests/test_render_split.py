@@ -1,6 +1,6 @@
-"""Tests for the llmwiki/render/ module split (v1.1, #217).
+"""Tests for the sessionwiki/render/ module split (v1.1, #217).
 
-Verifies that the CSS + JS extraction from build.py into llmwiki/render/
+Verifies that the CSS + JS extraction from build.py into sessionwiki/render/
 is byte-identical and backwards-compatible.
 """
 
@@ -10,48 +10,48 @@ import pytest
 
 
 def test_render_package_imports():
-    """llmwiki.render exposes CSS + JS at package level."""
-    from llmwiki.render import CSS, JS
+    """sessionwiki.render exposes CSS + JS at package level."""
+    from sessionwiki.render import CSS, JS
     assert isinstance(CSS, str)
     assert isinstance(JS, str)
 
 
 def test_css_module_directly_importable():
-    from llmwiki.render.css import CSS
-    assert CSS.startswith("/* llmwiki — god-level docs style */")
+    from sessionwiki.render.css import CSS
+    assert CSS.startswith("/* sessionwiki — god-level docs style */")
 
 
 def test_js_module_directly_importable():
-    from llmwiki.render.js import JS
-    assert "llmwiki viewer" in JS
+    from sessionwiki.render.js import JS
+    assert "sessionwiki viewer" in JS
 
 
 # ─── Backwards compatibility ──────────────────────────────────────────
 
 
 def test_build_module_still_exposes_CSS():
-    """Old imports like `from llmwiki.build import CSS` keep working."""
-    from llmwiki.build import CSS
+    """Old imports like `from sessionwiki.build import CSS` keep working."""
+    from sessionwiki.build import CSS
     assert isinstance(CSS, str)
     assert len(CSS) > 1000
 
 
 def test_build_module_still_exposes_JS():
-    from llmwiki.build import JS
+    from sessionwiki.build import JS
     assert isinstance(JS, str)
     assert len(JS) > 1000
 
 
 def test_build_CSS_identical_to_render_CSS():
     """build.CSS and render.css.CSS must be the same object (re-exported)."""
-    from llmwiki import build
-    from llmwiki.render.css import CSS as RENDER_CSS
+    from sessionwiki import build
+    from sessionwiki.render.css import CSS as RENDER_CSS
     assert build.CSS is RENDER_CSS
 
 
 def test_build_JS_identical_to_render_JS():
-    from llmwiki import build
-    from llmwiki.render.js import JS as RENDER_JS
+    from sessionwiki import build
+    from sessionwiki.render.js import JS as RENDER_JS
     assert build.JS is RENDER_JS
 
 
@@ -60,36 +60,36 @@ def test_build_JS_identical_to_render_JS():
 
 def test_css_contains_theme_variables():
     """Critical tokens must all be present."""
-    from llmwiki.render.css import CSS
+    from sessionwiki.render.css import CSS
     for var in ["--bg:", "--text:", "--border:", "--accent:",
                 "--shadow-card:", "--heatmap-0:", "--tool-cat-io:"]:
         assert var in CSS, f"missing token: {var}"
 
 
 def test_css_has_dark_theme_block():
-    from llmwiki.render.css import CSS
+    from sessionwiki.render.css import CSS
     assert '[data-theme="dark"]' in CSS
     assert "prefers-color-scheme: dark" in CSS
 
 
 def test_css_respects_prefers_reduced_motion():
-    from llmwiki.render.css import CSS
+    from sessionwiki.render.css import CSS
     assert "prefers-reduced-motion" in CSS
 
 
 def test_js_has_theme_toggle():
-    from llmwiki.render.js import JS
+    from sessionwiki.render.js import JS
     assert "Theme toggle" in JS
     assert "data-theme" in JS
 
 
 def test_js_has_command_palette():
-    from llmwiki.render.js import JS
+    from sessionwiki.render.js import JS
     assert "cmdk" in JS.lower() or "palette" in JS.lower() or "Cmd+K" in JS or "Ctrl+K" in JS
 
 
 def test_js_loads_search_index():
-    from llmwiki.render.js import JS
+    from sessionwiki.render.js import JS
     assert "search-index.json" in JS
 
 
@@ -110,18 +110,18 @@ def test_build_py_is_smaller():
       * 2,800 (#v1378-review per-source sibling-failure isolation
         + warnings-before-success ordering bumped the function by ~30 LOC)
     Next refactor target: extract md_to_html + preprocessor to
-    llmwiki/render/markdown.py (tracked in the deep-audit epic #286).
+    sessionwiki/render/markdown.py (tracked in the deep-audit epic #286).
     """
-    from llmwiki import REPO_ROOT
-    build_py = REPO_ROOT / "llmwiki" / "build.py"
+    from sessionwiki import REPO_ROOT
+    build_py = REPO_ROOT / "sessionwiki" / "build.py"
     line_count = len(build_py.read_text(encoding="utf-8").splitlines())
     assert line_count < 2800, f"build.py is {line_count} lines (ceiling 2800)"
 
 
 def test_css_module_under_800_lines():
     """Per the refactor acceptance criterion."""
-    from llmwiki import REPO_ROOT
-    css_py = REPO_ROOT / "llmwiki" / "render" / "css.py"
+    from sessionwiki import REPO_ROOT
+    css_py = REPO_ROOT / "sessionwiki" / "render" / "css.py"
     line_count = len(css_py.read_text(encoding="utf-8").splitlines())
     assert line_count < 1000, f"css.py is {line_count} lines"
 
@@ -131,18 +131,18 @@ def test_css_module_under_800_lines():
 
 def test_build_site_still_works():
     """Smoke test: the orchestrator hasn't been broken."""
-    from llmwiki.build import build_site
+    from sessionwiki.build import build_site
     # Don't actually run — just confirm it's callable
     assert callable(build_site)
 
 
 def test_discover_sources_still_exported():
     """Other modules may call this."""
-    from llmwiki.build import discover_sources
+    from sessionwiki.build import discover_sources
     assert callable(discover_sources)
 
 
 def test_parse_frontmatter_still_exported():
     """Tests + other modules import this."""
-    from llmwiki.build import parse_frontmatter
+    from sessionwiki.build import parse_frontmatter
     assert callable(parse_frontmatter)

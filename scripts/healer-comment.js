@@ -145,7 +145,7 @@ function postComment(repo, pr, body, token) {
           "Authorization": `Bearer ${token}`,
           "Accept": "application/vnd.github+json",
           "X-GitHub-Api-Version": "2022-11-28",
-          "User-Agent": "llmwiki-healer-bot",
+          "User-Agent": "sessionwiki-healer-bot",
           "Content-Type": "application/json",
           "Content-Length": Buffer.byteLength(data),
         },

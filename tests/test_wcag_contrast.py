@@ -11,7 +11,7 @@ real failures in the light theme:
 
 The fix darkens those four light-theme text colors. These tests pin
 the contrast contract for the surfaces the issue called out, computed
-from the literal colors in `llmwiki/render/css.py` rather than running
+from the literal colors in `sessionwiki/render/css.py` rather than running
 axe-core in a browser. axe-core in CI is the right tool for an end-to-
 end pass; this unit test is the per-commit guard so a CSS edit can't
 regress contrast silently.
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.render.css import CSS
+from sessionwiki.render.css import CSS
 
 # WCAG 2.1 AA threshold for normal text (≥18pt or ≥14pt bold qualifies
 # as "large" and only needs 3:1).

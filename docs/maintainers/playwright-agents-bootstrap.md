@@ -49,7 +49,7 @@ After the install, `package.json` looks roughly like:
 
 ```json
 {
-  "name": "llmwiki-playwright-agents",
+  "name": "sessionwiki-playwright-agents",
   "private": true,
   "version": "0.0.0",
   "description": "TS Playwright Test Agents — gated by ADR-001.",
@@ -106,8 +106,8 @@ export default defineConfig({
   ],
   webServer: {
     // We don't auto-build here — CI builds + serves before invoking
-    // playwright test. Local dev: `python3 -m llmwiki build && python3
-    // -m llmwiki serve` in another terminal first.
+    // playwright test. Local dev: `python3 -m sessionwiki build && python3
+    // -m sessionwiki serve` in another terminal first.
     command: "true",
     url: baseURL,
     reuseExistingServer: true,
@@ -159,8 +159,8 @@ name: Playwright Test Agents (TS)
 on:
   pull_request:
     paths:
-      - "llmwiki/build.py"
-      - "llmwiki/render/**"
+      - "sessionwiki/build.py"
+      - "sessionwiki/render/**"
       - "tests/agents/**"
       - "playwright.config.ts"
       - "package.json"
@@ -168,8 +168,8 @@ on:
   push:
     branches: [master]
     paths:
-      - "llmwiki/build.py"
-      - "llmwiki/render/**"
+      - "sessionwiki/build.py"
+      - "sessionwiki/render/**"
       - "tests/agents/**"
       - "playwright.config.ts"
 
@@ -201,12 +201,12 @@ jobs:
 
       - name: Build the demo site
         run: |
-          python3 -m llmwiki init
-          python3 -m llmwiki build
+          python3 -m sessionwiki init
+          python3 -m sessionwiki build
 
       - name: Serve site in the background
         run: |
-          python3 -m llmwiki serve --port 8765 &
+          python3 -m sessionwiki serve --port 8765 &
           for i in {1..30}; do
             curl -fsS http://127.0.0.1:8765/ > /dev/null && break
             sleep 1
@@ -289,7 +289,7 @@ arrangement:
   regression lock for #456). Real generated specs land via #466's
   Generator pass once this bootstrap is on master.
 - **`.github/workflows/agents-e2e.yml`** — runs `npx playwright
-  test` on every PR touching `llmwiki/build.py`, `llmwiki/render/`,
+  test` on every PR touching `sessionwiki/build.py`, `sessionwiki/render/`,
   `tests/agents/`, or the playwright config. Builds the demo site,
   serves it on `localhost:8765`, runs Chromium scenarios, uploads
   HTML report (14-day retention) + traces (failure only).

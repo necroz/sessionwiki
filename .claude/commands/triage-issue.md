@@ -1,4 +1,4 @@
-Apply labels + milestone + priority to a new issue using the llmwiki triage rules.
+Apply labels + milestone + priority to a new issue using the sessionwiki triage rules.
 
 Usage: /triage-issue <issue-number>
 

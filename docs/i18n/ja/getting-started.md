@@ -19,16 +19,16 @@
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ./setup.sh
 ```
 
 ### Windows
 
 ```cmd
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 setup.bat
 ```
 
@@ -36,7 +36,7 @@ setup.bat
 
 1. `pip install --user` で `markdown`（必須）をインストール。シンタックスハイライトは CDN 経由の highlight.js を使用。
 2. `raw/`、`wiki/`、`site/` ディレクトリを作成
-3. `llmwiki adapters` を実行して検出された Agent を表示
+3. `sessionwiki adapters` を実行して検出された Agent を表示
 4. 最初の同期の dry-run を実行し、何が変換されるかをプレビュー
 
 ## インストール後の 3 つのコマンド

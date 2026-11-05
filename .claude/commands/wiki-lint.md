@@ -1,4 +1,4 @@
-Lint the llmwiki — find orphans, broken wikilinks, contradictions, and stale pages.
+Lint the sessionwiki — find orphans, broken wikilinks, contradictions, and stale pages.
 
 Usage: /wiki-lint
 

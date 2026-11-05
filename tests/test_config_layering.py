@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from llmwiki.config import resolve_config
+from sessionwiki.config import resolve_config
 
 
 def _write(path, data):
@@ -44,7 +44,7 @@ def test_resolve_config_ignores_invalid_local_file(tmp_path):
 
 
 def test_convert_load_config_layered_applies_local_redaction(tmp_path):
-    from llmwiki.convert import Redactor, load_config_layered
+    from sessionwiki.convert import Redactor, load_config_layered
 
     _write(
         tmp_path / "examples" / "sessions_config.json",
@@ -62,7 +62,7 @@ def test_convert_load_config_layered_applies_local_redaction(tmp_path):
 
 
 def test_schedule_backend_reads_layered_config(tmp_path, monkeypatch):
-    from llmwiki import config_schedule
+    from sessionwiki import config_schedule
 
     _write(tmp_path / "examples" / "sessions_config.json", {"synthesis": {"backend": "dummy"}})
     _write(tmp_path / "config.local.json", {"synthesis": {"backend": "openai"}})
@@ -72,7 +72,7 @@ def test_schedule_backend_reads_layered_config(tmp_path, monkeypatch):
 
 
 def test_freshness_reads_layered_config(tmp_path):
-    from llmwiki.freshness import load_freshness_config
+    from sessionwiki.freshness import load_freshness_config
 
     _write(tmp_path / "examples" / "sessions_config.json", {"freshness": {"green_days": 14}})
     _write(tmp_path / "config.json", {"freshness": {"green_days": 5}})

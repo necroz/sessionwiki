@@ -1,4 +1,4 @@
-# llmwiki — Claude Code Schema
+# sessionwiki — Claude Code Schema
 
 You are maintaining an **LLM Wiki** (per [Karpathy's spec](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)) that compiles the user's Claude Code session history into a structured, interlinked markdown knowledge base.
 
@@ -22,19 +22,19 @@ wiki/          YOU OWN THIS. LLM-generated pages that summarise, cross-reference
   questions/       First-class open questions with state tracking (kebab-case slug). [v0.2+]
   archive/         Deprecated / demoted pages preserved for history. [v0.2+]
 
-site/          GENERATED. Static HTML from `python3 -m llmwiki build`. Do not edit by hand.
+site/          GENERATED. Static HTML from `python3 -m sessionwiki build`. Do not edit by hand.
 ```
 
 ## Slash commands (and what they do)
 
 | Command | Intent | Workflow |
 |---|---|---|
-| `/wiki-sync` | Convert new `.jsonl` sessions into `raw/sessions/` AND ingest them into `wiki/` | Runs `python3 -m llmwiki sync`, then executes the Ingest Workflow below for each new file |
+| `/wiki-sync` | Convert new `.jsonl` sessions into `raw/sessions/` AND ingest them into `wiki/` | Runs `python3 -m sessionwiki sync`, then executes the Ingest Workflow below for each new file |
 | `/wiki-ingest <path>` | Ingest one source or folder | Executes the Ingest Workflow for the given path |
 | `/wiki-query <question>` | Answer a question from the wiki | Executes the Query Workflow below |
 | `/wiki-lint` | Find orphans, broken links, stale pages | Executes the Lint Workflow below |
-| `/wiki-build` | Regenerate the static HTML site | Runs `python3 -m llmwiki build` |
-| `/wiki-serve` | Start the local HTTP server | Runs `python3 -m llmwiki serve` |
+| `/wiki-build` | Regenerate the static HTML site | Runs `python3 -m sessionwiki build` |
+| `/wiki-serve` | Start the local HTTP server | Runs `python3 -m sessionwiki serve` |
 | `/wiki-update` | Update one wiki page in place (v0.2+) | Surgical edit of one page without re-ingest |
 | `/wiki-graph` | Build the knowledge graph (v0.2+) | Walks `[[wikilinks]]` → `graph/graph.json` + `graph.html` |
 | `/wiki-reflect` | Higher-order self-reflection over the wiki (v0.2+) | Finds gaps, patterns, and suggests new pages |
@@ -147,7 +147,7 @@ Use Grep and Read to find:
 4. **Stale summaries** — pages whose `last_updated` is older than the newest source that contributes to them.
 5. **Missing entity pages** — entities mentioned in 3+ source pages but lacking their own page.
 6. **Data gaps** — questions the wiki can't answer; suggest new sources or queries.
-7. **(v0.5, #60) Uncontexted folders** — any `wiki/` subfolder containing >10 `.md` files that lacks a `_context.md` stub. Large knowledge folders without a context description make deep queries more expensive per call — suggest creating a stub that describes what lives there. Use `python3 -c "from llmwiki.context_md import find_uncontexted_folders; from pathlib import Path; print(list(find_uncontexted_folders(Path('wiki'))))"` or load the helper directly.
+7. **(v0.5, #60) Uncontexted folders** — any `wiki/` subfolder containing >10 `.md` files that lacks a `_context.md` stub. Large knowledge folders without a context description make deep queries more expensive per call — suggest creating a stub that describes what lives there. Use `python3 -c "from sessionwiki.context_md import find_uncontexted_folders; from pathlib import Path; print(list(find_uncontexted_folders(Path('wiki'))))"` or load the helper directly.
 
 Output a report to the chat. Ask the user if they want it saved to `wiki/lint-report.md`.
 
@@ -196,7 +196,7 @@ Operations: `sync`, `ingest`, `query`, `lint`, `build`.
 
 ## Hard rules
 
-1. **`raw/` is immutable.** Never modify files under `raw/`. If source data is wrong, fix the converter, not the output. **Enforced at runtime as of #326**: `llmwiki sync` refuses to overwrite an existing `raw/` file unless you pass `--force`; failures go into `.llmwiki-quarantine.json` so you can see what didn't sync and why. Non-AI adapters (Obsidian, Jira, Meeting, PDF) are opt-in only — they never fire on a default `sync` without explicit `enabled: true` in `sessions_config.json`.
+1. **`raw/` is immutable.** Never modify files under `raw/`. If source data is wrong, fix the converter, not the output. **Enforced at runtime as of #326**: `sessionwiki sync` refuses to overwrite an existing `raw/` file unless you pass `--force`; failures go into `.llmwiki-quarantine.json` so you can see what didn't sync and why. Non-AI adapters (Obsidian, Jira, Meeting, PDF) are opt-in only — they never fire on a default `sync` without explicit `enabled: true` in `sessions_config.json`.
 2. **No silent overwrites.** When ingest conflicts with existing wiki content, record both claims under `## Contradictions`.
 3. **Cross-link everything.** Every page should have a `## Connections` section with at least one `[[wikilink]]`.
 4. **Frontmatter is authoritative.** Always fill `title`, `type`, `tags`, `sources` (where applicable), and `last_updated`.

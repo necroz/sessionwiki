@@ -436,7 +436,7 @@ def test_main_dry_run_returns_zero(tmp_path: Path, capsys: pytest.CaptureFixture
 
 def test_export_logic_is_available_as_package_module(tmp_path: Path) -> None:
     """The exporter must ship inside the package, not only in scripts/."""
-    from llmwiki.zcode import export as packaged
+    from sessionwiki.zcode import export as packaged
 
     assert (
         packaged.project_slug_for_directory(
@@ -481,7 +481,7 @@ def test_project_slug_uses_configured_project_root(tmp_path: Path) -> None:
 
 
 def test_zcode_export_parser_accepts_project_root(tmp_path: Path) -> None:
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
 
     args = build_parser().parse_args(
         ["zcode", "export", "--project-root", str(tmp_path)]
@@ -532,7 +532,7 @@ def test_export_does_not_prune_when_project_filter_is_used(tmp_path: Path) -> No
 def test_cli_zcode_export_dry_run(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    from llmwiki.cli import main
+    from sessionwiki.cli import main
 
     db = make_db(tmp_path)
     out = tmp_path / "out"

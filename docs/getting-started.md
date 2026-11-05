@@ -14,7 +14,7 @@
   - **Cursor** — Cursor IDE workspaceStorage
   - **Gemini CLI** — `~/.gemini/`
 
-llmwiki auto-detects whichever agents you have installed. No configuration needed.
+sessionwiki auto-detects whichever agents you have installed. No configuration needed.
 
 That's it. No `npm`, no `brew`, no database, no account.
 
@@ -23,16 +23,16 @@ That's it. No `npm`, no `brew`, no database, no account.
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ./setup.sh
 ```
 
 ### Windows
 
 ```cmd
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 setup.bat
 ```
 
@@ -40,15 +40,15 @@ setup.bat
 
 1. Installs `markdown` (the only runtime dep) via `pip install --user`. Syntax highlighting runs in the browser via highlight.js loaded from a CDN, so the build stays stdlib-only.
 2. Scaffolds `raw/`, `wiki/`, `site/` directories
-3. Runs `llmwiki adapters` to show which agents are detected
+3. Runs `sessionwiki adapters` to show which agents are detected
 4. Does a dry-run of the first sync so you see what *would* be converted
 
 ### Checking detected agents
 
-After install, run `llmwiki adapters` to see which session stores were found:
+After install, run `sessionwiki adapters` to see which session stores were found:
 
 ```bash
-python3 -m llmwiki adapters
+python3 -m sessionwiki adapters
 ```
 
 Example output:
@@ -64,9 +64,9 @@ Registered adapters:
   obsidian          available: no   (Obsidian vault)
 ```
 
-> The PDF adapter was removed in the simplification sweep — `llmwiki adapters` no longer lists it.
+> The PDF adapter was removed in the simplification sweep — `sessionwiki adapters` no longer lists it.
 
-Any adapter marked `available: yes` will be included when you run `llmwiki sync`. See [multi-agent-setup.md](multi-agent-setup.md) for details on configuring individual agents.
+Any adapter marked `available: yes` will be included when you run `sessionwiki sync`. See [multi-agent-setup.md](multi-agent-setup.md) for details on configuring individual agents.
 
 ## Three commands after install
 
@@ -87,7 +87,7 @@ Open [http://127.0.0.1:8765/](http://127.0.0.1:8765/) and click around. Try:
 ## Where your data ends up
 
 ```
-llm-wiki/
+sessionwiki/
 ├── raw/sessions/             # [gitignored] converted transcripts
 │   ├── ai-newsletter/
 │   │   ├── 2026-04-04-<slug>.md
@@ -122,7 +122,7 @@ Everything under `raw/`, `wiki/`, and `site/` stays **local**. It is never commi
 
 The `sync` step populates `raw/sessions/` with markdown. To build the actual **wiki** on top of that — `wiki/sources/`, `wiki/entities/`, `wiki/concepts/`, linked by `[[wikilinks]]` — you need an LLM in the loop. That's where Claude Code (or any supported agent) comes in.
 
-Inside a Claude Code session at the llm-wiki repo root:
+Inside a Claude Code session at the sessionwiki repo root:
 
 ```
 /wiki-ingest raw/sessions/ai-newsletter/
@@ -144,7 +144,7 @@ To make sync happen automatically every time you start Claude Code, add a `Sessi
         "hooks": [
           {
             "type": "command",
-            "command": "(python3 /absolute/path/to/llm-wiki/llmwiki/convert.py > /tmp/llmwiki-sync.log 2>&1 &) ; exit 0"
+            "command": "(python3 /absolute/path/to/sessionwiki/sessionwiki/convert.py > /tmp/sessionwiki-sync.log 2>&1 &) ; exit 0"
           }
         ]
       }
@@ -165,6 +165,6 @@ The `( ... &) ; exit 0` pattern backgrounds the sync and makes sure it never blo
 - [faq.md](faq.md) — common questions answered
 - [troubleshooting.md](troubleshooting.md) — common errors and fixes
 - [adapter-authoring.md](adapter-authoring.md) — write your own adapter
-- [api-guide.md](api-guide.md) — use llmwiki as a Python library
+- [api-guide.md](api-guide.md) — use sessionwiki as a Python library
 - [adapters/claude-code.md](adapters/claude-code.md) — Claude Code adapter details
 - [adapters/obsidian.md](adapters/obsidian.md) — use an Obsidian vault as an additional source

@@ -18,21 +18,21 @@ import importlib
 
 import pytest
 
-from llmwiki.adapters import REGISTRY
-from llmwiki.adapters.base import BaseAdapter
-from llmwiki.adapters.claude_code import ClaudeCodeAdapter
+from sessionwiki.adapters import REGISTRY
+from sessionwiki.adapters.base import BaseAdapter
+from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
 
 
 # Force-load every contrib adapter so the registry is populated.
 for mod in (
-    "llmwiki.adapters.codex_cli",
-    "llmwiki.adapters.contrib.copilot_chat",
-    "llmwiki.adapters.contrib.copilot_cli",
-    "llmwiki.adapters.contrib.cursor",
-    "llmwiki.adapters.contrib.gemini_cli",
-    "llmwiki.adapters.contrib.obsidian",
-    "llmwiki.adapters.opencode",
-    "llmwiki.adapters.contrib.chatgpt",
+    "sessionwiki.adapters.codex_cli",
+    "sessionwiki.adapters.contrib.copilot_chat",
+    "sessionwiki.adapters.contrib.copilot_cli",
+    "sessionwiki.adapters.contrib.cursor",
+    "sessionwiki.adapters.contrib.gemini_cli",
+    "sessionwiki.adapters.contrib.obsidian",
+    "sessionwiki.adapters.opencode",
+    "sessionwiki.adapters.contrib.chatgpt",
 ):
     importlib.import_module(mod)
 
@@ -127,7 +127,7 @@ def test_copilot_cli_intentional_override_preserved():
 def test_broken_init_adapter_returns_false_not_crash():
     """An adapter whose __init__ raises (e.g. missing transitive
     import surfaced eagerly) must report unavailable rather than
-    crash the whole `llmwiki adapters` listing."""
+    crash the whole `sessionwiki adapters` listing."""
 
     class BrokenAdapter(BaseAdapter):
         name = "broken_test"

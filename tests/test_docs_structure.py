@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
 DOCS = REPO_ROOT / "docs"
@@ -172,7 +172,7 @@ def _strip_code_blocks(text: str) -> str:
     return text
 
 
-# Paths that exist only as build output (`llmwiki build` writes them
+# Paths that exist only as build output (`sessionwiki build` writes them
 # into site/). The test can't find them in the source tree, so allow-list.
 _GENERATED_HTML_ALLOWLIST = frozenset({
     "changelog.html",   # compiled from CHANGELOG.md at the repo root
@@ -192,7 +192,7 @@ def _check_links(doc: Path) -> list[str]:
         if not base:
             continue
         # Whitelist known build-output paths — they only exist after
-        # `llmwiki build`, not in the source tree.
+        # `sessionwiki build`, not in the source tree.
         if Path(base).name in _GENERATED_HTML_ALLOWLIST:
             continue
         resolved = (doc.parent / base).resolve()
@@ -278,17 +278,17 @@ def test_no_raw_script_tags_in_tutorials():
 
 
 def test_docs_shell_css_appended_to_main_stylesheet():
-    from llmwiki.render.css import CSS
+    from sessionwiki.render.css import CSS
 
     assert ".docs-shell" in CSS, (
-        "docs-shell CSS not appended to llmwiki/render/css.py — "
+        "docs-shell CSS not appended to sessionwiki/render/css.py — "
         "pages with `docs_shell: true` won't pick up editorial styles"
     )
 
 
 def test_docs_shell_css_selectors_namespaced():
     """No leakage onto non-docs pages."""
-    from llmwiki.render.docs_css import DOCS_SHELL_CSS
+    from sessionwiki.render.docs_css import DOCS_SHELL_CSS
 
     # Every top-level selector under `.docs-shell` must be prefixed. We
     # accept media queries / keyframes / root-theme blocks as exceptions.
@@ -304,7 +304,7 @@ def test_docs_shell_css_selectors_namespaced():
 def test_docs_shell_css_inherits_brand_tokens_only():
     """No hard-coded hex colors — everything goes through the brand-system
     CSS variables (#115)."""
-    from llmwiki.render.docs_css import DOCS_SHELL_CSS
+    from sessionwiki.render.docs_css import DOCS_SHELL_CSS
     # Allow pixel values + rgba inside color-mix; flag only naked #hex.
     # A naked hex is anything that starts with `#` followed by 3 or 6
     # hex digits outside of var() / color-mix / comment context.
@@ -316,7 +316,7 @@ def test_docs_shell_css_inherits_brand_tokens_only():
     real_hex = re.findall(r"#[0-9A-Fa-f]{3,8}", comment_stripped)
     assert not real_hex, (
         f"docs-shell CSS hard-codes hex color(s) {real_hex!r}; use "
-        "`var(--…)` tokens from llmwiki/render/css.py instead"
+        "`var(--…)` tokens from sessionwiki/render/css.py instead"
     )
 
 

@@ -8,31 +8,31 @@ docs_shell: true
 
 **Time:** 10 minutes
 **You'll need:** An existing Obsidian or Logseq vault with real notes in it.
-**Result:** llmwiki writes new entity / concept / source pages *inside* your vault at paths you control, never overwriting your existing notes.
+**Result:** sessionwiki writes new entity / concept / source pages *inside* your vault at paths you control, never overwriting your existing notes.
 
 ---
 
 ## Why this matters
 
 If you already have hundreds of Obsidian or Logseq pages, you shouldn't have
-to migrate them to llmwiki's `raw/` + `wiki/` tree to get the benefits of
+to migrate them to sessionwiki's `raw/` + `wiki/` tree to get the benefits of
 auto-ingested sessions. Vault-overlay mode compiles your vault **in place** —
 your existing notes stay untouched, new pages land where you tell them.
 
 ---
 
-## Step 1 — Point `llmwiki sync` at your vault
+## Step 1 — Point `sessionwiki sync` at your vault
 
 Obsidian:
 
 ```bash
-python3 -m llmwiki sync --vault "~/Documents/Obsidian Vault"
+python3 -m sessionwiki sync --vault "~/Documents/Obsidian Vault"
 ```
 
 Logseq:
 
 ```bash
-python3 -m llmwiki sync --vault ~/src/my-logseq-graph
+python3 -m sessionwiki sync --vault ~/src/my-logseq-graph
 ```
 
 Expected opening lines:
@@ -66,7 +66,7 @@ Default layout writes under `Wiki/<type>/` at the vault root:
 | Candidate | `Wiki/Candidates/NewEntity.md` | `pages/wiki___candidates___NewEntity.md` |
 
 Obsidian wikilinks are bare slugs: `[[RAG]]`. Logseq wikilinks are
-namespace-aware: `[[wiki/entities/RAG]]`. llmwiki writes the correct
+namespace-aware: `[[wiki/entities/RAG]]`. sessionwiki writes the correct
 format for your vault without you thinking about it.
 
 ## Step 3 — Trust the non-destructive default
@@ -91,20 +91,20 @@ Under the hood:
 
 The workflow that makes vault-overlay actually worth using:
 
-1. llmwiki writes `Wiki/Entities/RAG.md` with basic frontmatter + a two-line description.
+1. sessionwiki writes `Wiki/Entities/RAG.md` with basic frontmatter + a two-line description.
 2. You open Obsidian, add prose, rearrange headings, link to five more pages.
-3. Next `llmwiki sync --vault`:
+3. Next `sessionwiki sync --vault`:
    - Sees the page already exists → **skips the write**.
    - Finds new `[[RAG]]` mentions in newly-synthesised sources → appends them under your existing `## Connections` heading (idempotent).
    - Your prose stays intact.
 
 You can now use Obsidian's graph view + backlinks + full-text search
-over your llmwiki output without any migration.
+over your sessionwiki output without any migration.
 
 ## Step 5 — (Optional) Build a static site from the vault
 
 ```bash
-python3 -m llmwiki build --vault ~/my-vault --out ~/my-vault-site
+python3 -m sessionwiki build --vault ~/my-vault --out ~/my-vault-site
 ```
 
 This compiles pages *from* the vault into a gitignorable static site
@@ -119,7 +119,7 @@ If you're scripting:
 
 ```python
 from pathlib import Path
-from llmwiki.vault import (
+from sessionwiki.vault import (
     append_section,
     format_wikilink,
     resolve_vault,
@@ -148,7 +148,7 @@ Full reference: **[`docs/guides/existing-vault.md`](../guides/existing-vault.md)
 ## Verify
 
 ```bash
-python3 -m llmwiki sync --vault ~/my-vault --dry-run
+python3 -m sessionwiki sync --vault ~/my-vault --dry-run
 ls "~/my-vault/Wiki/Entities" | head -5
 cat "~/my-vault/Wiki/Entities/Some-Page.md" | head -10
 ```

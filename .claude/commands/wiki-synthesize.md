@@ -1,6 +1,6 @@
 Synthesize `wiki/sources/<slug>.md` pages from raw session transcripts using the configured LLM backend.
 
-Wraps: `python3 -m llmwiki synthesize`
+Wraps: `python3 -m sessionwiki synthesize`
 
 Usage: `/wiki-synthesize` or any natural-language variant. Claude
 translates the phrasing into flags.
@@ -9,13 +9,13 @@ translates the phrasing into flags.
 
 | You say | Runs |
 |---|---|
-| "just show me what it would cost" | `python3 -m llmwiki synthesize --estimate` |
-| "preview without writing" | `python3 -m llmwiki synthesize --dry-run` |
-| "check the backend is reachable" | `python3 -m llmwiki synthesize --check` |
-| "force re-synthesize everything" | `python3 -m llmwiki synthesize --force` |
-| "synthesize but don't touch my wiki yet" | `python3 -m llmwiki synthesize --dry-run` |
-| "list pending agent prompts" / "what's waiting on me?" | `python3 -m llmwiki synthesize --list-pending` |
-| "complete pending synthesis \<uuid\>" | `python3 -m llmwiki synthesize --complete <uuid> --page <path>` (body via `--body` or stdin) |
+| "just show me what it would cost" | `python3 -m sessionwiki synthesize --estimate` |
+| "preview without writing" | `python3 -m sessionwiki synthesize --dry-run` |
+| "check the backend is reachable" | `python3 -m sessionwiki synthesize --check` |
+| "force re-synthesize everything" | `python3 -m sessionwiki synthesize --force` |
+| "synthesize but don't touch my wiki yet" | `python3 -m sessionwiki synthesize --dry-run` |
+| "list pending agent prompts" / "what's waiting on me?" | `python3 -m sessionwiki synthesize --list-pending` |
+| "complete pending synthesis \<uuid\>" | `python3 -m sessionwiki synthesize --complete <uuid> --page <path>` (body via `--body` or stdin) |
 
 ## Expected output
 

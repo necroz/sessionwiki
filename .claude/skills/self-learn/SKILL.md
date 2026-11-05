@@ -11,7 +11,7 @@ Closes the **Dogfooding Meta-Loop** from the Open Source Framework v4.1.
 
 Every non-trivial session on a framework-driven project produces lessons: patterns that worked, patterns that failed, gotchas hit, decisions made. Most tools let those lessons evaporate. This skill captures them, runs a quality gate, and proposes framework updates.
 
-**It is the reason the framework evolves.** Framework v4.0 → v4.1 was a `self-learn` pass that folded llmwiki's learnings back into the parent Open Source Framework.
+**It is the reason the framework evolves.** Framework v4.0 → v4.1 was a `self-learn` pass that folded sessionwiki's learnings back into the parent Open Source Framework.
 
 ## When to invoke
 
@@ -114,7 +114,7 @@ Apply all proposed updates? (y/n)
 5. **Never touch code** as part of self-learn. This skill only touches docs, steering files, and framework versioning. Code changes go through the normal PR flow.
 6. **Dogfood itself.** Self-learn should produce a session transcript that future self-learn passes can read.
 
-## Example outcomes (from llmwiki's own history)
+## Example outcomes (from sessionwiki's own history)
 
 - Framework v4.0 → v4.1: added **Phase 1.25 Research** after discovering that cloning 15 reference repos up-front prevented 3+ hours of rework during Phase 3 Structure.
 - Added **`.llmwikiignore`** rule after hitting sessions containing contract data that shouldn't enter the wiki.
@@ -126,5 +126,5 @@ Each of these started as a single session observation and got promoted to a fram
 ## Related skills
 
 - `project-maintainer` — runs the phase gates that surface the "we hit this 3 times" patterns.
-- `llmwiki-query` — to look back at past sessions and count occurrences of a pattern.
-- `llmwiki-sync` — to make sure the latest session is available before running self-learn.
+- `sessionwiki-query` — to look back at past sessions and count occurrences of a pattern.
+- `sessionwiki-sync` — to make sure the latest session is available before running self-learn.

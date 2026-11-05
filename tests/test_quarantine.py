@@ -23,7 +23,7 @@ from unittest.mock import patch
 
 import pytest
 
-from llmwiki import quarantine as q
+from sessionwiki import quarantine as q
 
 
 # ─── core module ──────────────────────────────────────────────────────────
@@ -270,7 +270,7 @@ def test_entry_equality_by_adapter_source():
 
 def _run_cli(*args, env=None):
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         check=False,

@@ -1,10 +1,10 @@
 /**
- * llm-wiki VS Code extension — minimal scaffold.
+ * sessionwiki VS Code extension — minimal scaffold.
  *
  * Provides:
- *  - "Open llm-wiki" command (opens localhost:8765 in the default browser)
- *  - "Sync Sessions" command (runs `python3 -m llmwiki sync`)
- *  - "Build Site" command (runs `python3 -m llmwiki build`)
+ *  - "Open sessionwiki" command (opens localhost:8765 in the default browser)
+ *  - "Sync Sessions" command (runs `python3 -m sessionwiki sync`)
+ *  - "Build Site" command (runs `python3 -m sessionwiki build`)
  *  - Sidebar tree view listing wiki pages by section
  */
 
@@ -18,13 +18,13 @@ import { exec } from "child_process";
 // ---------------------------------------------------------------------------
 
 export function activate(context: vscode.ExtensionContext) {
-  const config = vscode.workspace.getConfiguration("llmwiki");
+  const config = vscode.workspace.getConfiguration("sessionwiki");
   const port = config.get<number>("serverPort", 8765);
   const python = config.get<string>("pythonPath", "python3");
 
-  // Command: Open llm-wiki in browser
+  // Command: Open sessionwiki in browser
   context.subscriptions.push(
-    vscode.commands.registerCommand("llmwiki.openSite", () => {
+    vscode.commands.registerCommand("sessionwiki.openSite", () => {
       vscode.env.openExternal(
         vscode.Uri.parse(`http://localhost:${port}`)
       );
@@ -33,15 +33,15 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Command: Sync sessions
   context.subscriptions.push(
-    vscode.commands.registerCommand("llmwiki.sync", () => {
-      runLlmwikiCommand(python, "sync", "Syncing sessions...");
+    vscode.commands.registerCommand("sessionwiki.sync", () => {
+      runSessionwikiCommand(python, "sync", "Syncing sessions...");
     })
   );
 
   // Command: Build site
   context.subscriptions.push(
-    vscode.commands.registerCommand("llmwiki.build", () => {
-      runLlmwikiCommand(python, "build", "Building site...");
+    vscode.commands.registerCommand("sessionwiki.build", () => {
+      runSessionwikiCommand(python, "build", "Building site...");
     })
   );
 
@@ -49,11 +49,11 @@ export function activate(context: vscode.ExtensionContext) {
   const wikiRoot = findWikiRoot();
   if (wikiRoot) {
     const treeProvider = new WikiTreeProvider(wikiRoot);
-    vscode.window.registerTreeDataProvider("llmwikiPages", treeProvider);
+    vscode.window.registerTreeDataProvider("sessionwikiPages", treeProvider);
 
     // Refresh tree after sync/build
     context.subscriptions.push(
-      vscode.commands.registerCommand("llmwiki.refreshTree", () => {
+      vscode.commands.registerCommand("sessionwiki.refreshTree", () => {
         treeProvider.refresh();
       })
     );
@@ -80,11 +80,11 @@ function findWikiRoot(): string | undefined {
   return undefined;
 }
 
-function runLlmwikiCommand(python: string, subcommand: string, msg: string) {
+function runSessionwikiCommand(python: string, subcommand: string, msg: string) {
   const cwd = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
   if (!cwd) {
     vscode.window.showErrorMessage(
-      "llm-wiki: No workspace folder open."
+      "sessionwiki: No workspace folder open."
     );
     return;
   }
@@ -98,19 +98,19 @@ function runLlmwikiCommand(python: string, subcommand: string, msg: string) {
     () =>
       new Promise<void>((resolve, reject) => {
         exec(
-          `${python} -m llmwiki ${subcommand}`,
+          `${python} -m sessionwiki ${subcommand}`,
           { cwd },
           (err, stdout, stderr) => {
             if (err) {
               vscode.window.showErrorMessage(
-                `llm-wiki ${subcommand} failed: ${stderr || err.message}`
+                `sessionwiki ${subcommand} failed: ${stderr || err.message}`
               );
               reject(err);
             } else {
               vscode.window.showInformationMessage(
-                `llm-wiki ${subcommand} complete.`
+                `sessionwiki ${subcommand} complete.`
               );
-              vscode.commands.executeCommand("llmwiki.refreshTree");
+              vscode.commands.executeCommand("sessionwiki.refreshTree");
               resolve();
             }
           }

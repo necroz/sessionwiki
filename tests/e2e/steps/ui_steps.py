@@ -32,7 +32,7 @@ from pytest_bdd import given, parsers, then, when
 # ─── shared background steps ────────────────────────────────────────────
 
 
-@given("a built llmwiki site is served")
+@given("a built sessionwiki site is served")
 def _built_site_served(base_url: str) -> str:
     """Sanity-check that the session-scoped `base_url` fixture is
     live. The real build + serve work happens in `conftest.py`."""
@@ -552,7 +552,7 @@ def _console_clean(page: Page) -> None:
     # API is request-scoped, not console-scoped. We attach a
     # per-scenario listener via the `page.on("pageerror")` event
     # and store errors on the page object.
-    errors = getattr(page, "_llmwiki_console_errors", [])
+    errors = getattr(page, "_sessionwiki_console_errors", [])
     assert not errors, f"browser console errors: {errors}"
 
 
@@ -575,12 +575,12 @@ def _visit_path(page: Page, base_url: str, path: str) -> None:
             page.goto(f"{base_url}{path}")
         except Exception:
             pass
-    page._llmwiki_last_response = resp_info.value
+    page._sessionwiki_last_response = resp_info.value
 
 
 @then(parsers.parse('the response status is {status:d}'))
 def _response_status(page: Page, status: int) -> None:
-    last = getattr(page, "_llmwiki_last_response", None)
+    last = getattr(page, "_sessionwiki_last_response", None)
     assert last is not None, "no response captured; did you use 'I visit the path'?"
     assert last.status == status, f"response status was {last.status}, expected {status}"
 
@@ -697,7 +697,7 @@ def _set_theme(page: Page, theme: str) -> None:
     # every in-page script on the NEXT navigation, which is exactly
     # what the scenario chain wants: (set theme) → (visit page).
     page.add_init_script(
-        f"try {{ localStorage.setItem('llmwiki-theme', '{theme}'); }} catch (e) {{}}"
+        f"try {{ localStorage.setItem('sessionwiki-theme', '{theme}'); }} catch (e) {{}}"
     )
 
 

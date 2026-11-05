@@ -2,7 +2,7 @@
 
 > Status: the Actions workflow (`/.github/workflows/release.yml`) is ready.
 > This document is the checklist for **one-time PyPI configuration** that
-> unblocks `pip install llm-notebook` (#101).
+> unblocks `pip install sessionwiki` (#101).
 
 ## How the pipeline works
 
@@ -17,13 +17,10 @@ Every time a version tag (`v*.*.*`) is pushed:
    with `--generate-notes`, attaches all artifacts + signatures. Runs even
    if publish/sign fail so Releases always keep tracking tags.
 
-The package is uploaded as **`llm-notebook`** — `llmwiki` was already
-taken on PyPI. The CLI command, the Python import (`import llmwiki`),
-and the GitHub repo (`Pratiyush/llm-wiki`) all stay unchanged. Same
-pattern as `pillow` → `import PIL`.
-
-A future cleanup may unify all three — see the open issue for the full
-repo / CLI rename to `llm-notebook`.
+The package is uploaded as **`sessionwiki`**. The CLI command, the Python
+import (`import sessionwiki`) and the GitHub repo (`necroz/sessionwiki`)
+use the same name. (Upstream llmwiki had to publish as `llm-notebook`
+because `llmwiki` is taken on PyPI.)
 
 ## One-time setup (do this once, on pypi.org)
 
@@ -31,9 +28,8 @@ repo / CLI rename to `llm-notebook`.
 
 1. Log in to [pypi.org](https://pypi.org) (create an account if you
    haven't yet — GitHub sign-in works).
-2. **"Your projects" → "Manage"** — the `llmwiki` name was already
-   registered to another user. We use **`llm-notebook`** instead.
-3. Reserve the `llm-notebook` name (PyPI lets you create a project
+2. Check that `sessionwiki` is still free on PyPI (it was on 2026-11-05).
+3. Reserve the `sessionwiki` name (PyPI lets you create a project
    directly via the trusted-publisher flow below — no upload needed).
 
 ### 2. Add the GitHub repo as a trusted publisher
@@ -45,9 +41,9 @@ own Publishing tab once it exists):
 
 | Field | Value |
 |---|---|
-| PyPI Project Name | `llm-notebook` |
-| Owner | `Pratiyush` |
-| Repository name | `llm-wiki` |
+| PyPI Project Name | `sessionwiki` |
+| Owner | `necroz` |
+| Repository name | `sessionwiki` |
 | Workflow name | `release.yml` |
 | Environment name | `release` |
 
@@ -56,7 +52,7 @@ upload without a long-lived API token.
 
 ### 3. Create the `release` GitHub environment
 
-1. **[Repository settings → Environments → New environment](https://github.com/Pratiyush/llm-wiki/settings/environments)**
+1. **[Repository settings → Environments → New environment](https://github.com/necroz/sessionwiki/settings/environments)**
 2. Name: **`release`**
 3. Optional protection rules:
    - **Required reviewers** — add your own handle so every PyPI upload
@@ -68,9 +64,9 @@ upload without a long-lived API token.
 ### 4. Flip the publishing gate on
 
 ```bash
-gh variable set PYPI_PUBLISHING --body "true" --repo Pratiyush/llm-wiki
+gh variable set PYPI_PUBLISHING --body "true" --repo necroz/sessionwiki
 # Verify
-gh variable list --repo Pratiyush/llm-wiki | grep PYPI_PUBLISHING
+gh variable list --repo necroz/sessionwiki | grep PYPI_PUBLISHING
 ```
 
 ### 5. Cut a real release tag
@@ -87,7 +83,7 @@ git push origin v1.1.0
 ```
 
 Watch the workflow at:
-<https://github.com/Pratiyush/llm-wiki/actions/workflows/release.yml>
+<https://github.com/necroz/sessionwiki/actions/workflows/release.yml>
 
 The `publish` job should now run and show `uploading` + `success`.
 
@@ -95,9 +91,9 @@ The `publish` job should now run and show `uploading` + `success`.
 
 ```bash
 python3 -m venv /tmp/pypi-smoke && source /tmp/pypi-smoke/bin/activate
-pip install llm-notebook
-llmwiki --version    # should match the tag
-llmwiki adapters     # should list Claude Code, Codex, Cursor, Gemini, …
+pip install sessionwiki
+sessionwiki --version    # should match the tag
+sessionwiki adapters     # should list Claude Code, Codex, Cursor, Gemini, …
 deactivate
 ```
 
@@ -109,7 +105,7 @@ something other than `"true"`. Fix:
 
 **`publish` fails with "invalid-publisher"** — the OIDC binding on
 pypi.org doesn't match what GitHub sent. Double-check: owner =
-`Pratiyush`, repo = `llm-wiki`, workflow = `release.yml`, environment
+`necroz`, repo = `sessionwiki`, workflow = `release.yml`, environment
 = `release`. Casing matters.
 
 **`publish` fails with "403 Forbidden: User ... isn't allowed to upload

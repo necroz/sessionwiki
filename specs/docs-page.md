@@ -2,7 +2,7 @@
 
 ## Goal
 
-A single editorial doc rendered with the same site chrome as the rest of llmwiki. Same nav, same theme, same fonts.
+A single editorial doc rendered with the same site chrome as the rest of sessionwiki. Same nav, same theme, same fonts.
 
 ## URL pattern
 

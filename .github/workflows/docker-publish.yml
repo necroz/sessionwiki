@@ -2,8 +2,8 @@ name: Docker — publish to GHCR
 
 # Builds a multi-arch image (amd64 + arm64) on every tag push and
 # publishes to GitHub Container Registry as
-#   ghcr.io/pratiyush/llm-wiki:<tag>
-#   ghcr.io/pratiyush/llm-wiki:latest    (only on non-prerelease tags)
+#   ghcr.io/necroz/sessionwiki:<tag>
+#   ghcr.io/necroz/sessionwiki:latest    (only on non-prerelease tags)
 #
 # See docs/deploy/docker.md for the consumer-side quickstart.
 
@@ -46,7 +46,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/pratiyush/llm-wiki
+          images: ghcr.io/necroz/sessionwiki
           tags: |
             type=ref,event=tag
             type=semver,pattern={{version}}

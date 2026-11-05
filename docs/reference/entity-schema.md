@@ -3,7 +3,7 @@
 The wiki's entity pages are free-form markdown by default — a file
 like `wiki/entities/OpenAI.md` can be whatever you want, and the
 slash-command workflow just edits the body. **AI model entities**
-are a special case: they carry structured frontmatter so llmwiki can
+are a special case: they carry structured frontmatter so sessionwiki can
 render a sortable `/models/` index, inline info-cards, and future
 comparison pages (#58).
 
@@ -37,7 +37,7 @@ type: entity
 entity_kind: ai-model
 provider: Anthropic
 
-# Nested blocks are written as inline JSON so llmwiki's lightweight
+# Nested blocks are written as inline JSON so sessionwiki's lightweight
 # frontmatter parser can store them without a full YAML library. The
 # schema validator parses them back out at build time.
 model: {"context_window": 200000, "max_output": 8192, "license": "proprietary", "released": "2026-03-18"}

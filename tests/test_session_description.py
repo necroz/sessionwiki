@@ -14,7 +14,7 @@ Edge cases covered:
 """
 from __future__ import annotations
 
-from llmwiki.convert import Redactor, derive_description, render_session_markdown
+from sessionwiki.convert import Redactor, derive_description, render_session_markdown
 from pathlib import Path
 
 

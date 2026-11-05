@@ -7,14 +7,14 @@ docs_shell: true
 # 03 · Use with Claude Code
 
 **Time:** 10 minutes
-**You'll need:** A working `llmwiki` CLI and Claude Code installed (sessions at `~/.claude/projects/`).
+**You'll need:** A working `sessionwiki` CLI and Claude Code installed (sessions at `~/.claude/projects/`).
 **Result:** A day-to-day workflow where every Claude Code session is auto-ingested into the wiki and queryable via slash commands.
 
 ---
 
 ## Why this matters
 
-Claude Code is the source of gravity for most llmwiki users. This tutorial
+Claude Code is the source of gravity for most sessionwiki users. This tutorial
 locks in the habits that keep your wiki current: a single
 `/wiki-sync` after a coding session and a `/wiki-query` when you need
 to answer "wait, when did I solve this before?"
@@ -24,7 +24,7 @@ to answer "wait, when did I solve this before?"
 ## Step 1 — Confirm the adapter sees your sessions
 
 ```bash
-python3 -m llmwiki adapters | grep claude_code
+python3 -m sessionwiki adapters | grep claude_code
 ```
 
 Expected:
@@ -41,8 +41,8 @@ See **[`docs/adapters/claude-code.md`](../adapters/claude-code.md)** for the ful
 
 ## Step 2 — Install the slash commands
 
-llmwiki ships slash commands under `.claude/commands/` in the repo. Claude
-Code picks them up automatically when you open the llm-wiki project.
+sessionwiki ships slash commands under `.claude/commands/` in the repo. Claude
+Code picks them up automatically when you open the sessionwiki project.
 
 Verify:
 
@@ -72,7 +72,7 @@ In Claude Code, type:
 Under the hood, the slash command executes:
 
 ```bash
-python3 -m llmwiki sync        # convert new .jsonl → raw/
+python3 -m sessionwiki sync        # convert new .jsonl → raw/
 # then: auto-ingest + auto-build (configurable in sessions_config.json)
 ```
 
@@ -154,8 +154,8 @@ That's it. Run `/wiki-lint` on demand when you want a health check.
 ## Verify
 
 ```bash
-python3 -m llmwiki --version            # → llmwiki <version>
-python3 -m llmwiki sync --dry-run       # shows what the next /wiki-sync would do
+python3 -m sessionwiki --version            # → sessionwiki <version>
+python3 -m sessionwiki sync --dry-run       # shows what the next /wiki-sync would do
 cat wiki/log.md | tail -20              # every operation is appended here
 ```
 
@@ -169,7 +169,7 @@ grep "^## \[" wiki/log.md | tail -10
 
 ## Troubleshooting
 
-**Slash commands don't appear in Claude Code** — you're not in the llm-wiki
+**Slash commands don't appear in Claude Code** — you're not in the sessionwiki
 working directory, or Claude Code was opened before `.claude/commands/`
 existed. Restart Claude Code from inside the repo.
 

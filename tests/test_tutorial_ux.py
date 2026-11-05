@@ -20,7 +20,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from llmwiki.docs_pages import (
+from sessionwiki.docs_pages import (
     DocsPage,
     _tutorial_footer_html,
     _tutorial_seq,
@@ -139,7 +139,7 @@ def test_footer_edit_on_github_link_present():
     pages = [_tutorial_page(1, "T1"), _tutorial_page(2, "T2")]
     html = _tutorial_footer_html(pages[0], pages, "../")
     assert 'class="edit-on-github"' in html
-    assert 'github.com/Pratiyush/llm-wiki/edit/master/docs' in html
+    assert 'github.com/necroz/sessionwiki/edit/master/docs' in html
     assert 'tutorials/01-x.md' in html
     # Edit link always opens in new tab.
     assert 'target="_blank"' in html

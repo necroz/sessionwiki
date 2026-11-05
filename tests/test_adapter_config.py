@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from llmwiki.adapter_config import (
+from sessionwiki.adapter_config import (
     ADAPTER_SCHEMAS,
     validate_adapter_config,
     validate_all_adapters,

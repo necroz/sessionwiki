@@ -1,4 +1,4 @@
-# llmwiki — Codex CLI / Agent Schema
+# sessionwiki — Codex CLI / Agent Schema
 
 This file is the schema for **Codex CLI** and any other coding agent that reads `AGENTS.md` instead of `CLAUDE.md` (OpenCode, Gemini CLI, etc.). The workflows are identical to [CLAUDE.md](CLAUDE.md) — only the language is agent-agnostic.
 
@@ -23,12 +23,12 @@ wiki/          LLM-maintained. Pages you write that summarise and cross-referenc
   concepts/        Ideas, frameworks, methods.
   syntheses/       Saved query answers.
 
-site/          GENERATED. Static HTML from `python3 -m llmwiki build`. Do not edit.
+site/          GENERATED. Static HTML from `python3 -m sessionwiki build`. Do not edit.
 ```
 
 ## Session stores by agent
 
-Different agents write their transcripts to different locations. The adapter registry in `llmwiki/adapters/` abstracts this away.
+Different agents write their transcripts to different locations. The adapter registry in `sessionwiki/adapters/` abstracts this away.
 
 | Agent | Session store | Adapter |
 |---|---|---|
@@ -44,12 +44,12 @@ The CLI auto-detects which adapter(s) to run. Override with `--adapter <name>`.
 Run from inside the repo:
 
 ```bash
-python3 -m llmwiki sync           # export ZCode/OpenCode + convert .jsonl → raw/sessions/*.md
-python3 -m llmwiki opencode autosync  # OpenCode V2 SQLite → JSONL → markdown
-python3 -m llmwiki opencode install   # install the session.idle autosync plugin
-python3 -m llmwiki build          # compile site/ from raw/ + wiki/
-python3 -m llmwiki serve          # local HTTP server on 127.0.0.1:8765
-python3 -m llmwiki init           # scaffold raw/, wiki/, site/ directories
+python3 -m sessionwiki sync           # export ZCode/OpenCode + convert .jsonl → raw/sessions/*.md
+python3 -m sessionwiki opencode autosync  # OpenCode V2 SQLite → JSONL → markdown
+python3 -m sessionwiki opencode install   # install the session.idle autosync plugin
+python3 -m sessionwiki build          # compile site/ from raw/ + wiki/
+python3 -m sessionwiki serve          # local HTTP server on 127.0.0.1:8765
+python3 -m sessionwiki init           # scaffold raw/, wiki/, site/ directories
 ```
 
 Or use the one-click scripts: `./sync.sh`, `./build.sh`, `./serve.sh` (macOS/Linux); `sync.bat`, `build.bat`, `serve.bat` (Windows).
@@ -190,7 +190,7 @@ Parse recent entries with: `grep "^## \[" wiki/log.md | tail -10`
 Other projects can reference this wiki by adding to their agent config:
 
 ```
-wiki_path: ~/Desktop/2026/production-draft/llm-wiki
+wiki_path: ~/path/to/sessionwiki
 ```
 
 Then read `wiki/index.md` first, navigate from there.

@@ -10,10 +10,10 @@ These rules are enforced on every PR and commit. They come from the parent Open 
 
 ## Identity
 
-- `git config user.name` = `Pratiyush`
-- `git config user.email` = `pratiyush1@gmail.com`
+- `git config user.name` = `Igor Lashkevich`
+- `git config user.email` = `3133574+necroz@users.noreply.github.com`
 - **Never** add `Co-authored-by: Claude`, `Co-authored-by: AI`, or any similar AI attribution line in commits.
-- Author line on every commit is `Pratiyush <pratiyush1@gmail.com>` exactly.
+- Author line on every commit is `Igor Lashkevich <3133574+necroz@users.noreply.github.com>` exactly.
 
 ## PR size
 

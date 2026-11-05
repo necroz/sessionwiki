@@ -23,16 +23,16 @@ From Claude Code, run these slash commands in order:
 
 | What you want | Slash command | CLI equivalent |
 |---|---|---|
-| Convert new session transcripts | `/wiki-sync` | `llmwiki sync` |
+| Convert new session transcripts | `/wiki-sync` | `sessionwiki sync` |
 | Ingest a source file into the wiki | `/wiki-ingest <path>` | -- |
 | Ask the wiki a question | `/wiki-query <question>` | -- |
 | Edit one page surgically | `/wiki-update <page>` | -- |
-| Find orphans + broken links | `/wiki-lint` | `llmwiki lint` |
-| Triage candidate pages | -- | `llmwiki candidates list` |
-| Build / rebuild the site | `/wiki-build` | `llmwiki build` |
-| Serve locally | `/wiki-serve` | `llmwiki serve --open` |
-| Interactive graph | `/wiki-graph` | `llmwiki graph` |
-| AI knowledge graph | `/wiki-graph` | `llmwiki graph --engine graphify` |
+| Find orphans + broken links | `/wiki-lint` | `sessionwiki lint` |
+| Triage candidate pages | -- | `sessionwiki candidates list` |
+| Build / rebuild the site | `/wiki-build` | `sessionwiki build` |
+| Serve locally | `/wiki-serve` | `sessionwiki serve --open` |
+| Interactive graph | `/wiki-graph` | `sessionwiki graph` |
+| AI knowledge graph | `/wiki-graph` | `sessionwiki graph --engine graphify` |
 | Self-reflection on wiki gaps | `/wiki-reflect` | -- |
 
 ## 12 CLI commands
@@ -55,13 +55,13 @@ From Claude Code, run these slash commands in order:
 ## Knowledge graph
 
 ```bash
-llmwiki graph                          # builtin wikilink graph (stdlib, zero deps)
-llmwiki graph --engine graphify        # AI-powered: Leiden communities, confidence edges, god nodes
-llmwiki graph --format json            # json only
-llmwiki graph --format html            # interactive HTML only
+sessionwiki graph                          # builtin wikilink graph (stdlib, zero deps)
+sessionwiki graph --engine graphify        # AI-powered: Leiden communities, confidence edges, god nodes
+sessionwiki graph --format json            # json only
+sessionwiki graph --format html            # interactive HTML only
 ```
 
-Install Graphify: `pip install llm-notebook[graph]`
+Install Graphify: `pip install sessionwiki[graph]`
 
 Graphify outputs to `graphify-out/`: `graph.json`, `graph.html`, `GRAPH_REPORT.md`.
 Features: tree-sitter AST extraction, semantic analysis, community detection, confidence-scored edges.
@@ -69,43 +69,43 @@ Features: tree-sitter AST extraction, semantic analysis, community detection, co
 ## Exports
 
 ```bash
-llmwiki export all                     # all 7 formats at once
-llmwiki export llms-txt                # llmstxt.org spec
-llmwiki export llms-full-txt           # full plain-text corpus (<= 5 MB)
-llmwiki export jsonld                  # schema.org entity graph
-llmwiki export sitemap                 # sitemap.xml
-llmwiki export rss                     # rss.xml
-llmwiki export robots                  # robots.txt
-llmwiki export ai-readme               # ai-readme.md
+sessionwiki export all                     # all 7 formats at once
+sessionwiki export llms-txt                # llmstxt.org spec
+sessionwiki export llms-full-txt           # full plain-text corpus (<= 5 MB)
+sessionwiki export jsonld                  # schema.org entity graph
+sessionwiki export sitemap                 # sitemap.xml
+sessionwiki export rss                     # rss.xml
+sessionwiki export robots                  # robots.txt
+sessionwiki export ai-readme               # ai-readme.md
 ```
 
 ## Quality
 
 ```bash
-llmwiki lint                           # 14 rules (8 structural + 3 LLM + 2 v1.1)
-llmwiki lint --json --fail-on-errors   # CI-friendly
-llmwiki lint --rules link_integrity,orphan_detection
-llmwiki lint --include-llm             # + contradiction/claim/summary checks
+sessionwiki lint                           # 14 rules (8 structural + 3 LLM + 2 v1.1)
+sessionwiki lint --json --fail-on-errors   # CI-friendly
+sessionwiki lint --rules link_integrity,orphan_detection
+sessionwiki lint --include-llm             # + contradiction/claim/summary checks
 ```
 
 ## Candidate workflow
 
 ```bash
-llmwiki candidates list                # show all candidates
-llmwiki candidates list --stale        # only stale (>30 days)
-llmwiki candidates promote --slug Foo  # promote to wiki
-llmwiki candidates merge --slug A --into B
-llmwiki candidates discard --slug X --reason "hallucinated"
+sessionwiki candidates list                # show all candidates
+sessionwiki candidates list --stale        # only stale (>30 days)
+sessionwiki candidates promote --slug Foo  # promote to wiki
+sessionwiki candidates merge --slug A --into B
+sessionwiki candidates discard --slug X --reason "hallucinated"
 ```
 
 ## LLM synthesis
 
 ```bash
-llmwiki synthesize                     # synthesize source pages
-llmwiki synthesize --check             # probe backend (exit 0 if ok)
-llmwiki synthesize --estimate          # cost preview, no API calls
-llmwiki synthesize --dry-run           # list what would be processed
-llmwiki synthesize --force             # re-synth everything
+sessionwiki synthesize                     # synthesize source pages
+sessionwiki synthesize --check             # probe backend (exit 0 if ok)
+sessionwiki synthesize --estimate          # cost preview, no API calls
+sessionwiki synthesize --dry-run           # list what would be processed
+sessionwiki synthesize --force             # re-synth everything
 ```
 
 Auto-tags pages (up to 5 AI tags per page, near-dup rejection, stop-word filter).
@@ -113,8 +113,8 @@ Auto-tags pages (up to 5 AI tags per page, near-dup rejection, stop-word filter)
 ## Adapters
 
 ```bash
-llmwiki adapters                       # list every adapter + who fires on next sync
-llmwiki adapters --wide                # untruncated descriptions
+sessionwiki adapters                       # list every adapter + who fires on next sync
+sessionwiki adapters --wide                # untruncated descriptions
 ```
 
 **Core** (auto-discovered, always loaded):
@@ -140,13 +140,13 @@ llmwiki adapters --wide                # untruncated descriptions
 
 ```bash
 # Sync wiki into an Obsidian vault
-llmwiki sync --vault "~/Documents/Obsidian Vault/my-wiki"
+sessionwiki sync --vault "~/Documents/Obsidian Vault/my-wiki"
 
 # Build site from a vault
-llmwiki build --vault "~/Documents/Obsidian Vault/my-wiki"
+sessionwiki build --vault "~/Documents/Obsidian Vault/my-wiki"
 
 # Use the obsidian adapter to read from a vault
-llmwiki sync --adapter obsidian
+sessionwiki sync --adapter obsidian
 ```
 
 ## Flags you'll actually use
@@ -217,23 +217,23 @@ site/    GENERATED static HTML (don't edit by hand)
 
 ```bash
 # Daily: sync + serve
-llmwiki sync && llmwiki serve --open
+sessionwiki sync && sessionwiki serve --open
 
 # Nightly cron (one project)
-llmwiki sync --project my-project --no-auto-lint --since $(date -v-1d +%Y-%m-%d)
+sessionwiki sync --project my-project --no-auto-lint --since $(date -v-1d +%Y-%m-%d)
 
 # AI knowledge graph
-pip install llm-notebook[graph]
-llmwiki graph --engine graphify
+pip install sessionwiki[graph]
+sessionwiki graph --engine graphify
 
 # CI quality gate
-llmwiki lint --json --fail-on-errors
+sessionwiki lint --json --fail-on-errors
 
 # Export wiki to Obsidian vault
-llmwiki sync --vault "~/Documents/Obsidian Vault/my-wiki"
+sessionwiki sync --vault "~/Documents/Obsidian Vault/my-wiki"
 
 # Full site rebuild with AI synthesis
-llmwiki build --synthesize && llmwiki export all
+sessionwiki build --synthesize && sessionwiki export all
 ```
 
 ## Exit codes

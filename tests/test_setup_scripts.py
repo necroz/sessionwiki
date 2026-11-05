@@ -37,7 +37,7 @@ def test_wrapper_scripts_prefer_venv_python(tmp_path: Path, script_name: str):
 
     assert result.returncode == 0, result.stderr
     assert "VENV_PYTHON" in result.stdout
-    assert "-m llmwiki" in result.stdout
+    assert "-m sessionwiki" in result.stdout
 
 
 def test_setup_sh_creates_and_installs_into_venv():

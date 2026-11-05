@@ -6,7 +6,7 @@ docs_shell: true
 
 # OpenCode / OpenClaw adapter
 
-OpenCode V2 stores sessions in a live SQLite database. llmwiki exports
+OpenCode V2 stores sessions in a live SQLite database. sessionwiki exports
 that database to a Claude-style JSONL corpus and converts it with the
 `opencode` adapter. Legacy OpenCode / OpenClaw JSONL stores are still
 supported.
@@ -37,10 +37,10 @@ Legacy OpenCode / OpenClaw stores are also detected:
 ## Export
 
 ```bash
-llmwiki opencode export
-llmwiki opencode export --project demo_project --dry-run
-llmwiki opencode export --since 2026-09-01
-llmwiki opencode export --include-subagents
+sessionwiki opencode export
+sessionwiki opencode export --project demo_project --dry-run
+sessionwiki opencode export --since 2026-09-01
+sessionwiki opencode export --include-subagents
 ```
 
 The exporter opens the database read-only, ignores non-message rows
@@ -49,14 +49,14 @@ reasoning blocks, and preserves text, tool calls, tool results, and file
 placeholders. `session_v2.time_updated` is the incremental key. A full
 export prunes JSONL for sessions deleted from the database.
 
-`llmwiki sync` runs the same export automatically when the database
+`sessionwiki sync` runs the same export automatically when the database
 exists. Disable it with `--no-opencode-export`.
 
 ## Autosync
 
 ```bash
-llmwiki opencode autosync
-llmwiki opencode autosync --build
+sessionwiki opencode autosync
+sessionwiki opencode autosync --build
 ```
 
 The command uses the shared OS-level `FileLock`, so two concurrent
@@ -66,17 +66,17 @@ go to `~/.llmwiki/opencode/autosync.log`.
 To run autosync after every finished OpenCode turn, install the plugin:
 
 ```bash
-llmwiki opencode install --dry-run
-llmwiki opencode install
+sessionwiki opencode install --dry-run
+sessionwiki opencode install
 ```
 
 The plugin is written to
-`$XDG_CONFIG_HOME/opencode/plugins/llmwiki-autosync/index.ts` (by default
+`$XDG_CONFIG_HOME/opencode/plugins/sessionwiki-autosync/index.ts` (by default
 `~/.config/opencode/...`, the same directory OpenCode reads). It subscribes
 to OpenCode's `session.idle` event and spawns:
 
 ```text
-<python> -m llmwiki opencode autosync --quiet --lock-timeout 0 [--build]
+<python> -m sessionwiki opencode autosync --quiet --lock-timeout 0 [--build]
 ```
 
 `--lock-timeout 0` makes a busy cycle a no-op: if the previous autosync is
@@ -103,7 +103,7 @@ exclude OpenCode from a sync entirely, list the adapters explicitly
 without it:
 
 ```bash
-llmwiki sync --adapter claude_code zcode --no-opencode-export
+sessionwiki sync --adapter claude_code zcode --no-opencode-export
 ```
 
 ## Output layout
@@ -114,10 +114,10 @@ Subagent sessions are skipped by default; `--include-subagents` writes
 
 ## Code
 
-- `llmwiki/opencode/export.py`
-- `llmwiki/opencode/autosync.py`
-- `llmwiki/opencode/install.py`
-- `llmwiki/adapters/opencode.py`
+- `sessionwiki/opencode/export.py`
+- `sessionwiki/opencode/autosync.py`
+- `sessionwiki/opencode/install.py`
+- `sessionwiki/adapters/opencode.py`
 - Tests: `tests/test_opencode_export.py`, `tests/test_opencode_adapter.py`,
   `tests/test_opencode_autosync.py`, `tests/test_opencode_install.py`
 - Issue history: #43 (initial adapter), OpenCode V2 SQLite support.
@@ -125,4 +125,4 @@ Subagent sessions are skipped by default; `--include-subagents` writes
 ## See also
 
 - [All adapters](../../README.md#works-with) — comparison table of
-  every agent adapter llmwiki supports out of the box.
+  every agent adapter sessionwiki supports out of the box.

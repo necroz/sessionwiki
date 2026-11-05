@@ -14,7 +14,7 @@ import os
 import time
 from pathlib import Path
 
-from llmwiki import convert as c
+from sessionwiki import convert as c
 
 
 def _write_jsonl(
@@ -74,7 +74,7 @@ def _patch(monkeypatch, home, out_dir, state):
     # itself instead of relying on Path.home monkeypatching.  Point it
     # at the `projects/` directory so `derive_project_slug()` resolves
     # every file under it against that prefix.
-    from llmwiki.adapters.claude_code import ClaudeCodeAdapter
+    from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
     store = home / ".claude" / "projects"
     monkeypatch.setattr(
         ClaudeCodeAdapter, "session_store_path", store, raising=False,

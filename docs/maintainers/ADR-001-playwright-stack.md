@@ -150,7 +150,7 @@ without a hard sunset; this trigger is the sunset.
 ## Layout (when #464 lands)
 
 ```
-llm-wiki/
+sessionwiki/
 ├── tests/
 │   ├── e2e/                    # existing Python suite (kept)
 │   │   ├── features/*.feature  # pytest-bdd Gherkin

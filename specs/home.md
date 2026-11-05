@@ -2,7 +2,7 @@
 
 ## Goal
 
-The landing page for a built llmwiki. Within 5 seconds a visitor must understand what the site is, what they can do here, and where to go next.
+The landing page for a built sessionwiki. Within 5 seconds a visitor must understand what the site is, what they can do here, and where to go next.
 
 ## URL pattern
 

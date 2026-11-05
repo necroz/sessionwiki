@@ -1,4 +1,4 @@
-"""Tests for ``llmwiki/references.py`` + CLI + stale_reference_detection rule.
+"""Tests for ``sessionwiki/references.py`` + CLI + stale_reference_detection rule.
 
 Covers:
 * ``_extract_dated_claims``: every regex branch + unicode + no matches.
@@ -10,7 +10,7 @@ Covers:
   + newer target); missing any produces empty; unparseable dates skipped.
 * ``format_references_table``: empty + sort order.
 * Lint rule wired + fires on a synthetic corpus.
-* CLI ``llmwiki references`` end-to-end.
+* CLI ``sessionwiki references`` end-to-end.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import references as r
+from sessionwiki import references as r
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -30,7 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def _run_cli(*args):
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         check=False,
@@ -330,12 +330,12 @@ def test_format_references_table_sorted():
 
 
 def test_lint_rule_registered():
-    from llmwiki.lint import REGISTRY, rules  # noqa: F401
+    from sessionwiki.lint import REGISTRY, rules  # noqa: F401
     assert "stale_reference_detection" in REGISTRY
 
 
 def test_lint_rule_fires_on_stale_pair():
-    from llmwiki.lint import REGISTRY, rules  # noqa: F401
+    from sessionwiki.lint import REGISTRY, rules  # noqa: F401
 
     rule = REGISTRY["stale_reference_detection"]()
     pages = dict([
@@ -353,7 +353,7 @@ def test_lint_rule_fires_on_stale_pair():
 
 
 def test_lint_rule_silent_on_fresh_pair():
-    from llmwiki.lint import REGISTRY, rules  # noqa: F401
+    from sessionwiki.lint import REGISTRY, rules  # noqa: F401
 
     rule = REGISTRY["stale_reference_detection"]()
     pages = dict([

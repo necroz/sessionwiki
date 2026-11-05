@@ -5,9 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from llmwiki import cli
-from llmwiki.lock import FileLock
-from llmwiki.zcode import autosync
+from sessionwiki import cli
+from sessionwiki.lock import FileLock
+from sessionwiki.zcode import autosync
 
 
 def _db(tmp_path: Path) -> Path:
@@ -37,7 +37,7 @@ def test_autosync_runs_export_convert_and_build(tmp_path, monkeypatch):
     builder = MagicMock(return_value=[])
     monkeypatch.setattr(autosync, "run_export", exporter)
     monkeypatch.setattr(autosync, "convert_all", converter)
-    monkeypatch.setattr("llmwiki.build.build_site", builder)
+    monkeypatch.setattr("sessionwiki.build.build_site", builder)
 
     rc = autosync.run_autosync(
         db_path=_db(tmp_path),
@@ -84,7 +84,7 @@ def test_autosync_coalesce_calls_deterministic_pipeline(tmp_path, monkeypatch):
     )
     monkeypatch.setattr(autosync, "convert_all", MagicMock(return_value=0))
     synth = MagicMock(return_value={"coalesced": 1})
-    monkeypatch.setattr("llmwiki.synth.pipeline.synthesize_new_sessions", synth)
+    monkeypatch.setattr("sessionwiki.synth.pipeline.synthesize_new_sessions", synth)
 
     rc = autosync.run_autosync(
         db_path=_db(tmp_path),

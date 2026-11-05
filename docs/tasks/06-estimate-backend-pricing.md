@@ -3,15 +3,15 @@
 - Priority: P2
 - Depends on: none
 - Size: S (30–45 min)
-- Files: `llmwiki/cli.py`, `tests/test_synthesize_estimate.py`
+- Files: `sessionwiki/cli.py`, `tests/test_synthesize_estimate.py`
 - PR title: `fix: label synthesize estimate with the active backend`
 
 ## Read first
 
-- `llmwiki/cli.py`, `_synthesize_estimate` (around line 558) and
+- `sessionwiki/cli.py`, `_synthesize_estimate` (around line 558) and
   `cmd_synthesize` (around line 472)
-- `llmwiki/synth/estimate.py`, `synthesize_estimate_report`
-- `llmwiki/cache.py`, `MODEL_PRICING` and `estimate_cost`
+- `sessionwiki/synth/estimate.py`, `synthesize_estimate_report`
+- `sessionwiki/cache.py`, `MODEL_PRICING` and `estimate_cost`
 - `tests/test_synthesize_estimate.py`
 
 ## Problem
@@ -57,7 +57,7 @@ def _synthesize_estimate(config: dict | None = None) -> int:
 At the start of the function, inspect the backend:
 
 ```python
-from llmwiki.cache import MODEL_PRICING
+from sessionwiki.cache import MODEL_PRICING
 
 synth = (config or {}).get("synthesis", {}) or {}
 backend = str(synth.get("backend") or "dummy")
@@ -105,7 +105,7 @@ report if the test becomes slow:
 
 ```python
 monkeypatch.setattr(
-    "llmwiki.cli.synthesize_estimate_report",
+    "sessionwiki.cli.synthesize_estimate_report",
     lambda **kwargs: {...},
 )
 ```
@@ -117,7 +117,7 @@ module attribute it actually looks up.
 
 ```bash
 .venv/bin/python -m pytest tests/test_synthesize_estimate.py -q
-.venv/bin/python -m llmwiki synthesize --estimate
+.venv/bin/python -m sessionwiki synthesize --estimate
 ```
 
 Expected in this repository:

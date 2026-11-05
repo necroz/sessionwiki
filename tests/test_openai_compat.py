@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from llmwiki.synth.openai_compat import (
+from sessionwiki.synth.openai_compat import (
     OpenAICompatConfig,
     OpenAICompatError,
     OpenAICompatHTTPError,
@@ -82,7 +82,7 @@ def test_429_is_retried_then_succeeds():
 
 
 def test_remote_host_logs_privacy_warning(caplog):
-    with caplog.at_level("WARNING", logger="llmwiki.synth.openai_compat"):
+    with caplog.at_level("WARNING", logger="sessionwiki.synth.openai_compat"):
         config = load_openai_config(
             {"synthesis": {"backend": "openai", "base_url": "http://10.0.0.5:8001/v1"}}
         )
@@ -91,7 +91,7 @@ def test_remote_host_logs_privacy_warning(caplog):
 
 
 def test_loopback_host_does_not_warn(caplog):
-    with caplog.at_level("WARNING", logger="llmwiki.synth.openai_compat"):
+    with caplog.at_level("WARNING", logger="sessionwiki.synth.openai_compat"):
         config = load_openai_config(
             {"synthesis": {"backend": "openai", "base_url": "http://127.0.0.1:8001/v1"}}
         )

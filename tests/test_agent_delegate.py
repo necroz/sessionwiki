@@ -20,7 +20,7 @@ from typing import Any
 
 import pytest
 
-from llmwiki.synth.agent_delegate import (
+from sessionwiki.synth.agent_delegate import (
     AgentDelegateSynthesizer,
     complete_pending,
     extract_pending_uuid,
@@ -30,7 +30,7 @@ from llmwiki.synth.agent_delegate import (
     sentinel_for,
     _agent_runtime_detected,
 )
-from llmwiki.synth.pipeline import resolve_backend
+from sessionwiki.synth.pipeline import resolve_backend
 
 
 @pytest.fixture
@@ -320,5 +320,5 @@ def test_sentinel_not_present_returns_none():
 
 
 def test_sentinel_tolerates_extra_whitespace():
-    body = "   <!--   llmwiki-pending: 12345678-1234-1234-1234-123456789abc   -->   \n\n## Summary"
+    body = "   <!--   sessionwiki-pending: 12345678-1234-1234-1234-123456789abc   -->   \n\n## Summary"
     assert extract_pending_uuid(body) == "12345678-1234-1234-1234-123456789abc"

@@ -140,7 +140,7 @@ def test_dark_mode_passes_color_contrast_audit(page: Page, base_url: str) -> Non
     if the dark-theme override wasn't updated together. Run a
     contrast-only scan against the homepage in dark mode."""
     page.add_init_script(
-        "try { localStorage.setItem('llmwiki-theme', 'dark'); } catch (e) {}"
+        "try { localStorage.setItem('sessionwiki-theme', 'dark'); } catch (e) {}"
     )
     page.goto(f"{base_url}/index.html", wait_until="domcontentloaded")
     page.wait_for_load_state("networkidle", timeout=5000)

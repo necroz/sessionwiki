@@ -19,16 +19,16 @@
 ### macOS / Linux
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ./setup.sh
 ```
 
 ### Windows
 
 ```cmd
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 setup.bat
 ```
 
@@ -36,7 +36,7 @@ setup.bat
 
 1. 通过 `pip install --user` 安装 `markdown`（必需）。语法高亮使用 highlight.js（通过 CDN 加载）。
 2. 创建 `raw/`、`wiki/`、`site/` 目录结构
-3. 运行 `llmwiki adapters` 显示检测到的 Agent
+3. 运行 `sessionwiki adapters` 显示检测到的 Agent
 4. 首次同步的 dry-run 预览，你可以看到将要转换哪些内容
 
 ## 安装后的三个命令

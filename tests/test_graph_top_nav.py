@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from llmwiki.graph import write_html
+from sessionwiki.graph import write_html
 
 
 def _build_minimal_graph() -> dict:

@@ -4,39 +4,39 @@
 # Patterns are gitignore-style, evaluated in order, LAST match wins.
 #
 # Until additional maintainers join the project, every path is owned
-# by @Pratiyush. When more maintainers exist, update per-layer lines
+# by @necroz. When more maintainers exist, update per-layer lines
 # to split the load (e.g. L6 adapters → whoever cares about adapters).
 
-*                               @Pratiyush
+*                               @necroz
 
 # L0 Raw — converters + adapters
-llmwiki/convert.py              @Pratiyush
-llmwiki/adapters/               @Pratiyush
+sessionwiki/convert.py              @necroz
+sessionwiki/adapters/               @necroz
 
 # L2 Site — HTML builder + visualization modules
-llmwiki/build.py                @Pratiyush
-llmwiki/viz_heatmap.py          @Pratiyush
-llmwiki/viz_tools.py             @Pratiyush
-llmwiki/viz_tokens.py           @Pratiyush
-llmwiki/models_page.py          @Pratiyush
-llmwiki/compare.py              @Pratiyush
-llmwiki/project_topics.py       @Pratiyush
+sessionwiki/build.py                @necroz
+sessionwiki/viz_heatmap.py          @necroz
+sessionwiki/viz_tools.py             @necroz
+sessionwiki/viz_tokens.py           @necroz
+sessionwiki/models_page.py          @necroz
+sessionwiki/compare.py              @necroz
+sessionwiki/project_topics.py       @necroz
 
 # L5 Schema — docs, steering, CLAUDE.md
-CLAUDE.md                       @Pratiyush
-AGENTS.md                       @Pratiyush
-docs/                           @Pratiyush
-docs/maintainers/               @Pratiyush
+CLAUDE.md                       @necroz
+AGENTS.md                       @necroz
+docs/                           @necroz
+docs/maintainers/               @necroz
 
 # L7 CI/Ops — workflows, tests, release
-.github/workflows/              @Pratiyush
-tests/                          @Pratiyush
+.github/workflows/              @necroz
+tests/                          @necroz
 
 # Governance — anything here is sensitive and touches how the project
 # is run. All changes need maintainer review.
-CONTRIBUTING.md                 @Pratiyush
-CODE_OF_CONDUCT.md              @Pratiyush
-SECURITY.md                     @Pratiyush
-.github/CODEOWNERS              @Pratiyush
-.github/PULL_REQUEST_TEMPLATE.md @Pratiyush
-.github/ISSUE_TEMPLATE/         @Pratiyush
+CONTRIBUTING.md                 @necroz
+CODE_OF_CONDUCT.md              @necroz
+SECURITY.md                     @necroz
+.github/CODEOWNERS              @necroz
+.github/PULL_REQUEST_TEMPLATE.md @necroz
+.github/ISSUE_TEMPLATE/         @necroz

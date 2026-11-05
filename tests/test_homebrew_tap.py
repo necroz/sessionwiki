@@ -18,10 +18,10 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki import REPO_ROOT
+from sessionwiki import REPO_ROOT
 
 
-FORMULA = REPO_ROOT / "homebrew" / "llmwiki.rb"
+FORMULA = REPO_ROOT / "homebrew" / "sessionwiki.rb"
 BUMP_SCRIPT = REPO_ROOT / "scripts" / "bump-homebrew-formula.sh"
 WORKFLOW = REPO_ROOT / ".github" / "workflows" / "homebrew-bump.yml"
 DOC = REPO_ROOT / "docs" / "deploy" / "homebrew-setup.md"
@@ -52,9 +52,9 @@ def doc() -> str:
 
 def test_formula_class_name_matches_filename(formula: str):
     # Homebrew derives the Ruby class name from the formula's filename.
-    # `llmwiki.rb` → `class Llmwiki`.
-    assert re.search(r"^class Llmwiki < Formula", formula, re.MULTILINE), (
-        "formula class must be `Llmwiki` (camelcase of the filename)"
+    # `sessionwiki.rb` → `class Sessionwiki`.
+    assert re.search(r"^class Sessionwiki < Formula", formula, re.MULTILINE), (
+        "formula class must be `Sessionwiki` (camelcase of the filename)"
     )
 
 
@@ -68,7 +68,7 @@ def test_formula_url_points_at_llm_wiki_release_tarball(formula: str):
     assert m, "formula has no url line"
     url = m.group(1)
     assert url.startswith(
-        "https://github.com/Pratiyush/llm-wiki/archive/refs/tags/v"
+        "https://github.com/necroz/sessionwiki/archive/refs/tags/v"
     ), f"unexpected url {url!r}; bump-homebrew-formula.sh rewrites this"
     assert url.endswith(".tar.gz"), "formula url must be the .tar.gz archive"
 
@@ -85,11 +85,11 @@ def test_formula_sha_is_64_hex_or_placeholder(formula: str):
     )
 
 
-def test_formula_test_block_runs_llmwiki_commands(formula: str):
+def test_formula_test_block_runs_sessionwiki_commands(formula: str):
     # Homebrew runs the `test do ... end` block on install. We exercise
     # the subcommands that matter to users — `--version` and `adapters`.
-    assert 'system bin/"llmwiki", "--version"' in formula
-    assert 'system bin/"llmwiki", "adapters"' in formula
+    assert 'system bin/"sessionwiki", "--version"' in formula
+    assert 'system bin/"sessionwiki", "adapters"' in formula
 
 
 def test_formula_depends_on_python_312(formula: str):
@@ -128,7 +128,7 @@ def test_bump_script_rejects_non_semver_tag(tmp_path: Path):
 def test_bump_script_uses_right_tarball_url(bump_script: str):
     # Must match the URL pattern the formula test guards.
     assert (
-        "https://github.com/Pratiyush/llm-wiki/archive/refs/tags/${tag}.tar.gz"
+        "https://github.com/necroz/sessionwiki/archive/refs/tags/${tag}.tar.gz"
         in bump_script
     )
 
@@ -168,7 +168,7 @@ def test_workflow_gracefully_handles_missing_secret(workflow: str):
 
 
 def test_workflow_targets_homebrew_tap_repo(workflow: str):
-    assert "Pratiyush/homebrew-tap" in workflow
+    assert "necroz/homebrew-tap" in workflow
 
 
 # ─── Setup doc ────────────────────────────────────────────────────────

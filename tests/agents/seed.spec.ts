@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 // #464: seed scenarios — three smoke checks that prove the harness
-// works against a built llmwiki demo site. Real generated specs land
+// works against a built sessionwiki demo site. Real generated specs land
 // via #466's Generator pass once this bootstrap is on master.
 
 test.describe("seed — site reachability", () => {

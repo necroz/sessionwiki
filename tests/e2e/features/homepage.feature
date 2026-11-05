@@ -1,10 +1,10 @@
 Feature: Homepage
-  As a visitor landing on the root of a built llmwiki
+  As a visitor landing on the root of a built sessionwiki
   I want the page to render the hero, the nav, and the projects grid
   So I can immediately see what the wiki contains
 
   Background:
-    Given a built llmwiki site is served
+    Given a built sessionwiki site is served
 
   Scenario: Homepage hero is visible
     When I visit the homepage

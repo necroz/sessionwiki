@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Compatibility wrapper for the ZCode exporter.
 
-The implementation now lives in :mod:`llmwiki.zcode.export` and is
-available as ``llmwiki zcode export``. This wrapper keeps existing
+The implementation now lives in :mod:`sessionwiki.zcode.export` and is
+available as ``sessionwiki zcode export``. This wrapper keeps existing
 Stop-hooks, timers, and cron entries working while they migrate.
 """
 
@@ -12,13 +12,13 @@ import sys
 from pathlib import Path
 
 # ``python scripts/zcode_export.py`` puts scripts/ on sys.path, not the
-# repository root. Add the root so ``import llmwiki`` works from a clone
+# repository root. Add the root so ``import sessionwiki`` works from a clone
 # that has not been pip-installed.
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from llmwiki.zcode.export import (  # noqa: E402,F401
+from sessionwiki.zcode.export import (  # noqa: E402,F401
     DEFAULT_DB,
     DEFAULT_OUT_DIR,
     REQUIRED_COLUMNS,

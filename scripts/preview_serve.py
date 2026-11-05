@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tiny localhost-only static server for llmwiki preview.
+"""Tiny localhost-only static server for sessionwiki preview.
 
 This exists because the default `python3 -m http.server` can fail when the
 parent shell is launched from a cwd that has been deleted — Python 3.9's

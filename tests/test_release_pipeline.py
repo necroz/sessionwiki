@@ -13,7 +13,7 @@ import re
 
 import pytest
 
-from llmwiki import REPO_ROOT, __version__
+from sessionwiki import REPO_ROOT, __version__
 
 RELEASE_YML = REPO_ROOT / ".github" / "workflows" / "release.yml"
 PYPI_DOC = REPO_ROOT / "docs" / "deploy" / "pypi-publishing.md"
@@ -109,14 +109,14 @@ def test_pyproject_version_matches_package_version(pyproject: str):
     assert m is not None
     assert m.group(1) == __version__, (
         f"pyproject.toml version {m.group(1)!r} != "
-        f"llmwiki.__version__ {__version__!r} — pip install will show "
-        "one value while llmwiki --version shows another"
+        f"sessionwiki.__version__ {__version__!r} — pip install will show "
+        "one value while sessionwiki --version shows another"
     )
 
 
 def test_pyproject_uses_package_discovery(pyproject: str):
     assert "[tool.setuptools.packages.find]" in pyproject
-    assert 'include = ["llmwiki*"]' in pyproject
+    assert 'include = ["sessionwiki*"]' in pyproject
 
 
 # ─── Doc walkthrough ──────────────────────────────────────────────────

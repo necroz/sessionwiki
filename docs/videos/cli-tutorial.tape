@@ -23,13 +23,13 @@ Sleep 200ms
 Show
 
 # ── 1. init ──────────────────────────────────────────────────
-Type "# llmwiki — every command in 90 seconds"
+Type "# sessionwiki — every command in 90 seconds"
 Sleep 600ms
 Enter
 Type "# 1. Scaffold a fresh vault"
 Sleep 300ms
 Enter
-Type "llmwiki init"
+Type "sessionwiki init"
 Sleep 300ms
 Enter
 Sleep 2500ms
@@ -38,7 +38,7 @@ Sleep 2500ms
 Type "# 2. Which adapters can see your sessions on this machine?"
 Sleep 300ms
 Enter
-Type "llmwiki adapters"
+Type "sessionwiki adapters"
 Sleep 300ms
 Enter
 Sleep 3500ms
@@ -47,7 +47,7 @@ Sleep 3500ms
 Type "# 3. Pull in sessions  (dry-run for the demo)"
 Sleep 300ms
 Enter
-Type "llmwiki sync --help | head -12"
+Type "sessionwiki sync --help | head -12"
 Sleep 300ms
 Enter
 Sleep 3500ms
@@ -56,7 +56,7 @@ Sleep 3500ms
 Type "# 4. Build the static site"
 Sleep 300ms
 Enter
-Type "llmwiki build"
+Type "sessionwiki build"
 Sleep 300ms
 Enter
 Sleep 3500ms
@@ -65,7 +65,7 @@ Sleep 3500ms
 Type "# 5. Lint  — 16 rules: orphans, broken links, stale pages…"
 Sleep 300ms
 Enter
-Type "llmwiki lint"
+Type "sessionwiki lint"
 Sleep 300ms
 Enter
 Sleep 4000ms
@@ -74,7 +74,7 @@ Sleep 4000ms
 Type "# 6. One-shot: build + graph + export all + lint"
 Sleep 300ms
 Enter
-Type "llmwiki all"
+Type "sessionwiki all"
 Sleep 300ms
 Enter
 Sleep 6000ms
@@ -84,7 +84,7 @@ Type "# 7. Browse it locally"
 Sleep 300ms
 Enter
 Hide
-Type "(llmwiki serve --port 8989 >/tmp/serve.log 2>&1 &) ; sleep 1"
+Type "(sessionwiki serve --port 8989 >/tmp/serve.log 2>&1 &) ; sleep 1"
 Enter
 Sleep 1500ms
 Show
@@ -93,13 +93,13 @@ Sleep 300ms
 Enter
 Sleep 1500ms
 Hide
-Type "pkill -f 'llmwiki serve' 2>/dev/null"
+Type "pkill -f 'sessionwiki serve' 2>/dev/null"
 Enter
 Sleep 300ms
 Show
 
 # ── 8. closer ────────────────────────────────────────────────
-Type "# Done — pip install llm-notebook"
+Type "# Done — pip install sessionwiki"
 Sleep 400ms
 Enter
 Sleep 2500ms

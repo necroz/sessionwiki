@@ -2,12 +2,12 @@
 must stay aligned with the CLI surface (#279).
 
 Context: users reach for `/wiki-candidates` inside Claude Code and the
-slash file is supposed to dispatch `python3 -m llmwiki candidates …`.
+slash file is supposed to dispatch `python3 -m sessionwiki candidates …`.
 If the CLI grows a new flag, or a slash gets renamed, the two surfaces
 can drift silently.  These tests pin the contract:
 
 * Every `.claude/commands/wiki-*.md` that wraps a CLI subcommand
-  references the correct ``python3 -m llmwiki <subcommand>`` name.
+  references the correct ``python3 -m sessionwiki <subcommand>`` name.
 * Every CLI subcommand the slash wraps exists in ``build_parser()``.
 * Slash-command file names must start with ``wiki-`` for the pipeline.
 * The subcommand the slash wraps is inferred from its first fenced
@@ -49,7 +49,7 @@ LEGACY_SLASH_FILES = {
 
 
 def _cli_subcommands() -> set[str]:
-    from llmwiki.cli import build_parser
+    from sessionwiki.cli import build_parser
     parser = build_parser()
     for a in parser._actions:
         if hasattr(a, "choices") and a.choices:
@@ -60,8 +60,8 @@ def _cli_subcommands() -> set[str]:
 def _wrapped_subcommand(slash_file: Path) -> str | None:
     """Return the CLI subcommand a slash file wraps, or ``None``."""
     text = slash_file.read_text(encoding="utf-8")
-    # Pull the first ``python3 -m llmwiki <subcommand>`` reference.
-    m = re.search(r"python3\s+-m\s+llmwiki\s+([a-z][a-z0-9_-]*)", text)
+    # Pull the first ``python3 -m sessionwiki <subcommand>`` reference.
+    m = re.search(r"python3\s+-m\s+sessionwiki\s+([a-z][a-z0-9_-]*)", text)
     return m.group(1) if m else None
 
 
@@ -101,7 +101,7 @@ def test_every_wrapper_slash_points_at_a_real_subcommand():
             continue
         sub = _wrapped_subcommand(p)
         if sub is None:
-            offenders.append(f"{p.name}: no `python3 -m llmwiki <sub>` in body")
+            offenders.append(f"{p.name}: no `python3 -m sessionwiki <sub>` in body")
             continue
         if sub not in cli:
             offenders.append(
@@ -172,7 +172,7 @@ def test_known_wrappers_match_expected_set():
 
 
 def test_non_wrapper_slashes_dont_claim_to_wrap_cli():
-    """If you add `python3 -m llmwiki ...` to a prompt-driven slash, it
+    """If you add `python3 -m sessionwiki ...` to a prompt-driven slash, it
     must either wrap that subcommand correctly OR drop the CLI mention.
     Prevents "confusing by having a CLI line that's actually a hint,
     not the implementation" drift."""

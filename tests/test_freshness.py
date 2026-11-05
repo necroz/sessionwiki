@@ -1,4 +1,4 @@
-"""Tests for llmwiki.freshness — content-freshness badges (#57)."""
+"""Tests for sessionwiki.freshness — content-freshness badges (#57)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from llmwiki.freshness import (
+from sessionwiki.freshness import (
     DEFAULT_GREEN_DAYS,
     DEFAULT_YELLOW_DAYS,
     format_relative_time,

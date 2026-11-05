@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from llmwiki.opencode import install
+from sessionwiki.opencode import install
 
 
 def test_install_plugin_writes_index_ts(tmp_path):
@@ -18,13 +18,13 @@ def test_install_plugin_writes_index_ts(tmp_path):
         / ".config"
         / "opencode"
         / "plugins"
-        / "llmwiki-autosync"
+        / "sessionwiki-autosync"
         / "index.ts"
     )
     assert path.is_file()
     text = path.read_text(encoding="utf-8")
     assert "session.idle" in text
-    assert "llmwiki" in text
+    assert "sessionwiki" in text
     assert "opencode" in text
     assert "autosync" in text
     assert "/venv/bin/python" in text
@@ -138,7 +138,7 @@ def test_plugin_path_honours_xdg_config_home(tmp_path, monkeypatch):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
 
     assert install.plugin_path() == (
-        xdg / "opencode" / "plugins" / "llmwiki-autosync" / "index.ts"
+        xdg / "opencode" / "plugins" / "sessionwiki-autosync" / "index.ts"
     )
 
 
@@ -147,7 +147,7 @@ def test_plugin_path_ignores_empty_xdg_config_home(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
 
     assert install.plugin_path() == (
-        tmp_path / ".config" / "opencode" / "plugins" / "llmwiki-autosync" / "index.ts"
+        tmp_path / ".config" / "opencode" / "plugins" / "sessionwiki-autosync" / "index.ts"
     )
 
 
@@ -155,5 +155,5 @@ def test_explicit_home_wins_over_xdg_config_home(tmp_path, monkeypatch):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "xdg"))
 
     assert install.plugin_path(home=tmp_path / "h") == (
-        tmp_path / "h" / ".config" / "opencode" / "plugins" / "llmwiki-autosync" / "index.ts"
+        tmp_path / "h" / ".config" / "opencode" / "plugins" / "sessionwiki-autosync" / "index.ts"
     )

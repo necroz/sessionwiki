@@ -4,8 +4,8 @@ type: entity
 entity_type: project
 project: llm-wiki
 topics: [python, wiki, karpathy, claude-code, static-site, markdown, open-source]
-description: "The llmwiki framework itself — a Karpathy-style LLM knowledge base compiled from Claude Code session transcripts. Stdlib Python, no server, no database."
-homepage: "https://github.com/Pratiyush/llm-wiki"
+description: "The sessionwiki framework itself — a Karpathy-style LLM knowledge base compiled from Claude Code session transcripts. Stdlib Python, no server, no database."
+homepage: "https://github.com/necroz/sessionwiki"
 cache_tier: L1
 reader_shell: true
 ---
@@ -13,7 +13,7 @@ reader_shell: true
 # llm-wiki
 
 The meta project. Every session under this slug is a session
-*about* llmwiki — adding features, fixing bugs, shipping releases.
+*about* sessionwiki — adding features, fixing bugs, shipping releases.
 The wiki's own dogfooding loop: session → converter → wiki page →
 static site → browse.
 
@@ -22,4 +22,4 @@ static site → browse.
 - Andrej Karpathy
 - Claude Code
 - Static site generation
-- llmwiki
+- sessionwiki

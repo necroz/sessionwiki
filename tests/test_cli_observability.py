@@ -27,7 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def _run_cli(*args, env=None):
     return subprocess.run(
-        [sys.executable, "-m", "llmwiki", *args],
+        [sys.executable, "-m", "sessionwiki", *args],
         capture_output=True,
         text=True,
         check=False,
@@ -58,14 +58,14 @@ def _available_fake(is_avail: bool):
 
 
 def test_adapter_status_auto_default():
-    from llmwiki.cli import _adapter_status
+    from sessionwiki.cli import _adapter_status
     configured, will_fire = _adapter_status("x", _available_fake(True), config={})
     assert configured == "auto"
     assert will_fire == "yes"
 
 
 def test_adapter_status_explicit_enable():
-    from llmwiki.cli import _adapter_status
+    from sessionwiki.cli import _adapter_status
     cfg = {"x": {"enabled": True}}
     configured, will_fire = _adapter_status("x", _available_fake(True), config=cfg)
     assert configured == "explicit"
@@ -73,7 +73,7 @@ def test_adapter_status_explicit_enable():
 
 
 def test_adapter_status_explicit_off_blocks_fire():
-    from llmwiki.cli import _adapter_status
+    from sessionwiki.cli import _adapter_status
     cfg = {"x": {"enabled": False}}
     configured, will_fire = _adapter_status("x", _available_fake(True), config=cfg)
     assert configured == "off"
@@ -81,7 +81,7 @@ def test_adapter_status_explicit_off_blocks_fire():
 
 
 def test_adapter_status_unavailable_never_fires():
-    from llmwiki.cli import _adapter_status
+    from sessionwiki.cli import _adapter_status
     configured, will_fire = _adapter_status(
         "x", _available_fake(False), config={"x": {"enabled": True}}
     )
@@ -90,7 +90,7 @@ def test_adapter_status_unavailable_never_fires():
 
 def test_adapter_status_invalid_config_entry_defaults_to_auto():
     """A malformed config row (string instead of dict) must not crash."""
-    from llmwiki.cli import _adapter_status
+    from sessionwiki.cli import _adapter_status
     configured, _ = _adapter_status("x", _available_fake(True), config={"x": "yes"})
     assert configured == "auto"
 
@@ -186,10 +186,10 @@ def test_cli_log_end_to_end():
 
 
 def test_sync_status_empty_state(tmp_path, monkeypatch, capsys):
-    import llmwiki.cli as cli_mod
-    import llmwiki.convert as convert_mod
+    import sessionwiki.cli as cli_mod
+    import sessionwiki.convert as convert_mod
     monkeypatch.setattr(convert_mod, "DEFAULT_STATE_FILE", tmp_path / "state.json")
-    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import llmwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import sessionwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
     args = _mk_sync_status_args()
     rc = cli_mod.cmd_sync_status(args)
     assert rc == 0
@@ -218,10 +218,10 @@ def test_sync_status_renders_counters_table(tmp_path, monkeypatch, capsys):
         }, indent=2),
         encoding="utf-8",
     )
-    import llmwiki.cli as cli_mod
-    import llmwiki.convert as convert_mod
+    import sessionwiki.cli as cli_mod
+    import sessionwiki.convert as convert_mod
     monkeypatch.setattr(convert_mod, "DEFAULT_STATE_FILE", state_file)
-    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import llmwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import sessionwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
     rc = cli_mod.cmd_sync_status(_mk_sync_status_args())
     assert rc == 0
     out = capsys.readouterr().out
@@ -237,14 +237,14 @@ def test_sync_status_surfaces_quarantine(tmp_path, monkeypatch, capsys):
     state_file = tmp_path / "state.json"
     state_file.write_text(json.dumps({}), encoding="utf-8")
     quar_file = tmp_path / "quar.json"
-    from llmwiki import quarantine as q
+    from sessionwiki import quarantine as q
     q.add_entry("claude_code", "/tmp/bad.jsonl", "boom", path=quar_file)
 
-    import llmwiki.cli as cli_mod
-    import llmwiki.convert as convert_mod
+    import sessionwiki.cli as cli_mod
+    import sessionwiki.convert as convert_mod
     monkeypatch.setattr(convert_mod, "DEFAULT_STATE_FILE", state_file)
     monkeypatch.setattr(q, "DEFAULT_QUARANTINE_FILE", quar_file)
-    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import llmwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import sessionwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
 
     rc = cli_mod.cmd_sync_status(_mk_sync_status_args())
     assert rc == 0
@@ -258,10 +258,10 @@ def test_sync_status_with_recent_logs_events(tmp_path, monkeypatch, capsys):
     (tmp_path / "wiki" / "log.md").write_text(SAMPLE_LOG, encoding="utf-8")
     state_file = tmp_path / "state.json"
     state_file.write_text(json.dumps({}), encoding="utf-8")
-    import llmwiki.cli as cli_mod
-    import llmwiki.convert as convert_mod
+    import sessionwiki.cli as cli_mod
+    import sessionwiki.convert as convert_mod
     monkeypatch.setattr(convert_mod, "DEFAULT_STATE_FILE", state_file)
-    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import llmwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import sessionwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
     rc = cli_mod.cmd_sync_status(_mk_sync_status_args(recent=2))
     assert rc == 0
     out = capsys.readouterr().out
@@ -274,16 +274,16 @@ def test_sync_status_with_recent_logs_events(tmp_path, monkeypatch, capsys):
 def test_sync_status_corrupt_state_file_is_tolerated(tmp_path, monkeypatch, capsys):
     state_file = tmp_path / "state.json"
     state_file.write_text("{ not json", encoding="utf-8")
-    import llmwiki.cli as cli_mod
-    import llmwiki.convert as convert_mod
+    import sessionwiki.cli as cli_mod
+    import sessionwiki.convert as convert_mod
     monkeypatch.setattr(convert_mod, "DEFAULT_STATE_FILE", state_file)
-    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import llmwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(cli_mod, "REPO_ROOT", tmp_path); import sessionwiki.sync.status as sync_status_mod; monkeypatch.setattr(sync_status_mod, "REPO_ROOT", tmp_path)
     rc = cli_mod.cmd_sync_status(_mk_sync_status_args())
     assert rc == 0
 
 
 def test_cli_sync_status_flag_short_circuits(monkeypatch):
-    """`llmwiki sync --status` must not try to run a real sync."""
+    """`sessionwiki sync --status` must not try to run a real sync."""
     cp = _run_cli("sync", "--status")
     # Either reports observability (rc=0) or complains about env, but
     # should never crash with a traceback.
@@ -295,7 +295,7 @@ def test_cli_sync_status_flag_short_circuits(monkeypatch):
 
 
 def test_migrate_preserves_underscore_prefixed_keys(tmp_path):
-    from llmwiki.convert import _migrate_legacy_state
+    from sessionwiki.convert import _migrate_legacy_state
     legacy = {
         "_meta": {"last_sync": "2026-04-20T00:00:00Z"},
         "_counters": {"claude_code": {"discovered": 10}},
@@ -316,7 +316,7 @@ def test_migrate_preserves_meta_through_legacy_path_rewrite(tmp_path, monkeypatc
         "_meta": {"last_sync": "2026-04-20T00:00:00Z"},
         legacy_abs: 1.0,
     }
-    from llmwiki.convert import _migrate_legacy_state
+    from sessionwiki.convert import _migrate_legacy_state
     migrated, count = _migrate_legacy_state(legacy, ["claude_code"])
     assert count == 1
     assert "_meta" in migrated

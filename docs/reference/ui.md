@@ -6,8 +6,8 @@ docs_shell: true
 
 # UI reference
 
-Every screen on the compiled site (`llmwiki build` → `site/`), what it
-shows, and how to reach it. Screens are what `llmwiki serve` exposes on
+Every screen on the compiled site (`sessionwiki build` → `site/`), what it
+shows, and how to reach it. Screens are what `sessionwiki serve` exposes on
 `http://127.0.0.1:8765/`.
 
 ---
@@ -118,7 +118,7 @@ Clicking a row navigates to `/sessions/<project>/<slug>.html`.
 URLs: `/models/index.html`, `/vs/index.html`
 
 **Models:** structured info cards for each AI model (per
-`llmwiki/schema.py :: ModelProfile`):
+`sessionwiki/schema.py :: ModelProfile`):
 
 - Provider · release date · license
 - Context window · max output
@@ -273,7 +273,7 @@ Press `?` on any page to see the shortcuts modal. Current set:
 
 ## Theming
 
-Site-wide CSS lives in `llmwiki/render/css.py`. All tokens inherit
+Site-wide CSS lives in `sessionwiki/render/css.py`. All tokens inherit
 from the brand system — see
 [`../design/brand-system.md`](../design/brand-system.md).
 
@@ -298,7 +298,7 @@ WCAG 2.1 AA targeted across the whole site. Specifics in
 
 ## Related
 
-- **[CLI reference](cli.md)** — every `python3 -m llmwiki …` subcommand.
+- **[CLI reference](cli.md)** — every `python3 -m sessionwiki …` subcommand.
 - **[Slash commands reference](slash-commands.md)** — the `/wiki-*` surface.
 - **[Reader API contract](reader-api.md)** — stable shape of every file the build writes.
 - **[Reader-first article shell](reader-shell.md)** — opt-in Wikipedia-style layout for individual pages.

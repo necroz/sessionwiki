@@ -1,13 +1,13 @@
 """Tests for #477 — graph viewer theme key sync with the rest of the site.
 
-The bug: `llmwiki/graph.py` wrote `localStorage["theme"]` but the rest of
-the site uses `localStorage["llmwiki-theme"]`. Toggling theme on the
+The bug: `sessionwiki/graph.py` wrote `localStorage["theme"]` but the rest of
+the site uses `localStorage["sessionwiki-theme"]`. Toggling theme on the
 graph never persisted to /, /docs/, /sessions/, etc., and vice-versa.
 The graph template also hardcoded `<html data-theme="dark">` so light-
 mode users always saw a dark graph regardless of OS / site preference.
 
 The fix:
-  1. Standardise on `llmwiki-theme` for both read + write in graph.py.
+  1. Standardise on `sessionwiki-theme` for both read + write in graph.py.
   2. Drop the hardcoded `data-theme="dark"` attribute on `<html>`.
   3. Add a pre-paint inline `<script>` that reads localStorage (with
      `prefers-color-scheme` fallback) BEFORE first paint to eliminate
@@ -16,10 +16,10 @@ The fix:
 
 from __future__ import annotations
 
-from llmwiki.graph import HTML_TEMPLATE
+from sessionwiki.graph import HTML_TEMPLATE
 
 
-def test_graph_template_uses_llmwiki_theme_key():
+def test_graph_template_uses_sessionwiki_theme_key():
     """No remaining `localStorage.getItem('theme')` or `setItem('theme'`.
 
     #456: the standalone toggle (and its setItem call) was removed from
@@ -30,7 +30,7 @@ def test_graph_template_uses_llmwiki_theme_key():
     assert "localStorage.getItem('theme')" not in HTML_TEMPLATE
     assert "localStorage.setItem('theme'" not in HTML_TEMPLATE
     # The pre-paint script reads the canonical key.
-    assert "localStorage.getItem('llmwiki-theme')" in HTML_TEMPLATE
+    assert "localStorage.getItem('sessionwiki-theme')" in HTML_TEMPLATE
 
 
 def test_graph_template_has_no_hardcoded_data_theme_dark():
@@ -53,7 +53,7 @@ def test_graph_template_has_pre_paint_theme_script():
     head = HTML_TEMPLATE[head_start:head_end]
     # The pre-paint script must reference the canonical key + the
     # prefers-color-scheme fallback.
-    assert "llmwiki-theme" in head
+    assert "sessionwiki-theme" in head
     assert "prefers-color-scheme" in head
     assert "data-theme" in head
 
@@ -64,13 +64,13 @@ def test_graph_template_toggle_writes_canonical_key(tmp_path):
     #456: the toggle moved out of the graph template into the site nav.
     The contract is now end-to-end: the rendered graph.html loads
     script.js (which carries the click handler that writes
-    `localStorage.llmwiki-theme`) and exposes one `id="theme-toggle"`
+    `localStorage.sessionwiki-theme`) and exposes one `id="theme-toggle"`
     in the nav for that handler to bind to. The graph's own
     `themeToggle.addEventListener` block is intentionally gone — a
     duplicate would flip the theme twice per click.
     """
     from pathlib import Path
-    from llmwiki.graph import write_html
+    from sessionwiki.graph import write_html
     g = {"nodes": [], "edges": [],
          "stats": {"total_pages": 0, "total_edges": 0, "orphans": [], "top_linked": []}}
     out: Path = tmp_path / "graph.html"

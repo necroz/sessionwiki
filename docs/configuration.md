@@ -1,6 +1,6 @@
 # Configuration
 
-Every tuning knob in llmwiki, explained.
+Every tuning knob in sessionwiki, explained.
 
 ## Config file
 
@@ -106,10 +106,10 @@ Minimal config:
 
 ## CLI flags
 
-### `llmwiki sync`
+### `sessionwiki sync`
 
 ```bash
-python3 -m llmwiki sync [options]
+python3 -m sessionwiki sync [options]
 
 --adapter <name...>       Only run the named adapter(s); default: all available
 --since YYYY-MM-DD        Skip sessions with a last record older than this
@@ -119,20 +119,20 @@ python3 -m llmwiki sync [options]
 --dry-run                 Preview what would be written, don't touch disk
 ```
 
-### `llmwiki build`
+### `sessionwiki build`
 
 ```bash
-python3 -m llmwiki build [options]
+python3 -m sessionwiki build [options]
 
 --out <dir>               Output directory; default: ./site
 --synthesize              Call the `claude` CLI once to generate an Overview
 --claude <path>           Path to the claude binary; default: /usr/local/bin/claude
 ```
 
-### `llmwiki serve`
+### `sessionwiki serve`
 
 ```bash
-python3 -m llmwiki serve [options]
+python3 -m sessionwiki serve [options]
 
 --dir <dir>               Directory to serve; default: ./site
 --port N                  Port number; default: 8765
@@ -140,11 +140,11 @@ python3 -m llmwiki serve [options]
 --open                    Open the browser after starting
 ```
 
-### `llmwiki init`
+### `sessionwiki init`
 
 No options. Scaffolds `raw/`, `wiki/`, `site/` and seeds `wiki/index.md`, `wiki/log.md`, `wiki/overview.md`.
 
-### `llmwiki adapters`
+### `sessionwiki adapters`
 
 No options. Lists every registered adapter and whether its session store is present on the current machine.
 
@@ -205,7 +205,7 @@ Files smaller than `min_content_chars` are skipped (mostly empty notes).
 
 ## Changing the theme
 
-Theme colours live in `llmwiki/build.py` inside the `CSS` string constant, under the `:root` block. The main tokens:
+Theme colours live in `sessionwiki/build.py` inside the `CSS` string constant, under the `:root` block. The main tokens:
 
 ```css
 --accent: #7C3AED;     /* primary accent (purple) */

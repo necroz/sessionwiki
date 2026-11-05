@@ -8,10 +8,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from llmwiki.adapters import REGISTRY, discover_adapters
-from llmwiki.adapters.status import adapter_status
-from llmwiki.adapters.zcode import ZcodeAdapter
-from llmwiki.convert import Redactor, convert_all, load_config
+from sessionwiki.adapters import REGISTRY, discover_adapters
+from sessionwiki.adapters.status import adapter_status
+from sessionwiki.adapters.zcode import ZcodeAdapter
+from sessionwiki.convert import Redactor, convert_all, load_config
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE_CONFIG = REPO_ROOT / "examples" / "sessions_config.json"
@@ -55,7 +55,7 @@ def _write_session(store: Path, project: str = "demo_project", session: str = "s
 
 def test_zcode_adapter_is_registered_by_discover_adapters() -> None:
     code = (
-        "from llmwiki.adapters import REGISTRY, discover_adapters; "
+        "from sessionwiki.adapters import REGISTRY, discover_adapters; "
         "discover_adapters(); "
         "print(REGISTRY['zcode'].name)"
     )

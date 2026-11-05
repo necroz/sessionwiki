@@ -14,7 +14,7 @@ docs_shell: true
 
 ## Why this matters
 
-llmwiki isn't about the ingest. The ingest is one-time. The payoff is when
+sessionwiki isn't about the ingest. The ingest is one-time. The payoff is when
 you ask **"have I solved this before?"** and get a confident answer grounded
 in your own session history. Every command below is designed for that loop.
 
@@ -128,7 +128,7 @@ For each candidate, Claude Code offers three actions:
 - **merge** → appends into an existing page under `## Candidate merge — <date>`
 - **discard** → moves to `wiki/archive/candidates/<timestamp>/` with a reason file
 
-All three are non-destructive; `llmwiki candidates list` on the CLI shows
+All three are non-destructive; `sessionwiki candidates list` on the CLI shows
 the same queue without the chat.
 
 ---
@@ -136,9 +136,9 @@ the same queue without the chat.
 ## Verify
 
 ```bash
-python3 -m llmwiki candidates list                    # pending candidates
-python3 -m llmwiki lint                               # same as /wiki-lint, plain CLI
-python3 -m llmwiki graph && ls graph/                 # graph.json + graph.html
+python3 -m sessionwiki candidates list                    # pending candidates
+python3 -m sessionwiki lint                               # same as /wiki-lint, plain CLI
+python3 -m sessionwiki graph && ls graph/                 # graph.json + graph.html
 ```
 
 ---
@@ -154,11 +154,11 @@ it's no longer useful.
 
 **`/wiki-candidates` shows candidates you thought you'd merged** — check
 `wiki/candidates/<kind>/` — the file is still there. The slash command may
-have failed partway; run `python3 -m llmwiki candidates list` to see the
+have failed partway; run `python3 -m sessionwiki candidates list` to see the
 canonical queue.
 
 ---
 
 ## Next
 
-→ **[06 · Bring your Obsidian / Logseq vault](06-bring-your-obsidian-vault.md)** — point llmwiki at an existing vault so you don't have to migrate.
+→ **[06 · Bring your Obsidian / Logseq vault](06-bring-your-obsidian-vault.md)** — point sessionwiki at an existing vault so you don't have to migrate.

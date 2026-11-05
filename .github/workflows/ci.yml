@@ -33,18 +33,18 @@ jobs:
 
       - name: Ruff lint
         run: |
-          ruff check llmwiki tests || true
+          ruff check sessionwiki tests || true
           # Don't fail the build on warnings in v0.1
 
       - name: CLI smoke tests
         run: |
-          python -m llmwiki --version
-          python -m llmwiki adapters
-          python -m llmwiki init
+          python -m sessionwiki --version
+          python -m sessionwiki adapters
+          python -m sessionwiki init
 
       - name: Build smoke test with fixtures
         run: |
-          python -m llmwiki build --out ./ci-site || true
+          python -m sessionwiki build --out ./ci-site || true
           test -f ./ci-site/style.css || echo "build produced no output (no fixtures yet — this is ok in v0.1)"
 
       - name: Run pytest
@@ -79,11 +79,11 @@ jobs:
 
       - name: Build against fixtures (when present)
         run: |
-          python -m llmwiki init
+          python -m sessionwiki init
           if [ -d tests/fixtures/demo ]; then
-            # Stage demo fixtures as if they'd been produced by `llmwiki sync`.
+            # Stage demo fixtures as if they'd been produced by `sessionwiki sync`.
             cp -a tests/fixtures/demo/. raw/sessions/
-            time python -m llmwiki build --out ./perf-site
+            time python -m sessionwiki build --out ./perf-site
             if [ ! -d ./perf-site ]; then
               echo "ERROR: build produced no output directory" >&2
               exit 1

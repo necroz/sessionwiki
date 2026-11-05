@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import inspect
 
-from llmwiki import convert as convert_mod
-from llmwiki.adapters import REGISTRY, discover_adapters
+from sessionwiki import convert as convert_mod
+from sessionwiki.adapters import REGISTRY, discover_adapters
 
 
 def _strip_comments(src: str) -> str:

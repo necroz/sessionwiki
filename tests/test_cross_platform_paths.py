@@ -10,11 +10,11 @@ from __future__ import annotations
 
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
-from llmwiki.adapters.claude_code import ClaudeCodeAdapter
-from llmwiki.adapters.codex_cli import CodexCliAdapter
-from llmwiki.adapters.contrib.cursor import CursorAdapter
-from llmwiki.adapters.contrib.gemini_cli import GeminiCliAdapter
-from llmwiki.adapters.contrib.obsidian import ObsidianAdapter
+from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
+from sessionwiki.adapters.codex_cli import CodexCliAdapter
+from sessionwiki.adapters.contrib.cursor import CursorAdapter
+from sessionwiki.adapters.contrib.gemini_cli import GeminiCliAdapter
+from sessionwiki.adapters.contrib.obsidian import ObsidianAdapter
 
 
 # ── helpers ──────────────────────────────────────────────────────────

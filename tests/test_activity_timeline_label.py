@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from llmwiki.render.js import JS
+from sessionwiki.render.js import JS
 
 
 def _calendar_span_days(iso_dates: list[str]) -> int:

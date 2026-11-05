@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from llmwiki.confidence import (
+from sessionwiki.confidence import (
     source_count_score,
     source_quality_score,
     avg_source_quality,
@@ -22,7 +22,7 @@ from llmwiki.confidence import (
     decay_factor,
     apply_decay,
 )
-from llmwiki.lifecycle import (
+from sessionwiki.lifecycle import (
     LifecycleState,
     can_transition,
     transition,
@@ -31,8 +31,8 @@ from llmwiki.lifecycle import (
     check_confidence_stale,
     parse_lifecycle,
 )
-from llmwiki.schema import ENTITY_TYPES, validate_entity_type
-from llmwiki.synth.pipeline import _append_log, _auto_archive_log
+from sessionwiki.schema import ENTITY_TYPES, validate_entity_type
+from sessionwiki.synth.pipeline import _append_log, _auto_archive_log
 
 
 # ═══════════════════════════════════════════════════════════════════════

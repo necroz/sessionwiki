@@ -1,6 +1,6 @@
 # Docker deployment
 
-Run llmwiki in a container — no Python install, no pip, no venv. Two
+Run sessionwiki in a container — no Python install, no pip, no venv. Two
 supported setups:
 
 1. **Pull pre-built image** from GitHub Container Registry (recommended)
@@ -14,13 +14,13 @@ supported setups:
 
 ## Quick start — pre-built image
 
-The image is published to `ghcr.io/pratiyush/llm-wiki:latest` on every
+The image is published to `ghcr.io/necroz/sessionwiki:latest` on every
 release tag. To run:
 
 ```bash
 # 1. Clone the repo (you need the Dockerfile + examples for the volume mounts)
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 
 # 2. Pull the latest image
 docker compose pull
@@ -36,20 +36,20 @@ it comes back after reboots / Docker restarts.
 
 ## Running CLI commands in the container
 
-Any `llmwiki` subcommand works inside the container via `docker compose run`:
+Any `sessionwiki` subcommand works inside the container via `docker compose run`:
 
 ```bash
 # Build the static site from raw/ + wiki/
-docker compose run --rm llmwiki build
+docker compose run --rm sessionwiki build
 
 # Sync session transcripts (needs host agent stores bind-mounted)
-docker compose run --rm llmwiki sync --dry-run
+docker compose run --rm sessionwiki sync --dry-run
 
-# Run every registered lint rule (15 at last count — see `llmwiki lint --help`)
-docker compose run --rm llmwiki lint --fail-on-errors
+# Run every registered lint rule (15 at last count — see `sessionwiki lint --help`)
+docker compose run --rm sessionwiki lint --fail-on-errors
 
 # Generate a knowledge graph
-docker compose run --rm llmwiki graph
+docker compose run --rm sessionwiki graph
 ```
 
 Because the repo's `raw/`, `wiki/`, and `site/` directories are
@@ -57,7 +57,7 @@ bind-mounted, the output shows up on the host too.
 
 ## Build locally
 
-If you're developing llmwiki itself or need unreleased changes:
+If you're developing sessionwiki itself or need unreleased changes:
 
 ```bash
 docker compose build
@@ -72,7 +72,7 @@ This uses the repo `Dockerfile` and re-builds on every code change.
 - **Runtime deps:** `markdown` only (stdlib + optional `graphifyy` extra)
 - **User:** non-root (`app`, UID 1000) — mounted volumes stay host-owned
 - **Port:** 8765 (exposed + mapped)
-- **Entrypoint:** `python -m llmwiki`
+- **Entrypoint:** `python -m sessionwiki`
 - **Default CMD:** `serve --host 0.0.0.0 --port 8765 --dir site`
 - **Labels:** OCI standard (title, description, source, licenses, authors)
 
@@ -87,12 +87,12 @@ This uses the repo `Dockerfile` and re-builds on every code change.
 
 ## Publishing your own image
 
-Only the repo maintainer can publish to `ghcr.io/pratiyush/llm-wiki`.
+Only the repo maintainer can publish to `ghcr.io/necroz/sessionwiki`.
 To publish under your own namespace:
 
 ```bash
-docker build -t ghcr.io/<your-user>/llm-wiki:latest .
-docker push ghcr.io/<your-user>/llm-wiki:latest
+docker build -t ghcr.io/<your-user>/sessionwiki:latest .
+docker push ghcr.io/<your-user>/sessionwiki:latest
 ```
 
 Or fork the repo and the release workflow will publish under your

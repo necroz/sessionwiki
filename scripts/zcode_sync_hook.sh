@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Compatibility wrapper for the ZCode autosync job.
 #
-# Prefer `llmwiki zcode install`, which writes a portable Stop-hook and a
+# Prefer `sessionwiki zcode install`, which writes a portable Stop-hook and a
 # native scheduler entry. This script remains for existing hook/cron
 # entries and simply delegates to the Python command.
 #
@@ -17,4 +17,4 @@ if [ -n "${LLMWIKI_ZCODE_PROJECT:-}" ]; then
   ARGS+=(--project "$LLMWIKI_ZCODE_PROJECT")
 fi
 
-exec "$PY" -m llmwiki zcode autosync "${ARGS[@]}"
+exec "$PY" -m sessionwiki zcode autosync "${ARGS[@]}"

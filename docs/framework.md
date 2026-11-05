@@ -1,8 +1,8 @@
-# llmwiki Framework — Building an Agent-Native Dev Tool
+# sessionwiki Framework — Building an Agent-Native Dev Tool
 
 > **Adapted from** the maintainer's "Open Source Project Framework v4.0" (local reference — kept outside the public repo).
 >
-> **Extensions** specific to llmwiki and any tool in this class (dev tools that ingest from AI coding agents):
+> **Extensions** specific to sessionwiki and any tool in this class (dev tools that ingest from AI coding agents):
 >
 > 1. **Agent-Aware pipeline** (Phase 1.75)
 > 2. **Adapter Contribution flow** (Phase 5.25)
@@ -13,7 +13,7 @@
 > 7. **Performance Budget** (cross-cutting)
 > 8. **Dogfooding Meta-Loop** (cross-cutting)
 
-This document is both the **spec for how llmwiki is built** and the **contribution guide for anyone extending it**. It is the source of truth for what "done" means at each phase.
+This document is both the **spec for how sessionwiki is built** and the **contribution guide for anyone extending it**. It is the source of truth for what "done" means at each phase.
 
 ---
 
@@ -41,7 +41,7 @@ The new phases are:
 
 ## Phase 0 — Capture
 
-Same as parent framework. See `idea-brief.md` at the repo root for llmwiki's capture.
+Same as parent framework. See `idea-brief.md` at the repo root for sessionwiki's capture.
 
 **Gate to Phase 1**: idea-brief.md exists and names the target users + the one non-obvious mechanism that makes this 10x.
 
@@ -49,7 +49,7 @@ Same as parent framework. See `idea-brief.md` at the repo root for llmwiki's cap
 
 ## Phase 1 — Validate
 
-Same scoring (/25). llmwiki scored **22/25** on 2026-04-08 (see `_progress.md`).
+Same scoring (/25). sessionwiki scored **22/25** on 2026-04-08 (see `_progress.md`).
 
 | Dimension | Score | Note |
 |---|---|---|
@@ -65,7 +65,7 @@ Same scoring (/25). llmwiki scored **22/25** on 2026-04-08 (see `_progress.md`).
 
 ## Phase 1.5 — Project Steering
 
-**llmwiki steering decisions** (locked on 2026-04-08):
+**sessionwiki steering decisions** (locked on 2026-04-08):
 
 | Decision | Choice | Rationale |
 |---|---|---|
@@ -124,9 +124,9 @@ When an adapter encounters a record `type` it doesn't know:
 
 ## Phase 2 — Brand
 
-Same as parent. llmwiki brand artifacts:
+Same as parent. sessionwiki brand artifacts:
 
-- **Name**: `llmwiki` (lowercase, one word)
+- **Name**: `sessionwiki` (lowercase, one word)
 - **Tagline**: "LLM-powered knowledge base from your Claude Code and Codex CLI sessions"
 - **README header**: License + Python + Claude Code badge + Codex badge
 - **LICENSE**: MIT
@@ -135,12 +135,12 @@ Same as parent. llmwiki brand artifacts:
 
 ## Phase 3 — Structure
 
-Same as parent. llmwiki layout is defined in `docs/architecture.md`. Key invariants:
+Same as parent. sessionwiki layout is defined in `docs/architecture.md`. Key invariants:
 
 ```
-llmwiki/                      # Python package (renamed from tools/)
+sessionwiki/                      # Python package (renamed from tools/)
 ├── __init__.py
-├── __main__.py               # enables `python3 -m llmwiki`
+├── __main__.py               # enables `python3 -m sessionwiki`
 ├── cli.py                    # argparse entry
 ├── convert.py                # .jsonl → markdown
 ├── build.py                  # markdown → HTML
@@ -162,13 +162,13 @@ bin/, docs/, examples/        # user-facing
 
 ### Hard rule — no dual Python package
 
-There is exactly ONE `llmwiki/` directory that is a Python package. Tools live inside it, not alongside it in a `tools/` sibling. (This is a lesson from the earlier llm-wiki workspace which had both.)
+There is exactly ONE `sessionwiki/` directory that is a Python package. Tools live inside it, not alongside it in a `tools/` sibling. (This is a lesson from the earlier llm-wiki workspace which had both.)
 
 ---
 
 ## Phase 4 — Content
 
-Same as parent. For llmwiki specifically:
+Same as parent. For sessionwiki specifically:
 
 - **CSS/JS are Python string constants** inside `build.py` — single-file rendering, no template loader, no file watching complexity.
 - **No templates directory as separate files** (the `templates/` subdirectory is a stub for future split when the files grow beyond 2000 lines).
@@ -193,7 +193,7 @@ If any metric exceeds its budget, the offending change is blocked or must be pre
 3. **Binding default is `127.0.0.1`.** LAN or public binding requires an explicit `--host 0.0.0.0`.
 4. **No cloud features.** No auth, no accounts, no sync. Everything is local.
 5. **Config never stores secrets.** The config file only stores regex patterns and truncation limits.
-6. **CI must pass `grep -r "pratiyush1" site/` with zero hits** on any build produced from fixtures.
+6. **CI must pass `grep -r "<your-username>" site/` with zero hits** on any build produced from fixtures.
 
 ### Schema-Versioning rules (cross-cutting)
 
@@ -210,15 +210,15 @@ Same as parent plus one addition: **adapter contribution flow** (Phase 5.25).
 
 ### PR rules (reiterated from parent)
 
-- git config user.name: `Pratiyush`
-- git config user.email: `pratiyush1@gmail.com`
+- git config user.name: `Igor Lashkevich`
+- git config user.email: `3133574+necroz@users.noreply.github.com`
 - No AI co-authored-by lines
 - One PR per concern
 - Small commits (one file group per commit)
 
 ### Library-style two-workflow CI
 
-From parent framework. For llmwiki:
+From parent framework. For sessionwiki:
 
 - **`ci.yml`** — lint + build smoke test on push + PR to `master`. Never publishes.
 - **`pages.yml`** — deploys the self-demo site (see Phase 6.5) on tag push.
@@ -233,7 +233,7 @@ An extensible agent tool needs a predictable way for community contributors to a
 
 To add a new agent adapter, a PR must include:
 
-1. **One file under `llmwiki/adapters/<agent>.py`** that:
+1. **One file under `sessionwiki/adapters/<agent>.py`** that:
    - Subclasses `BaseAdapter`
    - Registers itself via `@register("<agent>")`
    - Sets `session_store_path` to the agent's default location(s)
@@ -248,7 +248,7 @@ To add a new agent adapter, a PR must include:
 
 5. **One documentation page** at `docs/adapters/<agent>.md` explaining:
    - What session store path the adapter reads
-   - How to verify the adapter sees sessions (`python3 -m llmwiki adapters`)
+   - How to verify the adapter sees sessions (`python3 -m sessionwiki adapters`)
    - Known format quirks
 
 6. **A CHANGELOG entry** under `## [Unreleased]`.
@@ -266,13 +266,13 @@ To add a new agent adapter, a PR must include:
 
 ### Gate to Phase 5.5
 
-Adapter-flow is met when the checklist above is automatable (a GitHub Actions workflow enforces it on every PR touching `llmwiki/adapters/**`).
+Adapter-flow is met when the checklist above is automatable (a GitHub Actions workflow enforces it on every PR touching `sessionwiki/adapters/**`).
 
 ---
 
 ## Phase 5.5 — Pre-Launch QA
 
-Same as parent. For llmwiki specifically:
+Same as parent. For sessionwiki specifically:
 
 - [ ] Run `./setup.sh` on a pristine git clone
 - [ ] Run `./sync.sh && ./build.sh && ./serve.sh`
@@ -282,10 +282,10 @@ Same as parent. For llmwiki specifically:
 - [ ] Dark mode toggle works and persists
 - [ ] Copy-code button works on a code block
 - [ ] Copy-as-markdown button works on a session page
-- [ ] `grep -r pratiyush1 site/` returns zero hits (privacy check)
+- [ ] `grep -r <your-username> site/` returns zero hits (privacy check)
 - [ ] All links in README return HTTP 200
-- [ ] `python3 -m llmwiki --version` prints the version
-- [ ] `python3 -m llmwiki adapters` lists claude_code as available
+- [ ] `python3 -m sessionwiki --version` prints the version
+- [ ] `python3 -m sessionwiki adapters` lists claude_code as available
 
 ---
 
@@ -295,7 +295,7 @@ Same as parent:
 
 1. `git init`
 2. Atomic commits per file group (README separate from code, tests separate from adapters, etc.)
-3. `gh repo create Pratiyush/llmwiki --public`
+3. `gh repo create necroz/sessionwiki --public`
 4. `git push -u origin master`
 5. `git tag v0.1.0 && git push origin v0.1.0`
 6. Create GitHub Release (mark as pre-release for 0.x)
@@ -304,7 +304,7 @@ Same as parent:
 
 ## Phase 6.5 — Self-Demo (NEW)
 
-**llmwiki's killer demo is its own repo.**
+**sessionwiki's killer demo is its own repo.**
 
 Every dev tool that produces browsable output should publish its own dev history as the demo. The pattern:
 
@@ -316,7 +316,7 @@ Every dev tool that produces browsable output should publish its own dev history
 3. Every release updates the demo automatically.
 4. Visitors SEE the exact output they'd get. No screenshots, no "look here's what it looks like on my machine".
 
-For **privacy reasons**, llmwiki's self-demo uses a **synthetic corpus** under `tests/fixtures/demo/`, not the author's real session history. The fixtures are hand-curated, cover all UI states (short sessions, long sessions, sub-agents, code blocks, tool calls, errors), and are committed to the repo.
+For **privacy reasons**, sessionwiki's self-demo uses a **synthetic corpus** under `tests/fixtures/demo/`, not the author's real session history. The fixtures are hand-curated, cover all UI states (short sessions, long sessions, sub-agents, code blocks, tool calls, errors), and are committed to the repo.
 
 ### Gate to Phase 7
 
@@ -335,7 +335,7 @@ Same as parent. Platform strategies for a dev tool:
 |---|---|
 | Reddit r/ClaudeAI | "I built a local tool that turns all your Claude Code sessions into a Karpathy-style wiki" |
 | Reddit r/programming | "Self-hosted knowledge base from your AI coding sessions, no servers needed" |
-| Hacker News | "Show HN: llmwiki — Turn your coding agent session history into a searchable wiki" |
+| Hacker News | "Show HN: sessionwiki — Turn your coding agent session history into a searchable wiki" |
 | X/Twitter | Thread: screenshot → demo URL → install command → link |
 | Dev.to | Long-form: "I have 278 Claude Code sessions. I built this to browse them." |
 | LinkedIn | "Learning from your own work" framing |
@@ -346,7 +346,7 @@ Same as parent. Platform strategies for a dev tool:
 
 **The wiki built during development IS a growth engine.** Publish it.
 
-- The author's own `wiki/` (synthetic or hand-curated) becomes a public knowledge base at `https://pratiyush.github.io/llmwiki/wiki/`.
+- The author's own `wiki/` (synthetic or hand-curated) becomes a public knowledge base at `https://necroz.github.io/sessionwiki/wiki/`.
 - Every release refreshes the public wiki with new insights, decisions, and patterns extracted from dev sessions.
 - Visitors who land on the demo can also browse the **living documentation of how the tool is built** — a form of meta-transparency that doubles as SEO.
 
@@ -386,10 +386,10 @@ When an agent ships a new `.jsonl` schema:
 
 ## Dogfooding Meta-Loop (cross-cutting)
 
-**llmwiki tracks its own development with llmwiki.**
+**sessionwiki tracks its own development with sessionwiki.**
 
-- Every dev session on llmwiki is already being captured by Claude Code.
-- `./sync.sh` pulls those sessions into `raw/sessions/llmwiki/`.
+- Every dev session on sessionwiki is already being captured by Claude Code.
+- `./sync.sh` pulls those sessions into `raw/sessions/sessionwiki/`.
 - The author runs `./build.sh` and reads the output to validate the tool on its own dev history.
 - Insights (bugs, UX issues, missing features) get extracted into `tasks.md`.
 - The loop closes: the tool's own output drives the tool's own backlog.

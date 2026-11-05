@@ -1,4 +1,4 @@
-"""Smoke test for ``llmwiki serve`` (#278).
+"""Smoke test for ``sessionwiki serve`` (#278).
 
 Ensures the server starts, binds to a port, serves index.html with a
 200, and shuts down cleanly.  No browser — pure HTTP client check.
@@ -53,11 +53,11 @@ def minimal_site(tmp_path: Path) -> Path:
 
 
 def test_serve_starts_and_serves_index(minimal_site: Path) -> None:
-    """Spawn `llmwiki serve --dir <tmp>` and confirm it serves index.html."""
+    """Spawn `sessionwiki serve --dir <tmp>` and confirm it serves index.html."""
     port = _free_port()
     proc = subprocess.Popen(
         [
-            sys.executable, "-m", "llmwiki", "serve",
+            sys.executable, "-m", "sessionwiki", "serve",
             "--dir", str(minimal_site),
             "--port", str(port),
             "--host", "127.0.0.1",
@@ -100,7 +100,7 @@ def test_serve_rejects_missing_dir(tmp_path: Path) -> None:
     port = _free_port()
     proc = subprocess.run(
         [
-            sys.executable, "-m", "llmwiki", "serve",
+            sys.executable, "-m", "sessionwiki", "serve",
             "--dir", str(tmp_path / "does-not-exist"),
             "--port", str(port),
             "--host", "127.0.0.1",
@@ -117,7 +117,7 @@ def test_serve_rejects_missing_dir(tmp_path: Path) -> None:
 
 def test_serve_help_mentions_flags() -> None:
     proc = subprocess.run(
-        [sys.executable, "-m", "llmwiki", "serve", "--help"],
+        [sys.executable, "-m", "sessionwiki", "serve", "--help"],
         capture_output=True, text=True, timeout=5,
     )
     assert proc.returncode == 0

@@ -1,12 +1,12 @@
 # Feature Matrix — Every Feature Across the 15 Prior Implementations
 
-**Method:** Cloned and inspected every referenced repo. Listed every feature I found in any of them, rated each by target value to llmwiki (1–5), and marked which ones are already present in at least one reference implementation vs. which are a net-new invention for llmwiki.
+**Method:** Cloned and inspected every referenced repo. Listed every feature I found in any of them, rated each by target value to sessionwiki (1–5), and marked which ones are already present in at least one reference implementation vs. which are a net-new invention for sessionwiki.
 
 **Value legend:**
 
 | Rating | Meaning |
 |---|---|
-| ⭐⭐⭐⭐⭐ | God-level — killer feature, llmwiki ships without it is pointless |
+| ⭐⭐⭐⭐⭐ | God-level — killer feature, sessionwiki ships without it is pointless |
 | ⭐⭐⭐⭐ | Strong must-have — ship in v0.1 |
 | ⭐⭐⭐ | Should-have — ship in v0.2 or v0.3 |
 | ⭐⭐ | Could-have — ship when there's demand |
@@ -14,7 +14,7 @@
 
 ## A · Core wiki workflows
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | A1 | `/wiki-ingest` — read source → write wiki page | ⭐⭐⭐⭐⭐ | SamurAIGPT, kfchou, bashiraziz, Ss1024sS, hsuanguo, louiswang524 | v0.1 |
 | A2 | `/wiki-query` — answer questions with citations | ⭐⭐⭐⭐⭐ | Same as above | v0.1 |
@@ -29,7 +29,7 @@
 
 ## B · Input adapters (data sources)
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | B1 | **Claude Code `.jsonl` adapter** (killer feature) | ⭐⭐⭐⭐⭐ | **None** | v0.1 |
 | B2 | **Codex CLI adapter** | ⭐⭐⭐⭐⭐ | bashiraziz (stub), Ss1024sS (script only) | v0.1 stub, v0.2 full |
@@ -45,7 +45,7 @@
 
 ## C · Page types / templates
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | C1 | Source page (`wiki/sources/`) | ⭐⭐⭐⭐⭐ | All | v0.1 |
 | C2 | Entity page (`wiki/entities/`) | ⭐⭐⭐⭐⭐ | Most | v0.1 |
@@ -62,7 +62,7 @@
 
 ## D · Output / viewer
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | D1 | **Static HTML site (no deps, no auth)** | ⭐⭐⭐⭐⭐ | xoai (basic), lucasastorian (auth-walled) | v0.1 |
 | D2 | **Cmd+K command palette** | ⭐⭐⭐⭐⭐ | **None** | v0.1 |
@@ -89,7 +89,7 @@
 
 ## E · Distribution
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | E1 | `git clone + ./setup.sh` (macOS/Linux) | ⭐⭐⭐⭐⭐ | Most | v0.1 |
 | E2 | `git clone + setup.bat` (Windows) | ⭐⭐⭐⭐⭐ | Few | v0.1 |
@@ -97,26 +97,26 @@
 | E4 | **Claude Code plugin** (marketplace install) | ⭐⭐⭐⭐⭐ | kfchou, sinzin91, remember-md | v0.2 |
 | E5 | Homebrew formula | ⭐⭐⭐ | raine (Go) | v0.3 |
 | E6 | Precompiled single binary (Go/Rust?) | ⭐⭐ | sinzin91 (Go) | won't (Python) |
-| E7 | `pip install llm-notebook` on PyPI | ⭐⭐⭐⭐ | lucasastorian | v0.3 |
+| E7 | `pip install sessionwiki` on PyPI | ⭐⭐⭐⭐ | lucasastorian | v0.3 |
 | E8 | Docker image | ⭐⭐ | — | v0.4 |
 
 ## F · Multi-agent support
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | F1 | `CLAUDE.md` schema | ⭐⭐⭐⭐⭐ | All | v0.1 |
 | F2 | `AGENTS.md` schema (Codex, OpenCode) | ⭐⭐⭐⭐⭐ | SamurAIGPT, Ss1024sS, bashiraziz | v0.1 |
 | F3 | `GEMINI.md` schema | ⭐⭐⭐⭐ | SamurAIGPT | v0.2 |
 | F4 | `UNIVERSAL.md` — one schema for all agents | ⭐⭐⭐ | Ss1024sS | v0.2 |
-| F5 | Adapter registry (`llmwiki.adapters.REGISTRY`) | ⭐⭐⭐⭐⭐ | **None** (bashiraziz has folders, not registry) | v0.1 |
+| F5 | Adapter registry (`sessionwiki.adapters.REGISTRY`) | ⭐⭐⭐⭐⭐ | **None** (bashiraziz has folders, not registry) | v0.1 |
 | F6 | Schema version tracking per adapter | ⭐⭐⭐⭐ | **None** | v0.1 |
 | F7 | Graceful degradation on unknown record types | ⭐⭐⭐⭐⭐ | **None** | v0.1 |
 
 ## G · Infrastructure
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
-| G1 | Raw-file mtime tracker (idempotent sync) | ⭐⭐⭐⭐⭐ | hsuanguo, llmwiki state file | v0.1 |
+| G1 | Raw-file mtime tracker (idempotent sync) | ⭐⭐⭐⭐⭐ | hsuanguo, sessionwiki state file | v0.1 |
 | G2 | **File watcher (auto-resync on .jsonl change)** | ⭐⭐⭐⭐ | bitsofchris, kytmanov | v0.2 |
 | G3 | Git ops integration (auto-commit wiki changes) | ⭐⭐⭐ | kytmanov | v0.2 |
 | G4 | **MCP server (expose wiki as tools to agents)** | ⭐⭐⭐⭐⭐ | bitsofchris, lucasastorian | v0.2 |
@@ -129,7 +129,7 @@
 
 ## H · Search / discovery
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | H1 | **Client-side search index (JSON + fuzzy matcher)** | ⭐⭐⭐⭐⭐ | **None** | v0.1 |
 | H2 | Server-side full-text (SQLite FTS5) | ⭐⭐⭐ | bashiraziz | v0.3 |
@@ -140,7 +140,7 @@
 
 ## I · Testing & quality
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | I1 | Unit tests (pytest) | ⭐⭐⭐⭐⭐ | bitsofchris, kytmanov, hsuanguo, lucasastorian | v0.1 |
 | I2 | Snapshot tests for adapters | ⭐⭐⭐⭐⭐ | **None** | v0.1 |
@@ -153,7 +153,7 @@
 
 ## J · CI / CD
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | J1 | `ci.yml` — lint + test on every PR | ⭐⭐⭐⭐⭐ | kytmanov, sinzin91 | v0.1 |
 | J2 | `pages.yml` — deploy GitHub Pages demo | ⭐⭐⭐⭐⭐ | xoai | v0.1 |
@@ -165,7 +165,7 @@
 
 ## K · Documentation
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | K1 | `README.md` with install + demo | ⭐⭐⭐⭐⭐ | All | v0.1 |
 | K2 | `SETUP-GUIDE.md` with per-OS instructions | ⭐⭐⭐⭐ | bashiraziz, Ss1024sS | v0.1 |
@@ -185,7 +185,7 @@
 
 ## L · Configuration
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | L1 | JSON config with defaults | ⭐⭐⭐⭐⭐ | Most | v0.1 |
 | L2 | `config.defaults.json` + user override | ⭐⭐⭐⭐ | remember-md | v0.1 |
@@ -195,7 +195,7 @@
 
 ## M · Privacy & security
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | M1 | **Username redaction** (`/Users/you/` → `/Users/USER/`) | ⭐⭐⭐⭐⭐ | **None** | v0.1 |
 | M2 | **API key / token / password regex redaction** | ⭐⭐⭐⭐⭐ | **None** | v0.1 |
@@ -209,7 +209,7 @@
 
 ## N · UX polish
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | N1 | Inter + JetBrains Mono typography | ⭐⭐⭐⭐⭐ | — | v0.1 |
 | N2 | Proper focus rings (a11y) | ⭐⭐⭐⭐ | — | v0.1 |
@@ -223,7 +223,7 @@
 
 ## O · Operational features
 
-| # | Feature | Value | Prior art | llmwiki phase |
+| # | Feature | Value | Prior art | sessionwiki phase |
 |---|---|---|---|---|
 | O1 | Contradiction tracking in wiki pages | ⭐⭐⭐⭐⭐ | SamurAIGPT, our CLAUDE.md | v0.1 |
 | O2 | Stale-page detection (lint) | ⭐⭐⭐⭐⭐ | Ss1024sS | v0.1 |
@@ -233,13 +233,13 @@
 | O6 | Wiki backup / export | ⭐⭐⭐ | — | v0.2 |
 | O7 | Dry-run mode everywhere | ⭐⭐⭐⭐⭐ | — | v0.1 |
 
-## P · Novel inventions for llmwiki
+## P · Novel inventions for sessionwiki
 
-These are features **no prior implementation has** that llmwiki will ship:
+These are features **no prior implementation has** that sessionwiki will ship:
 
 | # | Feature | Value | Rationale |
 |---|---|---|---|
-| P1 | **Session `.jsonl` → markdown adapter** | ⭐⭐⭐⭐⭐ | The entire reason llmwiki exists |
+| P1 | **Session `.jsonl` → markdown adapter** | ⭐⭐⭐⭐⭐ | The entire reason sessionwiki exists |
 | P2 | **Cmd+K command palette** | ⭐⭐⭐⭐⭐ | Modern dev-tool UX standard |
 | P3 | **Client-side search index + fuzzy matcher** | ⭐⭐⭐⭐⭐ | No dependencies, works offline, instant |
 | P4 | **Pygments syntax highlighting at build** | ⭐⭐⭐⭐⭐ | Code blocks look professional |

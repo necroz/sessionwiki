@@ -8,13 +8,13 @@ docs_shell: true
 
 **Time:** 5 minutes
 **You'll need:** Python 3.9+, `git`, and at least one AI-coding agent already installed with session history on disk.
-**Result:** A working `llmwiki` CLI in `.venv` (run `.venv/bin/llmwiki` or activate the venv), plus wrapper scripts that work without activation.
+**Result:** A working `sessionwiki` CLI in `.venv` (run `.venv/bin/sessionwiki` or activate the venv), plus wrapper scripts that work without activation.
 
 ---
 
 ## Why this matters
 
-llmwiki runs **locally**. Every session transcript stays on your machine. No
+sessionwiki runs **locally**. Every session transcript stays on your machine. No
 telemetry, no account, no network calls at build time. The install is
 deliberately boring: clone, run the setup script, done.
 
@@ -33,8 +33,8 @@ macOS and most Linux distros already ship both. Windows: install Python from
 ## Step 2 — Clone the repo
 
 ```bash
-git clone https://github.com/Pratiyush/llm-wiki.git
-cd llm-wiki
+git clone https://github.com/necroz/sessionwiki.git
+cd sessionwiki
 ```
 
 ## Step 3 — Run the setup script
@@ -59,7 +59,7 @@ It will:
 - Install the package into that venv (editable, so source edits apply)
 - Create `raw/`, `wiki/`, `site/` directories if they don't exist
 - Seed `wiki/index.md`, `wiki/overview.md`, `wiki/log.md`, `wiki/CRITICAL_FACTS.md`
-- Run `llmwiki doctor` to show which adapters and ZCode paths are visible
+- Run `sessionwiki doctor` to show which adapters and ZCode paths are visible
 
 Expected output ends with:
 
@@ -78,14 +78,14 @@ in a new shell.
 Once [#246](https://github.com/Pratiyush/llm-wiki/issues/246) is set up:
 
 ```bash
-pip install llm-notebook
-llmwiki --version
+pip install sessionwiki
+sessionwiki --version
 ```
 
 Or via Homebrew, once [#247](https://github.com/Pratiyush/llm-wiki/issues/247) is set up:
 
 ```bash
-brew install Pratiyush/tap/llmwiki
+brew install necroz/tap/sessionwiki
 ```
 
 Until then the clone-and-run path above is authoritative.
@@ -95,7 +95,7 @@ Until then the clone-and-run path above is authoritative.
 Zero-touch, no Python on your machine:
 
 ```bash
-docker run -p 8765:8765 -v $PWD/wiki:/wiki ghcr.io/pratiyush/llm-wiki:latest
+docker run -p 8765:8765 -v $PWD/wiki:/wiki ghcr.io/necroz/sessionwiki:latest
 ```
 
 See [deploy/docker.md](../deploy/docker.md) for the full Compose setup.
@@ -105,9 +105,9 @@ See [deploy/docker.md](../deploy/docker.md) for the full Compose setup.
 ## Verify
 
 ```bash
-.venv/bin/python -m llmwiki --version  # → llmwiki <version>
-.venv/bin/python -m llmwiki adapters   # lists every adapter and whether it's configured
-.venv/bin/python -m llmwiki doctor     # Python, markdown, venv, config, ZCode paths
+.venv/bin/python -m sessionwiki --version  # → sessionwiki <version>
+.venv/bin/python -m sessionwiki adapters   # lists every adapter and whether it's configured
+.venv/bin/python -m sessionwiki doctor     # Python, markdown, venv, config, ZCode paths
 ```
 
 The `adapters` output tells you which agents have session stores on this
@@ -125,10 +125,10 @@ machine — your first sync pulls from every one marked `active`.
 
 **`externally-managed-environment` (PEP 668)** — do not use `pip install --user`; `./setup.sh` creates a local `.venv` and installs there.
 
-**`ImportError` on Python 3.8 or older** — llmwiki requires ≥ 3.9. Upgrade Python; on macOS use `brew install python@3.12`.
+**`ImportError` on Python 3.8 or older** — sessionwiki requires ≥ 3.9. Upgrade Python; on macOS use `brew install python@3.12`.
 
 ---
 
 ## Next
 
-→ **[02 · First sync](02-first-sync.md)** — point llmwiki at your session history and build the site.
+→ **[02 · First sync](02-first-sync.md)** — point sessionwiki at your session history and build the site.

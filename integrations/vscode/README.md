@@ -1,18 +1,18 @@
-# llm-wiki VS Code Extension
+# sessionwiki VS Code Extension
 
-A minimal VS Code extension that integrates with your local llm-wiki instance.
+A minimal VS Code extension that integrates with your local sessionwiki instance.
 
 ## Features
 
-- **Open llm-wiki** -- opens the local site (localhost:8765) in your browser
-- **Sync Sessions** -- runs `python3 -m llmwiki sync` from the workspace root
-- **Build Site** -- runs `python3 -m llmwiki build`
+- **Open sessionwiki** -- opens the local site (localhost:8765) in your browser
+- **Sync Sessions** -- runs `python3 -m sessionwiki sync` from the workspace root
+- **Build Site** -- runs `python3 -m sessionwiki build`
 - **Wiki Pages sidebar** -- tree view of all wiki pages grouped by section (sources, entities, concepts, syntheses)
 
 ## Prerequisites
 
-- An llm-wiki project in your VS Code workspace (must contain `wiki/index.md`)
-- Python 3.9+ with `llmwiki` installed (`pip install -e .` from the repo root)
+- An sessionwiki project in your VS Code workspace (must contain `wiki/index.md`)
+- Python 3.9+ with `sessionwiki` installed (`pip install -e .` from the repo root)
 
 ## Build & Install
 
@@ -26,7 +26,7 @@ To test in VS Code:
 
 1. Open this folder in VS Code
 2. Press F5 to launch the Extension Development Host
-3. Open a workspace that contains an llm-wiki project
+3. Open a workspace that contains an sessionwiki project
 
 To package as a `.vsix`:
 
@@ -38,8 +38,8 @@ npx @vscode/vsce package
 
 | Setting | Default | Description |
 |---|---|---|
-| `llmwiki.serverPort` | `8765` | Port for the local llm-wiki server |
-| `llmwiki.pythonPath` | `python3` | Path to the Python interpreter |
+| `sessionwiki.serverPort` | `8765` | Port for the local sessionwiki server |
+| `sessionwiki.pythonPath` | `python3` | Path to the Python interpreter |
 
 ## Development
 

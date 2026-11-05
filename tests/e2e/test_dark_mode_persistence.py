@@ -33,7 +33,7 @@ def _set_localstorage_theme(page: Page, theme: str) -> None:
     """Set the persisted theme key BEFORE the next navigation. We use
     ``add_init_script`` because localStorage on about:blank throws."""
     page.add_init_script(
-        f"try {{ localStorage.setItem('llmwiki-theme', {theme!r}); }} catch (e) {{}}"
+        f"try {{ localStorage.setItem('sessionwiki-theme', {theme!r}); }} catch (e) {{}}"
     )
 
 
@@ -79,7 +79,7 @@ def test_theme_respects_prefers_color_scheme_when_unset(
         page.emulate_media(color_scheme="dark")
         # Clear any persisted value the harness may have leaked.
         page.add_init_script(
-            "try { localStorage.removeItem('llmwiki-theme'); } catch (e) {}"
+            "try { localStorage.removeItem('sessionwiki-theme'); } catch (e) {}"
         )
         page.goto(f"{base_url}/index.html", wait_until="domcontentloaded")
         theme = _get_theme(page)

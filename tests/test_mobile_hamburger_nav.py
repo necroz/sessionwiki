@@ -10,9 +10,9 @@ These tests pin the markup, CSS, and JS contracts.
 """
 from __future__ import annotations
 
-from llmwiki.build import nav_bar
-from llmwiki.render.css import CSS
-from llmwiki.render.js import JS
+from sessionwiki.build import nav_bar
+from sessionwiki.render.css import CSS
+from sessionwiki.render.js import JS
 
 
 # ─── Markup contract ──────────────────────────────────────────────────

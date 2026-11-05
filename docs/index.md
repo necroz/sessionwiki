@@ -1,10 +1,10 @@
 ---
-title: "llmwiki documentation"
+title: "sessionwiki documentation"
 type: navigation
 docs_shell: true
 ---
 
-# llmwiki documentation
+# sessionwiki documentation
 
 A local, stdlib-only Python knowledge base built from your AI-coding-agent
 session transcripts. Install in five minutes, then keep every session
@@ -14,7 +14,7 @@ searchable, interlinked, and offline. No database, no account, no cloud.
 
 ## Pick your mode
 
-llmwiki runs two interchangeable ways. Pick one, start — you can switch later.
+sessionwiki runs two interchangeable ways. Pick one, start — you can switch later.
 
 | | [**API mode**](modes/api/) | [**Agent mode**](modes/agent/) |
 |---|---|---|
@@ -35,7 +35,7 @@ llmwiki runs two interchangeable ways. Pick one, start — you can switch later.
 | 01 | [Installation](tutorials/01-installation.md) — macOS / Linux / Windows / Docker | 5 min |
 | 02 | [First sync](tutorials/02-first-sync.md) — from install to a browsable site | 5 min |
 
-*If it's not working in 10 minutes, [open an issue](https://github.com/Pratiyush/llm-wiki/issues/new) — that's a bug in the docs.*
+*If it's not working in 10 minutes, [open an issue](https://github.com/necroz/sessionwiki/issues/new) — that's a bug in the docs.*
 
 ---
 
@@ -50,7 +50,7 @@ llmwiki runs two interchangeable ways. Pick one, start — you can switch later.
 ## Use it locally
 
 - **[Query your wiki](tutorials/05-querying-your-wiki.md)** — `/wiki-query`, `/wiki-graph`, `/wiki-lint`, `/wiki-candidates`, `/wiki-serve`.
-- **[Bring your existing Obsidian / Logseq vault](tutorials/06-bring-your-obsidian-vault.md)** — `llmwiki sync --vault <path>`, non-destructive by default.
+- **[Bring your existing Obsidian / Logseq vault](tutorials/06-bring-your-obsidian-vault.md)** — `sessionwiki sync --vault <path>`, non-destructive by default.
 - **[Example workflows](tutorials/07-example-workflows.md)** — four real, end-to-end workflows.
 
 ---
@@ -70,14 +70,14 @@ llmwiki runs two interchangeable ways. Pick one, start — you can switch later.
 
 ## Reference
 
-- **[CLI reference](reference/cli.md)** — every `python3 -m llmwiki <subcommand>` with every flag and realistic examples.
+- **[CLI reference](reference/cli.md)** — every `python3 -m sessionwiki <subcommand>` with every flag and realistic examples.
 - **[Slash commands reference](reference/slash-commands.md)** — every `/wiki-*` command used from Claude Code / Codex.
 - **[UI reference](reference/ui.md)** — every screen on the compiled site, how to reach it, what it shows.
 - **[Architecture](architecture.md)** — three layers (`raw/` / `wiki/` / `site/`).
 - **[Configuration](configuration.md)** · **[Full configuration reference](configuration-reference.md)**.
 - **[Cache tiers](reference/cache-tiers.md)** — L1 / L2 / L3 / L4 frontmatter.
 - **[Prompt caching + batch API](reference/prompt-caching.md)**.
-- **[Reader API contract](reference/reader-api.md)** — stable shapes of every file `llmwiki build` writes.
+- **[Reader API contract](reference/reader-api.md)** — stable shapes of every file `sessionwiki build` writes.
 - **[Reader-first article shell](reference/reader-shell.md)** — opt-in Wikipedia-style layout.
 - **[Entity schema](reference/entity-schema.md)** — structured model-profile frontmatter.
 - **[Adapter authoring](adapter-authoring.md)** — write an adapter for a new agent.
@@ -91,7 +91,7 @@ llmwiki runs two interchangeable ways. Pick one, start — you can switch later.
 - **[FAQ](faq.md)** · **[Troubleshooting](troubleshooting.md)** · **[Privacy](privacy.md)**.
 - **[Accessibility](accessibility.md)** (WCAG 2.1 AA).
 - **[Benchmarks](benchmarks.md)** · **[Competitor landscape](competitor-landscape.md)**.
-- **Maintainers** — governance docs at [`docs/maintainers/`](https://github.com/Pratiyush/llm-wiki/tree/master/docs/maintainers).
+- **Maintainers** — governance docs at [`docs/maintainers/`](https://github.com/necroz/sessionwiki/tree/master/docs/maintainers).
 
 ---
 
@@ -105,7 +105,7 @@ llmwiki runs two interchangeable ways. Pick one, start — you can switch later.
 
 ---
 
-## What llmwiki is not
+## What sessionwiki is not
 
 It's not a vector database, not a RAG framework, not a hosted service. It
 compiles markdown from JSONL transcripts, writes a static site, and stays
@@ -113,6 +113,6 @@ out of the way. The only third-party runtime dependency is `markdown`.
 
 ## What's new
 
-See the **[CHANGELOG](https://github.com/Pratiyush/llm-wiki/blob/master/CHANGELOG.md)**. Latest tagged release: **v{{__llmwiki_version__}}**.
+See the **[CHANGELOG](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)**. Latest tagged release: **v{{__sessionwiki_version__}}**.
 
-> The version above is substituted from `llmwiki/__init__.py:__version__` at build time, so this hub stays current on every release without a manual edit (#457).
+> The version above is substituted from `sessionwiki/__init__.py:__version__` at build time, so this hub stays current on every release without a manual edit (#457).

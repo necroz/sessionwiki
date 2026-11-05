@@ -5,7 +5,7 @@ Feature: Mobile bottom nav
   So the wiki is usable with one thumb
 
   Background:
-    Given a built llmwiki site is served
+    Given a built sessionwiki site is served
 
   Scenario: Mobile bottom nav is visible on a small viewport
     When I visit the homepage on a mobile viewport

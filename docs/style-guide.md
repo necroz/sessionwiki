@@ -21,7 +21,7 @@ written by one careful person.
 | Do | Don't |
 |---|---|
 | "The adapter reads `~/.claude/projects/`." | "Our amazing adapter seamlessly integrates with Claude Code." |
-| "Run `llmwiki sync`. It takes 5 s for the incremental case." | "Simply run `llmwiki sync` and watch the magic happen!" |
+| "Run `sessionwiki sync`. It takes 5 s for the incremental case." | "Simply run `sessionwiki sync` and watch the magic happen!" |
 | "If X fails, it's a bug in the docs. File an issue." | "Need help? Don't hesitate to reach out!" |
 | Give numbers. "647 sessions, 93 sub-agents, 5 s incremental." | Adjectives without numbers. "Fast, scalable, robust." |
 
@@ -118,12 +118,12 @@ a subtle tinted background. No icons, no colored banners.
 - **Shell commands** fence with `bash` and prefix with `$` **only** when
   the output follows on the next lines:
   ```bash
-  $ llmwiki --version
-  llmwiki 1.2.0
+  $ sessionwiki --version
+  sessionwiki 1.2.0
   ```
   If it's just the command (no output in the same block), drop the `$`:
   ```bash
-  llmwiki sync --dry-run
+  sessionwiki sync --dry-run
   ```
 - **Python** fences with `python` (never `py`).
 - **JSON / YAML / TOML** use their own language tag.
@@ -141,7 +141,7 @@ a subtle tinted background. No icons, no colored banners.
   (e.g. `[text](reference/cache-tiers.md#the-four-tiers)` with the
   relative prefix that suits the source file).
 - **External links**: use the canonical URL, no tracking params.
-  Prefer the project's own repo (`https://github.com/Pratiyush/llm-wiki/issues/N`)
+  Prefer the project's own repo (`https://github.com/necroz/sessionwiki/issues/N`)
   over screenshots of issues.
 - **Never link to `master`** when you could link to a tagged version.
   (`/v1.1.0-rc2/…` beats `/master/…`.)
@@ -156,7 +156,7 @@ a subtle tinted background. No icons, no colored banners.
 4. Update the "Next" link on the previous tutorial to point to yours.
 5. Add any new internal links the tutorial needs to existing pages.
 6. Run the guardrail test: `python3 -m pytest tests/test_docs_structure.py`.
-7. Build locally: `python3 -m llmwiki build && python3 -m llmwiki serve`.
+7. Build locally: `python3 -m sessionwiki build && python3 -m sessionwiki serve`.
 8. Visually inspect the rendered page at `http://127.0.0.1:8765/docs/tutorials/<file>.html`.
 
 ---
