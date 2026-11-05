@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Added
+
+- **Plugin icon** — `plugin/.claude-plugin/icon.png` (1024 px, the site's layers mark) for the Anthropic plugin directory listing, with its source in `docs/images/plugin-icon.svg`. `claude plugin validate ./plugin --strict` now reports nothing.
+
 ## [2.0.2] — 2026-11-05
 
 Theme: installable from catalogs — `sessionwiki mcp`, a working Claude Code plugin, and MCP Registry / Glama manifests.

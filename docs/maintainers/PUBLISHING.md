@@ -88,7 +88,7 @@ Docs: <https://claude.com/docs/plugins/submit#submit-a-plugin>
 1. Finish step 1. `claude plugin validate ./plugin --strict`
    must pass.
 2. `plugin.json` already has `documentationUrl`, `supportUrl` and
-   `privacyPolicyUrl` (→ `docs/privacy.md`). Add `icon` if the portal asks.
+   `privacyPolicyUrl` (→ `docs/privacy.md`). The listing icon is `plugin/.claude-plugin/icon.png` (source: `docs/images/plugin-icon.svg`); the directory takes it only on the first submission.
 3. Open <https://claude.ai/directory/manage> (needs Pro, Max, Ultra, or a
    Team/Enterprise owner account).
 4. Submit the GitHub repo. The portal runs its own checks on top of the CLI ones;

@@ -97,3 +97,17 @@ def test_plugin_skills_have_frontmatter():
 
 def test_glama_claim_names_a_maintainer():
     assert _load(GLAMA_JSON)["maintainers"]
+
+
+def test_plugin_icon_meets_directory_rules():
+    """The plugin directory takes a square PNG, 512–2048 px, under 2 MB,
+    and only on the first submission — so it must be right up front."""
+    import struct
+
+    icon = PLUGIN_DIR / ".claude-plugin" / "icon.png"
+    data = icon.read_bytes()
+    assert data[:8] == b"\x89PNG\r\n\x1a\n"
+    width, height = struct.unpack(">II", data[16:24])
+    assert width == height
+    assert 512 <= width <= 2048
+    assert len(data) < 2 * 1024 * 1024

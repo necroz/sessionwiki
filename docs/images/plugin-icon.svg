@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Source for plugin/.claude-plugin/icon.png (plugin directory listing icon).
+       The glyph is the site's nav-brand "layers" mark (sessionwiki/build.py).
+       Render: google-chrome --headless=new --window-size=1024,1024
+               --screenshot=icon.png <html page that inlines this SVG> -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a1530"/>
+      <stop offset="1" stop-color="#0b0b14"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="512" cy="470" r="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ink" x1="0" y1="2" x2="0" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c4b5fd"/>
+      <stop offset="0.55" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#glow)"/>
+
+  <g transform="translate(176 176) scale(28)" fill="none" stroke="url(#ink)"
+     stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2L2 7l10 5 10-5-10-5z" fill="#a78bfa" fill-opacity="0.16"/>
+    <path d="M2 12l10 5 10-5"/>
+    <path d="M2 17l10 5 10-5"/>
+  </g>
+</svg>
