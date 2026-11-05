@@ -2,10 +2,10 @@
 
 > **Your AI coding sessions, compiled into a searchable, interlinked wiki** — from Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot, ZCode and OpenCode. Local-first, with LLM synthesis, a session graph, and an MCP server so your agents can look up what you already solved.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/necroz/sessionwiki/blob/master/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-v2.0.0-10B981.svg)](CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/tests-2886%20passing-10B981.svg)](tests/)
+[![Version](https://img.shields.io/badge/version-v2.0.0-10B981.svg)](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/tests-2886%20passing-10B981.svg)](https://github.com/necroz/sessionwiki/tree/master/tests)
 [![CI](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml)
 [![Link check](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml)
 [![Wiki checks](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml)
@@ -13,9 +13,9 @@
 
 ### 👉 [Live demo: necroz.github.io/sessionwiki](https://necroz.github.io/sessionwiki/)
 
-27 synthetic sessions across five projects and seven agents (Aug–Nov 2026) — no personal data. Rebuilt from [`examples/demo-sessions/`](examples/demo-sessions) on every push to `master`.
+27 synthetic sessions across five projects and seven agents (Aug–Nov 2026) — no personal data. Rebuilt from [`examples/demo-sessions/`](https://github.com/necroz/sessionwiki/tree/master/examples/demo-sessions) on every push to `master`.
 
-![sessionwiki home: activity heatmap, token stats and project cards](docs/images/home.png)
+![sessionwiki home: activity heatmap, token stats and project cards](https://raw.githubusercontent.com/necroz/sessionwiki/master/docs/images/home.png)
 
 ---
 
@@ -46,24 +46,24 @@ sessionwiki turns that history into a knowledge base:
 
 ## Screenshots
 
-All screenshots come from the [live demo](https://necroz.github.io/sessionwiki/) and are regenerated with [`scripts/regen_docs_screenshots.py`](scripts/regen_docs_screenshots.py).
+All screenshots come from the [live demo](https://necroz.github.io/sessionwiki/) and are regenerated with [`scripts/regen_docs_screenshots.py`](https://github.com/necroz/sessionwiki/blob/master/scripts/regen_docs_screenshots.py).
 
 **Every session, every agent** — filter by project, model and date; each row carries its agent badge.
 
-![sessions table with Claude, ZCode, Codex and OpenCode badges](docs/images/sessions.png)
+![sessions table with Claude, ZCode, Codex and OpenCode badges](https://raw.githubusercontent.com/necroz/sessionwiki/master/docs/images/sessions.png)
 
 **Session pages** — the summary, the conversation, highlighted code and the tools that ran, plus token and cache usage.
 
-![session page with a highlighted Go code block and tool calls](docs/images/session-detail.png)
+![session page with a highlighted Go code block and tool calls](https://raw.githubusercontent.com/necroz/sessionwiki/master/docs/images/session-detail.png)
 
 **Projects** — topics, description, activity and tool usage per project, with freshness badges on the index.
 
-| ![project page for infra-stack](docs/images/project-detail.png) | ![projects index with freshness badges](docs/images/projects.png) |
+| ![project page for infra-stack](https://raw.githubusercontent.com/necroz/sessionwiki/master/docs/images/project-detail.png) | ![projects index with freshness badges](https://raw.githubusercontent.com/necroz/sessionwiki/master/docs/images/projects.png) |
 |---|---|
 
 **Graph and search** — sessions grouped around their projects; ⌘K searches every page instantly.
 
-| ![session and project graph](docs/images/graph.png) | ![command palette search for "redis"](docs/images/search.png) |
+| ![session and project graph](https://raw.githubusercontent.com/necroz/sessionwiki/master/docs/images/graph.png) | ![command palette search for "redis"](https://raw.githubusercontent.com/necroz/sessionwiki/master/docs/images/search.png) |
 |---|---|
 
 ## Quick start
@@ -85,7 +85,7 @@ pip install 'sessionwiki @ git+https://github.com/necroz/sessionwiki'          #
 pip install 'sessionwiki[all] @ git+https://github.com/necroz/sessionwiki'     # + graph engine, dev, e2e
 ```
 
-A step-by-step walkthrough with screenshots lives in the [setup guide](docs/tutorials/setup-guide.md).
+A step-by-step walkthrough with screenshots lives in the [setup guide](https://github.com/necroz/sessionwiki/blob/master/docs/tutorials/setup-guide.md).
 
 ## Connect your agents
 
@@ -116,7 +116,7 @@ sessionwiki opencode install --dry-run
 sessionwiki opencode install          # honours $XDG_CONFIG_HOME
 ```
 
-Hook-triggered runs skip instead of queueing when a cycle is already running; scheduled runs wait and catch up. Details: [ZCODE.md](ZCODE.md), [docs/adapters/opencode.md](docs/adapters/opencode.md), and `sessionwiki adapters` for the full list.
+Hook-triggered runs skip instead of queueing when a cycle is already running; scheduled runs wait and catch up. Details: [ZCODE.md](https://github.com/necroz/sessionwiki/blob/master/ZCODE.md), [docs/adapters/opencode.md](https://github.com/necroz/sessionwiki/blob/master/docs/adapters/opencode.md), and `sessionwiki adapters` for the full list.
 
 ## LLM synthesis
 
@@ -140,7 +140,7 @@ sessionwiki synthesize                # new sessions only; idempotent
 sessionwiki all --with-synth          # synthesize → build → graph → export → lint
 ```
 
-Backends: `ollama` (local), `openai` (any OpenAI-compatible `/v1`: vLLM, SGLang, LM Studio, LiteLLM, hosted APIs), `agent-delegate` (let your coding agent write the pages), `dummy` (offline stubs). sessionwiki warns when a non-loopback `base_url` would send transcripts off your machine. See [docs/modes/api/](docs/modes/api/).
+Backends: `ollama` (local), `openai` (any OpenAI-compatible `/v1`: vLLM, SGLang, LM Studio, LiteLLM, hosted APIs), `agent-delegate` (let your coding agent write the pages), `dummy` (offline stubs). sessionwiki warns when a non-loopback `base_url` would send transcripts off your machine. See [docs/modes/api/](https://github.com/necroz/sessionwiki/tree/master/docs/modes/api).
 
 ## Ask your wiki from your agents (MCP)
 
@@ -180,7 +180,7 @@ sessionwiki opencode                # export · autosync · install
 sessionwiki version
 ```
 
-Every subcommand has `--help`. Full reference: [docs/reference/cli.md](docs/reference/cli.md).
+Every subcommand has `--help`. Full reference: [docs/reference/cli.md](https://github.com/necroz/sessionwiki/blob/master/docs/reference/cli.md).
 
 ## Configuration
 
@@ -191,7 +191,7 @@ examples/sessions_config.json  →  config.json  →  config.local.json
    (shared defaults)              (gitignored)      (gitignored, machine-local)
 ```
 
-Put machine-specific values — synthesis backend and keys, redaction patterns, project roots, adapter toggles — in `config.local.json`. Reference: [docs/configuration-reference.md](docs/configuration-reference.md). Use [`.llmwikiignore`](examples/.llmwikiignore) to exclude projects or sessions.
+Put machine-specific values — synthesis backend and keys, redaction patterns, project roots, adapter toggles — in `config.local.json`. Reference: [docs/configuration-reference.md](https://github.com/necroz/sessionwiki/blob/master/docs/configuration-reference.md). Use [`.llmwikiignore`](https://github.com/necroz/sessionwiki/blob/master/examples/.llmwikiignore) to exclude projects or sessions.
 
 ## How it works
 
@@ -219,26 +219,26 @@ Three layers, following [Karpathy's LLM Wiki pattern](https://gist.github.com/ka
 - Nothing leaves your machine unless you configure a remote synthesis backend — and sessionwiki warns when you do.
 - `sessionwiki audit` scans `raw/`, `wiki/` and `site/` before you publish a site.
 
-See [docs/privacy.md](docs/privacy.md) and [SECURITY.md](SECURITY.md).
+See [docs/privacy.md](https://github.com/necroz/sessionwiki/blob/master/docs/privacy.md) and [SECURITY.md](https://github.com/necroz/sessionwiki/blob/master/SECURITY.md).
 
 ## Documentation
 
-- **[Documentation hub](docs/index.md)** — start here
-- [Setup guide](docs/tutorials/setup-guide.md) · [Installation](docs/tutorials/01-installation.md) · [Use with Claude Code](docs/tutorials/03-use-with-claude-code.md) · [Windows](docs/windows-setup.md)
-- [CLI](docs/reference/cli.md) · [Configuration](docs/configuration-reference.md) · [Architecture](docs/architecture.md)
-- [Deploy to GitHub Pages, Docker, Vercel/Netlify](docs/deploy/)
-- [What's different from llmwiki](docs/differences-from-llmwiki.md) · [Changelog](CHANGELOG.md)
+- **[Documentation hub](https://github.com/necroz/sessionwiki/blob/master/docs/index.md)** — start here
+- [Setup guide](https://github.com/necroz/sessionwiki/blob/master/docs/tutorials/setup-guide.md) · [Installation](https://github.com/necroz/sessionwiki/blob/master/docs/tutorials/01-installation.md) · [Use with Claude Code](https://github.com/necroz/sessionwiki/blob/master/docs/tutorials/03-use-with-claude-code.md) · [Windows](https://github.com/necroz/sessionwiki/blob/master/docs/windows-setup.md)
+- [CLI](https://github.com/necroz/sessionwiki/blob/master/docs/reference/cli.md) · [Configuration](https://github.com/necroz/sessionwiki/blob/master/docs/configuration-reference.md) · [Architecture](https://github.com/necroz/sessionwiki/blob/master/docs/architecture.md)
+- [Deploy to GitHub Pages, Docker, Vercel/Netlify](https://github.com/necroz/sessionwiki/tree/master/docs/deploy)
+- [What's different from llmwiki](https://github.com/necroz/sessionwiki/blob/master/docs/differences-from-llmwiki.md) · [Changelog](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
 
 ## Based on llmwiki
 
-sessionwiki started as a fork of **[llmwiki](https://github.com/Pratiyush/llm-wiki) by [Pratiyush](https://github.com/Pratiyush)** (MIT) at v1.3.82 and keeps its full history. Most of the converter, site, lint and MCP foundations are his work. sessionwiki adds the ZCode and OpenCode sources with autosync, the OpenAI-compatible synthesis backend, session coalescing, locking and atomic state, `doctor` and `audit`, the session graph, and a long list of fixes — see [what's different](docs/differences-from-llmwiki.md) and [how to migrate](docs/differences-from-llmwiki.md#migrating-from-llmwiki).
+sessionwiki started as a fork of **[llmwiki](https://github.com/Pratiyush/llm-wiki) by [Pratiyush](https://github.com/Pratiyush)** (MIT) at v1.3.82 and keeps its full history. Most of the converter, site, lint and MCP foundations are his work. sessionwiki adds the ZCode and OpenCode sources with autosync, the OpenAI-compatible synthesis backend, session coalescing, locking and atomic state, `doctor` and `audit`, the session graph, and a long list of fixes — see [what's different](https://github.com/necroz/sessionwiki/blob/master/docs/differences-from-llmwiki.md) and [how to migrate](https://github.com/necroz/sessionwiki/blob/master/docs/differences-from-llmwiki.md#migrating-from-llmwiki).
 
 Thanks also to [Andrej Karpathy](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) for the LLM Wiki idea, [Python Markdown](https://python-markdown.github.io/), [highlight.js](https://highlightjs.org/) and [vis-network](https://visjs.github.io/vis-network/).
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md). Keep PRs to one concern, use `feat:` / `fix:` / `docs:` / `chore:` / `test:` titles, add a CHANGELOG entry for `feat` and `fix`, and never commit real session data. CI must be green.
+Read [CONTRIBUTING.md](https://github.com/necroz/sessionwiki/blob/master/CONTRIBUTING.md). Keep PRs to one concern, use `feat:` / `fix:` / `docs:` / `chore:` / `test:` titles, add a CHANGELOG entry for `feat` and `fix`, and never commit real session data. CI must be green.
 
 ## License
 
-[MIT](LICENSE) © 2026 Igor Lashkevich (sessionwiki) · © 2026 Pratiyush (original llmwiki). See [NOTICE](NOTICE).
+[MIT](https://github.com/necroz/sessionwiki/blob/master/LICENSE) © 2026 Igor Lashkevich (sessionwiki) · © 2026 Pratiyush (original llmwiki). See [NOTICE](https://github.com/necroz/sessionwiki/blob/master/NOTICE).
