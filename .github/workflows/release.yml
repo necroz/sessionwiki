@@ -142,6 +142,18 @@ jobs:
             if [ ${#assets[@]} -gt 0 ]; then
               gh release upload "$tag" "${assets[@]}" --repo "$GITHUB_REPOSITORY" --clobber
             fi
+            # Release Drafter keeps a draft named after the next version, so
+            # this tag usually finds that draft. Publish it now that the tag
+            # exists — otherwise the release silently stays a draft (v2.0.1).
+            is_draft="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)"
+            if [ "$is_draft" = "true" ]; then
+              latest="--latest"
+              if [ -n "$prerelease" ]; then
+                latest="--latest=false"
+              fi
+              echo "Publishing draft release $tag"
+              gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false $prerelease $latest
+            fi
           else
             echo "Creating release $tag with ${#assets[@]} asset(s)"
             gh release create "$tag" \

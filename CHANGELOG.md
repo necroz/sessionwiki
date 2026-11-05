@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Release job publishes the Release Drafter draft** — Release Drafter keeps a draft named after the next version, so the tag's release already existed and the job only uploaded assets to it; v2.0.1 stayed a draft until published by hand. The job now publishes the draft (Latest for stable tags, pre-release for rc/alpha/beta/dev).
+
 ## [2.0.1] — 2026-11-05
 
 ### Fixed
