@@ -155,3 +155,13 @@ def test_check_release_artifacts_script_runs_twine_check():
     # metadata issues that trip up PyPI.
     assert "python -m build" in text or "python3 -m build" in text
     assert "twine check" in text
+
+
+def test_release_job_publishes_a_release_drafter_draft():
+    """Release Drafter pre-creates a draft for the next tag; the release
+    job must publish it, not just upload assets to it (v2.0.1 stayed a
+    draft until published by hand)."""
+    text = (REPO_ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
+    assert "--json isDraft" in text
+    assert "--draft=false" in text
+    assert "--latest=false" in text  # pre-releases must not become Latest
