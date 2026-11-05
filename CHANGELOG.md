@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.0.2] — 2026-11-05
+
+Theme: installable from catalogs — `sessionwiki mcp`, a working Claude Code plugin, and MCP Registry / Glama manifests.
+
 ### Added
 
 - **`sessionwiki mcp`** — starts the stdio MCP server from the installed CLI, so MCP clients and the MCP Registry can run the PyPI package as `uvx sessionwiki mcp` (set `SESSIONWIKI_HOME` to the data folder). `python3 -m sessionwiki.mcp` still works.
