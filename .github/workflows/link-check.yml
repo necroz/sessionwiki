@@ -24,6 +24,12 @@ permissions:
   contents: read
   issues: write
 
+# Serialise runs: a push and a scheduled run can otherwise both look for
+# the tracking issue before either has created it.
+concurrency:
+  group: link-check-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   link-check:
     name: Lychee external link scan
@@ -54,6 +60,20 @@ jobs:
           fail: false  # Don't fail the workflow; file an issue instead
           output: lychee-report.md
 
+      - name: Find the open tracking issue
+        id: tracking
+        if: steps.lychee.outputs.exit_code != 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          number=$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            --jq 'map(select(.title == "Broken external links detected")) | first | .number // ""')
+          echo "number=$number" >> "$GITHUB_OUTPUT"
+
       - name: Create or update tracking issue on broken links
         if: steps.lychee.outputs.exit_code != 0
         uses: peter-evans/create-issue-from-file@v6
@@ -61,8 +81,23 @@ jobs:
           title: "Broken external links detected"
           content-filepath: lychee-report.md
           labels: docs, chore
-          # #544+: without update_existing every weekly cron + every push
-          # filed a fresh issue with the same title. Use the action's
-          # built-in update path so a single tracking issue gets the
-          # latest report appended instead of spawning duplicates.
-          update_existing: true
+          # The action has no title-matching mode: without an explicit
+          # issue-number it always creates a new issue. Reuse the open
+          # tracking issue so each run refreshes its report.
+          issue-number: ${{ steps.tracking.outputs.number }}
+
+      - name: Close the tracking issue when the check is clean
+        if: steps.lychee.outputs.exit_code == 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --state open \
+            --limit 100 \
+            --json number,title \
+            --jq '.[] | select(.title == "Broken external links detected") | .number' |
+          while read -r number; do
+            gh issue close "$number" --repo "$GITHUB_REPOSITORY" \
+              --comment "All checked links resolve again as of ${GITHUB_SHA:0:7}."
+          done
