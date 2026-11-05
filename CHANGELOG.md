@@ -12,6 +12,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Added
 
+- **ZCode and OpenCode agent badges** — sessions from the ZCode and OpenCode adapters show their own `ZCode` / `OpenCode` badge (light and dark styles, WCAG AA contrast). These tools run many vendors' models, so the adapter tag now wins over the model name; before, a ZCode session on Claude showed "Claude" and one on GLM/Qwen showed the generic "Agent".
 - **`sessionwiki all --with-synth`** (#383) — opt-in chain that runs `synthesize` before `build → graph → export → lint`, so CLI users can fill `wiki/sources/` from `raw/` in one command without relying on agent slash skills. Companion flags: `--synth-force` (pass `--force` to synthesize), `--vault` (vault-overlay synthesize when using `--with-synth`).
 - **`sessionwiki sync --status` synthesis hint** (#383) — reports the configured `synthesis.backend` and points to `sessionwiki synthesize` / `sessionwiki all --with-synth` when `wiki/sources/` may stay empty after sync.
 - **OpenAI-compatible synthesis backend** — `synthesis.backend: "openai"` talks to any `/v1` chat-completions server (vLLM, SGLang, LM Studio, LiteLLM) with stdlib HTTP. New keys: `api_key`, `max_tokens`, `temperature`, `enable_thinking`. A non-loopback `base_url` logs a privacy warning, matching the Ollama backend.
