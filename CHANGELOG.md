@@ -47,6 +47,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Fixed
 
+- **CI runs again on the new `ubuntu-latest` (26.04)** — the Python 3.9 test job and the npm Playwright agents job are pinned to `ubuntu-24.04` (26.04 has no Python 3.9 build for `setup-python`, and that Playwright cannot install Chromium there); `test_query_graph_reads_links_keyed_export` now skips when the optional `networkx` is not installed instead of failing the base job.
 - **Hook-triggered autosync skips instead of queueing** — the OpenCode plugin and the ZCode Stop hook now call `autosync --lock-timeout 0`, so an idle/stop event that arrives while a cycle is running exits at once instead of leaving a python process waiting up to 600 s for the lock. Scheduled runs (systemd/launchd/Task Scheduler) still wait.
 - **`sessionwiki opencode install` honours `XDG_CONFIG_HOME`** — the plugin is written to `$XDG_CONFIG_HOME/opencode/plugins/sessionwiki-autosync/index.ts` when the variable is set, the same directory OpenCode loads plugins from; previously it always used `~/.config`, so OpenCode never saw the plugin on such setups.
 - **`ensure_projects_index` emits valid frontmatter** — the generated `wiki/projects/index.md` now uses `type: navigation` and `topics: [projects]` instead of `type: index` / `tags: [index, projects]`, which `frontmatter_validity` and `tags_topics_convention` reject; a plain `sync --auto-build` no longer turns a clean wiki into a lint error.
