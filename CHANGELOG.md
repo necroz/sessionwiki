@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`pip`, `uv` and Docker installs keep data in the working directory** — the data root was always the parent of the package, which for an installed package is `site-packages`: `sessionwiki init` scaffolded `raw/`, `wiki/` and `site/` inside the virtualenv (and could not write at all in the Docker image or a read-only install), and the GitHub Action reported the wrong `site-dir`. The root is now `$SESSIONWIKI_HOME` (or the documented-but-unimplemented `$LLMWIKI_HOME`) when set, the source checkout when run from a clone, and the current directory otherwise.
+
 ### Removed
 
 - **Homebrew formula and tap automation** — `homebrew/sessionwiki.rb`, the `homebrew-bump` workflow, `scripts/bump-homebrew-formula.sh` and `docs/deploy/homebrew-setup.md`. The tap repository was never created and the formula still pointed at the upstream v1.2.0 tarball, so `brew install` could not work. Install with `uv tool install sessionwiki`, `pip install sessionwiki` or the `ghcr.io/necroz/sessionwiki` Docker image; the README and installation tutorial now show these three ways.

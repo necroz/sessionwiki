@@ -101,7 +101,7 @@ Minimal config:
 
 | Variable | What it does |
 |---|---|
-| `LLMWIKI_HOME` | Override the repo root. Defaults to auto-detection from the script location. |
+| `SESSIONWIKI_HOME` (legacy: `LLMWIKI_HOME`) | Directory for `raw/`, `wiki/`, `site/` and state. Default: the source checkout when run from a clone, otherwise the current directory (`pip` / `uv` / Docker installs). |
 | `LLMWIKI_CONFIG` | Override the config file path. Defaults to `./config.json` then `examples/sessions_config.json`. |
 
 ## CLI flags

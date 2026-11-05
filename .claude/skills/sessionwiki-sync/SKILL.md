@@ -45,7 +45,7 @@ Do NOT invoke when:
    - `./` (if cwd contains `sessionwiki/` package)
    - `~/Desktop/2026/production-draft/sessionwiki/`
    - `~/sessionwiki/`
-   - `$LLMWIKI_HOME` environment variable
+   - `$SESSIONWIKI_HOME` (or legacy `$LLMWIKI_HOME`) environment variable
 
    If you can't find it, tell the user and stop.
 
