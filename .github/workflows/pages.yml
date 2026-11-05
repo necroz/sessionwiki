@@ -41,15 +41,11 @@ jobs:
         run: |
           set -e
           mkdir -p raw/sessions
-          # Primary: richer multi-project demo under examples/demo-sessions/.
+          # The demo corpus: synthetic sessions under examples/demo-sessions/
+          # (tests/fixtures/ stay test-only, so the demo never shows stale fixtures).
           if [ -d examples/demo-sessions ] && [ "$(ls -A examples/demo-sessions 2>/dev/null)" ]; then
             cp -r examples/demo-sessions/* raw/sessions/
             echo "Seeded raw/sessions/ from examples/demo-sessions/"
-          fi
-          # Fallback: older synthetic fixtures (kept for test parity).
-          if [ -d tests/fixtures/demo ] && [ "$(ls -A tests/fixtures/demo 2>/dev/null)" ]; then
-            cp -r tests/fixtures/demo/* raw/sessions/
-            echo "Seeded raw/sessions/ from tests/fixtures/demo/"
           fi
           echo "--- raw/sessions contents ---"
           find raw/sessions -maxdepth 2 -type f | sort
