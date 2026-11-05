@@ -35,10 +35,8 @@ Order: **1 → 2 → 3**, then the optional ones.
 `server.json` equal to `__version__` and checks the links between these files.
 Maintainer-only commands and skills stay in `.claude/` and do not ship.
 
-**First release with these files:** the package on PyPI must contain the `mcp`
-subcommand and the `mcp-name` line, so nothing below works before the next
-release (2.0.2). The plugin also calls `uvx sessionwiki mcp`, which fails with
-2.0.1 from PyPI.
+**Minimum version:** the `mcp` subcommand and the `mcp-name` line ship from
+2.0.2. The plugin and `server.json` need 2.0.2 or later on PyPI.
 
 ---
 
@@ -70,9 +68,7 @@ claude plugin install sessionwiki@sessionwiki
 ```
 
 Claude Code asks for the sessionwiki folder. In a new session, `/mcp` lists
-`sessionwiki`. Until 2.0.2 is on PyPI, the server only starts if you temporarily
-change `"args"` to `["--from", "/path/to/checkout", "sessionwiki", "mcp"]`;
-do not commit that.
+`sessionwiki`.
 
 ### Users install with
 
@@ -89,7 +85,7 @@ These lines are in the README MCP section.
 
 Docs: <https://claude.com/docs/plugins/submit#submit-a-plugin>
 
-1. Release 2.0.2 and finish step 1. `claude plugin validate ./plugin --strict`
+1. Finish step 1. `claude plugin validate ./plugin --strict`
    must pass.
 2. `plugin.json` already has `documentationUrl`, `supportUrl` and
    `privacyPolicyUrl` (→ `docs/privacy.md`). Add `icon` if the portal asks.
@@ -124,7 +120,7 @@ curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/downlo
 
 ### 3.3 Publish
 
-After the release is on PyPI (2.0.2 or later):
+After the release is on PyPI:
 
 ```bash
 mcp-publisher validate
