@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/necroz/sessionwiki/blob/master/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-v2.0.0-10B981.svg)](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v2.0.1-10B981.svg)](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
 [![Tests](https://img.shields.io/badge/tests-2886%20passing-10B981.svg)](https://github.com/necroz/sessionwiki/tree/master/tests)
 [![CI](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml)
 [![Link check](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml)
