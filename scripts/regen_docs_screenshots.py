@@ -1,144 +1,159 @@
-"""#632: regenerate `docs/images/*.png` from a live sessionwiki build.
+"""Regenerate the README / docs screenshots in ``docs/images/``.
 
-The README + docs reference six canonical screenshots (home, sessions
-index, session detail, changelog, projects index, model card). They're
-hand-maintained which means they drift out of sync with the actual
-emitted UI on every theme/CSS change.
+The screenshots show the public demo, not your own sessions:
 
-This script:
-
-  1. Spins up the same seeded e2e harness so we always have a known-
-     good corpus to screenshot (no dependency on the user's real
-     `~/.claude/projects/`).
-  2. Walks a deterministic route through the site with Playwright,
-     captures `docs/images/<name>.png` at 1280×800 in the dark theme.
-  3. Reports a one-line diff (`changed N images / kept M`) so the
-     person running it sees what's about to be committed.
+  1. Builds the demo site in a temporary directory from the synthetic
+     sessions in ``examples/demo-sessions/`` and the project cards in
+     ``wiki/projects/`` — exactly what ``.github/workflows/pages.yml``
+     deploys to GitHub Pages. Nothing from your ``raw/`` or ``wiki/``
+     content is read.
+  2. Serves it on 127.0.0.1 and walks the routes in ``ROUTES`` with
+     Playwright at 1280×800 in the chosen theme.
+  3. Reports which images changed, so the diff is easy to review.
 
 Run locally:
 
-    python3 scripts/regen_docs_screenshots.py
+    pip install -e '.[e2e]'
+    python -m playwright install chromium      # or: --channel chrome
+    python scripts/regen_docs_screenshots.py
 
-Run from CI on demand via `.github/workflows/regen-screenshots.yml`
-(workflow_dispatch only — never auto-fires) so a maintainer can
-trigger a refresh and review the diff in a follow-up PR.
+``--channel chrome`` drives an installed Google Chrome instead of
+Playwright's bundled Chromium (useful where the bundled build is not
+supported, e.g. Ubuntu 26.04).
 
-The script is intentionally idempotent: re-running with no UI changes
-produces no diff. PNG output is `optimize=True` so commits stay small.
+CI: ``.github/workflows/regen-screenshots.yml`` (manual dispatch) runs
+this and opens a PR with the changed images.
 """
+
 from __future__ import annotations
 
 import argparse
-import socket
+import shutil
 import subprocess
 import sys
+import tempfile
 import threading
-import time
+from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-SITE_DIR = REPO_ROOT / "site"
 DOCS_IMAGES = REPO_ROOT / "docs" / "images"
+DEMO_SESSIONS = REPO_ROOT / "examples" / "demo-sessions"
 
-# Each entry: (output filename, URL path, optional pre-screenshot JS to run).
-# Add or reorder as the README screenshot set evolves; this file is
-# the single source of truth for what canonical screenshots ship.
+# (output file, URL path, action). Actions: None, "code" (scroll to the
+# first code block), "graph" (expand project clusters), "search" (open
+# the Cmd+K palette and type a query). This list is the single source of
+# truth for which screenshots the README and docs use.
 ROUTES = [
     ("home.png", "/index.html", None),
-    ("projects.png", "/projects/index.html", None),
     ("sessions.png", "/sessions/index.html", None),
-    ("changelog.png", "/changelog.html", None),
+    ("session-detail.png", "/sessions/edge-cache/2026-09-10-stale-while-revalidate.html", "code"),
+    ("project-detail.png", "/projects/infra-stack.html", None),
+    ("projects.png", "/projects/index.html", None),
+    ("graph.png", "/graph.html", "graph"),
+    ("search.png", "/index.html", "search"),
 ]
 
 
-def _free_port() -> int:
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("127.0.0.1", 0))
-    port = s.getsockname()[1]
-    s.close()
-    return port
+class _QuietHandler(SimpleHTTPRequestHandler):
+    def log_message(self, *args):  # noqa: D401 - silence request logs
+        pass
 
 
-def _serve(port: int) -> ThreadingHTTPServer:
-    class _Handler(SimpleHTTPRequestHandler):
-        def __init__(self, *a, **kw):
-            super().__init__(*a, directory=str(SITE_DIR), **kw)
-        def log_message(self, *args):  # quiet
-            pass
-    srv = ThreadingHTTPServer(("127.0.0.1", port), _Handler)
-    threading.Thread(target=srv.serve_forever, daemon=True).start()
-    return srv
+def build_demo_site(workdir: Path) -> Path:
+    """Build the public demo into ``workdir/site`` and return that path.
 
-
-def _build_site() -> None:
-    """Force a fresh build into ./site so we screenshot the latest."""
+    Mirrors pages.yml: a copy of the *tracked* files only (so untracked
+    personal ``raw/`` and ``wiki/`` content never leaks into a screenshot),
+    the demo sessions seeded into ``raw/sessions/``, then ``build`` run
+    from that copy so ``sessionwiki`` resolves its root there.
+    """
+    tracked = subprocess.run(
+        ["git", "ls-files", "-z"], cwd=str(REPO_ROOT), check=True, capture_output=True
+    ).stdout.decode("utf-8").split("\0")
+    for rel in filter(None, tracked):
+        src = REPO_ROOT / rel
+        if src.is_file():
+            dst = workdir / rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+    raw = workdir / "raw" / "sessions"
+    raw.mkdir(parents=True, exist_ok=True)
+    for project in sorted(p for p in DEMO_SESSIONS.iterdir() if p.is_dir()):
+        shutil.copytree(project, raw / project.name, dirs_exist_ok=True)
+    site = workdir / "site"
     subprocess.run(
-        [sys.executable, "-m", "sessionwiki", "build"],
-        cwd=str(REPO_ROOT),
+        [sys.executable, "-m", "sessionwiki", "build", "--out", str(site)],
+        cwd=str(workdir),
         check=True,
     )
+    return site
 
 
-def _capture(port: int, theme: str) -> dict[str, bool]:
-    """Returns {filename: True if changed else False}."""
+def capture(site: Path, theme: str, channel: str | None) -> dict[str, bool]:
+    """Screenshot every route; return {filename: changed?}."""
     from playwright.sync_api import sync_playwright
 
     DOCS_IMAGES.mkdir(parents=True, exist_ok=True)
-    base = f"http://127.0.0.1:{port}"
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), partial(_QuietHandler, directory=str(site)))
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    base = f"http://127.0.0.1:{srv.server_address[1]}"
     changed: dict[str, bool] = {}
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        ctx = browser.new_context(viewport={"width": 1280, "height": 800})
-        # Pre-set theme via init script so it's set before first paint.
-        ctx.add_init_script(
-            f"try {{ localStorage.setItem('sessionwiki-theme', {theme!r}); }} catch (e) {{}}"
-        )
-        page = ctx.new_page()
-
-        for fname, path, pre_js in ROUTES:
-            page.goto(f"{base}{path}", wait_until="networkidle")
-            if pre_js:
-                page.evaluate(pre_js)
-                page.wait_for_timeout(300)
-            out = DOCS_IMAGES / fname
-            existing_bytes = out.read_bytes() if out.is_file() else b""
-            page.screenshot(path=str(out), full_page=False)
-            new_bytes = out.read_bytes()
-            changed[fname] = new_bytes != existing_bytes
-
-        browser.close()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(channel=channel) if channel else p.chromium.launch()
+            ctx = browser.new_context(viewport={"width": 1280, "height": 800}, color_scheme=theme)
+            ctx.add_init_script(
+                f"try {{ localStorage.setItem('sessionwiki-theme', {theme!r}); }} catch (e) {{}}"
+            )
+            page = ctx.new_page()
+            for fname, path, action in ROUTES:
+                page.goto(base + path, wait_until="networkidle")
+                page.wait_for_timeout(400)
+                if action == "code":
+                    page.evaluate(
+                        "(() => { const el = document.querySelector('.content pre, pre');"
+                        " if (el) window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 330); })()"
+                    )
+                    page.wait_for_timeout(400)
+                elif action == "graph":
+                    toggle = page.get_by_role("button", name="Cluster")
+                    if toggle.count():
+                        toggle.first.click()
+                    page.wait_for_timeout(3500)  # let the physics settle
+                elif action == "search":
+                    page.keyboard.press("Control+k")
+                    page.wait_for_timeout(300)
+                    page.keyboard.type("redis", delay=40)
+                    page.wait_for_timeout(700)
+                out = DOCS_IMAGES / fname
+                before = out.read_bytes() if out.is_file() else b""
+                page.screenshot(path=str(out), full_page=False)
+                changed[fname] = out.read_bytes() != before
+            browser.close()
+    finally:
+        srv.shutdown()
     return changed
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Regenerate docs/images/*.png")
-    p.add_argument("--theme", choices=("light", "dark"), default="dark")
-    p.add_argument("--no-build", action="store_true",
-                   help="Reuse the existing ./site directory")
-    args = p.parse_args()
+    parser = argparse.ArgumentParser(description="Regenerate docs/images/*.png from the demo site")
+    parser.add_argument("--theme", choices=("light", "dark"), default="dark")
+    parser.add_argument("--channel", default=None,
+                        help="Playwright browser channel, e.g. 'chrome' to use an installed Google Chrome")
+    parser.add_argument("--site", type=Path, default=None,
+                        help="Screenshot an already-built site instead of building the demo")
+    args = parser.parse_args()
 
-    if not args.no_build:
-        print("Building site …")
-        _build_site()
-    if not SITE_DIR.is_dir():
-        print(f"error: {SITE_DIR} doesn't exist — pass --no-build only after a successful build", file=sys.stderr)
-        return 2
+    with tempfile.TemporaryDirectory(prefix="sessionwiki-demo-") as tmp:
+        site = args.site or build_demo_site(Path(tmp))
+        result = capture(site, args.theme, args.channel)
 
-    port = _free_port()
-    srv = _serve(port)
-    time.sleep(0.2)
-    try:
-        result = _capture(port, args.theme)
-    finally:
-        srv.shutdown()
-
-    changed = [k for k, v in result.items() if v]
-    kept = [k for k, v in result.items() if not v]
-    print(f"\n{'changed' if changed else 'no changes'}: {len(changed)} / kept: {len(kept)}")
-    for fname in changed:
-        print(f"  changed: docs/images/{fname}")
+    changed = [name for name, diff in result.items() if diff]
+    print(f"{'changed' if changed else 'no changes'}: {len(changed)} / kept: {len(result) - len(changed)}")
+    for name in changed:
+        print(f"  changed: docs/images/{name}")
     return 0
 
 
