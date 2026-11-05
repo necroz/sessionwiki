@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.necroz/sessionwiki",
+  "title": "sessionwiki",
+  "description": "Search a local wiki compiled from your Claude Code, Codex, Cursor and other AI coding sessions.",
+  "repository": {
+    "url": "https://github.com/necroz/sessionwiki",
+    "source": "github"
+  },
+  "version": "2.0.1",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "sessionwiki",
+      "version": "2.0.1",
+      "runtimeHint": "uvx",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "SESSIONWIKI_HOME",
+          "description": "Folder with raw/ and wiki/. Run `sessionwiki sync` there first.",
+          "format": "filepath",
+          "isRequired": true
+        }
+      ]
+    }
+  ]
+}

@@ -132,7 +132,8 @@ How users install and run sessionwiki:
 - `build.sh` / `build.bat` — wrappers around `python3 -m sessionwiki build`
 - `serve.sh` / `serve.bat` — wrappers around `python3 -m sessionwiki serve`
 - `upgrade.sh` / `upgrade.bat` — `git pull` + re-run setup
-- `.claude-plugin/plugin.json` + `marketplace.json` — Claude Code plugin packaging
+- `.claude-plugin/marketplace.json` + `plugin/` — Claude Code plugin users install (MCP server + skill)
+- `server.json` — MCP Registry entry; `glama.json` — Glama listing claim
 - `.claude/commands/` — 7 slash commands
 - `.claude/skills/` — 5 auto-discoverable skills
 - `sessionwiki/mcp/` — MCP server stub

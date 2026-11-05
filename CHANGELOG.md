@@ -10,7 +10,14 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Added
+
+- **`sessionwiki mcp`** — starts the stdio MCP server from the installed CLI, so MCP clients and the MCP Registry can run the PyPI package as `uvx sessionwiki mcp` (set `SESSIONWIKI_HOME` to the data folder). `python3 -m sessionwiki.mcp` still works.
+- **Catalog manifests** — `server.json` for the official MCP Registry (with the `mcp-name` ownership line in the README), `glama.json` for the Glama listing, and `docs/maintainers/PUBLISHING.md` with the steps for each catalog. `tests/test_distribution_manifests.py` keeps their versions equal to the package version.
+
 ### Fixed
+
+- **Claude Code plugin installs** — the marketplace had no `owner` and used `path` instead of `source`, and `plugin.json` pointed to `commands/`, `skills/` and a hook script that do not exist at the repo root. The plugin now lives in `plugin/`: the MCP server through `uvx`, a skill that tells the agent when to search the wiki, and a required setting for the sessionwiki folder. Maintainer-only commands and skills in `.claude/` no longer ship. Install with `/plugin marketplace add necroz/sessionwiki` and `/plugin install sessionwiki@sessionwiki`.
 
 - **Release job publishes the Release Drafter draft** — Release Drafter keeps a draft named after the next version, so the tag's release already existed and the job only uploaded assets to it; v2.0.1 stayed a draft until published by hand. The job now publishes the draft (Latest for stable tags, pre-release for rc/alpha/beta/dev).
 

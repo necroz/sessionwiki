@@ -32,6 +32,10 @@ place that mentions the version is derivative and must match.
 - [ ] Update `__version__ = "X.Y.Z"` in `sessionwiki/__init__.py`
 - [ ] Update `version = "X.Y.Z"` in `pyproject.toml` (the test
       `test_pyproject_version_matches_package` enforces this)
+- [ ] Update `version` in `plugin/.claude-plugin/plugin.json` (Claude Code
+      users get plugin updates only when it changes) and both `version`
+      fields in `server.json` (`tests/test_distribution_manifests.py`
+      enforces both)
 - [ ] Update the version badge in `README.md`
       (`Version-vX.Y.Z-7C3AED.svg`)
 - [ ] Update the tests badge in `README.md` with the new passing count
@@ -77,6 +81,9 @@ The tag push triggers `.github/workflows/release.yml` which automatically:
 - [ ] Confirm the release shows up at
       `https://github.com/necroz/sessionwiki/releases`
 - [ ] If the workflow failed, check the "release" environment protection rules
+- [ ] Publish to the MCP Registry once the version is on PyPI:
+      `mcp-publisher publish` (see [PUBLISHING.md](PUBLISHING.md)). A
+      published registry version cannot be changed.
 
 **Manual fallback** (if automation is broken):
 

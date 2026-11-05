@@ -65,7 +65,8 @@ sessionwiki/              # Python package
 └── mcp/              # MCP server (7 production tools, stdio transport)
 
 .claude/              # Claude Code plugin surface
-.claude-plugin/       # plugin.json + marketplace.json
+.claude-plugin/       # marketplace.json (points to plugin/)
+plugin/               # Claude Code plugin users install: plugin.json, MCP server, skill
 .kiro/steering/       # always-loaded rules
 docs/                 # user-facing + framework docs
 tests/                # fixtures + snapshot tests
