@@ -47,8 +47,6 @@ exclude = [
   "^https://github\\.com/necroz/sessionwiki/actions/workflows/docker-publish\\.yml/badge\\.svg",
   # Third-party repo cited in the historical docs/research.md; it was deleted.
   "^https://github\\.com/Ss1024sS/LLM-wiki",
-  # Homebrew tap (pre-creation)
-  "^https://github\\.com/necroz/homebrew-sessionwiki",
   # Repo settings URLs (auth-gated, only visible to admins — CI runner
   # can't authenticate so every settings link 404s)
   "^https://github\\.com/necroz/sessionwiki/settings",

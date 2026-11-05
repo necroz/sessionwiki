@@ -33,7 +33,6 @@ The v1.0 release is a stability pass. No new features -- just hardening.
 | LTS branch | v1.x gets security fixes for 12 months |
 | Docs polish | Every feature documented, every tutorial up to date |
 | PyPI stable | `pip install sessionwiki` with stable version |
-| Homebrew formula | `brew install sessionwiki` |
 
 ## Planned: post-v1.0
 

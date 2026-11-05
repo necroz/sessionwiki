@@ -391,8 +391,7 @@ Use before doing anything governance-related.
 ### `/release`
 
 Walk through the sessionwiki release process step by step — tag, changelog
-cut, GitHub Release note, PyPI publish (via OIDC), Homebrew tap bump,
-Docker image push.
+cut, GitHub Release note, PyPI publish (via OIDC), Docker image push.
 
 ### `/review-pr`
 

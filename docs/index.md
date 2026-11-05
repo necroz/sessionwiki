@@ -64,7 +64,6 @@ sessionwiki runs two interchangeable ways. Pick one, start — you can switch la
 | Docker / GHCR | [deploy/docker.md](deploy/docker.md) |
 | Vercel / Netlify | [deploy/vercel-netlify.md](deploy/vercel-netlify.md) |
 | PyPI publishing | [deploy/pypi-publishing.md](deploy/pypi-publishing.md) |
-| Homebrew tap | [deploy/homebrew-setup.md](deploy/homebrew-setup.md) |
 
 ---
 

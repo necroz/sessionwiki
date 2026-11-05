@@ -134,4 +134,3 @@ version. Bump to the next patch (`v1.1.1`), update the changelog, re-tag.
 
 - `#101` — this issue
 - `.github/workflows/release.yml` — the pipeline
-- `docs/deploy/homebrew-setup.md` — sibling doc for the Homebrew tap (#102)
