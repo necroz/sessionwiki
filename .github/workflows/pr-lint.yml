@@ -49,9 +49,15 @@ jobs:
 
       - name: Skip for doc/test/chore-only PRs
         id: classify
+        env:
+          # Via env, not inline `${{ }}`: a PR title is untrusted input and
+          # would otherwise be pasted into the shell script.
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          title="${{ github.event.pull_request.title }}"
-          if [[ "$title" == docs:* || "$title" == chore:* || "$title" == test:* ]]; then
+          title="$PR_TITLE"
+          # Scoped titles count too: `chore(deps): ...` (Dependabot),
+          # `docs(readme): ...`, `test(e2e): ...`.
+          if [[ "$title" =~ ^(docs|chore|test)(\([^\)]+\))?: ]]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
