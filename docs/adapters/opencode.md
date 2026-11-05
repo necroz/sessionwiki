@@ -124,5 +124,5 @@ Subagent sessions are skipped by default; `--include-subagents` writes
 
 ## See also
 
-- [All adapters](../../README.md#works-with) — comparison table of
-  every agent adapter sessionwiki supports out of the box.
+- [Connect your agents](../../README.md#connect-your-agents) — how each
+  agent is connected; `sessionwiki adapters` lists them all.
