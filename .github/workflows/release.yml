@@ -41,7 +41,7 @@ jobs:
         run: python -m build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -94,7 +94,7 @@ jobs:
             dist/*.whl
 
       - name: Upload signature bundles
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sigstore-signatures
           path: dist/*.sigstore.json

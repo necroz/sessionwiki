@@ -67,7 +67,7 @@ jobs:
         run: echo "site-dir=$(pwd)/site" >> "$GITHUB_OUTPUT"
 
       - name: Upload site artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sessionwiki-site
           path: site/
