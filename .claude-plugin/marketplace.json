@@ -1,17 +1,17 @@
 {
-  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/marketplace.json",
   "name": "sessionwiki",
-  "displayName": "LLM Wiki",
-  "description": "Turn your Claude Code session history into a beautiful, searchable, Karpathy-style knowledge base.",
-  "version": "0.1.0",
-  "author": "Igor Lashkevich",
-  "homepage": "https://github.com/necroz/sessionwiki",
-  "license": "MIT",
+  "description": "Searchable wiki of your AI coding sessions, with an MCP server your agents can query.",
+  "owner": {
+    "name": "Igor Lashkevich",
+    "url": "https://github.com/necroz"
+  },
   "plugins": [
     {
       "name": "sessionwiki",
-      "path": ".",
-      "description": "Core sessionwiki plugin — commands, skills, hooks, and MCP server for building a wiki from your agent sessions."
+      "source": "./plugin",
+      "description": "MCP server and skill that let your agent search past sessions before it redoes work.",
+      "category": "productivity",
+      "tags": ["mcp", "knowledge-base", "session-history"]
     }
   ]
 }

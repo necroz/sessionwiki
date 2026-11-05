@@ -57,6 +57,13 @@ def cmd_version(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_mcp(args: argparse.Namespace) -> int:
+    """Run the MCP server on stdin/stdout (same as `python3 -m sessionwiki.mcp`)."""
+    from sessionwiki.mcp.server import main as mcp_main
+
+    return mcp_main()
+
+
 def cmd_all(args: argparse.Namespace) -> int:
     """Run the full wiki pipeline end-to-end: build → graph → export all → lint.
 
@@ -1628,6 +1635,13 @@ def build_parser() -> argparse.ArgumentParser:
     # version
     ver = sub.add_parser("version", help="Print version")
     ver.set_defaults(func=cmd_version)
+
+    # mcp — stdio MCP server (the entry point MCP clients and registries use)
+    mcp = sub.add_parser(
+        "mcp",
+        help="Run the MCP server on stdio (data root: $SESSIONWIKI_HOME or the current directory)",
+    )
+    mcp.set_defaults(func=cmd_mcp)
 
     # all — run build + graph + export all + lint in sequence
     all_p = sub.add_parser(

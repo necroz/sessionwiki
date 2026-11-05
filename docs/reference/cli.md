@@ -608,6 +608,21 @@ Both print `sessionwiki <version>`.
 
 ---
 
+## `mcp` — run the MCP server on stdio
+
+```bash
+sessionwiki mcp
+SESSIONWIKI_HOME=~/sessionwiki uvx sessionwiki mcp
+```
+
+Same server as `python3 -m sessionwiki.mcp`: JSON-RPC over stdin/stdout, 12
+`wiki_*` tools. MCP clients and the MCP Registry start the PyPI package this
+way. The data root is `$SESSIONWIKI_HOME` when set, the source checkout when run
+from a clone, and the current directory otherwise. MCP clients choose the working
+directory themselves, so set `SESSIONWIKI_HOME` in the client config.
+
+---
+
 ## `query` — search the knowledge graph
 
 ```bash

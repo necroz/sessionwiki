@@ -1,5 +1,7 @@
 # sessionwiki
 
+<!-- mcp-name: io.github.necroz/sessionwiki -->
+
 > **Your AI coding sessions, compiled into a searchable, interlinked wiki** — from Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot, ZCode and OpenCode. Local-first, with LLM synthesis, a session graph, and an MCP server so your agents can look up what you already solved.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/necroz/sessionwiki/blob/master/LICENSE)
@@ -152,17 +154,28 @@ Backends: `ollama` (local), `openai` (any OpenAI-compatible `/v1`: vLLM, SGLang,
 
 ## Ask your wiki from your agents (MCP)
 
+**Claude Code plugin** — the MCP server plus a skill that tells the agent when to search the wiki. It asks for your sessionwiki folder on install:
+
+```
+/plugin marketplace add necroz/sessionwiki
+/plugin install sessionwiki@sessionwiki
+```
+
+**Any MCP client** — run the published package with `uvx`, and point `SESSIONWIKI_HOME` at the folder that holds `raw/` and `wiki/` (run `sessionwiki sync` there first):
+
 ```json
 {
   "mcpServers": {
     "sessionwiki": {
-      "command": "/path/to/sessionwiki/.venv/bin/python",
-      "args": ["-m", "sessionwiki.mcp"],
-      "cwd": "/path/to/sessionwiki"
+      "command": "uvx",
+      "args": ["sessionwiki", "mcp"],
+      "env": { "SESSIONWIKI_HOME": "/path/to/your/sessionwiki" }
     }
   }
 }
 ```
+
+From a source checkout, use `"command": "/path/to/sessionwiki/.venv/bin/sessionwiki"` with `"args": ["mcp"]`; the checkout is the data root, so no `env` is needed.
 
 Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query`, `wiki_search` (optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and more — 12 in total, stdio transport, no SDK dependency, path-traversal guarded.
 
@@ -185,6 +198,7 @@ sessionwiki doctor                  # check Python, deps, config, agent paths
 sessionwiki audit                   # scan raw/ wiki/ site/ for usernames and secrets
 sessionwiki zcode                   # export · autosync · install
 sessionwiki opencode                # export · autosync · install
+sessionwiki mcp                     # MCP server on stdio
 sessionwiki version
 ```
 

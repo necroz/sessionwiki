@@ -1,0 +1,33 @@
+{
+  "name": "sessionwiki",
+  "version": "2.0.1",
+  "description": "Search a local wiki compiled from your Claude Code, Codex, Cursor and other AI coding sessions before redoing work.",
+  "author": {
+    "name": "Igor Lashkevich",
+    "url": "https://github.com/necroz"
+  },
+  "homepage": "https://github.com/necroz/sessionwiki",
+  "repository": "https://github.com/necroz/sessionwiki",
+  "documentationUrl": "https://github.com/necroz/sessionwiki/tree/master/docs",
+  "supportUrl": "https://github.com/necroz/sessionwiki/issues",
+  "privacyPolicyUrl": "https://github.com/necroz/sessionwiki/blob/master/docs/privacy.md",
+  "license": "MIT",
+  "keywords": ["mcp", "knowledge-base", "session-history", "claude-code", "codex-cli"],
+  "userConfig": {
+    "wiki_home": {
+      "type": "directory",
+      "title": "sessionwiki folder",
+      "description": "Folder that holds raw/ and wiki/ (your clone, or where you ran `sessionwiki init`).",
+      "required": true
+    }
+  },
+  "mcpServers": {
+    "sessionwiki": {
+      "command": "uvx",
+      "args": ["sessionwiki", "mcp"],
+      "env": {
+        "SESSIONWIKI_HOME": "${user_config.wiki_home}"
+      }
+    }
+  }
+}
