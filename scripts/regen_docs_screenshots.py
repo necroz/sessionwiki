@@ -28,6 +28,7 @@ this and opens a PR with the changed images.
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import subprocess
 import sys
@@ -102,8 +103,13 @@ def capture(site: Path, theme: str, channel: str | None) -> dict[str, bool]:
     changed: dict[str, bool] = {}
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(channel=channel) if channel else p.chromium.launch()
-            ctx = browser.new_context(viewport={"width": 1280, "height": 800}, color_scheme=theme)
+            # Chrome draws native widgets (date inputs) in its UI language, which
+            # follows the system locale — pin it so screenshots are English.
+            launch = {"args": ["--lang=en-US"], "env": {**os.environ, "LANG": "en_US.UTF-8", "LANGUAGE": "en_US"}}
+            browser = p.chromium.launch(channel=channel, **launch) if channel else p.chromium.launch(**launch)
+            # Fixed locale/timezone so page-side formatting does not depend on the machine.
+            ctx = browser.new_context(viewport={"width": 1280, "height": 800}, color_scheme=theme,
+                                      locale="en-US", timezone_id="UTC")
             ctx.add_init_script(
                 f"try {{ localStorage.setItem('sessionwiki-theme', {theme!r}); }} catch (e) {{}}"
             )
