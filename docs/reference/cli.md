@@ -24,7 +24,7 @@ python3 -m sessionwiki              # same as --help
 ```
 
 The shorter alias `sessionwiki` works too once the package is installed
-(`pip install sessionwiki` or `pipx install sessionwiki` — see
+(`uv tool install sessionwiki` or `pip install sessionwiki` — see
 [`deploy/pypi-publishing.md`](../deploy/pypi-publishing.md)).
 
 ---

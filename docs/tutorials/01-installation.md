@@ -73,20 +73,23 @@ The wrapper scripts (`sync.sh`, `build.sh`, `serve.sh`) use
 `.venv/bin/python` automatically; you do not need to activate the venv
 in a new shell.
 
-## Step 4 — (Optional) Install via PyPI instead
+## Step 4 — (Optional) Install the published package instead
 
-Once [#246](https://github.com/Pratiyush/llm-wiki/issues/246) is set up:
+With [uv](https://docs.astral.sh/uv/) — the CLI gets its own isolated
+environment (macOS, Linux and Windows):
 
 ```bash
-pip install sessionwiki
+uv tool install sessionwiki
 sessionwiki --version
+uvx sessionwiki --help        # or run it once without installing
 ```
 
-Or with [pipx](https://pipx.pypa.io/), which keeps the CLI in its own
-environment (works on macOS, Linux and Windows):
+With pip, inside a virtual environment:
 
 ```bash
-pipx install sessionwiki
+python3 -m venv .venv && . .venv/bin/activate
+pip install sessionwiki
+sessionwiki --version
 ```
 
 ## Step 5 — (Optional) Install via Docker
@@ -124,7 +127,7 @@ machine — your first sync pulls from every one marked `active`.
 
 **`externally-managed-environment` (PEP 668)** — do not use `pip install --user`; `./setup.sh` creates a local `.venv` and installs there.
 
-**`ImportError` on Python 3.8 or older** — sessionwiki requires ≥ 3.9. Upgrade Python; on macOS use `brew install python@3.12`.
+**`ImportError` on Python 3.8 or older** — sessionwiki requires ≥ 3.9. Upgrade Python, e.g. `uv python install 3.12`.
 
 ---
 

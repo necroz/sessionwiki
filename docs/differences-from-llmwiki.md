@@ -99,7 +99,7 @@ fork point.
 ## Migrating from llmwiki
 
 1. Install sessionwiki in the same checkout or a new one:
-   `pip install sessionwiki` (or `./setup.sh` in a clone).
+   `uv tool install sessionwiki`, `pip install sessionwiki`, or `./setup.sh` in a clone.
 2. Replace the command: `llmwiki <cmd>` → `sessionwiki <cmd>`, and
    `python -m llmwiki` → `python -m sessionwiki` — in shell aliases, hooks
    (`~/.claude/settings.json`, `~/.zcode/cli/config.json`), systemd /

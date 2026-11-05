@@ -1111,7 +1111,7 @@ def _add_vault_arg(parser: argparse.ArgumentParser, *, role: str) -> None:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="sessionwiki",
-        description="LLM-powered knowledge base from Claude Code and Codex CLI sessions.",
+        description="Searchable, interlinked wiki of your AI coding sessions (Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot, ZCode, OpenCode).",
     )
     p.add_argument("--version", action="version", version=f"sessionwiki {__version__}")
 

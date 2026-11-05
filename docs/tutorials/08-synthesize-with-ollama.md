@@ -23,10 +23,9 @@ Claude / OpenAI API key, point the pipeline at a local Ollama model.
 
 ### 1. Install Ollama
 
-macOS:
+macOS / Windows: download the app from <https://ollama.com/download>, then:
 
 ```bash
-brew install ollama
 ollama serve &   # background daemon on 127.0.0.1:11434
 ```
 

@@ -78,11 +78,19 @@ cd sessionwiki
 
 `setup` creates a checkout-local `.venv`, installs the package, scaffolds `raw/`, `wiki/`, `site/`, enables the adapters for the agents it finds and runs `sessionwiki doctor`. The wrapper scripts use the venv automatically; for the CLI, activate it (`source .venv/bin/activate`) or call `.venv/bin/sessionwiki`.
 
-Prefer pip? Install straight from GitHub (PyPI release coming with v2.0.0):
+Or install the published package — pick one:
 
 ```bash
-pip install 'sessionwiki @ git+https://github.com/necroz/sessionwiki'          # core
-pip install 'sessionwiki[all] @ git+https://github.com/necroz/sessionwiki'     # + graph engine, dev, e2e
+uv tool install sessionwiki          # uv: CLI in its own isolated environment
+uvx sessionwiki --help               # uv: run without installing
+pip install sessionwiki              # pip, inside a virtualenv
+pip install 'sessionwiki[graph]'     # + graphify graph engine (also works with uv tool install)
+```
+
+Docker — serve a site you have built (image `ghcr.io/necroz/sessionwiki`, see [Docker deployment](https://github.com/necroz/sessionwiki/blob/master/docs/deploy/docker.md) for `docker compose` and running CLI commands in the container):
+
+```bash
+docker run --rm -p 8765:8765 -v "$PWD/site:/wiki/site:ro" ghcr.io/necroz/sessionwiki
 ```
 
 A step-by-step walkthrough with screenshots lives in the [setup guide](https://github.com/necroz/sessionwiki/blob/master/docs/tutorials/setup-guide.md).
