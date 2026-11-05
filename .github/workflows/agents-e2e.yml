@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload HTML report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: agents-html-report
           path: playwright-report
@@ -84,7 +84,7 @@ jobs:
 
       - name: Upload traces
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: agents-traces
           path: test-results
