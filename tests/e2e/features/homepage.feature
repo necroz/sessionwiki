@@ -8,8 +8,8 @@ Feature: Homepage
 
   Scenario: Homepage hero is visible
     When I visit the homepage
-    Then I see the page title contains "LLM Wiki"
-    And I see a hero heading with text "LLM Wiki"
+    Then I see the page title contains "sessionwiki"
+    And I see a hero heading with text "sessionwiki"
     And I see the subtitle mentions "sessions"
 
   Scenario: Nav bar has the main sections

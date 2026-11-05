@@ -864,7 +864,7 @@ def nav_bar(active: str, link_prefix: str = "") -> str:
   <div class="nav-inner">
     <a href="{link_prefix}index.html" class="nav-brand">
       <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-      LLM Wiki
+      sessionwiki
     </a>
     <button type="button" class="nav-hamburger" id="nav-hamburger"
             aria-expanded="false" aria-controls="nav-drawer"
@@ -1152,7 +1152,7 @@ def render_session(
     # resolves it correctly whether served from a subdomain root or any path.
     page = (
         page_head_article(
-            title=f"{title_raw} — LLM Wiki",
+            title=f"{title_raw} — sessionwiki",
             description=f"Session transcript from {meta.get('project', '')} on {date}",
             css_prefix="../../",
             canonical=f"{html_stem}.html",
@@ -1323,7 +1323,7 @@ def render_project_page(
 
     page = (
         page_head(
-            f"{project_slug} — LLM Wiki",
+            f"{project_slug} — sessionwiki",
             f"{len(sessions)} Claude Code sessions from {project_slug}",
             css_prefix="../",
         )
@@ -1381,7 +1381,7 @@ def render_projects_index(
 """
 
     page = (
-        page_head("Projects — LLM Wiki", "All projects with Claude Code session history", css_prefix="../")
+        page_head("Projects — sessionwiki", "All projects with AI coding session history", css_prefix="../")
         + nav_bar("projects", link_prefix="../")
         + hero("Projects", _pluralize(len(groups), "project"))
         + body
@@ -1516,7 +1516,7 @@ def render_sessions_index(
 """
 
     page = (
-        page_head("Sessions — LLM Wiki", "All Claude Code sessions, newest first", css_prefix="../")
+        page_head("Sessions — sessionwiki", "All AI coding sessions, newest first", css_prefix="../")
         + nav_bar("sessions", link_prefix="../")
         + hero("All sessions", _pluralize(len(sources), "session") + " total")
         + body
@@ -1642,10 +1642,10 @@ def render_index(
 """
 
     page = (
-        page_head("LLM Wiki", "Karpathy-style knowledge base from Claude Code sessions", css_prefix="")
+        page_head("sessionwiki", "Karpathy-style LLM Wiki of your AI coding sessions", css_prefix="")
         + nav_bar("home", link_prefix="")
         + hero(
-            "LLM Wiki",
+            "sessionwiki",
             f"{_pluralize(mains, 'main session')} · {_pluralize(subs, 'sub-agent run')} · {_pluralize(len(groups), 'project')}",
         )
         + synth_block
@@ -1703,7 +1703,7 @@ def _render_root_md_page(
 """
     page = (
         page_head(
-            f"{title} — LLM Wiki",
+            f"{title} — sessionwiki",
             meta_description,
             css_prefix="",
         )
@@ -1816,7 +1816,7 @@ def render_changelog(out_dir: Path) -> Optional[Path]:
 
     page = (
         page_head(
-            "Changelog — LLM Wiki",
+            "Changelog — sessionwiki",
             "Release notes for sessionwiki — features, fixes, and version history.",
             css_prefix="",
         )
@@ -1867,7 +1867,7 @@ def render_models_section(out_dir: Path) -> tuple[Optional[Path], int]:
     index_body = render_models_index(entries)
     index_page = (
         page_head(
-            "Models — LLM Wiki",
+            "Models — sessionwiki",
             "Directory of AI-model entities tracked by the wiki with pricing, "
             "context windows, and benchmark scores.",
             css_prefix="../",
@@ -1923,7 +1923,7 @@ def render_models_section(out_dir: Path) -> tuple[Optional[Path], int]:
             )
         page = (
             page_head(
-                f"{title} — LLM Wiki",
+                f"{title} — sessionwiki",
                 f"AI-model entity: {title}",
                 css_prefix="../",
             )
@@ -1986,7 +1986,7 @@ def render_vs_section(
     index_body = render_comparisons_index(pairs)
     index_page = (
         page_head(
-            "Model comparisons — LLM Wiki",
+            "Model comparisons — sessionwiki",
             "Auto-generated side-by-side comparisons of AI-model entities.",
             css_prefix="../",
         )
@@ -2024,7 +2024,7 @@ def render_vs_section(
         title = f"{pair['title_a']} vs {pair['title_b']}"
         page = (
             page_head(
-                f"{title} — LLM Wiki",
+                f"{title} — sessionwiki",
                 f"Side-by-side comparison of {title}.",
                 css_prefix="../",
             )
