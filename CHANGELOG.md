@@ -70,6 +70,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 - **`sessionwiki zcode install --scheduler windows` prints a working `schtasks` command** — the task now runs the generated `autosync.cmd` wrapper (which sets the working directory and appends to `autosync.log`) instead of calling python inline, and the `/TR` value escapes its inner quotes as `\"`, so a Python or home path with spaces (`C:\Program Files\…`, `C:\Users\John Doe\…`) no longer splits into broken arguments. Literal `%` in paths is escaped as `%%` in the wrapper.
 - **No private project names or internal hosts in examples** — docs, CLI help, and test fixtures use placeholder projects (`demo_project`, `other-app`) and a loopback `base_url`.
 - **Graph node clicks** (#740) — `/graph.html` nodes now open their page again. The graph builder computed `site_url`, but the vis-network DataSet mapping dropped it, so the click handler always saw `undefined`.
+- **Demo project cards restored** — the rebrand swapped the demo corpus to five projects (`ledger-api`, `pixel-dash`, `edge-cache`, `infra-stack`, `eval-harness`) but shipped only their sessions; the five `wiki/projects/*.md` cards are tracked again, so the Pages demo project links and the `docs/reference/cache-tiers.md` example resolve instead of failing the link check.
 
 ## [1.3.82] — 2026-04-30
 
