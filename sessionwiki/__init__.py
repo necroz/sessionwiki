@@ -19,10 +19,34 @@ __version__ = "2.0.0"
 __author__ = "Igor Lashkevich"  # based on llmwiki by Pratiyush (MIT)
 __license__ = "MIT"
 
+import os
 from pathlib import Path
 
-# Repo root (sessionwiki/ clone), resolved from this file's location.
-REPO_ROOT = Path(__file__).resolve().parent.parent
+
+def _resolve_root(package_file: "str | Path" = __file__) -> Path:
+    """Directory that holds raw/, wiki/, site/ and the state files.
+
+    1. ``$SESSIONWIKI_HOME`` (or the legacy ``$LLMWIKI_HOME``) when set.
+    2. The source checkout, when the package runs from a clone (``./setup.sh``
+       or ``pip install -e``): the parent of ``sessionwiki/`` has
+       ``pyproject.toml``.
+    3. Otherwise — ``pip install`` / ``uv tool install`` / ``uvx`` / Docker,
+       where the parent is ``site-packages`` — the current directory.
+    """
+    for var in ("SESSIONWIKI_HOME", "LLMWIKI_HOME"):
+        value = os.environ.get(var, "").strip()
+        if value:
+            return Path(value).expanduser().resolve()
+    checkout = Path(package_file).resolve().parent.parent
+    if (checkout / "pyproject.toml").is_file():
+        return checkout
+    return Path.cwd().resolve()
+
+
+# Data root (raw/, wiki/, site/, state files). See _resolve_root().
+REPO_ROOT = _resolve_root()
+# The installed package itself — use this, not REPO_ROOT, for files that
+# ship inside the package (templates, prompts, bundled assets).
 PACKAGE_ROOT = Path(__file__).resolve().parent
 
 # #arch-m4 (#617): the docstring above promised a "public API" but
