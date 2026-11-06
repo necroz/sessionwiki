@@ -23,6 +23,8 @@ def synthesize_estimate_report(
     prefix_tokens: Optional[int] = None,
     output_tokens_per_call: int = 1000,
     model: Optional[str] = None,
+    chunking: Optional[Any] = None,
+    max_body_chars: int = 40_000,
 ) -> dict:
     """Compute the incremental vs full-force cost report (G-07 · #293).
 
@@ -38,6 +40,11 @@ def synthesize_estimate_report(
     * ``prefix_tokens`` — tokens in the stable CLAUDE.md + index.md +
       overview.md prefix
     * ``model`` — model id used for pricing
+    * ``chunked`` — sessions that exceed ``max_body_chars`` and go
+      through map-reduce (their digest outputs are counted in the
+      output-token estimate)
+    * ``chunked_new`` — how many of the ``new`` bucket are chunked,
+      i.e. what this run will actually map-reduce
     * ``warnings`` — list of human-readable warnings (e.g. prefix too
       small to be cached)
 
@@ -95,17 +102,29 @@ def synthesize_estimate_report(
     incremental_first = True
     full_force_first = True
 
-    def _add_to_bucket(fresh_tokens: int, first: bool) -> tuple[float, bool]:
+    def _add_to_bucket(
+        fresh_tokens: int, first: bool, output_tokens: Optional[int] = None
+    ) -> tuple[float, bool]:
         """Return (cost, was_first?). Cost-of-this-call uses cache_hit=
         not first, mirroring the old _bucket_usd semantics."""
         est = estimate_cost(
             cached_tokens=prefix_tokens,
             fresh_tokens=fresh_tokens,
-            output_tokens=output_tokens_per_call,
+            output_tokens=(
+                output_tokens_per_call if output_tokens is None else output_tokens
+            ),
             model=chosen_model,
             cache_hit=not first,
         )
         return est.usd, False  # second-and-later calls hit the cache
+
+    digest_tokens = (
+        max(1, int(getattr(chunking, "digest_chars", 2000)) // 4)
+        if chunking is not None
+        else 0
+    )
+    chunked = 0
+    chunked_new = 0
 
     for p, _meta, body in raw_sessions:
         keys_to_try: set[str] = set()
@@ -121,16 +140,43 @@ def synthesize_estimate_report(
             isinstance(k, str) and k.endswith(name) for k in state_keys
         )
         body_tokens = estimate_tokens(body)
+        fresh_tokens = body_tokens
+        out_tokens = output_tokens_per_call
+        if (
+            chunking is not None
+            and getattr(chunking, "enabled", False)
+            and len(body) > max_body_chars
+        ):
+            # The whole body still enters the model, split across map
+            # calls; each map call also emits a digest.
+            limit = max(256, min(int(getattr(chunking, "chunk_chars", 40_000)), max_body_chars))
+            budget_chars = min(
+                len(body), limit * max(1, int(getattr(chunking, "max_chunks", 200)))
+            )
+            chunks = max(1, (budget_chars + limit - 1) // limit)
+            fresh_tokens = (
+                max(1, body_tokens * budget_chars // len(body)) if body else 0
+            )
+            out_tokens = chunks * digest_tokens + output_tokens_per_call
+            chunked += 1
         # Full-force bucket: every session contributes regardless of state.
-        ff_cost, full_force_first = _add_to_bucket(body_tokens, full_force_first)
+        ff_cost, full_force_first = _add_to_bucket(
+            fresh_tokens, full_force_first, out_tokens
+        )
         full_force_usd += ff_cost
         # Incremental bucket: only un-synthesised sessions contribute.
         if matched:
             synthed += 1
         else:
             new += 1
+            if (
+                chunking is not None
+                and getattr(chunking, "enabled", False)
+                and len(body) > max_body_chars
+            ):
+                chunked_new += 1
             inc_cost, incremental_first = _add_to_bucket(
-                body_tokens, incremental_first
+                fresh_tokens, incremental_first, out_tokens
             )
             incremental_usd += inc_cost
 
@@ -142,5 +188,7 @@ def synthesize_estimate_report(
         "full_force_usd": full_force_usd,
         "prefix_tokens": prefix_tokens,
         "model": chosen_model,
+        "chunked": chunked,
+        "chunked_new": chunked_new,
         "warnings": warnings,
     }

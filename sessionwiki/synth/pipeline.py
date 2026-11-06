@@ -86,7 +86,7 @@ def resolve_backend(
         # users stick with the default dummy backend.
         from sessionwiki.synth.ollama import OllamaSynthesizer, load_ollama_config
 
-        return OllamaSynthesizer(config=load_ollama_config(cfg))
+        return _with_chunking(OllamaSynthesizer(config=load_ollama_config(cfg)), cfg)
 
     if name in {"openai", "openai-compatible", "openai_compat", "vllm"}:
         from sessionwiki.synth.openai_compat import (
@@ -94,7 +94,9 @@ def resolve_backend(
             load_openai_config,
         )
 
-        return OpenAICompatSynthesizer(config=load_openai_config(cfg))
+        return _with_chunking(
+            OpenAICompatSynthesizer(config=load_openai_config(cfg)), cfg
+        )
 
     if name in {"agent", "agent_delegate", "agent-delegate"}:
         # Imported lazily — the agent backend is a thin file-I/O layer
@@ -110,6 +112,42 @@ def resolve_backend(
             "Unknown synthesis.backend %r — falling back to dummy", name
         )
     return DummySynthesizer()
+
+
+def _with_chunking(
+    backend: BaseSynthesizer, cfg: Optional[dict[str, Any]] = None
+) -> BaseSynthesizer:
+    """Wrap a text backend in the map-reduce layer for long sessions.
+
+    Backends that write pending prompts or ignore the body opt out via
+    ``supports_chunking = False``.
+    """
+    from sessionwiki.synth.chunking import (
+        ChunkedSynthesizer,
+        ChunkingConfig,
+        PromptCache,
+        load_digest_template,
+        load_merge_template,
+    )
+
+    synth_cfg = (cfg or {}).get("synthesis", {}) or {}
+    chunk_cfg = ChunkingConfig.from_synthesis_config(synth_cfg)
+    if not chunk_cfg.enabled or not getattr(backend, "supports_chunking", False):
+        return backend
+    cache = None
+    if chunk_cfg.cache:
+        cache = PromptCache(
+            chunk_cfg.cache_dir or (REPO_ROOT / ".llmwiki-synth-cache")
+        )
+    language = str(synth_cfg.get("language") or DEFAULT_SYNTHESIS_LANGUAGE)
+    rule = _language_rule(language)
+    return ChunkedSynthesizer(
+        backend,
+        chunk_cfg,
+        cache,
+        load_digest_template(rule),
+        load_merge_template(rule),
+    )
 
 RAW_SESSIONS = REPO_ROOT / "raw" / "sessions"
 WIKI_SOURCES = REPO_ROOT / "wiki" / "sources"

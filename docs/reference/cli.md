@@ -572,6 +572,49 @@ Backend is picked from `synthesis.backend` in `sessions_config.json`
 (`dummy` by default, `ollama` for local, future `anthropic`). See
 [`reference/prompt-caching.md`](prompt-caching.md).
 
+### Long sessions (chunking)
+
+A raw session can be megabytes of markdown. One LLM call cannot carry
+it, and the backends used to keep only the head and the tail —
+silently dropping the middle. Sessions above `synthesis.max_body_chars`
+(default 40 000 for `openai`, 8 000 for `ollama`) now go through
+map-reduce instead:
+
+1. The body is split on `### Turn N` boundaries into chunks no larger
+   than `chunking.chunk_chars` (also capped by `max_body_chars`). An
+   oversized turn is split on paragraphs; code fences stay balanced.
+2. Each chunk becomes a digest (decisions, paths, commands, errors,
+   outcome, quotes), at most `chunking.digest_chars` characters.
+3. Digests are reduced through the normal `source_page` prompt. If
+   they still exceed `chunking.reduce_chars`, they are merged in
+   batches first (hierarchical reduce, up to `max_depth` levels).
+
+Every map and merge call is cached in `.llmwiki-synth-cache/`
+(gitignored) by prompt, body and backend name. A failed run re-pays
+only for the chunks that failed. `chunking.max_chunks` is a hard cap
+per session (default 200); above it the head and tail are kept and the
+omitted middle is named in the prompt, so the page can mention the gap.
+
+```json
+"synthesis": {
+  "max_body_chars": 96000,
+  "chunking": {
+    "enabled": true,
+    "chunk_chars": 96000,
+    "digest_chars": 2000,
+    "reduce_chars": 24000,
+    "max_chunks": 200,
+    "cache": true
+  }
+}
+```
+
+Raise `max_body_chars` and `chunk_chars` together for a large-context
+model: with 96 000 chars a 1.5M-character session is ~16 map calls
+instead of 125. The agent-delegate and dummy backends opt out —
+the first writes one pending prompt per session, the second ignores
+the body.
+
 ### Auto-tagging (#351)
 
 Every `synthesize` call now produces **topical** tags alongside the

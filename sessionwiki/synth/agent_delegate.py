@@ -148,7 +148,12 @@ class AgentDelegateSynthesizer(BaseSynthesizer):
     The backend's job is to write the rendered prompt to disk and
     return a placeholder page.  The slash-command layer picks up the
     pending prompt on the next agent turn.
+
+    Chunking is off: each call writes one pending prompt, so a map
+    step would leave the agent with one prompt per chunk.
     """
+
+    supports_chunking = False
 
     pending_root: Optional[Path] = None
 

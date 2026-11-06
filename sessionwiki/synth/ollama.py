@@ -99,6 +99,9 @@ class OllamaConfig:
     timeout: int = DEFAULT_TIMEOUT
     max_retries: int = DEFAULT_MAX_RETRIES
     backoff_base: float = DEFAULT_BACKOFF_BASE
+    #: Body cap for the one-shot path. ``ChunkedSynthesizer`` never
+    #: sends more than this.
+    max_body_chars: int = 8_000
 
     @property
     def generate_url(self) -> str:
@@ -143,12 +146,19 @@ def load_ollama_config(cfg: Optional[dict[str, Any]]) -> OllamaConfig:
         if "backoff_base" in synth
         else DEFAULT_BACKOFF_BASE
     )
+    max_body_chars = (
+        int(synth["max_body_chars"]) if "max_body_chars" in synth else 8_000
+    )
 
     if timeout <= 0:
         raise ValueError(f"synthesis.timeout must be positive, got {timeout}")
     if max_retries < 1:
         raise ValueError(
             f"synthesis.max_retries must be >= 1, got {max_retries}"
+        )
+    if max_body_chars < 1:
+        raise ValueError(
+            f"synthesis.max_body_chars must be >= 1, got {max_body_chars}"
         )
 
     resolved = OllamaConfig(
@@ -157,6 +167,7 @@ def load_ollama_config(cfg: Optional[dict[str, Any]]) -> OllamaConfig:
         timeout=timeout,
         max_retries=max_retries,
         backoff_base=backoff_base,
+        max_body_chars=max_body_chars,
     )
 
     if not resolved.is_local:
@@ -195,6 +206,10 @@ class OllamaSynthesizer(BaseSynthesizer):
 
     # ---- BaseSynthesizer interface --------------------------------
 
+    @property
+    def max_body_chars(self) -> int:
+        return self.config.max_body_chars
+
     def is_available(self) -> bool:
         """Probe ``/api/tags`` with a 2-second timeout.
 
@@ -232,10 +247,10 @@ class OllamaSynthesizer(BaseSynthesizer):
         # #py-h7 (#585): pipeline used to pre-render the prompt for us
         # (with `body[:8000]` truncation + a `key: value` meta format),
         # but that violated the BaseSynthesizer contract. Now we own the
-        # render. Mirror the previous 8 KB body cap so very long sessions
-        # don't blow Ollama's context window — agent_delegate uses the
-        # same cap; centralise here so the limit lives next to the prompt.
-        truncated_body = raw_body[:8000] if raw_body else ""
+        # render. Keep the 8 KB default so very long sessions don't blow
+        # Ollama's context window; `max_body_chars` raises it for larger
+        # models, and `ChunkedSynthesizer` splits anything above it.
+        truncated_body = raw_body[: self.config.max_body_chars] if raw_body else ""
         prompt = _render_prompt(prompt_template, raw_body=truncated_body, meta=meta)
         payload = {
             "model": self.config.model,
