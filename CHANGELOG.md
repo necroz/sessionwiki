@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.0.3] — 2026-11-06
+
+Theme: MCP tools agents can choose between — accurate descriptions, behaviour annotations, a working project filter, and the plugin listing icon.
+
 ### Added
 
 - **Plugin icon** — `plugin/.claude-plugin/icon.png` (1024 px, the site's layers mark) for the Anthropic plugin directory listing, with its source in `docs/images/plugin-icon.svg`. `claude plugin validate ./plugin --strict` now reports nothing.

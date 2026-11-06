@@ -15,7 +15,7 @@ Public API:
     - sessionwiki.mcp.server.main()       — MCP server (stdio)
 """
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 __author__ = "Igor Lashkevich"  # based on llmwiki by Pratiyush (MIT)
 __license__ = "MIT"
 
