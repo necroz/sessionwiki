@@ -24,7 +24,7 @@
   "mcpServers": {
     "sessionwiki": {
       "command": "uvx",
-      "args": ["sessionwiki", "mcp"],
+      "args": ["sessionwiki==2.0.5", "mcp"],
       "env": {
         "SESSIONWIKI_HOME": "${user_config.wiki_home}"
       }
