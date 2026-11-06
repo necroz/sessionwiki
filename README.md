@@ -116,7 +116,7 @@ Parallel hook runs are safe: `sync` and `synthesize` take an OS file lock and wr
 
 ```bash
 sessionwiki zcode install --dry-run   # show what will be written
-sessionwiki zcode install             # Stop hook + systemd / launchd / Task Scheduler
+sessionwiki zcode install             # Stop + SessionStart hooks, systemd / launchd / Task Scheduler
 ```
 
 **OpenCode** (V2, `opencode.db`) gets a server plugin that runs autosync when a session goes idle:
@@ -154,7 +154,7 @@ Backends: `ollama` (local), `openai` (any OpenAI-compatible `/v1`: vLLM, SGLang,
 
 ## Ask your wiki from your agents (MCP)
 
-**Claude Code plugin** — the MCP server plus a skill that tells the agent when to search the wiki. It asks for your sessionwiki folder on install:
+**Claude Code plugin** — the MCP server, a skill that tells the agent when to search the wiki, and a `SessionStart` hook that puts the project's recent sessions into context. It asks for your sessionwiki folder on install:
 
 ```
 /plugin marketplace add necroz/sessionwiki
@@ -199,6 +199,7 @@ sessionwiki audit                   # scan raw/ wiki/ site/ for usernames and se
 sessionwiki zcode                   # export · autosync · install
 sessionwiki opencode                # export · autosync · install
 sessionwiki mcp                     # MCP server on stdio
+sessionwiki recall                  # a project's recent sessions, for a SessionStart hook
 sessionwiki version
 ```
 

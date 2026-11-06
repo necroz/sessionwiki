@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "SESSIONWIKI_HOME=\"$CLAUDE_PLUGIN_OPTION_WIKI_HOME\" uvx sessionwiki recall --format hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

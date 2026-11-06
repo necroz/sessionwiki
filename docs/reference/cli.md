@@ -623,6 +623,27 @@ directory themselves, so set `SESSIONWIKI_HOME` in the client config.
 
 ---
 
+## `recall` — a project's recent sessions
+
+```bash
+sessionwiki recall                          # project = current folder name
+sessionwiki recall --project llm-wiki --limit 5
+sessionwiki recall --format hook            # SessionStart JSON (additionalContext)
+```
+
+Prints the latest sessions of one project, newest first: date, the
+user's original request, the first sentence of the summary and the
+page path. Sessions not synthesised yet come from `raw/sessions/`.
+Prints nothing when the project has no sessions.
+
+Meant for a `SessionStart` hook: agents rarely call memory tools on
+their own, so the hook puts recent work into context up front. With
+`--project` omitted it reads the hook's JSON from stdin and takes the
+project from its `cwd`. The Claude Code plugin and
+`sessionwiki zcode install` set the hook up.
+
+---
+
 ## `query` — search the knowledge graph
 
 ```bash

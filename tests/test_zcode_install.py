@@ -225,3 +225,26 @@ def test_scheduled_autosync_still_waits_for_the_lock(tmp_path):
         encoding="utf-8"
     )
     assert "--lock-timeout" not in service
+
+
+def test_install_all_adds_a_session_start_recall_hook(tmp_path):
+    """Agents rarely call memory tools themselves; a SessionStart hook
+    puts the project's recent sessions into context up front."""
+    for _ in range(2):
+        install.install_all(
+            scheduler="none", home=tmp_path, python_exe="/venv/bin/python", repo_root=tmp_path,
+        )
+    data = json.loads(_hook_config(tmp_path).read_text(encoding="utf-8"))
+    start = data["hooks"]["events"]["SessionStart"]
+    commands = [hook["command"] for entry in start for hook in entry["hooks"]]
+    assert len(commands) == 1
+    assert "sessionwiki recall --format hook" in commands[0]
+    assert str(tmp_path) in commands[0]  # data root pinned for the hook
+
+
+def test_no_hook_skips_the_recall_hook_too(tmp_path):
+    install.install_all(
+        scheduler="none", home=tmp_path, python_exe="/venv/bin/python",
+        repo_root=tmp_path, hook=False,
+    )
+    assert not _hook_config(tmp_path).exists()

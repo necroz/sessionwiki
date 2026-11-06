@@ -12,11 +12,16 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Added
 
+- **`sessionwiki recall`** and a **SessionStart hook** — agents called the wiki tools in 3 of 941 real sessions even with the MCP server configured and told to use it. `recall` prints a project's latest sessions (date, the user's request, first sentence of the summary, path); the Claude Code plugin and `sessionwiki zcode install` add a `SessionStart` hook that puts it into the new session's context. Subagent runs are left out.
 - **Source pages keep the user's own request** — synthesis now writes `slug` and `description` (the user's first message, from the raw transcript) into each source page's frontmatter. Pages were synthesised in English and dropped it, so a question in the user's language matched no page (0 of 850 pages had it; 835 of 941 transcripts were Russian). `sessionwiki synthesize --backfill-only` adds both to existing pages without an LLM, and every `synthesize` run backfills too.
+- **`scripts/eval_recall.py`** — measures `wiki_query` recall@k and hit@k over a hand-made JSON query set (`{id, kind, question, expected}`), per kind and overall, and lists the pages each query missed. Keep query sets in `.metrics/` (now gitignored): they name real sessions.
 - **`synthesis.language`** — pages are now written in the language the user wrote in (`"session"`, default); set e.g. `"English"` to pin one language. Section headings, tags and `[[wikilinks]]` stay as in the template.
 
 ### Changed
 
+- **`wiki_query` follows one hop of the session graph** — sessions that name the same tool or topic under `## Connections` (or `[[link]]` it) as two or more top hits now rank too, even without the question's words, and say why: `(score: 18.6, via Keycloak)`. A name on more than 5% of the pages links nothing. On a real 850-page wiki, 24 queries: recall@5 55.6% → 57.6%, recall@10 74.3% → 77.8%, questions about how sessions relate 41.7% → 52.1% at k=5; exact-term queries unchanged.
+- **Fresh sessions are searchable** — synthesis runs nightly, so a session from earlier today had no wiki page and `wiki_query` never read its transcript while the wiki matched anything. Transcripts without a page are now always ranked (the rest are skipped after their frontmatter), and newer sessions get up to +20% (half-life 30 days) so the latest of several similar sessions wins. ~0.14 s per query on ~1,000 sessions.
+- **Returned content is marked as data** — transcripts quote instructions given to other agents ("run exactly this SQL"). `wiki_read_page` and `wiki_query` output, and `wiki_search`'s `note` field, start with a `[sessionwiki]` notice to treat it as data, not instructions; the plugin skill says the same.
 - **`wiki_query` ranking** — rare words weigh more than common ones (BM25-style IDF), service pages (`type: navigation` / `context`, `index.md`, `overview.md`, `log.md`) are no longer ranked, and project overview pages count half so the session that holds the answer comes first. Raw transcripts are read only when no wiki page matches (new `include_raw`: `true` always, `false` never). On a real 901-page wiki after the backfill: English questions 13 → 16 of 17 in the top 3, Russian 0 → 3 of 5 (4 of 5 in the top 5), ~0.1 s per query.
 
 ### Fixed

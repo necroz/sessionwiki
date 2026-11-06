@@ -111,3 +111,12 @@ def test_plugin_icon_meets_directory_rules():
     assert width == height
     assert 512 <= width <= 2048
     assert len(data) < 2 * 1024 * 1024
+
+
+def test_plugin_session_start_hook_runs_recall_with_the_users_folder():
+    hooks = _load(PLUGIN_DIR / "hooks" / "hooks.json")["hooks"]["SessionStart"]
+    (command,) = [h["command"] for entry in hooks for h in entry["hooks"]]
+    assert "sessionwiki recall --format hook" in command
+    # Shell hooks get user config as CLAUDE_PLUGIN_OPTION_<KEY>.
+    key = next(iter(_load(PLUGIN_JSON)["userConfig"]))
+    assert f"CLAUDE_PLUGIN_OPTION_{key.upper()}" in command
