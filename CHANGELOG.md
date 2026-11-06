@@ -10,6 +10,19 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Added
+
+- **Source pages keep the user's own request** — synthesis now writes `slug` and `description` (the user's first message, from the raw transcript) into each source page's frontmatter. Pages were synthesised in English and dropped it, so a question in the user's language matched no page (0 of 850 pages had it; 835 of 941 transcripts were Russian). `sessionwiki synthesize --backfill-only` adds both to existing pages without an LLM, and every `synthesize` run backfills too.
+- **`synthesis.language`** — pages are now written in the language the user wrote in (`"session"`, default); set e.g. `"English"` to pin one language. Section headings, tags and `[[wikilinks]]` stay as in the template.
+
+### Changed
+
+- **`wiki_query` ranking** — rare words weigh more than common ones (BM25-style IDF), service pages (`type: navigation` / `context`, `index.md`, `overview.md`, `log.md`) are no longer ranked, and project overview pages count half so the session that holds the answer comes first. Raw transcripts are read only when no wiki page matches (new `include_raw`: `true` always, `false` never). On a real 901-page wiki after the backfill: English questions 13 → 16 of 17 in the top 3, Russian 0 → 3 of 5 (4 of 5 in the top 5), ~0.1 s per query.
+
+### Fixed
+
+- **Searches no longer drop files silently** — the 50 MiB per-call budget was smaller than a real `raw/sessions/` (61 MB), and a file larger than the remaining budget was skipped without a word. The budget is now 256 MiB, a scan stops instead of skipping, and `wiki_search` reports `scan_incomplete`, `files_scanned` and `files_total`; `wiki_query` notes an incomplete scan in its output.
+
 ## [2.0.3] — 2026-11-06
 
 Theme: MCP tools agents can choose between — accurate descriptions, behaviour annotations, a working project filter, and the plugin listing icon.
