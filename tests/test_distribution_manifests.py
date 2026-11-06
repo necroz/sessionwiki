@@ -120,3 +120,16 @@ def test_plugin_session_start_hook_runs_recall_with_the_users_folder():
     # Shell hooks get user config as CLAUDE_PLUGIN_OPTION_<KEY>.
     key = next(iter(_load(PLUGIN_JSON)["userConfig"]))
     assert f"CLAUDE_PLUGIN_OPTION_{key.upper()}" in command
+
+
+def test_plugin_launcher_is_pinned_to_the_package_version():
+    """The directory blocks an unpinned package launcher, and a pin that
+    lags behind the package ships an old version to everyone who installs
+    the plugin. Raise both pins with the version."""
+    requirement, *rest = _load(PLUGIN_JSON)["mcpServers"]["sessionwiki"]["args"]
+    assert requirement == f"sessionwiki=={__version__}"
+    assert rest == ["mcp"]
+
+    hooks = _load(PLUGIN_DIR / "hooks" / "hooks.json")["hooks"]["SessionStart"]
+    (command,) = [h["command"] for entry in hooks for h in entry["hooks"]]
+    assert f"uvx sessionwiki=={__version__} recall" in command
