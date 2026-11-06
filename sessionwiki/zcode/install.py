@@ -79,9 +79,17 @@ def _entry_has_autosync(entry: object) -> bool:
     if not isinstance(hooks, list):
         return False
     return any(
-        isinstance(hook, dict) and "zcode autosync" in str(hook.get("command", ""))
+        isinstance(hook, dict)
+        and any(marker in str(hook.get("command", "")) for marker in _AUTOSYNC_MARKERS)
         for hook in hooks
     )
+
+
+# A Stop hook runs autosync either directly or through the POSIX wrapper
+# older setups installed (scripts/zcode_sync_hook.sh calls `zcode
+# autosync`). Both count, or a reinstall adds a second hook that syncs
+# twice after every reply.
+_AUTOSYNC_MARKERS = ("zcode autosync", "zcode_sync_hook.sh")
 
 
 def _contains_autosync(entries: list) -> bool:

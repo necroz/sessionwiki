@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Fixed
+
+- **`sessionwiki zcode install` no longer adds a second Stop hook** — setups made before the installer run `scripts/zcode_sync_hook.sh`, a wrapper around `zcode autosync`, and the installer recognised only the direct command, so a reinstall synced twice after every reply. The wrapper now counts as installed; `--force` replaces it with the direct command.
+
 ## [2.0.4] — 2026-11-06
 
 Theme: the wiki reaches the agent — questions in the user's language, fresh sessions, recent work recalled at session start, past content marked as data.

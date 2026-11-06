@@ -248,3 +248,37 @@ def test_no_hook_skips_the_recall_hook_too(tmp_path):
         repo_root=tmp_path, hook=False,
     )
     assert not _hook_config(tmp_path).exists()
+
+
+def test_existing_wrapper_script_stop_hook_counts_as_installed(tmp_path):
+    """Older setups run scripts/zcode_sync_hook.sh, a wrapper around
+    `zcode autosync`. Installing again must not add a second Stop hook
+    that syncs after every reply twice."""
+    config_path = _hook_config(tmp_path)
+    config_path.parent.mkdir(parents=True)
+    wrapper = "nohup /repo/scripts/zcode_sync_hook.sh --lock-timeout 0 >/dev/null 2>&1 &"
+    config_path.write_text(json.dumps({"hooks": {"enabled": True, "events": {
+        "Stop": [{"hooks": [{"type": "command", "command": wrapper}]}],
+    }}}), encoding="utf-8")
+
+    messages = install.install_hook(home=tmp_path, python_exe="/venv/bin/python", repo_root=tmp_path)
+
+    stop = json.loads(config_path.read_text(encoding="utf-8"))["hooks"]["events"]["Stop"]
+    assert len(stop) == 1
+    assert "already installed" in messages[0]
+
+
+def test_force_replaces_the_wrapper_with_the_direct_command(tmp_path):
+    config_path = _hook_config(tmp_path)
+    config_path.parent.mkdir(parents=True)
+    wrapper = "nohup /repo/scripts/zcode_sync_hook.sh --lock-timeout 0 >/dev/null 2>&1 &"
+    config_path.write_text(json.dumps({"hooks": {"enabled": True, "events": {
+        "Stop": [{"hooks": [{"type": "command", "command": wrapper}]}],
+    }}}), encoding="utf-8")
+
+    install.install_hook(home=tmp_path, python_exe="/venv/bin/python", repo_root=tmp_path, force=True)
+
+    stop = json.loads(config_path.read_text(encoding="utf-8"))["hooks"]["events"]["Stop"]
+    commands = [hook["command"] for entry in stop for hook in entry["hooks"]]
+    assert len(commands) == 1
+    assert "zcode autosync" in commands[0]
