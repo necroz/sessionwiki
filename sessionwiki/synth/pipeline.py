@@ -124,11 +124,30 @@ PROMPT_TEMPLATE_PATH = Path(__file__).parent / "prompts" / "source_page.md"
 USER_PROMPT_OVERRIDE = REPO_ROOT / "wiki" / "prompts" / "source_page.md"
 
 
-def _load_prompt_template() -> str:
-    """Load the synthesis prompt template. User override wins."""
+# ``synthesis.language``: "session" writes each page in the language the
+# user wrote in, so a question in that language finds it. Any other
+# value (e.g. "English") pins one language for the whole wiki.
+DEFAULT_SYNTHESIS_LANGUAGE = "session"
+
+
+def _language_rule(language: str) -> str:
+    if not language or language.strip().lower() == DEFAULT_SYNTHESIS_LANGUAGE:
+        return (
+            "Write the prose in the language the user wrote in (their "
+            "`### Turn N — User` messages), e.g. Russian for a conversation "
+            "in Russian; code and identifiers stay as they are."
+        )
+    return f"Write the prose in {language.strip()}."
+
+
+def _load_prompt_template(language: str = DEFAULT_SYNTHESIS_LANGUAGE) -> str:
+    """Load the synthesis prompt template. User override wins; a
+    ``{language}`` placeholder in it is filled from ``synthesis.language``."""
     if USER_PROMPT_OVERRIDE.is_file():
-        return USER_PROMPT_OVERRIDE.read_text(encoding="utf-8")
-    return PROMPT_TEMPLATE_PATH.read_text(encoding="utf-8")
+        template = USER_PROMPT_OVERRIDE.read_text(encoding="utf-8")
+    else:
+        template = PROMPT_TEMPLATE_PATH.read_text(encoding="utf-8")
+    return template.replace("{language}", _language_rule(language))
 
 
 def _resolve_state_file(state_file: Optional[Path] = None) -> Path:
@@ -1163,6 +1182,8 @@ def _build_source_page(
         "---",
         f'title: "{title}"',
         "type: source",
+        f"slug: {slug}",
+        *_description_lines(meta),
         f"tags: [{', '.join(tags)}]",
         f"date: {date}",
         f"source_file: {source_file}",
@@ -1173,6 +1194,58 @@ def _build_source_page(
         "",
     ]
     return "\n".join(fm) + clean_body
+
+
+# The raw transcript's ``description`` is the user's first request in
+# their own language. The page body is synthesised in English, so this
+# line is what lets a question asked in the user's language find the
+# page (wiki_query, site search).
+_DESCRIPTION_MAX_CHARS = 300
+
+
+def _description_lines(meta: dict[str, Any]) -> list[str]:
+    """``description: "…"`` as one safe YAML line, or nothing."""
+    text = " ".join(str(meta.get("description") or "").split())
+    if not text:
+        return []
+    if len(text) > _DESCRIPTION_MAX_CHARS:
+        text = text[:_DESCRIPTION_MAX_CHARS].rstrip() + "…"
+    # The frontmatter parser strips the outer quotes and nothing else.
+    return [f'description: "{text.replace(chr(34), chr(39))}"']
+
+
+def backfill_source_descriptions(
+    raw_dir: Path | None = None,
+    wiki_sources_dir: Path | None = None,
+    dry_run: bool = False,
+) -> int:
+    """Add ``description`` (and ``slug``) to source pages written before
+    synthesis kept them. No LLM; only frontmatter lines are added, the
+    body is untouched. Returns the number of pages that need (or, with
+    ``dry_run``, would need) the update; a second run returns 0.
+    """
+    sources_out = wiki_sources_dir or WIKI_SOURCES
+    updated = 0
+    for _raw_path, meta, _body in _discover_raw_sessions(raw_dir):
+        lines = _description_lines(meta)
+        if not lines:
+            continue
+        page = _session_page_path(sources_out, meta)
+        try:
+            text = page.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        page_meta, _ = parse_frontmatter(text)
+        if not page_meta or page_meta.get("description"):
+            continue
+        if not page_meta.get("slug") and meta.get("slug"):
+            lines = [f"slug: {_normalise_slug(str(meta['slug']))}", *lines]
+        updated += 1
+        if dry_run:
+            continue
+        head, sep, rest = text.partition("\n")
+        page.write_text(head + sep + "\n".join(lines) + "\n" + rest, encoding="utf-8")
+    return updated
 
 
 def synthesize_new_sessions(
@@ -1191,6 +1264,7 @@ def synthesize_new_sessions(
     coalesce_only: bool = False,
     strip_unresolved_wikilinks: bool = True,
     lock_timeout: float = 600,
+    language: str = DEFAULT_SYNTHESIS_LANGUAGE,
 ) -> dict[str, Any]:
     """Run synthesis under an OS lock next to the synth state file.
 
@@ -1216,6 +1290,7 @@ def synthesize_new_sessions(
         lock_skip_patterns=lock_skip_patterns,
         coalesce_only=coalesce_only,
         strip_unresolved_wikilinks=strip_unresolved_wikilinks,
+        language=language,
     )
     if dry_run:
         return _synthesize_new_sessions_unlocked(**kwargs)
@@ -1238,7 +1313,11 @@ def synthesize_new_sessions(
             "locked": True,
         }
     try:
-        return _synthesize_new_sessions_unlocked(**kwargs)
+        summary = _synthesize_new_sessions_unlocked(**kwargs)
+        summary["backfilled"] = backfill_source_descriptions(
+            raw_dir=raw_dir, wiki_sources_dir=wiki_sources_dir
+        )
+        return summary
     finally:
         lock.release()
 
@@ -1258,6 +1337,7 @@ def _synthesize_new_sessions_unlocked(
     lock_skip_patterns: tuple[str, ...] | list[str] | None = None,
     coalesce_only: bool = False,
     strip_unresolved_wikilinks: bool = True,
+    language: str = DEFAULT_SYNTHESIS_LANGUAGE,
 ) -> dict[str, Any]:
     """Main entry point. Returns a summary dict:
 
@@ -1272,7 +1352,7 @@ def _synthesize_new_sessions_unlocked(
     }
     """
     sources_out = wiki_sources_dir or WIKI_SOURCES
-    prompt_template = _load_prompt_template()
+    prompt_template = _load_prompt_template(language)
     state = {} if force else _load_state(state_file)
     sessions = _discover_raw_sessions(raw_dir)
     raw_root = raw_dir or RAW_SESSIONS

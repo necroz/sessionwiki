@@ -112,4 +112,6 @@ def test_per_file_cap_constants_documented():
     """The cap values are part of the contract — make a future
     refactor that changes them notice this test."""
     assert _MCP_SCAN_PER_FILE_BYTES == 4 * 1024 * 1024
-    assert _MCP_SCAN_AGGREGATE_BYTES == 50 * 1024 * 1024
+    # Raised from 50 MiB: a real raw/sessions/ corpus is ~61 MB, and
+    # wiki_query now scans wiki/ + raw/ in one call.
+    assert _MCP_SCAN_AGGREGATE_BYTES == 256 * 1024 * 1024

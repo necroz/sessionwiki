@@ -225,6 +225,7 @@ cp examples/sessions_config.json config.json
 | `synthesis` | `coalesce_window` | enum | `"all"` | Cluster window: `"all"` / `"month"` |
 | `synthesis` | `lock_skip_patterns` | list | worker defaults | Phrases that mark a lock-skip; `[]` disables the rule |
 | `synthesis` | `strip_unresolved_wikilinks` | bool | true | Degrade links to missing pages to plain text |
+| `synthesis` | `language` | string | `"session"` | Language of page prose: `"session"` = the language the user wrote in; any other value (e.g. `"English"`) pins one language. Headings, tags and `[[wikilinks]]` stay as in the template |
 | `zcode` | `enabled` | bool | true | Include the ZCode adapter in auto-selection |
 | `zcode` | `project_roots` | list | `[]` | Extra roots for project-slug detection (e.g. `["~/dev"]`) |
 | `meeting` | `enabled` | bool | false | Opt-in; non-AI adapter |

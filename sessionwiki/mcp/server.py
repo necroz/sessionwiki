@@ -23,6 +23,7 @@ Ships as stdlib-only Python — no MCP SDK dependency.
 from __future__ import annotations
 
 import json
+import math
 import re
 import subprocess
 import sys
@@ -47,13 +48,16 @@ TOOLS = [
         "name": "wiki_query",
         "description": (
             "Start here for questions about the user's past work ('what did I "
-            "decide about X', 'how did I fix Y'). Ranks wiki/ pages by keyword "
-            "matches in title and body (no LLM, raw transcripts not included) "
-            "and returns up to max_pages page paths with a ~400-character "
-            "snippet each, plus the start of wiki/overview.md; with no match it "
-            "returns the start of wiki/index.md. Read-only. Open a full page "
-            "with wiki_read_page; use wiki_search for exact wording or to "
-            "include raw transcripts."
+            "decide about X', 'how did I fix Y'), in any language: session "
+            "pages keep the user's original request. Ranks wiki/ pages by "
+            "keyword matches, rare words weighted higher (no LLM, no "
+            "embeddings); service pages are skipped and project overview "
+            "pages rank below sessions. If no wiki page matches, it falls back "
+            "to raw transcripts (see include_raw). Returns up to max_pages "
+            "paths with a ~400-character snippet each, plus the start of "
+            "wiki/overview.md; with no match, the start of wiki/index.md. "
+            "Read-only. Open a full page with wiki_read_page; use wiki_search "
+            "for exact wording."
         ),
         "inputSchema": {
             "type": "object",
@@ -67,6 +71,14 @@ TOOLS = [
                     "description": "Maximum pages to return (default 5).",
                     "default": 5,
                 },
+                "include_raw": {
+                    "type": "boolean",
+                    "description": (
+                        "Raw session transcripts: true = always rank them too, "
+                        "false = never. Omit it to read them only when no wiki "
+                        "page matches."
+                    ),
+                },
             },
             "required": ["question"],
         },
@@ -77,10 +89,11 @@ TOOLS = [
             "Find exact text: case-insensitive substring match, line by line, "
             "over wiki/ pages, plus raw session transcripts in raw/sessions/ "
             "when include_raw=true. Returns JSON {term, matches: [{path, line, "
-            "text}], truncated, skipped_oversize_files}; stops at 200 matches, "
-            "skips files over 4 MiB and reads at most 50 MiB per call. "
-            "Read-only. Use wiki_query instead for ranked, question-style "
-            "lookup; open a hit with wiki_read_page."
+            "text}], truncated, scan_incomplete, files_scanned, files_total, "
+            "skipped_oversize_files}; stops at 200 matches (truncated), skips "
+            "files over 4 MiB and reads at most 256 MiB per call "
+            "(scan_incomplete). Read-only. Use wiki_query instead for ranked, "
+            "question-style lookup; open a hit with wiki_read_page."
         ),
         "inputSchema": {
             "type": "object",
@@ -436,6 +449,9 @@ def _is_read_page_allowed(p: Path) -> bool:
 def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
     question = (args.get("question") or "").strip()
     max_pages = int(args.get("max_pages", 5))
+    # None = automatic: transcripts are read only when no wiki page
+    # matches. True / False force them on / off.
+    include_raw = args.get("include_raw")
     if not question:
         return _err("question is required")
 
@@ -449,79 +465,148 @@ def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
     index = (wiki / "index.md").read_text(encoding="utf-8") if (wiki / "index.md").exists() else ""
     overview = (wiki / "overview.md").read_text(encoding="utf-8") if (wiki / "overview.md").exists() else ""
 
-    # Scan every .md under wiki/ for matches on title + body.
-    # #418: ranking is now length-normalised — body matches are
-    # divided by ``log2(max(len(content), 256))`` so a 1MB log
-    # page can't beat a perfectly-relevant 1-paragraph entity page
-    # just by accidentally containing every query token. Title
-    # matches are unchanged since titles are already short and
-    # high-signal.
     query_lower = question.lower()
-    tokens = [t for t in re.split(r"\W+", query_lower) if t]
-    matches: list[tuple[float, Path, str]] = []
+    # Tokens under 3 characters ("на", "и", "is") are substrings of
+    # almost every page and only blur the ranking.
+    tokens = [t for t in re.split(r"\W+", query_lower) if len(t) >= _QUERY_MIN_TOKEN_LEN]
     # #483: bound input bytes so a single large file or a giant corpus
-    # can't OOM the MCP server.
+    # can't OOM the MCP server. The budget is shared by wiki/ and raw/.
     budget = _MCP_SCAN_AGGREGATE_BYTES
-    skipped_oversize = 0
-    for page in wiki.rglob("*.md"):
-        if budget <= 0:
+    budget_hit = False
+    page_by_slug: dict[str, Path] = {}
+    # One entry per scanned file that matched anything:
+    # (target page, matched tokens, phrase in body, title tokens,
+    #  phrase in title, body length, weight, snippet).
+    hits: list[tuple[Path, frozenset[str], bool, frozenset[str], bool, int, float, str]] = []
+    doc_freq: dict[str, int] = dict.fromkeys(tokens, 0)
+    docs_scanned = 0
+
+    def _collect(content: str, target: Path, weight: float, snippet_src: str) -> None:
+        nonlocal docs_scanned
+        docs_scanned += 1
+        lower = content.lower()
+        present = frozenset(tok for tok in tokens if tok in lower)
+        for tok in present:
+            doc_freq[tok] += 1
+        title = _frontmatter_value(content, "title").lower()
+        in_title = frozenset(tok for tok in tokens if tok in title)
+        phrase = query_lower in lower
+        if present or phrase:
+            hits.append((
+                target, present, phrase, in_title, bool(title) and query_lower in title,
+                len(content), weight, _extract_snippet(snippet_src, tokens, max_chars=400),
+            ))
+
+    for page in sorted(wiki.rglob("*.md")):
+        if budget <= 0 or _over_budget(page, budget):
+            budget_hit = True
             break
         content, consumed = _read_capped(page, remaining_budget=budget)
         if consumed == 0:
-            try:
-                if page.stat().st_size > _MCP_SCAN_PER_FILE_BYTES:
-                    skipped_oversize += 1
-            except OSError:
-                pass
             continue
         budget -= consumed
-        content_lower = content.lower()
-        body_score = 0
-        if query_lower in content_lower:
-            body_score += 50
-        body_score += sum(10 for t in tokens if t in content_lower)
-        # Length normalisation: divide raw body score by
-        # log2(max(len, 256)). The 256-byte floor keeps very short
-        # pages (frontmatter-only) from getting a massive boost on
-        # zero-token queries.
-        if body_score > 0:
-            import math as _math
-            length_factor = _math.log2(max(len(content), 256))
-            normalised_body = body_score / length_factor
-        else:
-            normalised_body = 0.0
-        # Title bonus — unchanged. Titles are already short and
-        # high-signal; no normalisation needed.
-        title_score = 0
-        title_match = re.search(r'^title:\s*"?([^"\n]+)', content, re.MULTILINE)
-        if title_match:
-            title = title_match.group(1).lower()
-            if query_lower in title:
-                title_score += 100
-            title_score += sum(20 for t in tokens if t in title)
-        score = normalised_body + title_score
-        if score > 0:
-            snippet = _extract_snippet(content, tokens, max_chars=400)
-            matches.append((score, page, snippet))
+        rel = page.relative_to(wiki)
+        page_type = _frontmatter_value(content, "type")
+        # Service pages describe the wiki, they don't answer questions;
+        # index.md and overview.md are already part of every response.
+        if page_type in _QUERY_SKIP_TYPES or (len(rel.parts) == 1 and rel.name in _QUERY_SKIP_ROOT_FILES):
+            continue
+        if page_type == "source":
+            slug = _frontmatter_value(content, "slug") or page.stem[11:]
+            if slug:
+                page_by_slug[slug] = page
+        # A project hub mentions everything its sessions mention; the
+        # session page that holds the answer must win.
+        weight = _QUERY_HUB_WEIGHT if rel.parts[0] in _QUERY_HUB_DIRS else 1.0
+        _collect(content, page, weight, content)
 
-    matches.sort(key=lambda x: -x[0])
-    top = matches[:max_pages]
+    # The wiki is the compiled layer and normally enough: source pages
+    # carry the user's own wording in ``description``. Transcripts are a
+    # fallback for sessions the wiki doesn't cover yet (or on request);
+    # a transcript hit adds to its session page, or stands alone when
+    # the session has no page.
+    raw_sessions = REPO_ROOT / "raw" / "sessions"
+    read_raw = include_raw is True or (include_raw is None and not hits)
+    if read_raw and raw_sessions.exists() and not budget_hit:
+        for raw in sorted(raw_sessions.rglob("*.md")):
+            if budget <= 0 or _over_budget(raw, budget):
+                budget_hit = True
+                break
+            content, consumed = _read_capped(raw, remaining_budget=budget)
+            if consumed == 0:
+                continue
+            budget -= consumed
+            target = page_by_slug.get(_frontmatter_value(content, "slug"), raw)
+            _collect(content, target, 1.0, _body(content))
+
+    # Rare words decide the match: "палец" in 3 transcripts outweighs
+    # "дома" in 400 (BM25-style inverse document frequency).
+    idf = {
+        tok: math.log(1 + (docs_scanned - df + 0.5) / (df + 0.5)) for tok, df in doc_freq.items()
+    }
+    scored: dict[Path, tuple[float, str]] = {}
+    for target, present, phrase, in_title, title_phrase, length, weight, snippet in hits:
+        body_score = (50 if phrase else 0) + sum(10 * idf[tok] for tok in present)
+        # #418: divide by log2(max(len, 256)) so a 1MB log page can't
+        # beat a relevant 1-paragraph page just by containing every token.
+        score = body_score / math.log2(max(length, 256))
+        score += (100 if title_phrase else 0) + sum(20 * idf[tok] for tok in in_title)
+        score *= weight
+        if score <= 0:
+            continue
+        previous = scored.get(target)
+        scored[target] = (previous[0] + score, previous[1]) if previous else (score, snippet)
+
+    top = sorted(scored.items(), key=lambda item: -item[1][0])[:max_pages]
 
     out = [f"# Query: {question}\n"]
     if not top:
         out.append("No matching pages found.\n")
         out.append("\n## wiki/index.md\n\n" + index[:1500])
     else:
-        for score, page, snippet in top:
+        for page, (score, snippet) in top:
             rel = page.relative_to(REPO_ROOT)
             out.append(f"## `{rel}` (score: {score:.1f})\n")
             out.append(snippet)
             out.append("")
+    if budget_hit:
+        out.append(
+            f"_Scan stopped at the {_MCP_SCAN_AGGREGATE_BYTES // (1024 * 1024)} MiB "
+            "byte budget; some pages were not searched._\n"
+        )
     out.append("---\n")
     out.append("## Overview context\n")
     out.append(overview[:1000] if overview else "(no overview.md)")
 
     return _ok("\n".join(out))
+
+
+_QUERY_SKIP_TYPES = frozenset({"navigation", "context"})
+_QUERY_SKIP_ROOT_FILES = frozenset({"index.md", "overview.md", "log.md"})
+_QUERY_HUB_DIRS = frozenset({"projects"})
+_QUERY_HUB_WEIGHT = 0.5
+_QUERY_MIN_TOKEN_LEN = 3
+
+
+def _frontmatter_value(content: str, key: str) -> str:
+    """Value of one top-level key in the leading YAML frontmatter, or ''."""
+    if not content.startswith("---"):
+        return ""
+    end = content.find("\n---", 3)
+    block = content[3:end] if end != -1 else content[3:]
+    m = re.search(rf"^{re.escape(key)}:\s*\"?([^\"\n]*)\"?\s*$", block, re.MULTILINE)
+    return m.group(1).strip() if m else ""
+
+
+def _body(content: str) -> str:
+    """Content without the leading frontmatter block."""
+    if content.startswith("---"):
+        end = content.find("\n---", 3)
+        if end != -1:
+            return content[end + 4:].lstrip()
+    return content
+
+
 
 
 def _extract_snippet(content: str, tokens: list[str], max_chars: int = 400) -> str:
@@ -548,7 +633,17 @@ _SEARCH_HIT_CAP = 200
 # only — the loop still read every byte of every file. Cap inputs
 # explicitly so the worst-case is bounded regardless of corpus shape.
 _MCP_SCAN_PER_FILE_BYTES = 4 * 1024 * 1024   # 4 MiB / file
-_MCP_SCAN_AGGREGATE_BYTES = 50 * 1024 * 1024  # 50 MiB / call
+_MCP_SCAN_AGGREGATE_BYTES = 256 * 1024 * 1024  # 256 MiB / call (wiki/ + raw/)
+
+
+def _over_budget(p: Path, remaining_budget: int) -> bool:
+    """True when ``p`` fits the per-file cap but not the remaining budget,
+    i.e. the scan has to stop here rather than skip the file silently."""
+    try:
+        size = p.stat().st_size
+    except OSError:
+        return False
+    return size <= _MCP_SCAN_PER_FILE_BYTES and size > remaining_budget
 
 
 def _read_capped(p: Path, *, remaining_budget: int) -> tuple[str, int]:
@@ -610,41 +705,47 @@ def tool_wiki_search(args: dict[str, Any]) -> dict[str, Any]:
     # via _read_capped. Output cap (_SEARCH_HIT_CAP) is unchanged.
     budget = _MCP_SCAN_AGGREGATE_BYTES
     skipped_oversize = 0
-    for root in roots:
-        if truncated or budget <= 0:
+    files = [p for root in roots if root.exists() for p in sorted(root.rglob("*.md"))]
+    files_scanned = 0
+    budget_hit = False
+    for p in files:
+        if truncated:
             break
-        if not root.exists():
+        if budget <= 0 or _over_budget(p, budget):
+            budget_hit = True
+            break
+        files_scanned += 1
+        text, consumed = _read_capped(p, remaining_budget=budget)
+        if consumed == 0:
+            try:
+                if p.stat().st_size > _MCP_SCAN_PER_FILE_BYTES:
+                    skipped_oversize += 1
+            except OSError:
+                pass
             continue
-        for p in root.rglob("*.md"):
-            if truncated or budget <= 0:
-                break
-            text, consumed = _read_capped(p, remaining_budget=budget)
-            if consumed == 0:
-                try:
-                    if p.stat().st_size > _MCP_SCAN_PER_FILE_BYTES:
-                        skipped_oversize += 1
-                except OSError:
-                    pass
-                continue
-            budget -= consumed
-            for i, line in enumerate(text.splitlines(), start=1):
-                if term_lower in line.lower():
-                    hits.append(
-                        {
-                            "path": str(p.relative_to(REPO_ROOT)),
-                            "line": i,
-                            "text": line.strip()[:200],
-                        }
-                    )
-                    if len(hits) >= _SEARCH_HIT_CAP:
-                        truncated = True
-                        break
+        budget -= consumed
+        for i, line in enumerate(text.splitlines(), start=1):
+            if term_lower in line.lower():
+                hits.append(
+                    {
+                        "path": str(p.relative_to(REPO_ROOT)),
+                        "line": i,
+                        "text": line.strip()[:200],
+                    }
+                )
+                if len(hits) >= _SEARCH_HIT_CAP:
+                    truncated = True
+                    break
     # #483: surface skipped-oversize count so callers know we didn't
-    # silently miss content from huge files.
+    # silently miss content from huge files. scan_incomplete says the
+    # byte budget ran out before every file was read.
     return _ok(json.dumps({
         "term": term,
         "matches": hits,
         "truncated": truncated,
+        "scan_incomplete": budget_hit,
+        "files_scanned": files_scanned,
+        "files_total": len(files),
         "skipped_oversize_files": skipped_oversize,
     }, indent=2))
 
