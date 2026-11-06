@@ -1103,6 +1103,13 @@ def _synthesize_estimate(config: dict | None = None) -> int:
     model = str(synth.get("model") or "")
     priced = model in MODEL_PRICING
 
+    from sessionwiki.synth.chunking import ChunkingConfig
+
+    chunking = ChunkingConfig.from_synthesis_config(synth)
+    max_body_chars = int(
+        synth.get("max_body_chars") or (8_000 if backend == "ollama" else 40_000)
+    )
+
     if backend not in {"anthropic", "claude"} or (model and not priced):
         print(
             f"note: cost estimate uses Claude API pricing; "
@@ -1110,7 +1117,11 @@ def _synthesize_estimate(config: dict | None = None) -> int:
             f"(local models are usually free)."
         )
 
-    report = synthesize_estimate_report(model=model if priced else None)
+    report = synthesize_estimate_report(
+        model=model if priced else None,
+        chunking=chunking,
+        max_body_chars=max_body_chars,
+    )
 
     for w in report["warnings"]:
         print(f"warning: {w}")
@@ -1118,6 +1129,12 @@ def _synthesize_estimate(config: dict | None = None) -> int:
     print(f"Corpus:                {report['corpus']:>6} sessions in raw/sessions/")
     print(f"Already synthesized:   {report['synthesized']:>6} pages in wiki/sources/")
     print(f"New since last run:    {report['new']:>6}")
+    if report.get("chunked"):
+        print(
+            f"Chunked (map-reduce):  {report['chunked']:>6} corpus, "
+            f"{report.get('chunked_new', 0)} new "
+            f"(bodies over {max_body_chars:,} chars)"
+        )
     print()
     print(f"Prefix: {report['prefix_tokens']:,} tok  Model: {report['model']}")
     print()

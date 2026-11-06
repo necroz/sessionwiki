@@ -425,10 +425,14 @@ def test_resolve_backend_defaults_to_dummy_when_no_config():
 
 
 def test_resolve_backend_picks_ollama_when_configured():
+    from sessionwiki.synth.chunking import ChunkedSynthesizer
     from sessionwiki.synth.pipeline import resolve_backend
 
     backend = resolve_backend({"synthesis": {"backend": "ollama"}})
-    assert isinstance(backend, OllamaSynthesizer)
+    # Large sessions are wrapped in the map-reduce layer; the concrete
+    # backend is still Ollama underneath.
+    assert isinstance(backend, ChunkedSynthesizer)
+    assert isinstance(backend.backend, OllamaSynthesizer)
 
 
 def test_resolve_backend_falls_back_on_unknown_name(caplog):
@@ -442,11 +446,12 @@ def test_resolve_backend_falls_back_on_unknown_name(caplog):
 
 
 def test_resolve_backend_case_insensitive():
+    from sessionwiki.synth.chunking import ChunkedSynthesizer
     from sessionwiki.synth.pipeline import resolve_backend
-    assert isinstance(
-        resolve_backend({"synthesis": {"backend": "OLLAMA"}}),
-        OllamaSynthesizer,
-    )
+
+    backend = resolve_backend({"synthesis": {"backend": "OLLAMA"}})
+    assert isinstance(backend, ChunkedSynthesizer)
+    assert isinstance(backend.backend, OllamaSynthesizer)
 
 
 # ─── CLI integration ──────────────────────────────────────────────────

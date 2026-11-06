@@ -22,6 +22,15 @@ from typing import Any
 class BaseSynthesizer(ABC):
     """Interface for LLM-backed wiki-page synthesizers."""
 
+    #: Backends that cannot map-reduce opt out. ``ChunkedSynthesizer``
+    #: uses this to avoid double wrapping.
+    supports_chunking: bool = True
+
+    #: How much of a raw body one call can carry. ``ChunkedSynthesizer``
+    #: never sends a larger chunk, and sessions below this limit keep
+    #: the one-shot path. Override per backend or via config.
+    max_body_chars: int = 40_000
+
     @abstractmethod
     def synthesize_source_page(
         self,
@@ -54,6 +63,9 @@ class DummySynthesizer(BaseSynthesizer):
     """Test/preview backend — returns a canned wiki page without
     calling any LLM. Useful for `--dry-run` and unit tests.
 
+    The dummy output depends on metadata, not on the body, so chunking
+    would only multiply calls without changing the page.
+
     G-12 (#298): the dummy output used to copy every ``[[wikilink]]``
     mention straight out of the raw body into ``## Connections``.  That
     fabricated 371 dangling links on the compiled demo site because
@@ -63,6 +75,8 @@ class DummySynthesizer(BaseSynthesizer):
     mentions as plain text in ``## Raw Mentions`` so the information
     isn't lost but ``check-links`` doesn't cry wolf.
     """
+
+    supports_chunking = False
 
     def _title_case_project(self, project: str) -> str:
         """``ai-newsletter`` → ``AiNewsletter`` (matches entity filenames)."""

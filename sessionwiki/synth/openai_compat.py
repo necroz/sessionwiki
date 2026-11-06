@@ -85,6 +85,9 @@ class OpenAICompatConfig:
     max_tokens: int = DEFAULT_MAX_TOKENS
     temperature: float = DEFAULT_TEMPERATURE
     enable_thinking: bool = False
+    #: Body cap for the one-shot path. Raise it when the model has a
+    #: large context; ``ChunkedSynthesizer`` never sends more than this.
+    max_body_chars: int = 40_000
 
     @property
     def chat_url(self) -> str:
@@ -123,6 +126,9 @@ def load_openai_config(cfg: dict[str, Any] | None) -> OpenAICompatConfig:
         else DEFAULT_TEMPERATURE
     )
     enable_thinking = bool(synth.get("enable_thinking", False))
+    max_body_chars = (
+        int(synth["max_body_chars"]) if "max_body_chars" in synth else 40_000
+    )
 
     if timeout <= 0:
         raise ValueError(f"synthesis.timeout must be positive, got {timeout}")
@@ -138,6 +144,10 @@ def load_openai_config(cfg: dict[str, Any] | None) -> OpenAICompatConfig:
         raise ValueError(
             f"synthesis.backoff_base must be >= 0, got {backoff_base}"
         )
+    if max_body_chars < 1:
+        raise ValueError(
+            f"synthesis.max_body_chars must be >= 1, got {max_body_chars}"
+        )
     resolved = OpenAICompatConfig(
         base_url=base_url,
         model=model,
@@ -148,6 +158,7 @@ def load_openai_config(cfg: dict[str, Any] | None) -> OpenAICompatConfig:
         max_tokens=max_tokens,
         temperature=temperature,
         enable_thinking=enable_thinking,
+        max_body_chars=max_body_chars,
     )
     if not resolved.is_local:
         logger.warning(
@@ -164,7 +175,7 @@ def _render_prompt(template: str, *, raw_body: str, meta: dict[str, Any]) -> str
     return template.replace("{body}", raw_body).replace("{meta}", meta_dump)
 
 
-def _truncate_body(body: str, limit: int = 12000) -> str:
+def _truncate_body(body: str, limit: int = 40000) -> str:
     """Keep the opening and the conclusion of a long transcript.
 
     A pure head slice loses the outcome, which is the most valuable
@@ -192,6 +203,10 @@ class OpenAICompatSynthesizer(BaseSynthesizer):
     def name(self) -> str:
         return f"OpenAICompatSynthesizer({self.config.model})"
 
+    @property
+    def max_body_chars(self) -> int:
+        return self.config.max_body_chars
+
     def is_available(self) -> bool:
         try:
             body = self._http("GET", self.config.models_url, None, timeout=10)
@@ -211,7 +226,7 @@ class OpenAICompatSynthesizer(BaseSynthesizer):
     ) -> str:
         # Cap the transcript like the Ollama backend: the page is a
         # summary, and a 400 KB session would dominate the context.
-        truncated = _truncate_body(raw_body, limit=12000)
+        truncated = _truncate_body(raw_body, limit=self.config.max_body_chars)
         prompt = _render_prompt(prompt_template, raw_body=truncated, meta=meta)
         payload: dict[str, Any] = {
             "model": self.config.model,

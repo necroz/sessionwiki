@@ -93,7 +93,7 @@
     "auto_queue": true
   },
 
-  "_synthesis_comment": "LLM backend for auto-synthesizing wiki source pages. backend=dummy (default, offline) | ollama (local HTTP) | openai (any OpenAI-compatible /v1 server) | agent (defer to the running agent). Run `sessionwiki synthesize --check` to probe the server. Put machine-specific values in config.local.json (gitignored) instead of this shared example. strip_unresolved_wikilinks=true (default) degrades [[links]] to missing pages into plain text; false keeps red links so pages created later still get linked. language=session (default) writes each page in the language the user wrote in; set e.g. \"English\" to pin one language.",
+  "_synthesis_comment": "LLM backend for auto-synthesizing wiki source pages. backend=dummy (default, offline) | ollama (local HTTP) | openai (any OpenAI-compatible /v1 server) | agent (defer to the running agent). Run `sessionwiki synthesize --check` to probe the server. Put machine-specific values in config.local.json (gitignored) instead of this shared example. strip_unresolved_wikilinks=true (default) degrades [[links]] to missing pages into plain text; false keeps red links so pages created later still get linked. language=session (default) writes each page in the language the user wrote in; set e.g. \"English\" to pin one language. max_body_chars is how much of a raw session one LLM call carries (40000 for openai, 8000 for ollama); raise it when the model has a larger context. chunking maps sessions above that limit into digests and reduces them into the page instead of silently dropping the middle: chunk_chars is the per-call ceiling (also capped by max_body_chars), digest_chars bounds each digest, reduce_chars bounds the reduce input, max_chunks caps paid calls per session (above it the middle is explicitly marked as omitted), cache=true reuses digests across runs.",
   "synthesis": {
     "backend": "dummy",
     "model": "llama3.1:8b",
@@ -101,6 +101,7 @@
     "timeout": 60,
     "max_retries": 3,
     "max_concurrency": 1,
+    "max_body_chars": 40000,
     "coalesce_low_signal": false,
     "coalesce_min_group": 3,
     "coalesce_window": "all",
@@ -110,6 +111,15 @@
       "запуск пропущен"
     ],
     "strip_unresolved_wikilinks": true,
-    "language": "session"
+    "language": "session",
+    "chunking": {
+      "enabled": true,
+      "chunk_chars": 40000,
+      "digest_chars": 2000,
+      "reduce_chars": 12000,
+      "max_chunks": 200,
+      "max_depth": 6,
+      "cache": true
+    }
   }
 }

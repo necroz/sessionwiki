@@ -122,6 +122,33 @@ def test_money_numbers_are_non_negative():
     assert rpt["full_force_usd"] >= 0.0
 
 
+def test_chunked_sessions_add_digest_output_to_the_estimate():
+    from sessionwiki.cli import synthesize_estimate_report
+    from sessionwiki.synth.chunking import ChunkingConfig
+
+    sessions = [(_P("big.md"), {}, "x" * 100_000)]
+    chunking = ChunkingConfig(
+        chunk_chars=12_000, digest_chars=2_000, reduce_chars=12_000
+    )
+    chunked = synthesize_estimate_report(
+        raw_sessions=sessions,
+        state_keys=set(),
+        prefix_tokens=2000,
+        chunking=chunking,
+        max_body_chars=12_000,
+    )
+    plain = synthesize_estimate_report(
+        raw_sessions=sessions,
+        state_keys=set(),
+        prefix_tokens=2000,
+    )
+
+    assert chunked["chunked"] == 1
+    assert chunked["chunked_new"] == 1
+    assert plain["chunked"] == 0
+    assert chunked["incremental_usd"] > plain["incremental_usd"]
+
+
 def test_prefix_too_small_warning():
     from sessionwiki.cli import synthesize_estimate_report
     rpt = synthesize_estimate_report(

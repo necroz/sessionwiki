@@ -108,7 +108,7 @@ sessionwiki = "sessionwiki.cli:main"
 include = ["sessionwiki*"]
 
 [tool.setuptools.package-data]
-sessionwiki = ["py.typed"]
+sessionwiki = ["py.typed", "synth/prompts/*.md"]
 
 [tool.ruff]
 line-length = 120
