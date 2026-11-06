@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.0.5] — 2026-11-06
+
+Theme: large sessions synthesised in full — chunked map-reduce instead of head-and-tail truncation; zcode install no longer duplicates the Stop hook.
+
 ### Added
 
 - **Large sessions are chunked, not truncated** — a raw session bigger than one LLM call (40 000 chars for `openai`, 8 000 for `ollama`) used to keep only the head and the tail, so a 1.5M-character session lost almost everything it did. Such sessions now split on `### Turn N` boundaries, each chunk becomes a digest, and the digests are reduced through the normal `source_page` prompt (hierarchically when they still overflow). Digests are cached in `.llmwiki-synth-cache/`, so a failed run re-pays only for the failed chunks; `chunking.max_chunks` bounds paid calls per session and the omitted middle is named in the prompt. `synthesis.max_body_chars` raises the one-shot ceiling for large-context models. The agent-delegate and dummy backends opt out.
