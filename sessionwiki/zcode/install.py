@@ -151,6 +151,67 @@ def install_hook(
     return [f"hook: installed in {path}"]
 
 
+def _recall_command(python_exe: str, repo_root: Path | None) -> str:
+    executable = f'"{python_exe}"' if " " in python_exe else python_exe
+    command = f"{executable} -m sessionwiki recall --format hook"
+    if repo_root is None:
+        return command
+    # The hook runs in the project folder; pin the data root explicitly.
+    if os.name == "nt":
+        return f'set "SESSIONWIKI_HOME={repo_root}" && {command}'
+    return f'SESSIONWIKI_HOME="{repo_root}" {command}'
+
+
+def install_recall_hook(
+    *,
+    home: Path | None = None,
+    python_exe: Path | str | None = None,
+    repo_root: Path | None = None,
+    dry_run: bool = False,
+    force: bool = False,
+) -> list[str]:
+    """Add a ZCode ``SessionStart`` hook that prints the project's recent
+    sessions (``sessionwiki recall``) into the new session's context.
+    Agents rarely call memory tools on their own. Idempotent."""
+    path = _home(home) / ".zcode" / "cli" / "config.json"
+    data: dict = {}
+    if path.is_file():
+        try:
+            loaded = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError(f"cannot read {path}: {exc}") from exc
+        if not isinstance(loaded, dict):
+            raise ValueError(f"{path} must contain a JSON object")
+        data = loaded
+    hooks = data.setdefault("hooks", {})
+    events = hooks.setdefault("events", {}) if isinstance(hooks, dict) else None
+    start = events.setdefault("SessionStart", []) if isinstance(events, dict) else None
+    if not isinstance(start, list):
+        raise ValueError(f"{path}: 'hooks.events.SessionStart' must be a list")
+
+    def _is_recall(entry: object) -> bool:
+        return isinstance(entry, dict) and any(
+            isinstance(h, dict) and "sessionwiki recall" in str(h.get("command", ""))
+            for h in entry.get("hooks", []) or []
+        )
+
+    if any(_is_recall(entry) for entry in start):
+        if not force:
+            return [f"recall hook: already installed in {path}"]
+        start[:] = [entry for entry in start if not _is_recall(entry)]
+    hooks["enabled"] = True
+    start.append({"hooks": [{
+        "type": "command",
+        "command": _recall_command(_python(python_exe), repo_root),
+        "timeout": 10,
+    }]})
+    if dry_run:
+        return [f"recall hook: would update {path}"]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return [f"recall hook: installed in {path}"]
+
+
 def install_systemd(
     *,
     home: Optional[Path] = None,
@@ -340,6 +401,15 @@ def install_all(
                 repo_root=repo_root,
                 build=build,
                 coalesce=coalesce,
+                dry_run=dry_run,
+                force=force,
+            )
+        )
+        messages.extend(
+            install_recall_hook(
+                home=home,
+                python_exe=python_exe,
+                repo_root=repo_root,
                 dry_run=dry_run,
                 force=force,
             )

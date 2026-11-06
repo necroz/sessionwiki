@@ -22,6 +22,8 @@ Subcommands:
 from __future__ import annotations
 
 import argparse
+import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Optional
@@ -54,6 +56,94 @@ from sessionwiki.synth.cli_helpers import (  # noqa: F401
 
 def cmd_version(args: argparse.Namespace) -> int:
     print(f"sessionwiki {__version__}")
+    return 0
+
+
+def _project_from_hook_input() -> str:
+    """Project name from a hook's JSON on stdin (``cwd``), or ''."""
+    try:
+        if sys.stdin.isatty():
+            return ""
+        data = json.loads(sys.stdin.read() or "{}")
+    except (OSError, ValueError):
+        return ""
+    cwd = data.get("cwd") if isinstance(data, dict) else None
+    return Path(cwd).name if isinstance(cwd, str) and cwd else ""
+
+
+def _first_sentence(body: str, limit: int = 200) -> str:
+    m = re.search(r"^## Summary\s*\n+(.+)", body, re.MULTILINE)
+    text = (m.group(1) if m else "").strip()
+    end = text.find(". ")
+    text = text[: end + 1] if end != -1 else text
+    return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
+
+
+def _is_subagent(meta: dict[str, Any], filename: str) -> bool:
+    """Subagent runs are pieces of a parent session, not work to recall."""
+    return meta.get("is_subagent") in (True, "true") or "-subagent-" in filename
+
+
+def _recent_sessions(project: str, limit: int) -> list[tuple[str, str, str, str]]:
+    """``(date, request, summary, path)`` of the project's latest sessions,
+    newest first. Sessions without a wiki page yet come from raw/."""
+    from sessionwiki._frontmatter import parse_frontmatter
+
+    items: list[tuple[str, str, str, str]] = []
+    slugs: set[str] = set()
+    sources = REPO_ROOT / "wiki" / "sources"
+    for page in sources.rglob("*.md") if sources.is_dir() else []:
+        try:
+            meta, body = parse_frontmatter(page.read_text(encoding="utf-8"))
+        except OSError:
+            continue
+        if str(meta.get("project", "")) != project or meta.get("merged_sessions"):
+            continue
+        slugs.add(str(meta.get("slug", "")))
+        if _is_subagent(meta, page.name):
+            continue
+        items.append((str(meta.get("date", "")), str(meta.get("description", "")),
+                      _first_sentence(body), str(page.relative_to(REPO_ROOT))))
+    raw = REPO_ROOT / "raw" / "sessions"
+    for transcript in raw.rglob("*.md") if raw.is_dir() else []:
+        try:
+            with transcript.open("rb") as f:
+                head = f.read(8 * 1024).decode("utf-8", errors="replace")
+        except OSError:
+            continue
+        meta, _ = parse_frontmatter(head)
+        if str(meta.get("project", "")) != project or str(meta.get("slug", "")) in slugs:
+            continue
+        if _is_subagent(meta, transcript.name):
+            continue
+        items.append((str(meta.get("date", "")), str(meta.get("description", "")),
+                      "", str(transcript.relative_to(REPO_ROOT))))
+    items.sort(key=lambda item: (item[0], item[3]), reverse=True)
+    return items[:limit]
+
+
+def cmd_recall(args: argparse.Namespace) -> int:
+    """Print a project's recent sessions for a SessionStart hook, so the
+    agent starts with them in context instead of having to ask."""
+    from sessionwiki.mcp.server import DATA_NOTICE
+
+    project = args.project or _project_from_hook_input() or Path.cwd().name
+    items = _recent_sessions(project, args.limit)
+    if not items:
+        return 0
+    lines = [f"Recent sessions in project '{project}' (sessionwiki):", DATA_NOTICE, ""]
+    for day, request, summary, path in items:
+        what = f"«{request}»" if request else "(no request recorded)"
+        note = summary or "not in the wiki yet"
+        lines.append(f"- {day} {what} — {note} ({path})")
+    lines += ["", "Search earlier work with the wiki_query tool; open a page with wiki_read_page."]
+    text = "\n".join(lines)
+    if args.format == "hook":
+        print(json.dumps({"hookSpecificOutput": {
+            "hookEventName": "SessionStart", "additionalContext": text,
+        }}, ensure_ascii=False))
+    else:
+        print(text)
     return 0
 
 
@@ -1672,6 +1762,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run the MCP server on stdio (data root: $SESSIONWIKI_HOME or the current directory)",
     )
     mcp.set_defaults(func=cmd_mcp)
+
+    # recall — recent sessions of a project, for SessionStart hooks
+    recall = sub.add_parser(
+        "recall",
+        help="Print a project's recent sessions (for a SessionStart hook)",
+    )
+    recall.add_argument(
+        "--project", default="",
+        help="Project name; default: the hook's cwd on stdin, else the current folder name",
+    )
+    recall.add_argument("--limit", type=int, default=5, help="How many sessions (default 5)")
+    recall.add_argument(
+        "--format", choices=["text", "hook"], default="text",
+        help="text, or hook = SessionStart JSON with additionalContext",
+    )
+    recall.set_defaults(func=cmd_recall)
 
     # all — run build + graph + export all + lint in sequence
     all_p = sub.add_parser(
