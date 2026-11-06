@@ -13,6 +13,16 @@ Versions below 1.0 are pre-production — API and file formats may change.
 ### Added
 
 - **Plugin icon** — `plugin/.claude-plugin/icon.png` (1024 px, the site's layers mark) for the Anthropic plugin directory listing, with its source in `docs/images/plugin-icon.svg`. `claude plugin validate ./plugin --strict` now reports nothing.
+- **MCP tool annotations** — every tool now has a `title` and the MCP behaviour hints (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`): all tools are read-only and local except `wiki_sync`, which only adds new files.
+
+### Changed
+
+- **MCP tool descriptions** — each of the 12 descriptions now says when to use the tool instead of its siblings, what it returns and its limits (hit caps, size caps, timeouts). Directories such as Glama grade these (TDQS 3.5/5 for 2.0.2).
+
+### Fixed
+
+- **`wiki_list_sources` project filter** — `raw/sessions/` is flat, so the project was always taken as `sessions` and `project=` matched nothing. The project now comes from each file's frontmatter, and each entry also carries its `date`.
+- **MCP descriptions that promised too much** — `wiki_lint` claimed to find contradictions and stale summaries, and `wiki_dashboard` claimed stale pages and recent updates; neither does. `wiki_export` did not document the `rss` and `manifest` formats.
 
 ## [2.0.2] — 2026-11-05
 

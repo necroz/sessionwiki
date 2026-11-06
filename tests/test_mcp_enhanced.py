@@ -266,3 +266,47 @@ def test_category_browse_min_count(tmp_path: Path):
     text = result["content"][0]["text"]
     assert "popular" in text
     assert "lonely" not in text
+
+
+# ─── Tool definitions for agents and directories (TDQS) ──────────────
+
+
+_HINTS = ("readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint")
+
+
+def test_every_tool_has_title_and_behaviour_annotations():
+    for tool in TOOLS:
+        assert tool["title"], tool["name"]
+        annotations = tool["annotations"]
+        assert annotations["title"] == tool["title"]
+        for hint in _HINTS:
+            assert isinstance(annotations[hint], bool), (tool["name"], hint)
+        assert annotations["destructiveHint"] is False
+        assert annotations["openWorldHint"] is False
+
+
+def test_only_wiki_sync_writes():
+    writers = {t["name"] for t in TOOLS if not t["annotations"]["readOnlyHint"]}
+    assert writers == {"wiki_sync"}
+
+
+def test_every_description_points_to_a_sibling_tool():
+    """Agents pick between 12 similar tools from the descriptions alone,
+    so each one names at least one alternative."""
+    names = {t["name"] for t in TOOLS}
+    for tool in TOOLS:
+        others = names - {tool["name"]}
+        assert any(other in tool["description"] for other in others), tool["name"]
+
+
+def test_export_description_covers_every_format():
+    (export,) = [t for t in TOOLS if t["name"] == "wiki_export"]
+    for fmt in export["inputSchema"]["properties"]["format"]["enum"]:
+        assert f"'{fmt}'" in export["description"], fmt
+
+
+def test_lint_description_claims_only_what_it_checks():
+    (lint,) = [t for t in TOOLS if t["name"] == "wiki_lint"]
+    assert "orphan" in lint["description"]
+    assert "contradiction" not in lint["description"].lower()
+    assert "stale" not in lint["description"].lower()

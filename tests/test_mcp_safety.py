@@ -411,3 +411,24 @@ def test_query_short_floor_prevents_tiny_page_dominance(tmp_path: Path):
     pages = _query_pages_in_order(result)
     # The page with title match should still win (titles aren't normalised).
     assert pages[0].endswith("Normal.md")
+
+
+def test_list_sources_reads_project_from_frontmatter_in_flat_layout(tmp_path: Path):
+    """raw/sessions/ is flat (``<date>-<project>-<slug>.md``), so the
+    parent directory is always ``sessions``. The project must come from
+    the file's frontmatter, or ``project=`` filters match nothing."""
+    sessions = tmp_path / "raw" / "sessions"
+    sessions.mkdir(parents=True)
+    (sessions / "2026-11-01T10-00-llm-wiki-a.md").write_text(
+        "---\ntitle: \"A\"\ndate: 2026-11-01\nproject: llm-wiki\n---\nbody\n",
+        encoding="utf-8",
+    )
+    (sessions / "2026-11-02T10-00-other-b.md").write_text(
+        "---\ntitle: \"B\"\ndate: 2026-11-02\nproject: other\n---\nbody\n",
+        encoding="utf-8",
+    )
+    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
+        result = tool_wiki_list_sources({"project": "llm-wiki"})
+    payload = _result_json(result)
+    assert [item["project"] for item in payload] == ["llm-wiki"]
+    assert payload[0]["date"] == "2026-11-01"

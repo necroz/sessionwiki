@@ -46,10 +46,14 @@ TOOLS = [
     {
         "name": "wiki_query",
         "description": (
-            "Search the sessionwiki by keyword and return relevant page content. "
-            "Reads wiki/index.md, wiki/overview.md, and any matching pages. "
-            "Use for questions like 'what did I decide about X' or 'what's my "
-            "preferred approach to Y'."
+            "Start here for questions about the user's past work ('what did I "
+            "decide about X', 'how did I fix Y'). Ranks wiki/ pages by keyword "
+            "matches in title and body (no LLM, raw transcripts not included) "
+            "and returns up to max_pages page paths with a ~400-character "
+            "snippet each, plus the start of wiki/overview.md; with no match it "
+            "returns the start of wiki/index.md. Read-only. Open a full page "
+            "with wiki_read_page; use wiki_search for exact wording or to "
+            "include raw transcripts."
         ),
         "inputSchema": {
             "type": "object",
@@ -70,9 +74,13 @@ TOOLS = [
     {
         "name": "wiki_search",
         "description": (
-            "Raw grep search across wiki/ and raw/sessions/. No synthesis — "
-            "just returns file:line matches. Use when you want the literal "
-            "text without LLM interpretation."
+            "Find exact text: case-insensitive substring match, line by line, "
+            "over wiki/ pages, plus raw session transcripts in raw/sessions/ "
+            "when include_raw=true. Returns JSON {term, matches: [{path, line, "
+            "text}], truncated, skipped_oversize_files}; stops at 200 matches, "
+            "skips files over 4 MiB and reads at most 50 MiB per call. "
+            "Read-only. Use wiki_query instead for ranked, question-style "
+            "lookup; open a hit with wiki_read_page."
         ),
         "inputSchema": {
             "type": "object",
@@ -92,13 +100,24 @@ TOOLS = [
     },
     {
         "name": "wiki_list_sources",
-        "description": "List all raw source markdown files under raw/sessions/ with their metadata.",
+        "description": (
+            "List raw session transcripts in raw/sessions/ (one markdown file "
+            "per agent session), sorted by path, oldest first. Returns a JSON "
+            "array of {path, project, date, filename, size_bytes}; project and "
+            "date come from each file's frontmatter. Read-only. Use it to see "
+            "which sessions exist for a project, then open one with "
+            "wiki_read_page."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "project": {
                     "type": "string",
-                    "description": "Optional project slug to filter by.",
+                    "description": (
+                        "Optional substring of the project name, usually the "
+                        "workspace folder name (e.g. 'llm-wiki'). Omit to list "
+                        "every session."
+                    ),
                 },
             },
         },
@@ -106,15 +125,23 @@ TOOLS = [
     {
         "name": "wiki_read_page",
         "description": (
-            "Return the full content of one wiki or raw page. Path is relative "
-            "to the repo root (e.g. 'wiki/sources/clever-munching-parnas.md')."
+            "Return the full text of one file, unmodified and not truncated. "
+            "path is relative to the sessionwiki folder and must be under "
+            "wiki/, raw/, docs/, examples/ or site/ (or README.md, "
+            "CHANGELOG.md, CONTRIBUTING.md, LICENSE). Returns an error if the "
+            "path is outside that set, escapes the folder, or does not exist. "
+            "Read-only. Get paths from wiki_query, wiki_search or "
+            "wiki_list_sources."
         ),
         "inputSchema": {
             "type": "object",
             "properties": {
                 "path": {
                     "type": "string",
-                    "description": "Page path relative to the repo root.",
+                    "description": (
+                        "File path relative to the sessionwiki folder, e.g. "
+                        "'wiki/sources/clever-munching-parnas.md'."
+                    ),
                 },
             },
             "required": ["path"],
@@ -123,9 +150,13 @@ TOOLS = [
     {
         "name": "wiki_lint",
         "description": (
-            "Run the lint workflow over the wiki: find orphan pages, broken "
-            "wikilinks, contradictions, and stale summaries. Returns a JSON "
-            "report."
+            "Check the link structure of wiki/: find orphan pages (no inbound "
+            "[[wikilinks]]; index, overview and log are exempt) and broken "
+            "[[wikilinks]] that point to no page. Returns JSON {total_pages, "
+            "orphan_count, orphans, broken_link_count, broken_links}, listing "
+            "at most 50 of each. Read-only: it reports and changes nothing. "
+            "Use it after wiki_sync or before publishing; use wiki_lifecycle "
+            "or wiki_confidence to review page quality."
         ),
         "inputSchema": {
             "type": "object",
@@ -135,10 +166,15 @@ TOOLS = [
     {
         "name": "wiki_sync",
         "description": (
-            "Run the session-transcript converter to pull in any new sessions "
-            "from the agent's session store into raw/sessions/. Returns the "
-            "converter's summary line. Defaults to dry-run; pass confirm=true "
-            "to actually write."
+            "Convert new agent sessions (Claude Code, Codex, Cursor, ZCode, "
+            "OpenCode, ...) from their local session stores into markdown under "
+            "raw/sessions/. Dry run by default: it only reports what would "
+            "change. It writes only with dry_run=false and confirm=true; ask "
+            "the user before that. A real run adds new files and never "
+            "overwrites existing ones, so repeating it is safe; it may also "
+            "rebuild site/. Returns the converter's output (last 256 KB) and "
+            "fails after 120 s. Use it when wiki_list_sources lacks recent "
+            "sessions."
         ),
         "inputSchema": {
             "type": "object",
@@ -169,11 +205,14 @@ TOOLS = [
     {
         "name": "wiki_export",
         "description": (
-            "Dump the entire wiki in a machine-readable format for AI agents. "
-            "Returns the requested format as text. Use 'llms-txt' for the "
-            "short llms.txt index, 'llms-full-txt' for the flattened content "
-            "dump, 'jsonld' for the schema.org JSON-LD graph, 'sitemap' for "
-            "the sitemap.xml, or 'list' to list every available export."
+            "Return one generated export file from site/ as text, to load the "
+            "whole wiki at once: 'llms-txt' (short llms.txt index), "
+            "'llms-full-txt' (all pages flattened), 'jsonld' (schema.org "
+            "graph), 'sitemap' (sitemap.xml), 'rss' (feed of recent pages), "
+            "'manifest' (build manifest.json), or 'list' (JSON list of the "
+            "export files that exist, with sizes). Output is cut at 200 KB. "
+            "Read-only. Fails if the file is missing; run `sessionwiki build` "
+            "first. For specific facts wiki_query is cheaper."
         ),
         "inputSchema": {
             "type": "object",
@@ -192,8 +231,12 @@ TOOLS = [
     {
         "name": "wiki_confidence",
         "description": (
-            "Return confidence scores for wiki pages. Filters by minimum "
-            "confidence threshold. Pages below threshold may need review."
+            "List wiki pages whose frontmatter confidence (0.0-1.0) is between "
+            "min_confidence and max_confidence; pages without a confidence "
+            "value are left out. Returns plain text: the match count, then up "
+            "to 50 lines of 'score path - title', lowest score first. "
+            "Read-only. Use max_confidence=0.5 to find weak pages to recheck; "
+            "use wiki_dashboard for the overall distribution."
         ),
         "inputSchema": {
             "type": "object",
@@ -214,8 +257,12 @@ TOOLS = [
     {
         "name": "wiki_lifecycle",
         "description": (
-            "List pages by lifecycle state: draft, reviewed, verified, stale, "
-            "or archived. Use to find pages needing review or archival."
+            "List wiki pages whose frontmatter lifecycle equals state (draft, "
+            "reviewed, verified, stale or archived). Returns plain text: the "
+            "match count, then up to 50 lines of 'last_updated path - title', "
+            "newest first. Read-only. Use 'stale' or 'draft' to find pages to "
+            "update; use wiki_dashboard to see how many pages are in each "
+            "state."
         ),
         "inputSchema": {
             "type": "object",
@@ -232,9 +279,12 @@ TOOLS = [
     {
         "name": "wiki_dashboard",
         "description": (
-            "Return a summary of wiki health: page counts by type, "
-            "confidence distribution, lifecycle distribution, stale pages, "
-            "and recent updates."
+            "Overview of the whole wiki in one call: total page count, pages "
+            "per type (source, entity, concept, ...), pages per lifecycle "
+            "state, and how many pages have high (>=0.8), medium, low (<0.5) "
+            "or no confidence. Returns plain-text Markdown. Read-only, no "
+            "parameters. Call it first to see the wiki's size and health, then "
+            "use wiki_lifecycle or wiki_confidence for the page lists."
         ),
         "inputSchema": {
             "type": "object",
@@ -244,8 +294,14 @@ TOOLS = [
     {
         "name": "wiki_entity_search",
         "description": (
-            "Search entities by name or entity_type. Returns matching "
-            "entity pages with their metadata."
+            "Find entity pages (people, orgs, tools, libraries, APIs, "
+            "projects, concepts): wiki pages with type: entity. name matches a "
+            "case-insensitive substring of the title or path; entity_type "
+            "matches exactly; when both are given both must match; with "
+            "neither, every entity is listed. Returns plain text: the count, "
+            "then up to 50 lines of '[type] path - title', sorted by title. "
+            "Read-only. Use wiki_query for free-text questions and "
+            "wiki_category_browse for tags."
         ),
         "inputSchema": {
             "type": "object",
@@ -265,8 +321,12 @@ TOOLS = [
     {
         "name": "wiki_category_browse",
         "description": (
-            "List tags and the count of pages for each. Optionally return "
-            "all pages for a specific tag."
+            "Browse the wiki by tag (the 'tags' frontmatter field; 'category' "
+            "here means tag). Without tag: lists tags used by at least "
+            "min_count pages, most used first, up to 100. With tag: lists up "
+            "to 50 pages with that tag as 'path - title' (min_count is "
+            "ignored). Returns plain text. Read-only. Use wiki_entity_search "
+            "for named things and wiki_query for free-text questions."
         ),
         "inputSchema": {
             "type": "object",
@@ -284,6 +344,36 @@ TOOLS = [
         },
     },
 ]
+
+# MCP tool annotations (spec 2025-03-26): behaviour hints clients and
+# directories read. Every tool works on local files only. All but
+# wiki_sync are read-only; wiki_sync only adds new files to raw/.
+_TOOL_TITLES = {
+    "wiki_query": "Ask the wiki",
+    "wiki_search": "Search exact text",
+    "wiki_list_sources": "List session transcripts",
+    "wiki_read_page": "Read a page",
+    "wiki_lint": "Check wiki links",
+    "wiki_sync": "Import new sessions",
+    "wiki_export": "Export the whole wiki",
+    "wiki_confidence": "List pages by confidence",
+    "wiki_lifecycle": "List pages by lifecycle state",
+    "wiki_dashboard": "Wiki overview",
+    "wiki_entity_search": "Find entities",
+    "wiki_category_browse": "Browse by tag",
+}
+_WRITE_TOOLS = {"wiki_sync"}
+
+for _tool in TOOLS:
+    _name = _tool["name"]
+    _tool["title"] = _TOOL_TITLES[_name]
+    _tool["annotations"] = {
+        "title": _TOOL_TITLES[_name],
+        "readOnlyHint": _name not in _WRITE_TOOLS,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": False,
+    }
 
 
 # ─── Tool implementations ─────────────────────────────────────────────────
@@ -559,6 +649,32 @@ def tool_wiki_search(args: dict[str, Any]) -> dict[str, Any]:
     }, indent=2))
 
 
+_FRONTMATTER_HEAD_BYTES = 8 * 1024
+
+
+def _source_meta(p: Path) -> dict[str, str]:
+    """Read ``project`` and ``date`` from a raw session's frontmatter.
+
+    Reads only the head of the file. raw/sessions/ is flat, so the
+    frontmatter is the only place that names the project.
+    """
+    try:
+        with p.open("rb") as f:
+            head = f.read(_FRONTMATTER_HEAD_BYTES).decode("utf-8", errors="replace")
+    except OSError:
+        return {}
+    if not head.startswith("---"):
+        return {}
+    end = head.find("\n---", 3)
+    block = head[3:end] if end != -1 else head[3:]
+    meta: dict[str, str] = {}
+    for key in ("project", "date"):
+        m = re.search(rf"^{key}:\s*\"?([^\"\n]*)\"?\s*$", block, re.MULTILINE)
+        if m:
+            meta[key] = m.group(1).strip()
+    return meta
+
+
 def tool_wiki_list_sources(args: dict[str, Any]) -> dict[str, Any]:
     project_filter = args.get("project")
     raw_sessions = REPO_ROOT / "raw" / "sessions"
@@ -566,7 +682,10 @@ def tool_wiki_list_sources(args: dict[str, Any]) -> dict[str, Any]:
         return _ok(json.dumps([], indent=2))
     out = []
     for p in sorted(raw_sessions.rglob("*.md")):
-        project = p.parent.name
+        meta = _source_meta(p)
+        # Frontmatter is authoritative; the parent directory is only a
+        # fallback for the legacy per-project subdirectory layout.
+        project = meta.get("project") or (p.parent.name if p.parent != raw_sessions else "")
         if project_filter and project_filter not in project:
             continue
         try:
@@ -577,6 +696,7 @@ def tool_wiki_list_sources(args: dict[str, Any]) -> dict[str, Any]:
             {
                 "path": str(p.relative_to(REPO_ROOT)),
                 "project": project,
+                "date": meta.get("date", ""),
                 "filename": p.name,
                 "size_bytes": size,
             }
