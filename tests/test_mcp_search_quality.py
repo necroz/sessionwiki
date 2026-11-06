@@ -126,12 +126,16 @@ def test_include_raw_true_credits_transcript_hits_to_the_session_page(tmp_path: 
     assert paths[0] == "wiki/sources/pc/2026-10-27-sess_ddd.md"
 
 
-def test_transcripts_are_not_read_while_the_wiki_has_an_answer(tmp_path: Path):
+def test_transcripts_of_synthesised_sessions_are_not_read_in_full(tmp_path: Path):
+    """While the wiki has an answer, a transcript whose session already
+    has a page is skipped after its frontmatter; only sessions without a
+    page yet are read in full (see test_mcp_recall.py for freshness)."""
     _seed(tmp_path)
     with patch.object(server, "REPO_ROOT", tmp_path), \
          patch.object(server, "_read_capped", wraps=server._read_capped) as reads:
         tool_wiki_query({"question": "store filter lost room layouts"})
-    assert not any("raw" in str(call.args[0]) for call in reads.call_args_list)
+    read = [str(call.args[0]) for call in reads.call_args_list]
+    assert not any("sess_bbb" in p or "sess_ddd" in p for p in read if "/raw/" in p)
 
 
 def test_falls_back_to_transcript_without_wiki_page(tmp_path: Path):
