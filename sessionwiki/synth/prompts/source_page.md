@@ -66,6 +66,9 @@ decisions made, problems solved, and tools/libraries chosen.
 4. If the session contradicts known wiki content, record BOTH claims
    under ## Contradictions. Never silently overwrite.
 5. Keep it concise — the source page is a summary, not a transcript.
+6. {language} Keep the section headings (`## Summary`, `## Key Claims`,
+   ...), the tags comment and the `[[wikilinks]]` exactly as in the
+   format above: search, the site and links between pages rely on them.
 
 ## Session to synthesize
 

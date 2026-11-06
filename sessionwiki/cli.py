@@ -890,6 +890,9 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
     if args.complete:
         return _synthesize_complete(args)
 
+    if getattr(args, "backfill_only", False):
+        return _synthesize_backfill(args)
+
     coalesce_only = bool(getattr(args, "coalesce_only", False))
     if coalesce_only:
         backend = None
@@ -955,15 +958,38 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
         lock_skip_patterns=lock_skip_patterns,
         coalesce_only=coalesce_only,
         strip_unresolved_wikilinks=strip_links,
+        language=str(synth_cfg.get("language") or "session"),
     )
     print(
         f"Scanned {summary['total_scanned']}, new {summary['new_files']}, "
         f"synthesized {summary['synthesized']}, skipped {summary['skipped']}"
+        + (f", backfilled {summary['backfilled']}" if summary.get("backfilled") else "")
     )
     if summary["errors"]:
         for err in summary["errors"]:
             print(f"  ! {err}", file=sys.stderr)
         return 1
+    return 0
+
+
+def _synthesize_backfill(args: argparse.Namespace) -> int:
+    """``synthesize --backfill-only``: copy each session's description
+    onto its existing source page. Deterministic, no backend."""
+    from sessionwiki.synth.pipeline import backfill_source_descriptions
+
+    raw_dir = wiki_sources_dir = None
+    vault_path = getattr(args, "vault", None)
+    if vault_path:
+        from sessionwiki.vault import resolve_vault
+        try:
+            vault = resolve_vault(vault_path)
+        except (FileNotFoundError, NotADirectoryError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        raw_dir = vault.root / "raw" / "sessions"
+        wiki_sources_dir = vault.root / "wiki" / "sources"
+    count = backfill_source_descriptions(raw_dir=raw_dir, wiki_sources_dir=wiki_sources_dir)
+    print(f"Backfilled description on {count} source page(s)")
     return 0
 
 
@@ -1606,6 +1632,10 @@ def build_parser() -> argparse.ArgumentParser:
     syn_mode.add_argument(
         "--coalesce-only", action="store_true",
         help="Run deterministic low-signal coalescing only; no LLM backend needed",
+    )
+    syn_mode.add_argument(
+        "--backfill-only", action="store_true",
+        help="Add the user's original request (description) to existing source pages; no LLM",
     )
     # --force is orthogonal (modifies the default re-synthesize-all flow)
     # and stays outside the exclusion group so callers can pass
