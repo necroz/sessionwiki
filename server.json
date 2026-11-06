@@ -7,12 +7,12 @@
     "url": "https://github.com/necroz/sessionwiki",
     "source": "github"
   },
-  "version": "2.0.2",
+  "version": "2.0.3",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "sessionwiki",
-      "version": "2.0.2",
+      "version": "2.0.3",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
