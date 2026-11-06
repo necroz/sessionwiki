@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.0.4] — 2026-11-06
+
+Theme: the wiki reaches the agent — questions in the user's language, fresh sessions, recent work recalled at session start, past content marked as data.
+
 ### Added
 
 - **`sessionwiki recall`** and a **SessionStart hook** — agents called the wiki tools in 3 of 941 real sessions even with the MCP server configured and told to use it. `recall` prints a project's latest sessions (date, the user's request, first sentence of the summary, path); the Claude Code plugin and `sessionwiki zcode install` add a `SessionStart` hook that puts it into the new session's context. Subagent runs are left out.
