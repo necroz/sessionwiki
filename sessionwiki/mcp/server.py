@@ -653,7 +653,9 @@ def _link_idf(links: dict[Path, dict[str, str]], seeds: list[Path]) -> dict[str,
     max_df = max(2, int(len(links) * _GRAPH_MAX_DF_SHARE))
     return {
         key: math.log(len(links) / n) for key, n in df.items()
-        if 2 <= n <= max_df and in_seeds[key] >= _GRAPH_MIN_SEEDS
+        # n < len(links): a name on every page has idf 0 and links nothing
+        # (a two-page wiki used to divide by that zero).
+        if 2 <= n <= max_df and n < len(links) and in_seeds[key] >= _GRAPH_MIN_SEEDS
     }
 
 

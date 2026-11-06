@@ -102,3 +102,19 @@ def test_neighbour_says_which_name_links_it(tmp_path: Path):
     assert re.search(rf"^## `{re.escape(pages['refresh'])}` \(score: [\d.]+, via Keycloak\)$",
                      text, re.MULTILINE)
     assert re.search(rf"^## `{re.escape(pages['scopes'])}` \(score: [\d.]+\)$", text, re.MULTILINE)
+
+
+def test_tiny_wiki_where_every_page_shares_a_name_does_not_crash(tmp_path):
+    """Two pages that both link [[Keycloak]] give it idf log(2/2) = 0;
+    the hop used to divide by that sum."""
+    for n, day in (("a", "01"), ("b", "02")):
+        page = tmp_path / "wiki" / "sources" / "x" / f"2026-01-{day}-{n}.md"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text(
+            f'---\ntitle: "{n}"\ntype: source\nslug: {n}\n---\n\n'
+            "## Summary\n\nkeycloak setup\n\n## Connections\n\n- [[Keycloak]] — auth\n",
+            encoding="utf-8",
+        )
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = server.tool_wiki_query({"question": "keycloak setup"})
+    assert result["isError"] is False
