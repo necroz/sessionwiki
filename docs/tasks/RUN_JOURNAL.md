@@ -84,3 +84,22 @@ Newest entries go at the bottom.
 - Next card: 16
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 11:34 — card 16: Publish recall results
+
+- Status: done
+- Files: `docs/benchmarks.md`, `CHANGELOG.md`
+- Gates: `tests/test_docs_structure.py` 28 passed (rc 0), full suite
+  2938 passed / 28 skipped (rc 0), lint 16 → 16 errors, version 2.0.5
+  (rc 0), `grep -n "Retrieval recall"` rc 0, privacy grep clean,
+  synth state unchanged
+- Commit: 190b5fa
+- Decisions: every table cell was checked against
+  `.metrics/recall-{base,graph}-{k5,k10}.json` (`by_kind` and `overall`);
+  all rounded values match, so the card's table was used unchanged.
+  `CHANGELOG.md` is not in the card's Files list, but `README.md` and
+  `.kiro/steering/contributing-rules.md` require an Unreleased line on every
+  change; one line was added and this is the interpretation.
+- Next card: 17
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.

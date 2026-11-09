@@ -70,7 +70,7 @@ merge conflicts. Card 30 also edits `mcp/server.py`, but only appends to
 | 13 | [recall: say when to search](13-recall-when-to-search.md) | 0 | — | P0 | S | — | done |
 | 14 | [Align docs with the code](14-docs-facts.md) | 0 | — | P0 | S | — | done |
 | 15 | [Rewrite the competitor landscape](15-competitor-landscape-rewrite.md) | 0 | E4 | P0 | S | — | done |
-| 16 | [Publish recall results](16-benchmarks-recall.md) | 0 | E1 | P0 | S | — | todo |
+| 16 | [Publish recall results](16-benchmarks-recall.md) | 0 | E1 | P0 | S | — | done |
 | 17 | [query on the MCP ranking engine](17-cli-query-mcp-engine.md) | 0 | E7 | P0 | M | — | todo |
 | 18 | [recall --format json](18-recall-json.md) | 0 | E7 | P1 | S | 13 | todo |
 | 19 | [doctor reports the synthesis backlog](19-doctor-synthesis-backlog.md) | 0 | E11 | P0 | S | — | todo |
