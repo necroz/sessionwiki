@@ -103,3 +103,27 @@ Newest entries go at the bottom.
 - Next card: 17
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 11:43 — card 17: `query` on the MCP ranking engine
+
+- Status: done
+- Files: `sessionwiki/mcp/server.py`, `sessionwiki/cli.py`,
+  `tests/test_cli_query.py` (new), `docs/reference/cli.md`, `CHANGELOG.md`
+- Gates: targeted 29 passed (rc 0), full suite 2943 passed / 28 skipped
+  (rc 0), lint 16 → 16 errors, version 2.0.5 (rc 0), `query … --limit 3`
+  and `--limit 3 --json` rc 0, MCP text byte-identical to HEAD for 9
+  queries, eval report identical to HEAD for all 24 queries, ruff 15 → 15,
+  privacy grep clean, synth state unchanged
+- Commit: 5d459d2
+- Decisions: `rank_query(..., include_raw: bool | None)` instead of the
+  card's `Optional[bool]` — the repo's ruff config selects UP045 and
+  `server.py` already uses `Path | None`; `Optional` would have added a
+  16th ruff error. The CLI's and the server's `REPO_ROOT` are the same
+  object (`from sessionwiki import REPO_ROOT`), so they cannot diverge.
+  The card's eval step was run as a HEAD-vs-new comparison, not against
+  `.metrics/recall-*.json`: the wiki content changed after the Nov-6
+  snapshot (now overall recall@5 55.6%, hit@5 66.7%), so the old file is
+  not a valid baseline for a code change.
+- Next card: 18
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
