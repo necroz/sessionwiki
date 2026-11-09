@@ -221,3 +221,6 @@ test-results/
 
 # Agent working notes (superpowers plans/specs). Local scratch, not project docs.
 docs/superpowers/
+
+# ─── Autonomous task-card worker (transient lock) ────────────────────────
+docs/tasks/RUN.lock
