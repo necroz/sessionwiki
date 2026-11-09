@@ -198,3 +198,85 @@ def test_recall_json_for_an_unknown_project_is_an_empty_document(tmp_path: Path)
 def test_recall_prints_nothing_for_an_unknown_project(tmp_path: Path):
     _seed_project(tmp_path)
     assert _recall(tmp_path, "--project", "nope") == ""
+
+
+# ─── recall handoff ───────────────────────────────────────────────────
+
+
+def _raw_with_turns(root: Path, day: str, slug: str, request: str,
+                    *turns: tuple[str, str]) -> Path:
+    path = root / "raw" / "sessions" / f"{day}T09-00-app-{slug}.md"
+    body = ["## Conversation", ""]
+    for n, (role, text) in enumerate(turns, 1):
+        body += [f"### Turn {n} — {role}", "", text, ""]
+    _page(path, {"slug": slug, "project": "app", "date": day,
+                 "description": f'"{request}"'}, "\n".join(body))
+    return path
+
+
+def test_recall_handoff_comes_from_the_raw_tail_without_code(tmp_path: Path):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "почини сборку",
+                    ("User", "сборка падает"),
+                    ("Assistant", "Сборку починил.\n\n"
+                                  "```python\nprint('secret code')\n```\n\n"
+                                  "## Tests\n\nТесты зелёные."))
+    text = _recall(tmp_path, "--project", "app", "--limit", "1")
+    assert "Last session ended with («почини сборку», 2026-11-07):" in text
+    assert "Сборку починил." in text
+    assert "Тесты зелёные." in text
+    assert "secret code" not in text
+    assert "```" not in text
+    assert "## Tests" not in text
+
+
+def test_recall_handoff_follows_the_wiki_page_source_file(tmp_path: Path):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "собери релиз",
+                    ("User", "собери релиз"),
+                    ("Assistant", "Релиз собран, тег v2.0.5."))
+    _page(tmp_path / "wiki" / "sources" / "app" / "2026-11-07-s5.md",
+          {"title": '"Session: s5"', "type": "source", "slug": "s5",
+           "project": "app", "date": "2026-11-07", "description": '"собери релиз"',
+           "source_file": "raw/sessions/2026-11-07T09-00-app-s5.md"},
+          "## Summary\n\nRelease prepared.")
+    text = _recall(tmp_path, "--project", "app", "--limit", "1")
+    assert "Релиз собран, тег v2.0.5." in text
+    assert "wiki/sources/app/2026-11-07-s5.md" in text
+
+
+def test_recall_has_no_handoff_without_an_assistant_turn(tmp_path: Path):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "только вопрос",
+                    ("User", "как собрать проект?"))
+    text = _recall(tmp_path, "--project", "app", "--limit", "1")
+    assert "Last session ended with" not in text
+
+
+def test_recall_handoff_reads_only_the_tail(tmp_path: Path):
+    _seed_project(tmp_path)
+    padding = "промежуточный текст " * 200
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "длинная сессия",
+                    ("Assistant", "old answer"),
+                    ("User", padding),
+                    ("Assistant", "new answer"))
+    with patch("sessionwiki.cli._HANDOFF_TAIL_BYTES", 256):
+        text = _recall(tmp_path, "--project", "app", "--limit", "1")
+    assert "new answer" in text
+    assert "old answer" not in text
+
+
+def test_recall_json_has_a_handoff_key(tmp_path: Path):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "собери релиз",
+                    ("User", "собери релиз"),
+                    ("Assistant", "Релиз собран."))
+    payload = json.loads(_recall(tmp_path, "--project", "app", "--limit", "3",
+                                 "--format", "json"))
+    assert payload["handoff"] == {
+        "path": "raw/sessions/2026-11-07T09-00-app-s5.md",
+        "date": "2026-11-07",
+        "text": "Релиз собран.",
+    }
+    empty = json.loads(_recall(tmp_path, "--project", "nope", "--format", "json"))
+    assert empty["handoff"] is None

@@ -12,6 +12,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Added
 
+- **`recall` shows where the last session stopped** — the newest session's last assistant turn is read from the raw transcript's final 64 KB, with code blocks and headings stripped and the text capped at 400 characters, so a handoff works even when the session has no wiki page yet. `--format json` exposes it as `handoff` (`{path, date, text}`, or `null` when the project has no sessions).
 - **`wiki_query` filters** — MCP `wiki_query` and `sessionwiki query` accept `project`, `type`, `tag`, `date_from` and `date_to` (CLI: `--project`, `--type`, `--tag`, `--date-from`, `--date-to`). Filters apply to wiki pages and raw transcripts; a filtered-out page never appears, including through the graph hop. An unparseable date is ignored, and a search without filters returns exactly what it returned before.
 - **`doctor` reports the synthesis backlog** — a new non-critical `synthesis` check counts raw sessions with no entry in `.llmwiki-synth-state.json` (the pipeline's "needs synthesis" rule) and source pages that still carry the agent-delegate placeholder, then points at `sessionwiki synthesize`. It never changes the exit code.
 - **`recall --format json`** — prints `{project, notice, sessions}` with one `{date, request, summary, path}` object per session, newest first, so scripts and other agents can read the list; an unknown project yields an empty `sessions` list. `text` and `hook` output is unchanged.

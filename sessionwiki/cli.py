@@ -122,6 +122,52 @@ def _recent_sessions(project: str, limit: int) -> list[tuple[str, str, str, str]
     return items[:limit]
 
 
+_TURN_RE = re.compile(r"^### Turn \d+ — (User|Assistant)\s*$", re.MULTILINE)
+_HANDOFF_TAIL_BYTES = 64 * 1024
+_HANDOFF_MAX_CHARS = 400
+
+
+def _raw_path_for(path: str) -> Path | None:
+    """The raw transcript behind a recall item (a raw path or a wiki page)."""
+    p = REPO_ROOT / path
+    if path.startswith("raw/"):
+        return p if p.is_file() else None
+    from sessionwiki._frontmatter import parse_frontmatter
+    try:
+        with p.open("rb") as f:
+            meta, _ = parse_frontmatter(f.read(8 * 1024).decode("utf-8", errors="replace"))
+    except OSError:
+        return None
+    src = str(meta.get("source_file", "")).strip()
+    raw = REPO_ROOT / src if src else None
+    return raw if raw is not None and raw.is_file() else None
+
+
+def _last_assistant_text(raw: Path) -> str:
+    """First characters of the last assistant turn, read from the file's tail."""
+    try:
+        with raw.open("rb") as f:
+            f.seek(0, 2)
+            size = f.tell()
+            f.seek(max(0, size - _HANDOFF_TAIL_BYTES))
+            tail = f.read().decode("utf-8", errors="replace")
+    except OSError:
+        return ""
+    turns = list(_TURN_RE.finditer(tail))
+    for i in range(len(turns) - 1, -1, -1):
+        if turns[i].group(1) != "Assistant":
+            continue
+        end = turns[i + 1].start() if i + 1 < len(turns) else len(tail)
+        text = tail[turns[i].end():end]
+        text = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
+        text = re.sub(r"^#+ .*$", " ", text, flags=re.MULTILINE)
+        text = " ".join(text.split())
+        if not text:
+            continue
+        return text if len(text) <= _HANDOFF_MAX_CHARS else text[: _HANDOFF_MAX_CHARS - 1].rstrip() + "…"
+    return ""
+
+
 def cmd_recall(args: argparse.Namespace) -> int:
     """Print a project's recent sessions for a SessionStart hook, so the
     agent starts with them in context instead of having to ask."""
@@ -129,6 +175,10 @@ def cmd_recall(args: argparse.Namespace) -> int:
 
     project = args.project or _project_from_hook_input() or Path.cwd().name
     items = _recent_sessions(project, args.limit)
+    handoff = ""
+    if items:
+        raw = _raw_path_for(items[0][3])
+        handoff = _last_assistant_text(raw) if raw else ""
     if args.format == "json":
         print(json.dumps({
             "project": project,
@@ -137,6 +187,10 @@ def cmd_recall(args: argparse.Namespace) -> int:
                 {"date": day, "request": request, "summary": summary, "path": path}
                 for day, request, summary, path in items
             ],
+            "handoff": (
+                {"path": items[0][3], "date": items[0][0], "text": handoff}
+                if items else None
+            ),
         }, ensure_ascii=False, indent=2))
         return 0
     if not items:
@@ -146,6 +200,9 @@ def cmd_recall(args: argparse.Namespace) -> int:
         what = f"«{request}»" if request else "(no request recorded)"
         note = summary or "not in the wiki yet"
         lines.append(f"- {day} {what} — {note} ({path})")
+    if handoff:
+        what = f"«{items[0][1]}»" if items[0][1] else "(no request recorded)"
+        lines += ["", f"Last session ended with ({what}, {items[0][0]}):", handoff]
     lines += [
         "",
         "Before you ask the user about earlier work, call the wiki_query tool; "
