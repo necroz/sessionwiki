@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import json
+
 from sessionwiki import doctor
+from sessionwiki.synth.agent_delegate import sentinel_for
 
 
 def test_collect_report_reports_core_environment(tmp_path):
@@ -45,3 +48,58 @@ def test_cmd_doctor_returns_zero_when_core_checks_pass(tmp_path, monkeypatch, ca
     assert rc == 0
     assert "python" in out.lower()
     assert "zcode" in out.lower()
+
+
+def test_synthesis_check_ok_on_empty_repo(tmp_path):
+    report = doctor.collect_report(repo_root=tmp_path, home=tmp_path)
+
+    assert report["synthesis"]["ok"] is True
+    assert "0 raw session(s)" in report["synthesis"]["detail"]
+
+
+def test_synthesis_check_counts_unsynthesized_raw_sessions(tmp_path):
+    raw = tmp_path / "raw" / "sessions"
+    raw.mkdir(parents=True)
+    done = raw / "done.md"
+    done.write_text("# done\n", encoding="utf-8")
+    (raw / "new.md").write_text("# new\n", encoding="utf-8")
+    state_file = tmp_path / ".llmwiki-synth-state.json"
+    state_file.write_text(
+        json.dumps({"done.md": done.stat().st_mtime}), encoding="utf-8"
+    )
+
+    report = doctor.collect_report(repo_root=tmp_path, home=tmp_path)
+
+    assert report["synthesis"]["ok"] is False
+    assert "1 raw session(s) not synthesized" in report["synthesis"]["detail"]
+
+
+def test_synthesis_check_counts_pages_waiting_for_the_agent(tmp_path):
+    sources = tmp_path / "wiki" / "sources" / "project"
+    sources.mkdir(parents=True)
+    page = sources / "session.md"
+    page.write_text(
+        f"---\ntitle: x\n---\n{sentinel_for('00000000-0000-0000-0000-000000000000')}\n",
+        encoding="utf-8",
+    )
+
+    report = doctor.collect_report(repo_root=tmp_path, home=tmp_path)
+
+    assert report["synthesis"]["ok"] is False
+    assert "1 page(s) waiting for the agent" in report["synthesis"]["detail"]
+
+
+def test_cmd_doctor_returns_zero_when_only_synthesis_warns(
+    tmp_path, monkeypatch, capsys
+):
+    monkeypatch.setattr(doctor, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(doctor.Path, "home", classmethod(lambda cls: tmp_path))
+    raw = tmp_path / "raw" / "sessions"
+    raw.mkdir(parents=True)
+    (raw / "new.md").write_text("# new\n", encoding="utf-8")
+
+    rc = doctor.cmd_doctor()
+
+    out = capsys.readouterr().out
+    assert rc == 0
+    assert "[warn] synthesis" in out

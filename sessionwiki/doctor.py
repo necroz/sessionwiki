@@ -84,6 +84,46 @@ def _check_zcode_export(home: Path) -> dict[str, Any]:
     }
 
 
+def _check_synthesis(repo_root: Path) -> dict[str, Any]:
+    """Raw sessions not synthesized yet, and pages waiting for the agent."""
+    from sessionwiki.synth.agent_delegate import is_pending
+    from sessionwiki.synth.pipeline import _load_state
+
+    raw_root = repo_root / "raw" / "sessions"
+    state = _load_state(repo_root / ".llmwiki-synth-state.json")
+    waiting = 0
+    for p in raw_root.rglob("*.md") if raw_root.is_dir() else []:
+        # Same skip as _discover_raw_sessions: underscore files are support
+        # files, not sessions.
+        if p.name.startswith("_"):
+            continue
+        rel = str(p.relative_to(raw_root))
+        try:
+            mtime = p.stat().st_mtime
+        except OSError:
+            continue
+        if rel not in state or state[rel] < mtime:
+            waiting += 1
+    pending = 0
+    sources = repo_root / "wiki" / "sources"
+    for page in sources.rglob("*.md") if sources.is_dir() else []:
+        try:
+            with page.open("rb") as f:
+                head = f.read(16 * 1024).decode("utf-8", errors="replace")
+        except OSError:
+            continue
+        if is_pending(head):
+            pending += 1
+    ok = waiting == 0 and pending == 0
+    detail = (
+        f"{waiting} raw session(s) not synthesized, "
+        f"{pending} page(s) waiting for the agent"
+    )
+    if not ok:
+        detail += " — run `sessionwiki synthesize`"
+    return {"ok": ok, "detail": detail}
+
+
 def collect_report(
     repo_root: Path | None = None,
     home: Path | None = None,
@@ -98,6 +138,7 @@ def collect_report(
         "config": _check_config(root),
         "zcode_db": _check_zcode_db(home_dir),
         "zcode_export": _check_zcode_export(home_dir),
+        "synthesis": _check_synthesis(root),
     }
 
 

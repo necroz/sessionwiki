@@ -12,6 +12,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Added
 
+- **`doctor` reports the synthesis backlog** — a new non-critical `synthesis` check counts raw sessions with no entry in `.llmwiki-synth-state.json` (the pipeline's "needs synthesis" rule) and source pages that still carry the agent-delegate placeholder, then points at `sessionwiki synthesize`. It never changes the exit code.
 - **`recall --format json`** — prints `{project, notice, sessions}` with one `{date, request, summary, path}` object per session, newest first, so scripts and other agents can read the list; an unknown project yields an empty `sessions` list. `text` and `hook` output is unchanged.
 - **Recall numbers published** — `docs/benchmarks.md` now reports `wiki_query` recall@5 and recall@10 for the lexical and graph-hop rankings, including the k=10 case where the graph hop loses to the baseline.
 - **`recall` says when to search** — the closing line now reads "Before you ask the user about earlier work, call the `wiki_query` tool", not "Search earlier work with…". Optional wording is ignored by agents; the imperative trigger is what makes the hook fire.
