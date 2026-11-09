@@ -220,3 +220,28 @@ Newest entries go at the bottom.
 - Next card: 22
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 13:55 — card 22: Never overwrite pages with `origin: human`
+
+- Status: done
+- Files: `sessionwiki/_frontmatter.py`, `sessionwiki/synth/pipeline.py`,
+  `tests/test_synth_origin_human.py` (new), `CLAUDE.md`, `AGENTS.md`,
+  `CHANGELOG.md`
+- Gates: targeted 52 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version 2.0.5 (rc 0), ruff on the changed files 30 → 30 with none on the
+  new lines, privacy grep clean, synth state unchanged
+- Commit: 292ffb7
+- Decisions: `is_human_page` is the card's snippet verbatim. Both writers
+  named in the card were guarded: `_strip_unresolved_wikilinks` — the
+  `page.write_text(head + new_body …)` site at the card's "around line 490"
+  — and `backfill_source_descriptions`. The coalescing guard skips the
+  whole group, not only the `page_path.write_text` call: deleting the
+  member pages while leaving a human cluster page unchanged would lose
+  their content. The page name is still added to `produced`, so the
+  manifest-reconciliation loop never treats the human page as stale, and
+  that loop's `unlink` also skips human pages. `AGENTS.md` repeats the hard
+  rules, so it got the same rule 6. The locked-run return dict also carries
+  `kept_human: 0`, so every summary shape has the key.
+- Next card: 23
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
