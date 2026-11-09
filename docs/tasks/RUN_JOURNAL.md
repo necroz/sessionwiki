@@ -169,3 +169,29 @@ Newest entries go at the bottom.
 - Next card: 20
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 13:05 — card 20: Filters in `wiki_query` and `query`
+
+- Status: done
+- Files: `sessionwiki/mcp/server.py`, `sessionwiki/cli.py`,
+  `tests/test_mcp_query_filters.py` (new), `docs/reference/cli.md`,
+  `CHANGELOG.md`
+- Gates: targeted 19 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version 2.0.5 (rc 0), `query release --project llm-wiki --limit 3`
+  printed three `wiki/sources/llm-wiki/…` hits (rc 0), ruff on changed
+  files 15 → 15 with none on the new lines, privacy grep clean,
+  synth state unchanged
+- Commit: c467ebb
+- Decisions: the filter check in the wiki loop sits before the
+  `page_by_slug` registration as well as before `_collect`/`links`, so a
+  filtered-out source page cannot become a raw target either; raw
+  transcripts are filtered by their own frontmatter. `filters` is typed
+  `dict[str, str] | None` (not the card's `Optional`) because ruff
+  selects UP045, the card-17 precedent. Non-string and empty values are
+  dropped, an unparseable date is dropped instead of raising. The graph
+  hop still runs between two allowed pages that share a name — only
+  filtered-out pages are excluded. `--graph` ignores the filters (out of
+  scope). `docs/reference/cli.md` gained the five flags and an example.
+- Next card: 21
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
