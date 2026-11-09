@@ -12,6 +12,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Added
 
+- **`synthesize --max-sessions N`** — caps how many sessions one run synthesizes, so a paid backend cannot spend an unbounded amount in one go. The rest are deferred, not written to the state, and picked up by the next run; the summary reports `deferred`. Without the flag the behaviour is unchanged.
 - **`recall` shows where the last session stopped** — the newest session's last assistant turn is read from the raw transcript's final 64 KB, with code blocks and headings stripped and the text capped at 400 characters, so a handoff works even when the session has no wiki page yet. `--format json` exposes it as `handoff` (`{path, date, text}`, or `null` when the project has no sessions).
 - **`wiki_query` filters** — MCP `wiki_query` and `sessionwiki query` accept `project`, `type`, `tag`, `date_from` and `date_to` (CLI: `--project`, `--type`, `--tag`, `--date-from`, `--date-to`). Filters apply to wiki pages and raw transcripts; a filtered-out page never appears, including through the graph hop. An unparseable date is ignored, and a search without filters returns exactly what it returned before.
 - **`doctor` reports the synthesis backlog** — a new non-critical `synthesis` check counts raw sessions with no entry in `.llmwiki-synth-state.json` (the pipeline's "needs synthesis" rule) and source pages that still carry the agent-delegate placeholder, then points at `sessionwiki synthesize`. It never changes the exit code.

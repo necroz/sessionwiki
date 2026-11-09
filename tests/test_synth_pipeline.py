@@ -186,6 +186,47 @@ def _seed_raw(tmp_path: Path) -> Path:
     return tmp_path / "raw" / "sessions"
 
 
+SESSION_TEMPLATE = """---
+title: "Session: session-{n} — 2026-04-{n:02d}"
+type: source
+tags: [claude-code, session-transcript]
+date: 2026-04-{n:02d}
+source_file: raw/sessions/test-proj/2026-04-{n:02d}-session-{n}.md
+slug: session-{n}
+project: test-proj
+model: claude-sonnet-4-6
+user_messages: 1
+tool_calls: 0
+---
+
+# Session: session-{n} — 2026-04-{n:02d}
+
+## Summary
+
+Session number {n}.
+
+## Conversation
+
+### Turn 1 — User
+
+Do thing {n}.
+
+### Turn 1 — Assistant
+
+Did thing {n}.
+"""
+
+
+def _seed_three_raw(tmp_path: Path) -> Path:
+    """Three sessions in one project, sorted by filename."""
+    raw = tmp_path / "raw" / "sessions" / "test-proj"
+    raw.mkdir(parents=True)
+    for n in (1, 2, 3):
+        name = f"2026-04-{n:02d}-session-{n}.md"
+        (raw / name).write_text(SESSION_TEMPLATE.format(n=n), encoding="utf-8")
+    return tmp_path / "raw" / "sessions"
+
+
 # ─── DummySynthesizer ────────────────────────────────────────────────────
 
 
@@ -373,6 +414,72 @@ def test_synthesize_skip_already_processed(tmp_path: Path):
     )
     assert s2["new_files"] == 0
     assert s2["synthesized"] == 0
+
+
+def test_synthesize_max_sessions_defers_the_rest(tmp_path: Path):
+    raw = _seed_three_raw(tmp_path)
+    wiki_sources = tmp_path / "wiki" / "sources"
+    wiki_sources.mkdir(parents=True)
+    log_file = tmp_path / "wiki" / "log.md"
+    log_file.write_text("# Log\n", encoding="utf-8")
+
+    summary = synthesize_new_sessions(
+        backend=DummySynthesizer(), raw_dir=raw, wiki_sources_dir=wiki_sources,
+        log_path=log_file, max_sessions=1,
+    )
+    assert summary["new_files"] == 3
+    assert summary["synthesized"] == 1
+    assert summary["deferred"] == 2
+    pages = sorted((wiki_sources / "test-proj").glob("*.md"))
+    assert [p.name for p in pages] == ["2026-04-01-session-1.md"]
+    state = json.loads(
+        (tmp_path / "synth-state.json").read_text(encoding="utf-8")
+    )
+    assert len(state) == 1
+
+
+def test_synthesize_max_sessions_picks_up_deferred_next_run(tmp_path: Path):
+    raw = _seed_three_raw(tmp_path)
+    wiki_sources = tmp_path / "wiki" / "sources"
+    wiki_sources.mkdir(parents=True)
+    log_file = tmp_path / "wiki" / "log.md"
+    log_file.write_text("# Log\n", encoding="utf-8")
+
+    synthesize_new_sessions(
+        backend=DummySynthesizer(), raw_dir=raw, wiki_sources_dir=wiki_sources,
+        log_path=log_file, max_sessions=1,
+    )
+    second = synthesize_new_sessions(
+        backend=DummySynthesizer(), raw_dir=raw, wiki_sources_dir=wiki_sources,
+        log_path=log_file, max_sessions=1,
+    )
+    assert second["new_files"] == 2
+    assert second["synthesized"] == 1
+    assert second["deferred"] == 1
+    pages = sorted((wiki_sources / "test-proj").glob("*.md"))
+    assert [p.name for p in pages] == [
+        "2026-04-01-session-1.md",
+        "2026-04-02-session-2.md",
+    ]
+    state = json.loads(
+        (tmp_path / "synth-state.json").read_text(encoding="utf-8")
+    )
+    assert len(state) == 2
+
+
+def test_synthesize_without_max_sessions_synthesizes_all(tmp_path: Path):
+    raw = _seed_three_raw(tmp_path)
+    wiki_sources = tmp_path / "wiki" / "sources"
+    wiki_sources.mkdir(parents=True)
+    log_file = tmp_path / "wiki" / "log.md"
+    log_file.write_text("# Log\n", encoding="utf-8")
+
+    summary = synthesize_new_sessions(
+        backend=DummySynthesizer(), raw_dir=raw, wiki_sources_dir=wiki_sources,
+        log_path=log_file,
+    )
+    assert summary["synthesized"] == 3
+    assert summary["deferred"] == 0
 
 
 def test_synthesize_unavailable_backend(tmp_path: Path):

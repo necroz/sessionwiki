@@ -1309,6 +1309,7 @@ def synthesize_new_sessions(
     strip_unresolved_wikilinks: bool = True,
     lock_timeout: float = 600,
     language: str = DEFAULT_SYNTHESIS_LANGUAGE,
+    max_sessions: int | None = None,
 ) -> dict[str, Any]:
     """Run synthesis under an OS lock next to the synth state file.
 
@@ -1335,6 +1336,7 @@ def synthesize_new_sessions(
         coalesce_only=coalesce_only,
         strip_unresolved_wikilinks=strip_unresolved_wikilinks,
         language=language,
+        max_sessions=max_sessions,
     )
     if dry_run:
         return _synthesize_new_sessions_unlocked(**kwargs)
@@ -1353,6 +1355,7 @@ def synthesize_new_sessions(
             "kept_human": 0,
             "coalesced": 0,
             "skipped": 0,
+            "deferred": 0,
             "errors": [],
             "backend": getattr(backend, "name", "") if backend else "",
             "locked": True,
@@ -1383,6 +1386,7 @@ def _synthesize_new_sessions_unlocked(
     coalesce_only: bool = False,
     strip_unresolved_wikilinks: bool = True,
     language: str = DEFAULT_SYNTHESIS_LANGUAGE,
+    max_sessions: int | None = None,
 ) -> dict[str, Any]:
     """Main entry point. Returns a summary dict:
 
@@ -1393,6 +1397,7 @@ def _synthesize_new_sessions_unlocked(
         "kept_human": int,
         "coalesced": int,
         "skipped": int,
+        "deferred": int,
         "errors": list[str],
         "backend": str,
     }
@@ -1421,6 +1426,7 @@ def _synthesize_new_sessions_unlocked(
         "kept_human": 0,
         "coalesced": 0,
         "skipped": 0,
+        "deferred": 0,
         "errors": [],
         "backend": backend.name if backend is not None else "none",
     }
@@ -1464,6 +1470,11 @@ def _synthesize_new_sessions_unlocked(
                 except (OSError, ValueError, RuntimeError) as e:
                     summary["errors"].append(f"index rebuild: {e}")
         return summary
+
+    if max_sessions is not None and max_sessions >= 0 and len(new_files) > max_sessions:
+        summary["deferred"] = len(new_files) - max_sessions
+        new_files = new_files[:max_sessions]
+        print(f"  deferred: {summary['deferred']} session(s) — run again to continue")
 
     if backend is None:
         backend = DummySynthesizer()

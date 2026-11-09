@@ -1139,6 +1139,7 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
         coalesce_only=coalesce_only,
         strip_unresolved_wikilinks=strip_links,
         language=str(synth_cfg.get("language") or "session"),
+        max_sessions=getattr(args, "max_sessions", None),
     )
     print(
         f"Scanned {summary['total_scanned']}, new {summary['new_files']}, "
@@ -1848,6 +1849,10 @@ def build_parser() -> argparse.ArgumentParser:
     syn.add_argument(
         "--body", metavar="PATH", default=None,
         help="Read synthesized body from this file for --complete (default: stdin)",
+    )
+    syn.add_argument(
+        "--max-sessions", type=int, default=None, metavar="N",
+        help="Synthesize at most N sessions in this run; the rest wait for the next run",
     )
     _add_vault_arg(syn, role="synthesize")
     syn.set_defaults(func=cmd_synthesize)
