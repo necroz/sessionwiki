@@ -156,6 +156,7 @@ def test_recall_lists_recent_sessions_of_the_project_newest_first(tmp_path: Path
     assert "добавь кэш" not in text  # beyond --limit
     assert "Rewrote the install section." in text
     assert "wiki_query" in text
+    assert "Before you ask the user" in text
 
 
 def test_recall_takes_the_project_from_hook_input(tmp_path: Path):
@@ -170,6 +171,7 @@ def test_recall_hook_format_is_session_start_json(tmp_path: Path):
     ctx = payload["hookSpecificOutput"]
     assert ctx["hookEventName"] == "SessionStart"
     assert "обнови README" in ctx["additionalContext"]
+    assert "Before you ask the user" in ctx["additionalContext"]
 
 
 def test_recall_prints_nothing_for_an_unknown_project(tmp_path: Path):

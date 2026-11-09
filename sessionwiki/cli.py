@@ -136,7 +136,11 @@ def cmd_recall(args: argparse.Namespace) -> int:
         what = f"«{request}»" if request else "(no request recorded)"
         note = summary or "not in the wiki yet"
         lines.append(f"- {day} {what} — {note} ({path})")
-    lines += ["", "Search earlier work with the wiki_query tool; open a page with wiki_read_page."]
+    lines += [
+        "",
+        "Before you ask the user about earlier work, call the wiki_query tool; "
+        "open a page with wiki_read_page.",
+    ]
     text = "\n".join(lines)
     if args.format == "hook":
         print(json.dumps({"hookSpecificOutput": {
