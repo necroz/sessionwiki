@@ -129,6 +129,16 @@ def cmd_recall(args: argparse.Namespace) -> int:
 
     project = args.project or _project_from_hook_input() or Path.cwd().name
     items = _recent_sessions(project, args.limit)
+    if args.format == "json":
+        print(json.dumps({
+            "project": project,
+            "notice": DATA_NOTICE,
+            "sessions": [
+                {"date": day, "request": request, "summary": summary, "path": path}
+                for day, request, summary, path in items
+            ],
+        }, ensure_ascii=False, indent=2))
+        return 0
     if not items:
         return 0
     lines = [f"Recent sessions in project '{project}' (sessionwiki):", DATA_NOTICE, ""]
@@ -1815,8 +1825,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     recall.add_argument("--limit", type=int, default=5, help="How many sessions (default 5)")
     recall.add_argument(
-        "--format", choices=["text", "hook"], default="text",
-        help="text, or hook = SessionStart JSON with additionalContext",
+        "--format", choices=["text", "hook", "json"], default="text",
+        help="text, hook = SessionStart JSON with additionalContext, "
+             "json = machine-readable list",
     )
     recall.set_defaults(func=cmd_recall)
 

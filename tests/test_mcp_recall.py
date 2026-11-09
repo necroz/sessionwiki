@@ -174,6 +174,27 @@ def test_recall_hook_format_is_session_start_json(tmp_path: Path):
     assert "Before you ask the user" in ctx["additionalContext"]
 
 
+def test_recall_json_lists_sessions_newest_first(tmp_path: Path):
+    _seed_project(tmp_path)
+    payload = json.loads(_recall(tmp_path, "--project", "app", "--limit", "3",
+                                 "--format", "json"))
+    assert payload["project"] == "app"
+    assert payload["notice"] == DATA_NOTICE
+    assert [s["request"] for s in payload["sessions"]] == [
+        "собери релиз", "обнови README", "почини тесты",
+    ]
+    assert payload["sessions"][0]["path"] == "raw/sessions/2026-11-06T09-00-app-s4.md"
+    assert payload["sessions"][1]["date"] == "2026-11-05"
+    assert payload["sessions"][1]["summary"] == "Rewrote the install section."
+
+
+def test_recall_json_for_an_unknown_project_is_an_empty_document(tmp_path: Path):
+    _seed_project(tmp_path)
+    payload = json.loads(_recall(tmp_path, "--project", "nope", "--format", "json"))
+    assert payload["project"] == "nope"
+    assert payload["sessions"] == []
+
+
 def test_recall_prints_nothing_for_an_unknown_project(tmp_path: Path):
     _seed_project(tmp_path)
     assert _recall(tmp_path, "--project", "nope") == ""

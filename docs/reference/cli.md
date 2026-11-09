@@ -672,12 +672,14 @@ directory themselves, so set `SESSIONWIKI_HOME` in the client config.
 sessionwiki recall                          # project = current folder name
 sessionwiki recall --project llm-wiki --limit 5
 sessionwiki recall --format hook            # SessionStart JSON (additionalContext)
+sessionwiki recall --format json            # machine-readable list
 ```
 
 Prints the latest sessions of one project, newest first: date, the
 user's original request, the first sentence of the summary and the
 page path. Sessions not synthesised yet come from `raw/sessions/`.
-Prints nothing when the project has no sessions.
+Prints nothing when the project has no sessions; `--format json` prints
+a document with an empty `sessions` list instead.
 
 Meant for a `SessionStart` hook: agents rarely call memory tools on
 their own, so the hook puts recent work into context up front. With
