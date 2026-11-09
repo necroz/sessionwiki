@@ -66,7 +66,10 @@ Statuses: `todo`, `in-progress`, `done`, `blocked`.
    - Blockers: <none or the blocker>
    ```
 
-10. **Unlock.** Remove `RUN.lock`. Stop.
+10. **Commit the record.** On `master`, commit the `Status` and journal
+    changes: `chore: record card NN completion`. The working tree must be
+    clean before the lock is removed.
+11. **Unlock.** Remove `RUN.lock`. Stop.
 
 ## Rules
 
