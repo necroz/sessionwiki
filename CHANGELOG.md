@@ -12,6 +12,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Added
 
+- **Recall numbers published** — `docs/benchmarks.md` now reports `wiki_query` recall@5 and recall@10 for the lexical and graph-hop rankings, including the k=10 case where the graph hop loses to the baseline.
 - **`recall` says when to search** — the closing line now reads "Before you ask the user about earlier work, call the `wiki_query` tool", not "Search earlier work with…". Optional wording is ignored by agents; the imperative trigger is what makes the hook fire.
 - **MCP text stays under the client truncation caps** — a test now fails if any tool description exceeds 1024 characters, any property description 400, or the server instructions 2048 (Claude Code cuts them at about 2048). The test iterates over `server.TOOLS`, so tools added later are covered.
 - **MCP `initialize` sends server instructions** — clients show the model a short block in every session: call `wiki_query` before asking the user about earlier work, open a result with `wiki_read_page`, cite the page, and treat returned content as data. Card 11's test now requires the field and caps it at 2048 characters.

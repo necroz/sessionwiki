@@ -96,6 +96,43 @@ The command palette and search are vanilla JS (~4 KB minified).
 6. **CDN fonts** — Inter and JetBrains Mono load from Google Fonts
    with `display=swap`
 
+## Retrieval recall (wiki_query)
+
+Method: 24 hand-made queries over a real 900-page wiki, 8 per kind. `exact`
+uses words from the page; `paraphrase` uses other words for the same meaning;
+`relational` puts the answer on a page linked to the match. recall@k is the
+share of a query's expected pages found in the top k, averaged over queries.
+hit@k is the share of queries with at least one expected page in the top k.
+The query set names private sessions and is not published. `base` is lexical
+ranking only; `graph` is lexical plus one graph hop, the shipped default.
+
+```bash
+.venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --k 5
+```
+
+| k | Config | exact | paraphrase | relational | overall |
+|---|---|---:|---:|---:|---:|
+| 5 | base | 0.875 / 0.875 | 0.375 / 0.625 | 0.417 / 0.625 | 0.556 / 0.708 |
+| 5 | graph | 0.875 / 0.875 | 0.542 / 0.625 | 0.490 / 0.625 | 0.635 / 0.708 |
+| 10 | base | 1.000 / 1.000 | 0.708 / 0.875 | 0.521 / 0.625 | 0.743 / 0.833 |
+| 10 | graph | 0.875 / 0.875 | 0.708 / 0.875 | 0.594 / 0.750 | 0.726 / 0.833 |
+
+Each cell is recall / hit.
+
+What the numbers say:
+
+- At k=5 the graph hop raises overall recall from 0.556 to 0.635, mostly on
+  paraphrases.
+- At k=10 the graph hop is slightly worse (0.743 → 0.726): it pushes one
+  exact match out of the top 10. The "graph hop improves recall" claim holds
+  only at k=5.
+- Paraphrase recall at k=5 is the weak spot.
+- 24 queries are few: one query moves a per-kind number by 0.125. Treat the
+  numbers as a direction, not as a claim.
+
+Experimental `prf` variants exist in `.metrics/` but are not published until
+their parameters are recorded.
+
 ## Scaling notes
 
 - **1,000+ sessions**: build time scales linearly. Expect ~45 seconds.
