@@ -127,3 +127,24 @@ Newest entries go at the bottom.
 - Next card: 18
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 12:15 — card 18: `recall --format json`
+
+- Status: done
+- Files: `sessionwiki/cli.py`, `tests/test_mcp_recall.py`,
+  `docs/reference/cli.md`, `CHANGELOG.md`
+- Gates: targeted 11 passed (rc 0), full suite 2973 collected (rc 0; the
+  summary line is not printed by pytest 9.1.1 in this environment), lint
+  16 → 16 errors, version 2.0.5 (rc 0), `recall --project llm-wiki
+  --limit 2 --format json` printed valid JSON with two sessions (rc 0),
+  ruff on the changed files 11 → 11 with none in the new lines, privacy
+  grep clean, synth state unchanged
+- Commit: 6dc48cd
+- Decisions: `docs/reference/cli.md` is not in the card's Files list, but
+  the page said "Prints nothing when the project has no sessions", which
+  the json format makes false; added the json example and one clause.
+  `sessions` uses the card's key order (`date`, `request`, `summary`,
+  `path`) and the text/hook branches are untouched.
+- Next card: 19
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
