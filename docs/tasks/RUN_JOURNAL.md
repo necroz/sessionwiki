@@ -21,3 +21,17 @@ Newest entries go at the bottom.
 - Decisions: none
 - Next card: 12
 - Blockers: none
+
+## 2026-11-09 10:14 — card 12: Send MCP server instructions
+
+- Status: done
+- Files: `sessionwiki/mcp/server.py`, `tests/test_mcp_description_limits.py`,
+  `CHANGELOG.md`
+- Gates: targeted 10 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version rc 0, `initialize` JSON contains `instructions`, privacy grep clean
+- Commit: 8a45b02
+- Decisions: none
+- Next card: 13
+- Blockers: none. Unrelated changes from a parallel process
+  (`docs/reference/*`, `wiki/archive/seed/*`, `sessionwiki/lint/__init__.py`,
+  `tests/test_lint_rules.py`) were present and left uncommitted.

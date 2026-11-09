@@ -63,7 +63,7 @@ merge conflicts. Card 30 also edits `mcp/server.py`, but only appends to
 | # | Card | Phase | ID | Priority | Size | Depends on | Status |
 |---|---|---|---|---|---:|---|---|
 | 11 | [Guard MCP description and instructions length](11-mcp-description-limits.md) | 0 | E3 | P0 | S | — | done |
-| 12 | [Send MCP server instructions](12-mcp-server-instructions.md) | 0 | E10 | P0 | S | 11 | todo |
+| 12 | [Send MCP server instructions](12-mcp-server-instructions.md) | 0 | E10 | P0 | S | 11 | done |
 | 13 | [recall: say when to search](13-recall-when-to-search.md) | 0 | — | P0 | S | — | todo |
 | 14 | [Align docs with the code](14-docs-facts.md) | 0 | — | P0 | S | — | todo |
 | 15 | [Rewrite the competitor landscape](15-competitor-landscape-rewrite.md) | 0 | E4 | P0 | S | — | todo |
