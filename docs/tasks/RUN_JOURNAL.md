@@ -335,3 +335,44 @@ Newest entries go at the bottom.
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
 
+## 2026-11-09 16:20 — card 25: `extractive` synthesis backend
+
+- Status: done
+- Files: `sessionwiki/synth/extractive.py` (new),
+  `sessionwiki/synth/pipeline.py` (`resolve_backend` only),
+  `tests/test_synth_extractive.py` (new), `docs/configuration-reference.md`,
+  `CHANGELOG.md`
+- Gates: targeted `test_synth_extractive.py` 8 passed (rc 0),
+  `test_synth_extractive.py` + `test_synth_pipeline.py` +
+  `test_synth_config_loading.py` 51 passed (rc 0), full suite rc 0,
+  lint 16 → 16 errors, version 2.0.5 (rc 0), ruff clean on the new files and
+  `pipeline.py` 29 → 29 with none on the new lines, privacy grep: one
+  pre-existing hit (`RUN_JOURNAL.md:208`, the card-21 entry quotes the
+  command), synth state unchanged; manual check on a copy of all 998 raw
+  sessions in `/tmp/sw-extractive` took 4.9 s (rc 0), wrote 998 pages,
+  `lint --wiki-dir` on the copy reported 0 errors, and an audit found the
+  four sections on every page
+- Commit: 336b447
+- Decisions: `name` is a property returning `"ExtractiveSynthesizer"`, as in
+  `BaseSynthesizer` and the other backends — the card's
+  `name = "extractive"` would shadow the base property, and the printed
+  backend name then matches `DummySynthesizer`/`OllamaSynthesizer`.
+  `is_available` stays inherited from `DummySynthesizer` (always True), so no
+  override. The quote uses the same fence-free text as the claims; the card
+  only required fence removal before sentences, and this keeps code out of a
+  blockquote. Leading transcript list markers are stripped, so a list item no
+  longer renders as `- - …` (found in the manual check, pinned by a test).
+  The manual check needs the repo-root `config.local.json`: `resolve_config`
+  reads `examples/`, `config.json` and `config.local.json` from `REPO_ROOT`,
+  never from the vault, so the file was swapped for
+  `{"synthesis": {"backend": "extractive"}}` and restored byte-identically
+  (`cmp` silent). In that copy every `[[ProjectEntity]]` link was degraded to
+  plain text because `strip_unresolved_wikilinks` defaults to true and the
+  copy has no entity pages. Known limitation: a transcript sentence that
+  starts with `**Tools used:**` and contains "because" still becomes a claim;
+  it is verbatim text, and filtering bolded `Label:` sentences would also drop
+  real fix statements.
+- Next card: 26
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
+
