@@ -634,6 +634,16 @@ def test_load_pages_reads_markdown(tmp_path: Path):
     assert pages["entities/Foo.md"]["meta"]["type"] == "entity"
 
 
+def test_load_pages_skips_the_archive(tmp_path: Path):
+    """wiki/archive/ keeps retired pages for history; lint must not judge
+    them (freshness, index listing) as if they were live."""
+    (tmp_path / "entities").mkdir()
+    (tmp_path / "entities" / "Live.md").write_text("---\ntype: entity\n---\n", encoding="utf-8")
+    (tmp_path / "archive" / "seed").mkdir(parents=True)
+    (tmp_path / "archive" / "seed" / "Old.md").write_text("---\ntype: entity\n---\n", encoding="utf-8")
+    assert set(load_pages(tmp_path)) == {"entities/Live.md"}
+
+
 # ─── frontmatter_count_consistency (issues.md #2) ───────────────────────
 
 

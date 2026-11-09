@@ -93,8 +93,9 @@ def load_pages(wiki_dir: Optional[Path] = None) -> dict[str, dict[str, Any]]:
         return {}
     pages: dict[str, dict[str, Any]] = {}
     for p in sorted(root.rglob("*.md")):
-        # Skip README and archive
-        if p.name == "README.md":
+        # Skip README and archive: wiki/archive/ keeps retired pages for
+        # history, so freshness and index rules must not judge them.
+        if p.name == "README.md" or p.relative_to(root).parts[0] == "archive":
             continue
         try:
             text = p.read_text(encoding="utf-8")
