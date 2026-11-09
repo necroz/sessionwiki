@@ -549,6 +549,39 @@ round-trip semantics when a candidate lives inside a vault.
 
 ---
 
+## `remember` — store a fact as a candidate
+
+Saves one fact to `wiki/candidates/concepts/` with `status: candidate` and
+`origin: human`. The trusted folders (`wiki/concepts/`, `wiki/entities/`)
+never receive the page directly; review it with `candidates list` and then
+promote, merge or discard it.
+
+```bash
+python3 -m sessionwiki remember "The vault keeps secrets in 1Password."
+python3 -m sessionwiki remember "Deploys go through the kumquat pipeline." --title "Deploy pipeline" --project ai-newsletter
+python3 -m sessionwiki candidates list
+```
+
+The file name is the TitleCase of the title words, letters and digits only,
+capped at 60 characters; a taken name gets `-2`, `-3`, …. A title with no
+letters or digits falls back to `Remembered-<YYYYMMDD-HHMMSS>`.
+
+### Flags
+
+| Flag | What |
+|---|---|
+| `--title TITLE` | Page title. Default: the first 8 words of the fact. |
+| `--project NAME` | Project name and `[[ProjectEntity]]` link. Default: the current folder name. |
+
+### Expected output
+
+```
+  remembered → wiki/candidates/concepts/TheVaultKeepsSecretsIn1Password.md
+  review with: sessionwiki candidates list
+```
+
+---
+
 ## `synthesize` — LLM-backed source-page synthesis
 
 ```bash

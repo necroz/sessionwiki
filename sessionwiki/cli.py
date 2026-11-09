@@ -13,6 +13,7 @@ Subcommands:
     export            Export AI-consumable formats: llms-txt, llms-full-txt, jsonld, sitemap, rss, robots, ai-readme, marp
     lint              Run lint rules against the wiki
     candidates        List / promote / merge / discard candidate pages
+    remember          Store a fact as a candidate page for review
     synthesize        Synthesize wiki source pages from raw sessions via LLM
     all               Run the full pipeline: build → graph → export all → lint
                       (optional: synthesize first with --with-synth)
@@ -1344,6 +1345,84 @@ def cmd_candidates(args: argparse.Namespace) -> int:
     return 2
 
 
+def _remember_name(title: str) -> str:
+    """TitleCase the words of ``title``; keep letters and digits only."""
+    words = re.findall(r"[^\W_]+", title)
+    # ``title`` (not ``capitalize``) so "1password" becomes "1Password".
+    return "".join(word.title() for word in words)[:60]
+
+
+def _project_entity(project: str) -> str:
+    """``ai-newsletter`` → ``AiNewsletter``.
+
+    Same rule as ``DummySynthesizer._title_case_project``, so the link
+    points at the page synthesis creates for the project.
+    """
+    return "".join(part.capitalize() for part in re.split(r"[-_\s]+", project) if part)
+
+
+def _unique_candidate_path(directory: Path, name: str) -> Path:
+    """Return ``<name>.md`` or ``<name>-2.md``/``<name>-3.md`` if taken."""
+    path = directory / f"{name}.md"
+    counter = 2
+    while path.exists():
+        suffix = f"-{counter}"
+        path = directory / f"{name[: 60 - len(suffix)]}{suffix}.md"
+        counter += 1
+    return path
+
+
+def cmd_remember(args: argparse.Namespace) -> int:
+    """Store a remembered fact as a candidate page for human review (card 27)."""
+    from datetime import datetime, timezone
+
+    from sessionwiki.candidates import candidates_dir
+
+    fact = args.fact.strip()
+    if not fact:
+        print("error: the fact is empty", file=sys.stderr)
+        return 2
+
+    project = " ".join((args.project or Path.cwd().name or "unknown").split())
+    title = (args.title or " ".join(fact.split()[:8])).strip()
+
+    now = datetime.now(timezone.utc)
+    today = now.strftime("%Y-%m-%d")
+    name = _remember_name(title)
+    if not name:
+        name = f"Remembered-{now.strftime('%Y%m%d-%H%M%S')}"
+
+    target_dir = candidates_dir(REPO_ROOT / "wiki") / "concepts"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    path = _unique_candidate_path(target_dir, name)
+
+    # A raw project name may not break the inline YAML list or the scalar.
+    tag = re.sub(r"[,\[\]]", "-", project)
+    entity = _project_entity(project)
+    fm_title = title.replace('"', "'")
+    content = (
+        "---\n"
+        f'title: "{fm_title}"\n'
+        "type: concept\n"
+        "status: candidate\n"
+        "origin: human\n"
+        f"project: {project}\n"
+        f"tags: [remembered, {tag}]\n"
+        f"created: {today}\n"
+        f"last_updated: {today}\n"
+        "sources: []\n"
+        "---\n\n"
+        f"# {title}\n\n"
+        f"{fact}\n\n"
+        "## Connections\n\n"
+        f"- [[{entity}]] — project\n"
+    )
+    path.write_text(content, encoding="utf-8")
+    print(f"  remembered → {path.relative_to(REPO_ROOT)}")
+    print("  review with: sessionwiki candidates list")
+    return 0
+
+
 def _add_vault_arg(parser: argparse.ArgumentParser, *, role: str) -> None:
     """#arch-m8 (#620): single source of truth for the ``--vault`` flag.
 
@@ -1834,6 +1913,22 @@ def build_parser() -> argparse.ArgumentParser:
                       help="Staleness threshold in days (default 30)")
     cand.add_argument("--json", action="store_true", help="JSON output for list")
     cand.set_defaults(func=cmd_candidates)
+
+    # remember — a fact for review, never straight into the trusted wiki
+    rem = sub.add_parser(
+        "remember",
+        help="Store a fact as a candidate page in wiki/candidates/",
+    )
+    rem.add_argument("fact", help="The fact to remember")
+    rem.add_argument(
+        "--title", default="",
+        help="Page title (default: the first 8 words of the fact)",
+    )
+    rem.add_argument(
+        "--project", default="",
+        help="Project name (default: the current folder name)",
+    )
+    rem.set_defaults(func=cmd_remember)
 
     # synthesize (v1.1, #35) — LLM-backed wiki page synthesis
     syn = sub.add_parser(
