@@ -148,3 +148,24 @@ Newest entries go at the bottom.
 - Next card: 19
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 12:25 — card 19: `doctor` reports the synthesis backlog
+
+- Status: done
+- Files: `sessionwiki/doctor.py`, `tests/test_doctor.py`, `CHANGELOG.md`
+- Gates: targeted 8 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version 2.0.5 (rc 0), `doctor` prints `[warn] synthesis 13 raw session(s)
+  not synthesized, 0 page(s) waiting for the agent — run `sessionwiki
+  synthesize`` and exits 0, ruff on changed files clean, privacy grep clean,
+  synth state unchanged
+- Commit: dbee2b2
+- Decisions: `_check_synthesis` skips `_`-prefixed raw files, matching
+  `_discover_raw_sessions`; the card's snippet lacked that skip, but the
+  acceptance criterion requires the pipeline's exact rule. The maintainer's
+  backlog is 13 sessions, not the ~115 in the Problem section — the number
+  shrank before this card and is not an acceptance criterion. `CHANGELOG.md`
+  is not in the card's Files list, but the repo rules require an Unreleased
+  line for every change.
+- Next card: 20
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
