@@ -376,3 +376,36 @@ Newest entries go at the bottom.
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
 
+## 2026-11-09 16:31 — card 26: `import-memory` for Claude Code auto memory
+
+- Status: done
+- Files: `sessionwiki/memory_import.py` (new), `sessionwiki/cli.py`,
+  `sessionwiki/lint/rules/frontmatter_validity.py`,
+  `sessionwiki/lint/rules/index_sync.py`, `tests/test_memory_import.py`
+  (new), `docs/reference/cli.md`, `CHANGELOG.md`
+- Gates: targeted `tests/test_memory_import.py` 9 passed (rc 0),
+  `test_reference_coverage.py` + `test_docs_structure.py` 37 passed (rc 0),
+  full suite rc 0, lint 16 → 16 errors, version 2.0.5 (rc 0),
+  `import-memory --dry-run` rc 0 and wrote nothing (4 real memory files
+  listed), ruff: 11 pre-existing errors in `cli.py`, none on the new lines;
+  the new module and test are clean, `git grep ilashkevich` rc 0 with one
+  pre-existing hit (`RUN_JOURNAL.md:208`), synth state unchanged
+- Commit: 6f610e6
+- Decisions: `index_sync.py` is not in the card's Files list, but the card
+  accepts notes under `wiki/notes/` and its acceptance criterion says lint
+  must pass; `index_sync` would otherwise report one "not listed in
+  index.md" error per imported note. The rule now skips pages with
+  `type: note`, so notes stay checked for links, frontmatter and freshness.
+  `import_claude_memory` sets `adapter.session_store_path = store`, because
+  `derive_project_slug` resolves the project against that attribute and
+  `--store` must work for any directory. `source_path` always uses the
+  canonical `~/.claude/projects/<dir>/memory/<file>` form, as the card's
+  template and test require, even for a custom store. Titles and
+  descriptions are collapsed to one line and lose `"`; the project tag is
+  sanitized to the inline-list grammar, so an odd directory name cannot
+  abort the import. A concurrent run finished card 25 at 16:21 and removed
+  its lock before this run locked; this run then took 26.
+- Next card: 27
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
+
