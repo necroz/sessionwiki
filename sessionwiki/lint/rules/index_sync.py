@@ -57,6 +57,11 @@ class IndexSync(LintRule):
         for rel in pages:
             if rel in nav_pages or rel.endswith("_context.md"):
                 continue
+            # Hand-written notes (`type: note`, e.g. mirrored Claude Code
+            # memory) are origin: human; the agent must not edit index.md
+            # on their behalf. They stay checked for links and frontmatter.
+            if str(pages[rel]["meta"].get("type", "")).lower() == "note":
+                continue
             slug = _page_slug(rel)
             if slug not in listed_slugs:
                 issues.append({

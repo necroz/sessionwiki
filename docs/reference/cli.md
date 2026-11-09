@@ -689,6 +689,28 @@ project from its `cwd`. The Claude Code plugin and
 
 ---
 
+## `import-memory` — mirror Claude Code auto memory
+
+```bash
+sessionwiki import-memory                     # ~/.claude/projects, writes
+sessionwiki import-memory --dry-run           # list what would change
+sessionwiki import-memory --store /path/to/projects
+```
+
+Claude Code keeps its own memory under
+`~/.claude/projects/<dir>/memory/*.md`. This command copies each file to
+`wiki/notes/claude-memory/<project>/` as a `note` page with `origin: human`,
+so the wiki sees that memory and synthesis never rewrites it. The body and
+the description pass through the same redaction as `sync`; `source_path`
+uses a `~`-relative path, never the absolute home directory.
+
+A file is rewritten only when its content changes, and an existing page
+without `origin: human` is skipped, never overwritten. Nothing is deleted:
+a page stays when its Claude memory file is gone. `--dry-run` prints the
+files that would change and writes nothing.
+
+---
+
 ## `query` — search the wiki
 
 ```bash

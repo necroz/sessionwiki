@@ -218,6 +218,44 @@ def cmd_recall(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_import_memory(args: argparse.Namespace) -> int:
+    """Mirror Claude Code auto memory files into ``wiki/notes/``.
+
+    The memory files change in place and ``raw/`` is immutable, so the
+    pages are written directly to ``wiki/notes/claude-memory/<project>/``
+    with ``origin: human``.  Bodies pass through the same redactor as
+    ``sync``; an existing destination without ``origin: human`` is never
+    overwritten.
+    """
+    from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
+    from sessionwiki.convert import load_config_layered
+    from sessionwiki.memory_import import import_claude_memory
+
+    store = (
+        Path(args.store).expanduser()
+        if args.store
+        else ClaudeCodeAdapter.session_store_path
+    )
+    if not store.is_dir():
+        print(f"error: Claude Code memory store not found: {store}", file=sys.stderr)
+        return 2
+
+    result = import_claude_memory(
+        store, REPO_ROOT / "wiki", load_config_layered(), dry_run=args.dry_run
+    )
+    prefix = "would write" if args.dry_run else "wrote"
+    for rel in result["written"]:
+        print(f"  {prefix} wiki/{rel}")
+    for item in result["skipped"]:
+        print(f"  skipped wiki/{item['path']}: {item['reason']}")
+    verb = "to write" if args.dry_run else "written"
+    print(
+        f"{len(result['written'])} file(s) {verb}, "
+        f"{result['unchanged']} unchanged, {len(result['skipped'])} skipped"
+    )
+    return 0
+
+
 def cmd_mcp(args: argparse.Namespace) -> int:
     """Run the MCP server on stdin/stdout (same as `python3 -m sessionwiki.mcp`)."""
     from sessionwiki.mcp.server import main as mcp_main
@@ -1910,6 +1948,21 @@ def build_parser() -> argparse.ArgumentParser:
              "json = machine-readable list",
     )
     recall.set_defaults(func=cmd_recall)
+
+    # import-memory — mirror Claude Code auto memory into wiki/notes/
+    imp = sub.add_parser(
+        "import-memory",
+        help="Mirror Claude Code auto memory files into wiki/notes/",
+    )
+    imp.add_argument(
+        "--store", default="",
+        help="Claude Code projects dir (default: ~/.claude/projects)",
+    )
+    imp.add_argument(
+        "--dry-run", action="store_true",
+        help="List the files that would change; write nothing",
+    )
+    imp.set_defaults(func=cmd_import_memory)
 
     # all — run build + graph + export all + lint in sequence
     all_p = sub.add_parser(
