@@ -17,6 +17,7 @@ lists with `- ` bullets).
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from typing import Any, Optional
 
 # Accept LF, CRLF, or CR after each fence so Windows-authored (CRLF) and
@@ -75,6 +76,19 @@ def parse_frontmatter_or_none(text: str) -> tuple[Optional[str], str]:
     if not m:
         return None, text
     return m.group(1), m.group(2)
+
+
+def is_human_page(path: Path) -> bool:
+    """True when an existing page says ``origin: human`` in its frontmatter."""
+    if not path.is_file():
+        return False
+    try:
+        with path.open("rb") as f:
+            head = f.read(8 * 1024).decode("utf-8", errors="replace")
+    except OSError:
+        return False
+    meta, _ = parse_frontmatter(head)
+    return str(meta.get("origin", "")).strip().lower() == "human"
 
 
 def _parse_scalar(raw: str, *, coerce_bool: bool = True) -> Any:

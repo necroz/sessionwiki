@@ -32,7 +32,7 @@ from sessionwiki.lock import FileLock, atomic_write_text, lock_path_for
 # #py-m1 (#587) / #arch-h5 (#610): import directly from _frontmatter
 # instead of via build.py. The build module pulls in 145+ transitive
 # imports; the parser sits cleanly in _frontmatter.py with no deps.
-from sessionwiki._frontmatter import parse_frontmatter
+from sessionwiki._frontmatter import is_human_page, parse_frontmatter
 from sessionwiki.synth.base import BaseSynthesizer, DummySynthesizer
 
 
@@ -470,6 +470,8 @@ def _strip_unresolved_wikilinks(wiki_dir: Path, sources_dir: Path) -> int:
     for page in sorted(sources_dir.rglob("*.md")):
         if page.name.startswith("_"):
             continue
+        if is_human_page(page):
+            continue
         try:
             text = page.read_text(encoding="utf-8")
         except OSError:
@@ -890,6 +892,8 @@ def _coalesce_low_signal_sessions(
         page_name = _cluster_filename(rows, window)
         produced.setdefault(project, set()).add(page_name)
         page_path = sources_out / project / page_name
+        if is_human_page(page_path):
+            continue
         page_path.parent.mkdir(parents=True, exist_ok=True)
         content = _render_cluster_page(
             project,
@@ -970,7 +974,7 @@ def _coalesce_low_signal_sessions(
                 )
             except OSError:
                 generated = False
-            if generated:
+            if generated and not is_human_page(page_path):
                 page_path.unlink()
             for slug in entry.get("sessions", []) or []:
                 rel = rel_by_slug.get((project, str(slug)))
@@ -1269,6 +1273,8 @@ def backfill_source_descriptions(
         if not lines:
             continue
         page = _session_page_path(sources_out, meta)
+        if is_human_page(page):
+            continue
         try:
             text = page.read_text(encoding="utf-8")
         except OSError:
@@ -1344,6 +1350,7 @@ def synthesize_new_sessions(
             "total_scanned": 0,
             "new_files": 0,
             "synthesized": 0,
+            "kept_human": 0,
             "coalesced": 0,
             "skipped": 0,
             "errors": [],
@@ -1383,6 +1390,7 @@ def _synthesize_new_sessions_unlocked(
         "total_scanned": int,
         "new_files": int,
         "synthesized": int,
+        "kept_human": int,
         "coalesced": int,
         "skipped": int,
         "errors": list[str],
@@ -1410,6 +1418,7 @@ def _synthesize_new_sessions_unlocked(
         "total_scanned": len(sessions),
         "new_files": len(new_files),
         "synthesized": 0,
+        "kept_human": 0,
         "coalesced": 0,
         "skipped": 0,
         "errors": [],
@@ -1493,11 +1502,17 @@ def _synthesize_new_sessions_unlocked(
         slug = _normalise_slug(raw_slug)
         date = str(meta.get("date", "")).strip()
         filename = f"{date}-{slug}" if date else slug
+        out_dir = sources_out / project
+        out_path = out_dir / f"{filename}.md"
+        if is_human_page(out_path):
+            try:
+                mtime = p.stat().st_mtime
+            except OSError:
+                mtime = None
+            return ("human", rel, mtime, project, filename, None)
         try:
             synthesized = backend.synthesize_source_page(body, meta, prompt_template)
-            out_dir = sources_out / project
             out_dir.mkdir(parents=True, exist_ok=True)
-            out_path = out_dir / f"{filename}.md"
             page_content = _build_source_page(
                 meta, synthesized, existing_page_path=out_path
             )
@@ -1519,6 +1534,11 @@ def _synthesize_new_sessions_unlocked(
                 # pages it already produced.
                 if summary["synthesized"] % 10 == 0:
                     _save_state(state, state_file)
+            elif status == "human":
+                if mtime is not None:
+                    state[rel] = mtime
+                summary["kept_human"] += 1
+                print(f"  kept human page: {project} → {filename}")
             else:
                 summary["errors"].append(error or "unknown error")
                 summary["skipped"] += 1
