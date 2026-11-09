@@ -71,6 +71,21 @@ Statuses: `todo`, `in-progress`, `done`, `blocked`.
     clean before the lock is removed.
 11. **Unlock.** Remove `RUN.lock`. Stop.
 
+## Scheduling
+
+Each fire must start a new task. An automation created from chat carries the
+creator's session in `target_task_id`, and every fire then continues that
+session instead of starting a new one. `CronUpdate` cannot change the field;
+set it to `NULL` in `~/.zcode/v2/tasks-index.sqlite`:
+
+```sql
+UPDATE automations SET target_task_id = NULL
+WHERE automation_id = '<automation-id>';
+```
+
+Automations created in the ZCode UI have no such binding. After the update,
+`SELECT target_task_id` must return `NULL`.
+
 ## Rules
 
 - `raw/` is immutable. `site/` is generated. Touch neither.
