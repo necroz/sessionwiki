@@ -47,9 +47,12 @@ Optional follow-ups, not carded yet:
   runs without an LLM backend, and `sessionwiki zcode autosync --coalesce`
   runs it after sync. `sessionwiki zcode install --coalesce` enables it in
   the scheduled hook/timer.
-- **10 — Seed page cleanup.** Eight seed pages (`concepts/*`,
-  `entities/*`, `overview`) produce stale-content warnings. Archive them
-  or refresh `last_updated`.
+- **10 — Seed page cleanup.** Done (2026-11-09): seven demo seed pages
+  (`concepts/ARC-AGI-2`, `AgenticWorkloads`, `CachePricing`,
+  `MultimodalModels`, `entities/ClaudeSonnet4`, `GPT5`, `OpenAI`) moved to
+  `wiki/archive/seed/` with `lifecycle: archived`. `entities/Anthropic`
+  stays (real sessions link to it) and was rewritten from those sessions.
+  `lint` now skips `wiki/archive/`, as its comment always said.
 
 ## Roadmap 2026-11 cards
 
@@ -134,9 +137,10 @@ Run from the repository root:
 Expected:
 
 - `pytest` exits with code 0.
-- `lint` reports no **new** errors. On 2026-11-06 the maintainer's local
-  wiki already had 13 `index.md` errors (dead links to demo projects,
-  project pages missing from the index). Count the errors before the card
+- `lint` reports no **new** errors. On 2026-11-09 the maintainer's local
+  wiki already had 16 `index.md` errors (dead links to demo projects,
+  project pages missing from the index); the number grows as new project
+  pages appear. Count the errors before the card
   (`.venv/bin/python -m sessionwiki lint 2>&1 | grep -c '\[error\]'`) and
   after; the number must not grow. Do not fix wiki content inside a code
   card. Warnings are allowed.

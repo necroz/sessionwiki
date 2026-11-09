@@ -12,10 +12,12 @@ changelog: [{"date": "2026-03-18", "event": "Launched — initial pricing", "fie
 last_updated: 2026-04-09
 sources: []
 confidence: 0.56
-lifecycle: reviewed
+lifecycle: archived
 entity_type: tool
 cache_tier: L1
 reader_shell: true
+archived: 2026-11-09
+archive_reason: "demo seed page from the upstream template; not derived from sessions (tasks card 10)"
 ---
 
 # Claude Sonnet 4

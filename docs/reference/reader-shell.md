@@ -175,7 +175,7 @@ Pages with `reader_shell: true` as of v1.1.0-rc8:
 
 | Page | Why |
 |---|---|
-| [`wiki/entities/ClaudeSonnet4.md`](../../wiki/entities/ClaudeSonnet4.md) | Flagship model entity — has infobox-worthy pricing, benchmarks, modalities that map cleanly to the Wikipedia-style shell |
+| [`wiki/archive/seed/entities/ClaudeSonnet4.md`](../../wiki/archive/seed/entities/ClaudeSonnet4.md) | Flagship model entity — has infobox-worthy pricing, benchmarks, modalities that map cleanly to the Wikipedia-style shell |
 | [`wiki/projects/llm-wiki.md`](../../wiki/projects/llm-wiki.md) | Meta project page — showcases `reader_shell` on the framework's own canonical page |
 
 To opt a page in, add `reader_shell: true` to its frontmatter and rebuild with `sessionwiki build`. The shell renders infobox + table of contents + references rail automatically from the page's existing frontmatter + wikilinks.

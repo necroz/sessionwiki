@@ -99,8 +99,8 @@ Pages carrying an explicit `cache_tier` as of v1.1.0-rc8:
 
 | Page | Tier | Why |
 |---|---|---|
-| [`wiki/entities/ClaudeSonnet4.md`](../../wiki/entities/ClaudeSonnet4.md) | L1 | Flagship model entity — queries about current Claude behaviour always need this |
-| [`wiki/entities/GPT5.md`](../../wiki/entities/GPT5.md) | L2 | Reference comparison point, hot but not always loaded |
+| [`wiki/archive/seed/entities/ClaudeSonnet4.md`](../../wiki/archive/seed/entities/ClaudeSonnet4.md) | L1 | Flagship model entity — queries about current Claude behaviour always need this |
+| [`wiki/archive/seed/entities/GPT5.md`](../../wiki/archive/seed/entities/GPT5.md) | L2 | Reference comparison point, hot but not always loaded |
 | [`wiki/projects/llm-wiki.md`](../../wiki/projects/llm-wiki.md) | L1 | Meta project page — the framework's own canonical entry |
 | [`wiki/projects/ledger-api.md`](../../wiki/projects/ledger-api.md) and the other demo project cards | L2 | Demo project cards (topics, description, homepage) for the sample sessions in `examples/demo-sessions/` |
 

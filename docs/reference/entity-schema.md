@@ -117,5 +117,5 @@ change.
 
 ## Example
 
-See [`wiki/entities/ClaudeSonnet4.md`](../../wiki/entities/ClaudeSonnet4.md)
-for a complete real-world page.
+See [`wiki/archive/seed/entities/ClaudeSonnet4.md`](../../wiki/archive/seed/entities/ClaudeSonnet4.md)
+for a complete example page (an archived demo seed).

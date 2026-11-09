@@ -12,9 +12,11 @@ changelog: [{"date": "2026-02-14", "event": "GA launch", "field": "model.release
 last_updated: 2026-04-09
 sources: []
 confidence: 0.56
-lifecycle: reviewed
+lifecycle: archived
 entity_type: tool
 cache_tier: L2
+archived: 2026-11-09
+archive_reason: "demo seed page from the upstream template; not derived from sessions (tasks card 10)"
 ---
 
 # GPT-5

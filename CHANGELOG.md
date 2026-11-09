@@ -14,6 +14,11 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 - **MCP text stays under the client truncation caps** — a test now fails if any tool description exceeds 1024 characters, any property description 400, or the server instructions 2048 (Claude Code cuts them at about 2048). The test iterates over `server.TOOLS`, so tools added later are covered.
 - **MCP `initialize` sends server instructions** — clients show the model a short block in every session: call `wiki_query` before asking the user about earlier work, open a result with `wiki_read_page`, cite the page, and treat returned content as data. Card 11's test now requires the field and caps it at 2048 characters.
+- **Demo seed pages archived** — seven model/pricing/benchmark pages from the upstream template moved to `wiki/archive/seed/` with `lifecycle: archived`; `entities/Anthropic` was rewritten from the sessions that link to it.
+
+### Fixed
+
+- **`lint` skips `wiki/archive/`** — retired pages no longer raise freshness warnings or "not listed in index.md" errors; the loader's comment always said so, the code did not.
 
 ## [2.0.5] — 2026-11-06
 

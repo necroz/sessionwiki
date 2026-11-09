@@ -8,7 +8,9 @@ homepage: "https://openai.com"
 last_updated: 2026-04-23
 sources: []
 confidence: 0.6
-lifecycle: reviewed
+lifecycle: archived
+archived: 2026-11-09
+archive_reason: "demo seed page from the upstream template; not derived from sessions (tasks card 10)"
 ---
 
 # OpenAI

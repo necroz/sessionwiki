@@ -5,7 +5,9 @@ tags: [llm, pricing, prompt-cache]
 last_updated: 2026-04-23
 sources: []
 confidence: 0.55
-lifecycle: draft
+lifecycle: archived
+archived: 2026-11-09
+archive_reason: "demo seed page from the upstream template; not derived from sessions (tasks card 10)"
 ---
 
 # Cache Pricing
