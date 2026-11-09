@@ -37,7 +37,7 @@ sessionwiki turns that history into a knowledge base:
 
 | | |
 |---|---|
-| **8 sources** | Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot Chat / CLI, **ZCode**, **OpenCode**, Obsidian — each with its own agent badge |
+| **10 sources** | Built in: Claude Code, Codex CLI, **ZCode**, **OpenCode**. Opt-in: Cursor, Gemini CLI, Copilot Chat, Copilot CLI, ChatGPT export, Obsidian — each with its own agent badge |
 | **Autosync** | Claude Code `Stop` hook, ZCode `Stop` hook + nightly systemd / launchd / Task Scheduler job, OpenCode `session.idle` plugin |
 | **Synthesis backends** | Ollama, **any OpenAI-compatible server** (vLLM, SGLang, LM Studio, LiteLLM, hosted), agent-delegate, offline dummy |
 | **Signal over noise** | Low-signal session coalescing, wikilink cleanup, concurrency control, cost `--estimate` |

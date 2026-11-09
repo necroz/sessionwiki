@@ -1,5 +1,9 @@
 # sessionwiki Roadmap — Phase × Layer × Item, prioritised
 
+> **Superseded.** This plan dates from 2026-04-08 (v0.1–v0.3). The current
+> plan is [roadmap-2026-11.md](roadmap-2026-11.md). This file is kept as
+> history.
+
 **Last updated:** 2026-04-08
 
 This document is the master plan. It slices the [feature matrix](feature-matrix.md) three ways so you can see:

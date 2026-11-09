@@ -17,6 +17,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 - **MCP `initialize` sends server instructions** — clients show the model a short block in every session: call `wiki_query` before asking the user about earlier work, open a result with `wiki_read_page`, cite the page, and treat returned content as data. Card 11's test now requires the field and caps it at 2048 characters.
 - **Demo seed pages archived** — seven model/pricing/benchmark pages from the upstream template moved to `wiki/archive/seed/` with `lifecycle: archived`; `entities/Anthropic` was rewritten from the sessions that link to it.
 
+### Changed
+
+- **Docs match the code** — the README counts all 10 adapters (4 built in, 6 opt-in), the docs index says `markdown` is a dependency instead of calling the package stdlib-only, and the 2026-04 roadmap carries a banner pointing to the current plan.
+
 ### Fixed
 
 - **`lint` skips `wiki/archive/`** — retired pages no longer raise freshness warnings or "not listed in index.md" errors; the loader's comment always said so, the code did not.

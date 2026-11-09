@@ -6,7 +6,7 @@ docs_shell: true
 
 # sessionwiki documentation
 
-A local, stdlib-only Python knowledge base built from your AI-coding-agent
+A local, minimal-dependency (Python stdlib plus `markdown`) Python knowledge base built from your AI-coding-agent
 session transcripts. Install in five minutes, then keep every session
 searchable, interlinked, and offline. No database, no account, no cloud.
 
