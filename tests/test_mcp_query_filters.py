@@ -5,6 +5,9 @@ Five frontmatter filters narrow the ranked search: ``project``, ``type``,
 before it is collected, before it is registered as a raw target and before
 it enters the link graph, so the one-hop neighbour bonus cannot pull it
 back in.
+
+The last two tests cover the ranking weight for ``stale`` and ``archived``
+pages (card 21): retired answers sink but stay in the results.
 """
 
 from __future__ import annotations
@@ -183,3 +186,50 @@ def test_cli_exposes_all_five_filters(tmp_path: Path, capsys):
         out = capsys.readouterr().out
     assert rc == 0
     assert [hit["path"] for hit in json.loads(out)["hits"]] == [WIDGETRY]
+
+
+# ── Lifecycle weight (card 21) ────────────────────────────────────────
+# A page marked ``stale`` or ``archived`` ranks lower but is never removed:
+# the weight shrinks its score, it does not filter the page out.
+
+FRESH_TWIN = "wiki/concepts/PipelineAnswer.md"
+STALE_TWIN = "wiki/concepts/PipelineAnswerStale.md"
+BETTER_ARCHIVED = "wiki/concepts/PipelineAnswerArchived.md"
+
+
+def test_a_stale_page_ranks_below_its_fresh_twin(tmp_path: Path):
+    body = "## Summary\n\nThe widget pipeline answer lives here."
+    _page(tmp_path / FRESH_TWIN,
+          {"title": "Pipeline answer", "type": "concept",
+           "date": "2026-11-01"}, body)
+    _page(tmp_path / STALE_TWIN,
+          {"title": "Pipeline answer", "type": "concept",
+           "date": "2026-11-01", "lifecycle": "stale"}, body)
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("widget pipeline", include_raw=False)
+    paths = _paths(result)
+    # Same words, same date: only the lifecycle weight separates them.
+    assert set(paths) == {FRESH_TWIN, STALE_TWIN}
+    assert paths[0] == FRESH_TWIN
+    scores = {hit["path"]: hit["score"] for hit in result["hits"]}
+    assert scores[FRESH_TWIN] > scores[STALE_TWIN]
+
+
+def test_a_better_match_archived_page_is_lower_not_removed(tmp_path: Path):
+    _page(tmp_path / FRESH_TWIN,
+          {"title": "Widget pipeline", "type": "concept",
+           "date": "2026-11-01"},
+          "## Summary\n\nThe widget pipeline answer.")
+    # The archived page matches every word the fresh one does, plus a rare
+    # "connectors": a strictly better lexical match that still sinks.
+    _page(tmp_path / BETTER_ARCHIVED,
+          {"title": "Widget pipeline connectors", "type": "concept",
+           "date": "2026-11-01", "lifecycle": "archived"},
+          "## Summary\n\nThe widget pipeline connectors answer.")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("widget pipeline", include_raw=False)
+    paths = _paths(result)
+    assert BETTER_ARCHIVED in paths
+    assert paths[0] == FRESH_TWIN
+    scores = {hit["path"]: hit["score"] for hit in result["hits"]}
+    assert scores[FRESH_TWIN] > scores[BETTER_ARCHIVED]

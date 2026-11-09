@@ -627,6 +627,7 @@ def rank_query(
         # A project hub mentions everything its sessions mention; the
         # session page that holds the answer must win.
         weight = _QUERY_HUB_WEIGHT if rel.parts[0] in _QUERY_HUB_DIRS else 1.0
+        weight *= _LIFECYCLE_WEIGHT.get(_frontmatter_value(content, "lifecycle").lower(), 1.0)
         _collect(content, page, weight, content)
         links[page] = _page_links(content)
 
@@ -729,6 +730,8 @@ _QUERY_SKIP_TYPES = frozenset({"navigation", "context"})
 _QUERY_SKIP_ROOT_FILES = frozenset({"index.md", "overview.md", "log.md"})
 _QUERY_HUB_DIRS = frozenset({"projects"})
 _QUERY_HUB_WEIGHT = 0.5
+# Replaced answers sink but stay findable.
+_LIFECYCLE_WEIGHT = {"stale": 0.5, "archived": 0.25}
 _QUERY_MIN_TOKEN_LEN = 3
 # Newer sessions get up to +20%, halving every 30 days: among sessions
 # that say the same thing the latest wins, and old answers that newer
