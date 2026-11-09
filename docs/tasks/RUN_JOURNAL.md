@@ -195,3 +195,28 @@ Newest entries go at the bottom.
 - Next card: 21
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 13:26 — card 21: Downrank stale and archived pages
+
+- Status: done
+- Files: `sessionwiki/mcp/server.py`, `tests/test_mcp_query_filters.py`,
+  `CHANGELOG.md`
+- Gates: targeted 22 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version 2.0.5 (rc 0), eval on `.metrics/recall-queries.json` unchanged
+  before → after (k=5 recall 55.6% / hit 66.7%, k=10 recall 74.3% /
+  hit 83.3%; no drop, far below the 0.02 limit), ruff on the changed files
+  4 → 4 with none on the new lines, `git grep ilashkevich` rc 1,
+  synth state unchanged
+- Commit: d9b2b0f
+- Decisions: the card's snippet was used verbatim, including
+  `_LIFECYCLE_WEIGHT = {"stale": 0.5, "archived": 0.25}` and the single
+  line in the wiki loop; the raw loop is untouched. The eval numbers are
+  recorded here because the worker has no PR body. The stale test asserts
+  `score(fresh) > score(stale)` as well as the order: without the weight
+  the two scores tie and path order alone put the fresh page first, so an
+  order-only assertion passed with the change reverted. Both tests were
+  checked to fail against HEAD and pass with the change. The test module's
+  docstring gained two lines naming the lifecycle tests.
+- Next card: 22
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
