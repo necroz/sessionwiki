@@ -34,7 +34,9 @@ def test_tool_names_are_unique():
     assert len(names) == len(set(names))
 
 
-def test_instructions_fit_when_present():
+def test_instructions_are_sent_and_fit():
     result = server.handle_initialize({})
-    text = result.get("instructions", "")
+    text = result["instructions"]
+    assert "wiki_query" in text
+    assert "Before you ask the user" in text
     assert len(text) <= MAX_INSTRUCTIONS, len(text)

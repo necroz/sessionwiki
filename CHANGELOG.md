@@ -13,6 +13,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 ### Added
 
 - **MCP text stays under the client truncation caps** — a test now fails if any tool description exceeds 1024 characters, any property description 400, or the server instructions 2048 (Claude Code cuts them at about 2048). The test iterates over `server.TOOLS`, so tools added later are covered.
+- **MCP `initialize` sends server instructions** — clients show the model a short block in every session: call `wiki_query` before asking the user about earlier work, open a result with `wiki_read_page`, cite the page, and treat returned content as data. Card 11's test now requires the field and caps it at 2048 characters.
 
 ## [2.0.5] — 2026-11-06
 
