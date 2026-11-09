@@ -695,6 +695,8 @@ project from its `cwd`. The Claude Code plugin and
 python3 -m sessionwiki query "what projects am I working on"
 python3 -m sessionwiki query "Flutter mobile" --limit 3
 python3 -m sessionwiki query "Flutter mobile" --json
+python3 -m sessionwiki query "release" --project llm-wiki --type source
+python3 -m sessionwiki query "Flutter mobile" --tag claude-code --date-from 2026-11-01
 python3 -m sessionwiki query "Flutter mobile" --graph --depth 2 --budget 1000
 ```
 
@@ -709,11 +711,20 @@ Runs the same ranked lexical search with one graph hop as MCP
 |---|---|
 | `--limit N` | Pages to return. Default: `5`. |
 | `--json` | Print `hits` (`path`, `score`, `via`, `snippet`) as JSON. |
+| `--project NAME` | Only pages whose frontmatter `project` is `NAME`. |
+| `--type TYPE` | Only this page type: `source`, `entity`, `concept`, … |
+| `--tag TAG` | Only pages with this tag, e.g. the agent (`claude-code`, `zcode`). |
+| `--date-from YYYY-MM-DD` | Only pages dated on or after this day (inclusive). |
+| `--date-to YYYY-MM-DD` | Only pages dated on or before this day (inclusive). |
 | `--raw` | Always rank raw transcripts too. |
 | `--no-raw` | Never read raw transcripts. |
 | `--graph` | Use the graphify engine instead of the ranked search. |
 | `--depth N` | graphify BFS depth (with `--graph`). Default: `3`. |
 | `--budget N` | graphify token budget (with `--graph`). Default: `2000`. |
+
+Filters apply to wiki pages and to raw transcripts; a page that fails them
+never appears, including through the graph hop. An unparseable date is
+ignored, not an error. `--graph` ignores the filters.
 
 Without `--raw` or `--no-raw`, transcripts are read only when no wiki
 page matches. `--graph` requires Graphify (`pip install sessionwiki[graph]`)

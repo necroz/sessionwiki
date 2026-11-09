@@ -786,14 +786,22 @@ def cmd_query(args: argparse.Namespace) -> int:
         print(query_graph(question, depth=args.depth, token_budget=args.budget))
         return 0
     from sessionwiki.mcp.server import rank_query, tool_wiki_query
+    filters = {
+        "project": args.project,
+        "type": args.page_type,
+        "tag": args.tag,
+        "date_from": args.date_from,
+        "date_to": args.date_to,
+    }
     if args.json:
-        result = rank_query(question, max_pages=args.limit, include_raw=args.include_raw)
+        result = rank_query(question, max_pages=args.limit, include_raw=args.include_raw,
+                            filters=filters)
         result.pop("index", None)
         result.pop("overview", None)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     out = tool_wiki_query({"question": question, "max_pages": args.limit,
-                           "include_raw": args.include_raw})
+                           "include_raw": args.include_raw, **filters})
     print(out["content"][0]["text"])
     return 1 if out.get("isError") else 0
 
@@ -1792,6 +1800,16 @@ def build_parser() -> argparse.ArgumentParser:
     qry.add_argument("question", nargs="+", help="The question to ask")
     qry.add_argument("--limit", type=int, default=5, help="Pages to return (default 5)")
     qry.add_argument("--json", action="store_true", help="Print hits as JSON")
+    qry.add_argument("--project", default="",
+                     help="Only pages of this project (frontmatter project)")
+    qry.add_argument("--type", dest="page_type", default="",
+                     help="Only this page type: source, entity, concept, ...")
+    qry.add_argument("--tag", default="",
+                     help="Only pages with this tag, e.g. the agent")
+    qry.add_argument("--date-from", dest="date_from", default="",
+                     help="Only pages dated on or after YYYY-MM-DD")
+    qry.add_argument("--date-to", dest="date_to", default="",
+                     help="Only pages dated on or before YYYY-MM-DD")
     raw = qry.add_mutually_exclusive_group()
     raw.add_argument("--raw", dest="include_raw", action="store_const", const=True,
                      help="Always rank raw transcripts too")

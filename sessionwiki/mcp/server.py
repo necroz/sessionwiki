@@ -86,6 +86,7 @@ TOOLS = [
             "to raw transcripts (see include_raw). Returns up to max_pages "
             "paths with a ~400-character snippet each, plus the start of "
             "wiki/overview.md; with no match, the start of wiki/index.md. "
+            "Optional filters: project, type, tag, date_from, date_to. "
             "Read-only. Open a full page with wiki_read_page; use wiki_search "
             "for exact wording."
         ),
@@ -108,6 +109,29 @@ TOOLS = [
                         "false = never. Omit it to read them only when no wiki "
                         "page matches."
                     ),
+                },
+                "project": {
+                    "type": "string",
+                    "description": "Only pages of this project (frontmatter project).",
+                },
+                "type": {
+                    "type": "string",
+                    "description": "Only this page type: source, entity, concept, synthesis, ...",
+                },
+                "tag": {
+                    "type": "string",
+                    "description": (
+                        "Only pages with this tag, e.g. the agent: claude-code, "
+                        "codex-cli, zcode, opencode."
+                    ),
+                },
+                "date_from": {
+                    "type": "string",
+                    "description": "Only pages dated on or after YYYY-MM-DD.",
+                },
+                "date_to": {
+                    "type": "string",
+                    "description": "Only pages dated on or before YYYY-MM-DD.",
                 },
             },
             "required": ["question"],
@@ -476,10 +500,47 @@ def _is_read_page_allowed(p: Path) -> bool:
     return False
 
 
+_FILTER_KEYS = ("project", "type", "tag", "date_from", "date_to")
+
+
+def _tags(content: str) -> set[str]:
+    raw = _frontmatter_value(content, "tags").strip().strip("[]")
+    return {t.strip().strip("'\"").lower() for t in raw.split(",") if t.strip()}
+
+
+def _valid_day(value: str) -> str:
+    """A YYYY-MM-DD date, or '' when the filter value is not one."""
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        return ""
+    try:
+        return date.fromisoformat(value).isoformat()
+    except ValueError:
+        return ""
+
+
+def _passes_filters(content: str, filters: dict[str, str]) -> bool:
+    """True when the page's frontmatter matches every given filter."""
+    if not filters:
+        return True
+    if "project" in filters and _frontmatter_value(content, "project") != filters["project"]:
+        return False
+    if "type" in filters and _frontmatter_value(content, "type") != filters["type"]:
+        return False
+    if "tag" in filters and filters["tag"].lower() not in _tags(content):
+        return False
+    day = _frontmatter_value(content, "date")[:10]
+    if "date_from" in filters and (not day or day < filters["date_from"]):
+        return False
+    if "date_to" in filters and (not day or day > filters["date_to"]):
+        return False
+    return True
+
+
 def rank_query(
     question: str,
     max_pages: int = 5,
     include_raw: bool | None = None,
+    filters: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     """Ranked wiki search shared by MCP wiki_query and `sessionwiki query`.
 
@@ -487,6 +548,20 @@ def rank_query(
     "overview": str}. Each hit is {"path", "score", "via", "snippet"}.
     """
     wiki = REPO_ROOT / "wiki"
+
+    # Empty or unknown keys are dropped; an unparseable date filter is
+    # ignored instead of raising, so a bad flag never breaks a search.
+    filters = {
+        k: v for k, v in (filters or {}).items()
+        if isinstance(v, str) and v and k in _FILTER_KEYS
+    }
+    for key in ("date_from", "date_to"):
+        if key in filters:
+            day = _valid_day(filters[key])
+            if day:
+                filters[key] = day
+            else:
+                del filters[key]
 
     # Read the index + overview
     index = (wiki / "index.md").read_text(encoding="utf-8") if (wiki / "index.md").exists() else ""
@@ -540,6 +615,11 @@ def rank_query(
         # index.md and overview.md are already part of every response.
         if page_type in _QUERY_SKIP_TYPES or (len(rel.parts) == 1 and rel.name in _QUERY_SKIP_ROOT_FILES):
             continue
+        # Filtered-out pages are not collected, are not registered as a raw
+        # target and are not in `links`, so the graph hop cannot pull them
+        # back in either.
+        if not _passes_filters(content, filters):
+            continue
         if page_type == "source":
             slug = _frontmatter_value(content, "slug") or page.stem[11:]
             if slug:
@@ -571,6 +651,8 @@ def rank_query(
             if consumed == 0:
                 continue
             budget -= consumed
+            if not _passes_filters(content, filters):
+                continue
             target = page_by_slug.get(_frontmatter_value(content, "slug"), raw)
             _collect(content, target, 1.0, _body(content))
 
@@ -616,7 +698,10 @@ def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
             "wiki/ does not exist yet — run `sessionwiki init` and `/wiki-sync` first"
         )
 
-    result = rank_query(question, max_pages=max_pages, include_raw=include_raw)
+    result = rank_query(
+        question, max_pages=max_pages, include_raw=include_raw,
+        filters={k: args[k] for k in _FILTER_KEYS if k in args},
+    )
 
     out = [f"# Query: {question}\n", f"{DATA_NOTICE}\n"]
     if not result["hits"]:
