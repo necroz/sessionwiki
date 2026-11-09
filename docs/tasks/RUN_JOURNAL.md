@@ -270,3 +270,35 @@ Newest entries go at the bottom.
 - Next card: 24
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 14:55 — card 24: `synthesize --max-sessions N`
+
+- Status: done
+- Files: `sessionwiki/synth/pipeline.py`, `sessionwiki/cli.py`,
+  `tests/test_synth_pipeline.py`, `CHANGELOG.md`
+- Gates: targeted `tests/test_synth_pipeline.py` 38 passed (rc 0),
+  `test_synth_pipeline.py` + `test_synth_coalesce.py` 50 passed (rc 0),
+  full suite rc 0, lint 16 → 16 errors, version 2.0.5 (rc 0),
+  `synthesize --help | grep max-sessions` rc 0, ruff on the changed files
+  40 → 40 with none on the new lines, privacy grep clean, synth state
+  unchanged, end-to-end run in a `/tmp` vault: run 1 printed
+  `deferred: 1 session(s)` and wrote one page, run 2 wrote the second
+- Commit: 274bc8d
+- Decisions: the cap block is the card's snippet verbatim, placed directly
+  before `if backend is None:` and after the `coalesce_only` early return;
+  `summary["new_files"]` keeps the number of new sessions found (2) and
+  `deferred` carries the rest, so both numbers stay meaningful. The locked
+  run's return dict also carries `deferred: 0`, so every summary shape has
+  the key (card-22 precedent). `max_sessions: int | None` instead of
+  `Optional[int]` because ruff selects UP045 (cards 17, 20, 23 precedent);
+  `Optional` would have added two errors. The CLI passes
+  `getattr(args, "max_sessions", None)`: a hand-built `Namespace` in
+  `tests/test_synth_coalesce.py` omits the field, and the file already uses
+  `getattr` for `backfill_only` and `vault` for the same reason.
+- Next card: 30
+- Blockers: none. The end-to-end smoke test used the configured
+  OpenAI-compatible backend at `http://10.3.71.12:8001/v1` because the
+  `synthesize` command has no backend override flag; only the two-line
+  throwaway fixture was sent, and the temp vault was deleted. The
+  pre-existing uncommitted `docs/tasks/AUTONOMOUS.md` change (scheduling
+  notes) was left untouched and is not part of the card.
