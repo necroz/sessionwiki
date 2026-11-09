@@ -77,7 +77,7 @@ merge conflicts. Card 30 also edits `mcp/server.py`, but only appends to
 | 20 | [Filters in wiki_query and query](20-wiki-query-filters.md) | 1 | A3 | P0 | M | 11, 17 | done |
 | 21 | [Downrank stale and archived pages](21-downrank-stale.md) | 1 | B6 | P1 | S | 20 | done |
 | 22 | [Never overwrite origin: human pages](22-origin-human-guard.md) | 1 | B3 | P0 | S | — | done |
-| 23 | [Handoff block in recall](23-recall-handoff.md) | 1 | C2 | P0 | M | 18 | todo |
+| 23 | [Handoff block in recall](23-recall-handoff.md) | 1 | C2 | P0 | M | 18 | done |
 | 24 | [synthesize --max-sessions](24-synthesize-max-sessions.md) | 1 | E2 | P1 | S | — | todo |
 | 30 | [Guarded MCP write tools](30-mcp-write-tools.md) | 1 | E12 | P1 | M | 11, 12, 22 | todo |
 | 25 | [Extractive synthesis backend](25-extractive-backend.md) | 2 | D1 | P0 | M | — | todo |

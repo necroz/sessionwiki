@@ -245,3 +245,28 @@ Newest entries go at the bottom.
 - Next card: 23
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-09 14:34 — card 23: Handoff block in `recall`
+
+- Status: done
+- Files: `sessionwiki/cli.py`, `tests/test_mcp_recall.py`, `CHANGELOG.md`
+- Gates: targeted 16 passed (rc 0), full suite rc 0 (pytest 9.1.1 does
+  not print the summary line in this environment), lint 16 → 16 errors,
+  version 2.0.5 (rc 0), `recall --project llm-wiki --limit 3` printed the
+  `Last session ended with («…», 2026-11-09):` block and exited 0, ruff on
+  the changed files 11 → 11 with none on the new lines, privacy grep: one
+  pre-existing hit (`RUN_JOURNAL.md:208`, the card-21 entry quotes the
+  command), none in this diff, synth state unchanged
+- Commit: 9fcd114
+- Decisions: the real transcript heading is `### Turn N — User` /
+  `### Turn N — Assistant` with U+2014, as the card expected, so the
+  regex is the card's verbatim form. `Path | None` instead of the card's
+  `Optional[Path]` because ruff selects UP045 (card-17 precedent). The
+  handoff heading falls back to "(no request recorded)" when the newest
+  session has no description, matching the session-list line. The card's
+  Files list has no docs page, and `docs/reference/cli.md` makes no false
+  claim after the change, so it was left untouched — the recall section
+  does not mention the handoff yet; that is a follow-up.
+- Next card: 24
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
