@@ -67,3 +67,20 @@ Newest entries go at the bottom.
   the old counts as a follow-up.
 - Next card: 15
 - Blockers: none
+
+## 2026-11-09 11:31 — card 15: Rewrite the competitor landscape
+
+- Status: done
+- Files: `docs/competitor-landscape.md`, `CHANGELOG.md`
+- Gates: targeted 28 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version rc 0, `grep -nE 'Rewind|Pieces|PDF|6 agents|stdlib only'` prints
+  nothing (rc 1), privacy grep clean, synth state unchanged
+- Commit: 067dadb
+- Decisions: unknown table cells are `—` per the card, including the
+  "needs an LLM" and "MCP server" rows; claude-mem's retroactive cell says
+  "Early versions: no day-zero import" because the map does not claim the
+  current version lacks it; star counts are one line under the table with the
+  date and the GitHub API as the source.
+- Next card: 16
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
