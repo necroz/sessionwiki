@@ -409,3 +409,29 @@ Newest entries go at the bottom.
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
 
+## 2026-11-09 16:55 — card 27: `remember` a fact as a candidate
+
+- Status: done
+- Files: `sessionwiki/cli.py`, `tests/test_remember.py` (new),
+  `docs/reference/cli.md`, `CHANGELOG.md`
+- Gates: targeted `test_remember.py` + `test_candidates.py` 40 passed
+  (rc 0), full suite rc 0, lint 16 → 16 errors, version 2.0.5 (rc 0),
+  ruff: 11 pre-existing errors in `cli.py`, none on the new lines; the new
+  test is clean and format-clean, and `ruff format --diff cli.py` has no
+  hunk in the new code; privacy grep: one pre-existing hit
+  (`RUN_JOURNAL.md:208`), synth state unchanged. A manual run with
+  `SESSIONWIKI_HOME=/tmp/sw-remember-check` printed
+  `remembered → wiki/candidates/concepts/TheVaultKeepsSecretsIn1Password.md`
+  and `candidates list` showed the page (rc 0 for both).
+- Commit: ee1f9e6
+- Decisions: the file name uses `str.title()` on each letter/digit run, not
+  `capitalize()` as in `DummySynthesizer._title_case_project` — `capitalize()`
+  turns "1Password" into "1password". The `[[ProjectEntity]]` link keeps the
+  `_title_case_project` rule, so it points at the page synthesis creates.
+  No `--wiki-dir` flag: the card specifies three options and the tests patch
+  `REPO_ROOT`. A `"` in the title becomes `'` and `,`/`[`/`]` in the project
+  name become `-` in the tag, so the frontmatter always parses. An empty
+  fact exits 2 with an error; the card does not define this case.
+- Next card: 28
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.

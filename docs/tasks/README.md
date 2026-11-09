@@ -82,7 +82,7 @@ merge conflicts. Card 30 also edits `mcp/server.py`, but only appends to
 | 30 | [Guarded MCP write tools](30-mcp-write-tools.md) | 1 | E12 | P1 | M | 11, 12, 22 | done |
 | 25 | [Extractive synthesis backend](25-extractive-backend.md) | 2 | D1 | P0 | M | — | done |
 | 26 | [import-memory for Claude Code auto memory](26-import-claude-memory.md) | 2 | C5 | P0 | M | 22 | done |
-| 27 | [remember a fact as a candidate](27-remember-command.md) | 2 | C4 | P1 | S | 22 | todo |
+| 27 | [remember a fact as a candidate](27-remember-command.md) | 2 | C4 | P1 | S | 22 | done |
 | 28 | [CI on macOS and Windows](28-ci-macos-windows.md) | 2 | E5 | P0 | M | — | todo |
 | 29 | [Opt-in prompt recall hook](29-prompt-recall-hook.md) | 2 | C1 | P1 | M | 12, 17, 20 | todo |
 
