@@ -476,20 +476,17 @@ def _is_read_page_allowed(p: Path) -> bool:
     return False
 
 
-def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
-    question = (args.get("question") or "").strip()
-    max_pages = int(args.get("max_pages", 5))
-    # None = automatic: transcripts are read only when no wiki page
-    # matches. True / False force them on / off.
-    include_raw = args.get("include_raw")
-    if not question:
-        return _err("question is required")
+def rank_query(
+    question: str,
+    max_pages: int = 5,
+    include_raw: bool | None = None,
+) -> dict[str, Any]:
+    """Ranked wiki search shared by MCP wiki_query and `sessionwiki query`.
 
+    Returns {"hits": [...], "scan_incomplete": bool, "index": str,
+    "overview": str}. Each hit is {"path", "score", "via", "snippet"}.
+    """
     wiki = REPO_ROOT / "wiki"
-    if not wiki.exists():
-        return _ok(
-            "wiki/ does not exist yet — run `sessionwiki init` and `/wiki-sync` first"
-        )
 
     # Read the index + overview
     index = (wiki / "index.md").read_text(encoding="utf-8") if (wiki / "index.md").exists() else ""
@@ -596,25 +593,49 @@ def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
         previous = scored.get(target)
         scored[target] = (previous[0] + score, previous[1]) if previous else (score, snippet)
 
-    top = _ranked_hits(scored, links, max_pages, tokens)
+    return {
+        "hits": _ranked_hits(scored, links, max_pages, tokens),
+        "scan_incomplete": budget_hit,
+        "index": index,
+        "overview": overview,
+    }
+
+
+def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
+    question = (args.get("question") or "").strip()
+    max_pages = int(args.get("max_pages", 5))
+    # None = automatic: transcripts are read only when no wiki page
+    # matches. True / False force them on / off.
+    include_raw = args.get("include_raw")
+    if not question:
+        return _err("question is required")
+
+    wiki = REPO_ROOT / "wiki"
+    if not wiki.exists():
+        return _ok(
+            "wiki/ does not exist yet — run `sessionwiki init` and `/wiki-sync` first"
+        )
+
+    result = rank_query(question, max_pages=max_pages, include_raw=include_raw)
 
     out = [f"# Query: {question}\n", f"{DATA_NOTICE}\n"]
-    if not top:
+    if not result["hits"]:
         out.append("No matching pages found.\n")
-        out.append("\n## wiki/index.md\n\n" + index[:1500])
+        out.append("\n## wiki/index.md\n\n" + result["index"][:1500])
     else:
-        for header, snippet in top:
-            out.append(f"## {header}\n")
-            out.append(snippet)
+        for hit in result["hits"]:
+            linked = f", via {hit['via']}" if hit["via"] else ""
+            out.append(f"## `{hit['path']}` (score: {hit['score']:.1f}{linked})\n")
+            out.append(hit["snippet"])
             out.append("")
-    if budget_hit:
+    if result["scan_incomplete"]:
         out.append(
             f"_Scan stopped at the {_MCP_SCAN_AGGREGATE_BYTES // (1024 * 1024)} MiB "
             "byte budget; some pages were not searched._\n"
         )
     out.append("---\n")
     out.append("## Overview context\n")
-    out.append(overview[:1000] if overview else "(no overview.md)")
+    out.append(result["overview"][:1000] if result["overview"] else "(no overview.md)")
 
     return _ok("\n".join(out))
 
@@ -679,17 +700,22 @@ def _link_idf(links: dict[Path, dict[str, str]], seeds: list[Path]) -> dict[str,
 def _ranked_hits(
     scored: dict[Path, tuple[float, str]], links: dict[Path, dict[str, str]],
     max_pages: int, tokens: list[str],
-) -> list[tuple[str, str]]:
-    """Top pages after the graph hop, as (header, snippet)."""
+) -> list[dict[str, Any]]:
+    """Top pages after the graph hop, as hit dicts."""
     lexical = {page: score for page, (score, _) in scored.items()}
     bonus, via = _link_bonus(lexical, links, max_pages)
     totals = {page: lexical.get(page, 0.0) + bonus.get(page, 0.0) for page in lexical.keys() | bonus.keys()}
     hits = []
     for page, score in sorted(totals.items(), key=lambda item: -item[1])[:max_pages]:
         # Name the link when it, not the words, put the page here.
-        linked = f", via {via[page]}" if bonus.get(page, 0.0) > lexical.get(page, 0.0) else ""
+        via_name = via[page] if bonus.get(page, 0.0) > lexical.get(page, 0.0) else ""
         snippet = scored[page][1] if page in scored else _page_snippet(page, tokens)
-        hits.append((f"`{page.relative_to(REPO_ROOT)}` (score: {score:.1f}{linked})", snippet))
+        hits.append({
+            "path": str(page.relative_to(REPO_ROOT)),
+            "score": round(score, 1),
+            "via": via_name,
+            "snippet": snippet,
+        })
     return hits
 
 

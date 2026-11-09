@@ -687,22 +687,35 @@ project from its `cwd`. The Claude Code plugin and
 
 ---
 
-## `query` — search the knowledge graph
+## `query` — search the wiki
 
 ```bash
 python3 -m sessionwiki query "what projects am I working on"
-python3 -m sessionwiki query "Flutter mobile" --depth 2 --budget 1000
+python3 -m sessionwiki query "Flutter mobile" --limit 3
+python3 -m sessionwiki query "Flutter mobile" --json
+python3 -m sessionwiki query "Flutter mobile" --graph --depth 2 --budget 1000
 ```
+
+Runs the same ranked lexical search with one graph hop as MCP
+`wiki_query`: wiki pages first, transcripts only when no page matches
+(or always with `--raw`). Works without the optional graph engine;
+`--graph` switches to graphify.
 
 ### Flags
 
 | Flag | What |
 |---|---|
-| `--depth N` | BFS traversal depth. Default: `3`. |
-| `--budget N` | Max output tokens. Default: `2000`. |
+| `--limit N` | Pages to return. Default: `5`. |
+| `--json` | Print `hits` (`path`, `score`, `via`, `snippet`) as JSON. |
+| `--raw` | Always rank raw transcripts too. |
+| `--no-raw` | Never read raw transcripts. |
+| `--graph` | Use the graphify engine instead of the ranked search. |
+| `--depth N` | graphify BFS depth (with `--graph`). Default: `3`. |
+| `--budget N` | graphify token budget (with `--graph`). Default: `2000`. |
 
-Requires Graphify (`pip install sessionwiki[graph]`). Run `sessionwiki graph` first
-to build the graph.
+Without `--raw` or `--no-raw`, transcripts are read only when no wiki
+page matches. `--graph` requires Graphify (`pip install sessionwiki[graph]`)
+and a graph built by `sessionwiki graph`.
 
 ---
 

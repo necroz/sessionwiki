@@ -766,15 +766,26 @@ def cmd_opencode_install(args: argparse.Namespace) -> int:
 
 
 def cmd_query(args: argparse.Namespace) -> int:
-    """Query the knowledge graph with a natural language question."""
-    from sessionwiki.graphify_bridge import is_available, query_graph
-    if not is_available():
-        print("error: graphify not installed. Run: pip install sessionwiki[graph]", file=sys.stderr)
-        return 2
+    """Search the wiki with the MCP ranking, or graphify with --graph."""
     question = " ".join(args.question)
-    result = query_graph(question, depth=args.depth, token_budget=args.budget)
-    print(result)
-    return 0
+    if args.graph:
+        from sessionwiki.graphify_bridge import is_available, query_graph
+        if not is_available():
+            print("error: graphify not installed. Run: pip install sessionwiki[graph]", file=sys.stderr)
+            return 2
+        print(query_graph(question, depth=args.depth, token_budget=args.budget))
+        return 0
+    from sessionwiki.mcp.server import rank_query, tool_wiki_query
+    if args.json:
+        result = rank_query(question, max_pages=args.limit, include_raw=args.include_raw)
+        result.pop("index", None)
+        result.pop("overview", None)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+    out = tool_wiki_query({"question": question, "max_pages": args.limit,
+                           "include_raw": args.include_raw})
+    print(out["content"][0]["text"])
+    return 1 if out.get("isError") else 0
 
 
 def cmd_graph(args: argparse.Namespace) -> int:
@@ -1766,12 +1777,21 @@ def build_parser() -> argparse.ArgumentParser:
     _add_vault_arg(syn, role="synthesize")
     syn.set_defaults(func=cmd_synthesize)
 
-    # query — natural-language graph query
-    qry = sub.add_parser("query", help="Query the knowledge graph with a question")
+    # query — same ranking as MCP wiki_query; graphify with --graph
+    qry = sub.add_parser("query", help="Search the wiki (same ranking as MCP wiki_query)")
     qry.add_argument("question", nargs="+", help="The question to ask")
-    qry.add_argument("--depth", type=int, default=3, help="BFS traversal depth (default: 3)")
-    qry.add_argument("--budget", type=int, default=2000, help="Max output tokens (default: 2000)")
-    qry.set_defaults(func=cmd_query)
+    qry.add_argument("--limit", type=int, default=5, help="Pages to return (default 5)")
+    qry.add_argument("--json", action="store_true", help="Print hits as JSON")
+    raw = qry.add_mutually_exclusive_group()
+    raw.add_argument("--raw", dest="include_raw", action="store_const", const=True,
+                     help="Always rank raw transcripts too")
+    raw.add_argument("--no-raw", dest="include_raw", action="store_const", const=False,
+                     help="Never read raw transcripts")
+    qry.add_argument("--graph", action="store_true",
+                     help="Use the optional graphify engine instead (needs sessionwiki[graph])")
+    qry.add_argument("--depth", type=int, default=3, help="graphify BFS depth (with --graph)")
+    qry.add_argument("--budget", type=int, default=2000, help="graphify token budget (with --graph)")
+    qry.set_defaults(func=cmd_query, include_raw=None)
 
     # version
     ver = sub.add_parser("version", help="Print version")

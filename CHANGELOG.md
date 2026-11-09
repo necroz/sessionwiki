@@ -20,6 +20,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Changed
 
+- **`query` uses the MCP ranking** — `sessionwiki query` now answers with the same ranked lexical search (one graph hop) as MCP `wiki_query` and works without graphify; new `--limit`, `--json` and `--raw`/`--no-raw` flags, and `--graph` keeps the old graph engine path.
 - **Docs match the code** — the README counts all 10 adapters (4 built in, 6 opt-in), the docs index says `markdown` is a dependency instead of calling the package stdlib-only, and the 2026-04 roadmap carries a banner pointing to the current plan.
 - **Competitor landscape rewritten for coding-agent memory tools** — the page now compares sessionwiki with built-in Claude Code memory, claude-mem, Basic Memory, ai-memory, agentmemory, MemPalace, deja-vu and cass on two axes (retroactive vs forward, compiled wiki vs memory API), and marks unknown facts instead of guessing.
 
