@@ -35,3 +35,18 @@ Newest entries go at the bottom.
 - Blockers: none. Unrelated changes from a parallel process
   (`docs/reference/*`, `wiki/archive/seed/*`, `sessionwiki/lint/__init__.py`,
   `tests/test_lint_rules.py`) were present and left uncommitted.
+
+## 2026-11-09 10:26 — card 13: `recall`: say when to search
+
+- Status: done
+- Files: `sessionwiki/cli.py`, `tests/test_mcp_recall.py`, `CHANGELOG.md`
+- Gates: targeted 9 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version rc 0, `recall` text and `--format hook` both print
+  `Before you ask the user about earlier work, call the wiki_query tool`,
+  privacy grep clean, synth state unchanged
+- Commit: b326c2a
+- Decisions: added the `Before you ask the user` assertion to the hook-format
+  test too, so both output formats are covered by the acceptance criteria
+  (the card named only the text test).
+- Next card: 14
+- Blockers: none
