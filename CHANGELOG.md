@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Added
+
+- **MCP text stays under the client truncation caps** — a test now fails if any tool description exceeds 1024 characters, any property description 400, or the server instructions 2048 (Claude Code cuts them at about 2048). The test iterates over `server.TOOLS`, so tools added later are covered.
+
 ## [2.0.5] — 2026-11-06
 
 Theme: large sessions synthesised in full — chunked map-reduce instead of head-and-tail truncation; zcode install no longer duplicates the Stop hook.
