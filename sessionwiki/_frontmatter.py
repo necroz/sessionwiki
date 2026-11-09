@@ -78,6 +78,112 @@ def parse_frontmatter_or_none(text: str) -> tuple[Optional[str], str]:
     return m.group(1), m.group(2)
 
 
+_EOL_RE = re.compile(r"\r\n|\r|\n")
+_KEY_LINE_RE = re.compile(r"^([a-zA-Z_][\w-]*):")
+_BLOCK_LIST_LINE_RE = re.compile(r"^\s*- ")
+_LIST_ITEM_RE = re.compile(r"[\w][\w.\-/+ ]{0,63}")
+
+
+def _first_eol(text: str, default: str = "\n") -> str:
+    """Return the first line ending in ``text``, or ``default``."""
+    m = _EOL_RE.search(text)
+    return m.group(0) if m else default
+
+
+def format_frontmatter_value(value: Any) -> str:
+    """Serialize one value the way ``_parse_scalar`` reads it back.
+
+    Lists become ``[a, b]``. Strings are double-quoted (single-quoted if
+    they contain ``"``). Numbers and bools are written as-is. Raises
+    ``ValueError`` for newlines, or for a string that holds both quote
+    characters.
+    """
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return repr(value)
+    if isinstance(value, str):
+        if "\n" in value or "\r" in value:
+            raise ValueError("frontmatter values must not contain newlines")
+        if '"' in value:
+            if "'" in value:
+                raise ValueError(
+                    "frontmatter value contains both quote characters: "
+                    f"{value!r}"
+                )
+            return f"'{value}'"
+        return f'"{value}"'
+    if isinstance(value, (list, tuple)):
+        items: list[str] = []
+        for item in value:
+            if not isinstance(item, str):
+                raise ValueError(f"list items must be strings: {item!r}")
+            if not _LIST_ITEM_RE.fullmatch(item):
+                raise ValueError(
+                    f"invalid list item {item!r}: use letters, digits, '_', "
+                    "'.', '-', '/', '+' and spaces; no commas or brackets"
+                )
+            items.append(item)
+        return "[" + ", ".join(items) + "]"
+    raise ValueError(f"unsupported frontmatter value: {value!r}")
+
+
+def set_frontmatter_fields(text: str, fields: dict[str, Any]) -> str:
+    """Return ``text`` with each key in ``fields`` set in its frontmatter.
+
+    - An existing ``key: ...`` line is replaced in place. Block-list lines
+      that follow it (lines that match ``^\\s*- ``) are removed.
+    - A missing key is appended before the closing ``---``.
+    - Text without frontmatter gets a new block at the top.
+    - The body after the closing ``---`` is returned byte for byte.
+    - Line endings: use the line ending of the first frontmatter line.
+    """
+    text = _strip_bom(text)
+    formatted = {key: format_frontmatter_value(value) for key, value in fields.items()}
+
+    m = _FRONTMATTER_RE.match(text)
+    if not m:
+        eol = _first_eol(text)
+        lines = [f"{key}: {value}" for key, value in formatted.items()]
+        block = "---" + eol + eol.join(lines) + eol + "---" + eol
+        return block + text
+
+    meta_text = m.group(1)
+    body = m.group(2)
+    head = text[: m.start(1)]
+    tail = text[m.end(1): m.start(2)]
+    eol = _first_eol(head)
+    # ``tail`` is the newline before the closing fence, the fence itself and
+    # whatever followed it on that line. Keep the part after the fence so the
+    # body stays byte for byte.
+    after_close = tail[tail.rfind("---") + 3:]
+    open_prefix = head if head.endswith(("\n", "\r")) else head + eol
+
+    lines = re.split(r"\r\n|\r|\n", meta_text)
+    out: list[str] = []
+    seen: set[str] = set()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        km = _KEY_LINE_RE.match(line)
+        if km and km.group(1) in formatted:
+            key = km.group(1)
+            out.append(f"{key}: {formatted[key]}")
+            seen.add(key)
+            i += 1
+            while i < len(lines) and _BLOCK_LIST_LINE_RE.match(lines[i]):
+                i += 1
+            continue
+        out.append(line)
+        i += 1
+    for key, value in formatted.items():
+        if key not in seen:
+            out.append(f"{key}: {value}")
+
+    meta_new = eol.join(out) + (eol if out else "")
+    return open_prefix + meta_new + "---" + after_close + body
+
+
 def is_human_page(path: Path) -> bool:
     """True when an existing page says ``origin: human`` in its frontmatter."""
     if not path.is_file():

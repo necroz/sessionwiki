@@ -42,7 +42,7 @@ sessionwiki turns that history into a knowledge base:
 | **Synthesis backends** | Ollama, **any OpenAI-compatible server** (vLLM, SGLang, LM Studio, LiteLLM, hosted), agent-delegate, offline dummy |
 | **Signal over noise** | Low-signal session coalescing, wikilink cleanup, concurrency control, cost `--estimate` |
 | **Static site** | 365-day heatmap, token and cache stats, filterable sessions table, session pages with highlighted code, project pages with topics, session ↔ project graph, ⌘K search, dark mode |
-| **MCP server** | 12 tools: query, search, read, list sources, lint, sync, exports, dashboard… |
+| **MCP server** | 15 tools: query, search, read, list sources, lint, sync, exports, dashboard, write/edit/archive pages (with a confirm step)… |
 | **AI exports** | `llms.txt`, `llms-full.txt`, JSON-LD graph, per-page `.txt` / `.json`, sitemap, RSS |
 | **Safe by default** | Redaction of usernames and 17 secret patterns, read-only database exports, OS file locks and atomic state writes, `doctor` and `audit` |
 

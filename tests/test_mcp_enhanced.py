@@ -22,13 +22,15 @@ from sessionwiki.mcp.server import (
 # ─── Registration ─────────────────────────────────────────────────────
 
 
-def test_all_12_tools_registered():
-    assert len(TOOLS) == 12
+def test_all_tools_registered():
+    assert len(TOOLS) == 15
     names = {t["name"] for t in TOOLS}
     for required in ["wiki_query", "wiki_search", "wiki_list_sources",
                       "wiki_read_page", "wiki_lint", "wiki_sync", "wiki_export",
                       "wiki_confidence", "wiki_lifecycle", "wiki_dashboard",
-                      "wiki_entity_search", "wiki_category_browse"]:
+                      "wiki_entity_search", "wiki_category_browse",
+                      "wiki_write_page", "wiki_update_frontmatter",
+                      "wiki_archive_page"]:
         assert required in names
 
 
@@ -281,17 +283,22 @@ def test_every_tool_has_title_and_behaviour_annotations():
         assert annotations["title"] == tool["title"]
         for hint in _HINTS:
             assert isinstance(annotations[hint], bool), (tool["name"], hint)
-        assert annotations["destructiveHint"] is False
+        assert annotations["destructiveHint"] is (
+            tool["name"] in {"wiki_write_page", "wiki_update_frontmatter"}
+        )
         assert annotations["openWorldHint"] is False
 
 
-def test_only_wiki_sync_writes():
+def test_write_tools_are_marked():
     writers = {t["name"] for t in TOOLS if not t["annotations"]["readOnlyHint"]}
-    assert writers == {"wiki_sync"}
+    assert writers == {
+        "wiki_sync", "wiki_write_page", "wiki_update_frontmatter",
+        "wiki_archive_page",
+    }
 
 
 def test_every_description_points_to_a_sibling_tool():
-    """Agents pick between 12 similar tools from the descriptions alone,
+    """Agents pick between 15 similar tools from the descriptions alone,
     so each one names at least one alternative."""
     names = {t["name"] for t in TOOLS}
     for tool in TOOLS:

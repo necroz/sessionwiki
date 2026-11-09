@@ -28,13 +28,13 @@ you can open, inspect and edit.
 | **Output a human can read (Markdown pages)** | Yes — `wiki/` pages + static site | Yes — `MEMORY.md` + topic files | — | Yes — Markdown/local files | Yes — git-backed Markdown wiki | Yes — local files + viewer | — | — | — |
 | **Needs an LLM** | No — `dummy` is the default; `agent` adds no API cost; `ollama`/`openai` optional | Yes — the agent writes the files | Yes — a model summarizes every session | — | No — zero-LLM default | No — keyless BM25 default | — | No — no LLM | — |
 | **Runs locally** | Yes — local-first, no cloud | Yes — files under `~/.claude/projects/<project>/memory/` | — | Yes — local Markdown; Basic Memory Cloud for sync | Yes — git-backed | Yes — local files | Yes — verbatim local storage | — | — |
-| **MCP server** | Yes — 12 tools | — | — | Yes — progressive tool discovery | Yes — MCP for access | Yes — exposes its knowledge over MCP | Yes — 47 tools (claimed) | — | — |
+| **MCP server** | Yes — 15 tools | — | — | Yes — progressive tool discovery | Yes — MCP for access | Yes — exposes its knowledge over MCP | Yes — 47 tools (claimed) | — | — |
 | **Agents supported** | 10 adapters: 4 built in + 6 opt-in | Claude Code | Claude Code | Claude Code (plugin) | Cross-agent handoff | — | — | 44 harnesses (claimed) | 30+ providers (claimed) |
 
 `—` means the competitive map does not state the fact; it is not a "no".
 
 `sessionwiki` numbers are the verified state of section 2.2 of the map: 10
-adapters, 12 MCP tools, four synthesis backends, one runtime dependency
+adapters, 15 MCP tools, four synthesis backends, one runtime dependency
 (`markdown>=3.9`). Retrieval is lexical — BM25-style IDF, recency and one graph
 hop — with no embeddings and no FTS index.
 

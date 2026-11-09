@@ -192,7 +192,7 @@ Each entry starts with `## [YYYY-MM-DD] <operation> | <title>` so it's grep-pars
 grep "^## \[" wiki/log.md | tail -10
 ```
 
-Operations: `sync`, `ingest`, `query`, `lint`, `build`.
+Operations: `sync`, `ingest`, `query`, `lint`, `build`, `edit`.
 
 ## Hard rules
 
