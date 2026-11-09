@@ -50,3 +50,20 @@ Newest entries go at the bottom.
   (the card named only the text test).
 - Next card: 14
 - Blockers: none
+
+## 2026-11-09 10:52 — card 14: Align docs with the code
+
+- Status: done
+- Files: `README.md`, `docs/index.md`, `docs/roadmap.md`, `CHANGELOG.md`
+- Gates: targeted 38 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version rc 0, `grep -n "8 sources" README.md` prints nothing (rc 1),
+  privacy grep clean
+- Commit: 2668956
+- Decisions: the adapter list matches the card — 4 core
+  (`claude_code`, `codex_cli`, `opencode`, `zcode`) and 6 contrib
+  (`chatgpt`, `copilot_chat`, `copilot_cli`, `cursor`, `gemini_cli`,
+  `obsidian`). The card's replacement row was used verbatim. Translated
+  READMEs under `docs/i18n/` stay untouched (out of scope); they still carry
+  the old counts as a follow-up.
+- Next card: 15
+- Blockers: none
