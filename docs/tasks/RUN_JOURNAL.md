@@ -302,3 +302,36 @@ Newest entries go at the bottom.
   throwaway fixture was sent, and the temp vault was deleted. The
   pre-existing uncommitted `docs/tasks/AUTONOMOUS.md` change (scheduling
   notes) was left untouched and is not part of the card.
+
+## 2026-11-09 15:40 — card 30: Guarded MCP write tools
+
+- Status: done
+- Files: `sessionwiki/_frontmatter.py`, `sessionwiki/mcp/server.py`,
+  `tests/test_mcp_write_tools.py` (new), `tests/test_mcp_enhanced.py`,
+  `tests/test_mcp_protocol.py`, `README.md`, `CLAUDE.md`, `CHANGELOG.md`,
+  `docs/competitor-landscape.md`
+- Gates: targeted 118 passed (rc 0), full suite rc 0, lint 16 → 16 errors,
+  version 2.0.5 (rc 0), `tools/list` prints `15` (rc 0), ruff on the changed
+  files 7 → 7 with none on the new lines, privacy grep clean, synth state
+  unchanged
+- Commit: 027408f
+- Decisions: the three descriptions are the card's text verbatim and measure
+  767, 678 and 534 characters; `SERVER_INSTRUCTIONS` grew from 706 to 906
+  characters, inside card 11's 2048 cap. `_resolve_wiki_write_path` checks a
+  symlink first (so a link that escapes the repo reports the symlink, not the
+  escape), then `_safe_path`, `wiki/`, hidden parts, the `.md` suffix,
+  `wiki/archive/`, `is_system_file` and `is_human_page`; the human-page
+  message is the card's exact text. `_page_tags` also reads the block-list
+  form (`tags:` plus `  - item`), because `parse_frontmatter` skips bullet
+  lines and `add_tags` would otherwise drop the current tags when
+  `set_frontmatter_fields` rewrites the field. `tests/test_mcp_protocol.py`'s
+  test was renamed `test_tools_list_returns_fifteen_tools` so the name does
+  not say twelve. `AGENTS.md` and `CLAUDE.md` rule 6 already named "the MCP
+  write tools" from card 22, so neither needed an edit. `docs/`
+  `competitor-landscape.md` had the count twice (the comparison cell and the
+  closing paragraph); both now say 15. The new MCP tests call the `tool_*`
+  functions directly with `REPO_ROOT` monkeypatched to `tmp_path`.
+- Next card: 25
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
+
