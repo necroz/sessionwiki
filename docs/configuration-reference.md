@@ -213,7 +213,7 @@ cp examples/sessions_config.json config.json
 | `adapters` | per-adapter | object | varies | Override adapter-specific settings |
 | `schedule` | `build` | enum | `"on-sync"` | When `/wiki-build` runs. `on-sync` / `daily` / `weekly` / `manual` / `never`. |
 | `schedule` | `lint` | enum | `"manual"` | When `/wiki-lint` runs. Same enum. |
-| `synthesis` | `backend` | enum | `"dummy"` | Which synthesizer: `"dummy"` / `"ollama"` / `"openai"` / `"agent"`. |
+| `synthesis` | `backend` | enum | `"dummy"` | Which synthesizer: `"dummy"` / `"extractive"` / `"ollama"` / `"openai"` / `"agent"`. `extractive`: no LLM; extracts the request, the last answer, decisions, files and tools from the transcript. |
 | `synthesis` | `model` | string | `"llama3.1:8b"` | Model name sent to the backend |
 | `synthesis` | `base_url` | string | `"http://127.0.0.1:11434"` | HTTP endpoint; a loopback host keeps transcripts local |
 | `synthesis` | `timeout` | int (s) | 60 | Per-request timeout |

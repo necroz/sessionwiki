@@ -67,6 +67,9 @@ def resolve_backend(
 
     Supported values:
       - ``"dummy"`` (default) — canned offline backend for previews/tests
+      - ``"extractive"`` — offline backend that picks the request, the
+        last answer, decisions, files and tools out of the transcript
+        (D1); no model, no network
       - ``"ollama"`` — local Ollama HTTP backend (#35)
       - ``"openai"`` — any OpenAI-compatible ``/v1`` server (vLLM,
         SGLang, LM Studio, LiteLLM, hosted providers)
@@ -105,6 +108,13 @@ def resolve_backend(
         from sessionwiki.synth.agent_delegate import AgentDelegateSynthesizer
 
         return AgentDelegateSynthesizer()
+
+    if name == "extractive":
+        # Offline, like the dummy backend, so no chunking wrapper: the
+        # page is built from the body the call already carries.
+        from sessionwiki.synth.extractive import ExtractiveSynthesizer
+
+        return ExtractiveSynthesizer()
 
     if name != "dummy":
         import logging
