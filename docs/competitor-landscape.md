@@ -1,156 +1,118 @@
 # Competitor Landscape
 
-How sessionwiki compares to other tools in the AI session history and
-personal knowledge management space.
+Every coding agent writes its work to disk: prompts, decisions, commands,
+errors and fixes. The next session starts without any of it. The tools below
+all attack that gap, and they differ in *when* they capture, *what* they
+produce and *what* they require. This page compares the options a coding-agent
+user is likely to weigh in November 2026.
 
-## The problem
+## Two axes
 
-Every AI coding agent (Claude Code, Codex CLI, Cursor, Copilot, Gemini
-CLI) writes a full session transcript to disk. After a few months you
-have hundreds of sessions containing decisions, code patterns, and
-debugging insights -- and you never look at any of them again.
+- **Retroactive indexing** reads transcripts that are already on disk.
+  **Forward capture** records from install on.
+- **Compiled wiki** produces pages a human can read and audit. **Memory API**
+  returns facts to an agent on demand.
 
-Several tools address this problem. They differ in approach, scope, and
-philosophy.
+The split comes from deja-vu's comparison. `sessionwiki` is retroactive *and*
+compiles a wiki, which is a stronger claim than either category alone: it can
+answer "what did we decide last month" on day zero, and the answer is a page
+you can open, inspect and edit.
 
-## Comparison table
+## Comparison
 
-| Feature | sessionwiki | mem0 | Rewind | Pieces | Manual notes |
-|---|---|---|---|---|---|
-| **Approach** | Compile sessions into a wiki + static site | Memory layer API for LLM apps | System-wide screen recording + OCR | Snippet manager with AI context | Write it yourself |
-| **Input sources** | Claude Code, Codex CLI, Cursor, Copilot, Gemini CLI, PDF, Obsidian | Any LLM API call (programmatic) | Everything on screen | Code snippets, links, screenshots | Whatever you type |
-| **Output format** | Markdown wiki + HTML site + AI exports | API responses (JSON) | Searchable timeline (proprietary) | Snippet database (proprietary) | Your notes app |
-| **Runs locally** | Yes, always | Self-hosted option available | macOS app (local + cloud) | Desktop app (local + cloud) | Depends on your tool |
-| **Cloud required** | No | Optional (managed API available) | Yes (for sync + search) | Yes (for AI features) | No |
-| **Open source** | MIT | Apache 2.0 | No | No | N/A |
-| **API keys required** | No | Yes (for managed) | No (subscription) | No (freemium) | No |
-| **Runtime dependencies** | Python 3.9+ stdlib only | Python + vector DB | macOS native | Electron | N/A |
-| **Multi-agent support** | 6 agents | Agent-agnostic (API-level) | Agent-agnostic (screen-level) | Agent-agnostic (manual) | N/A |
-| **Searchable** | Yes (client-side fuzzy search) | Yes (semantic search) | Yes (OCR + NLP) | Yes (AI-powered) | Depends on your tool |
-| **Knowledge graph** | Yes (wikilinks + vis.js) | No | No | Contextual links | No |
-| **Static site output** | Yes (deploy to GitHub/GitLab Pages) | No | No | No | No |
-| **AI-consumable exports** | llms.txt, JSON-LD, MCP server | Native (it is an API) | No | API available | No |
-| **Price** | Free | Free tier + paid | $24.95/month | Free tier + $10/month | Free |
+| | sessionwiki | Built-in Claude Code memory | claude-mem | Basic Memory | ai-memory | agentmemory | MemPalace | deja-vu | cass |
+|---|---|---|---|---|---|---|---|---|---|
+| **Approach** | Compiles agent transcripts into a Markdown wiki and a static site | `MEMORY.md` + topic files written by the agent; first 200 lines auto-loaded | Hooks capture sessions; a model writes structured observations; progressive disclosure | Markdown/local knowledge base over MCP; session-start briefings and pre-compaction checkpoints | Git-backed Markdown wiki + derived index; lifecycle hooks; MCP | Keyless BM25 memory over imported sessions; viewer; decay | Verbatim local storage + local embeddings; 47 MCP tools (claimed) | Retroactive index over transcripts; no LLM; published benchmark | Session search across providers; robot CLI; quarantine and GC |
+| **Imports past sessions (retroactive)** | Yes — 10 adapters read transcripts already on disk | — | Early versions: no day-zero import | — | — | Yes — import of old sessions | — | Yes — 44 harnesses (claimed) | Yes — 30+ providers (claimed) |
+| **Captures new sessions (forward)** | Yes — `Stop` hooks for Claude Code and ZCode, OpenCode `session.idle` | Yes — the agent writes the files by default | Yes — hooks | Yes — checkpoints and `/remember` | Yes — lifecycle hooks | — | — | — | — |
+| **Output a human can read (Markdown pages)** | Yes — `wiki/` pages + static site | Yes — `MEMORY.md` + topic files | — | Yes — Markdown/local files | Yes — git-backed Markdown wiki | Yes — local files + viewer | — | — | — |
+| **Needs an LLM** | No — `dummy` is the default; `agent` adds no API cost; `ollama`/`openai` optional | Yes — the agent writes the files | Yes — a model summarizes every session | — | No — zero-LLM default | No — keyless BM25 default | — | No — no LLM | — |
+| **Runs locally** | Yes — local-first, no cloud | Yes — files under `~/.claude/projects/<project>/memory/` | — | Yes — local Markdown; Basic Memory Cloud for sync | Yes — git-backed | Yes — local files | Yes — verbatim local storage | — | — |
+| **MCP server** | Yes — 12 tools | — | — | Yes — progressive tool discovery | Yes — MCP for access | Yes — exposes its knowledge over MCP | Yes — 47 tools (claimed) | — | — |
+| **Agents supported** | 10 adapters: 4 built in + 6 opt-in | Claude Code | Claude Code | Claude Code (plugin) | Cross-agent handoff | — | — | 44 harnesses (claimed) | 30+ providers (claimed) |
 
-## Detailed comparisons
+`—` means the competitive map does not state the fact; it is not a "no".
 
-### sessionwiki vs mem0
+`sessionwiki` numbers are the verified state of section 2.2 of the map: 10
+adapters, 12 MCP tools, four synthesis backends, one runtime dependency
+(`markdown>=3.9`). Retrieval is lexical — BM25-style IDF, recency and one graph
+hop — with no embeddings and no FTS index.
 
-[mem0](https://github.com/mem0ai/mem0) is a "memory layer for AI
-applications" -- it stores and retrieves memories from LLM conversations
-via an API. It is designed to be embedded into AI applications, not used
-by end users directly.
+Stars measure attention, not quality. GitHub API, 2026-11-06: claude-mem
+113.8k, MemPalace 60.4k, agentmemory 30.2k, ai-memory 15.3k, Basic Memory
+4.5k, deja-vu 1.4k, cass 1.2k.
 
-**When to use mem0:** You are building an AI application and want it to
-remember things across conversations. mem0 is a library, not a tool.
+## Closest alternatives
 
-**When to use sessionwiki:** You are a developer who uses AI coding agents
-and wants to browse, search, and learn from your past sessions. sessionwiki
-is a tool, not a library.
+**ai-memory** is the closest architectural analogue. It uses a git-backed
+Markdown wiki as the source of truth, a derived index for retrieval, lifecycle
+hooks for capture and MCP for access. Two ideas are worth copying: a handoff
+summary at session start ("what was in progress, what is next") and a zero-LLM
+default that still produces useful Markdown pages. It ships as a single Go
+binary; `uvx` already covers distribution for `sessionwiki`, so that part does
+not need copying.
 
-**Key differences:**
-- mem0 requires a vector database (Qdrant, Pinecone, etc.) and API keys.
-  sessionwiki uses Python stdlib only.
-- mem0 stores memories as embeddings. sessionwiki stores sessions as
-  readable markdown with YAML frontmatter.
-- mem0 has no UI. sessionwiki generates a complete static HTML site.
-- mem0 is for machines. sessionwiki is for humans (with AI-consumable
-  exports as a secondary output).
+**Basic Memory** is the closest product analogue. Its Claude Code plugin has
+session-start briefings, pre-compaction checkpoints, `/remember` and `/status`.
+Progressive tool discovery with behavior hints is already matched by the MCP
+annotations in `sessionwiki/mcp/server.py`; the checkpoint and the explicit
+remember path are still missing here.
 
-### sessionwiki vs Rewind (now Limitless)
+**claude-mem** is one of the most popular plugins (113.8k stars on GitHub,
+2026-11-06) and the best source of failure modes: token cost, Windows/macOS
+breakage, closed issue submission, and no day-zero import in early versions.
+Its observation model — capture tool use, summarize with a model, inject the
+relevant subset — is better than per-session summaries for "what did we try and
+why". `sessionwiki` already answers the cost objection better than claude-mem:
+the `agent` backend lets the running session write the pages, so a subscription
+user pays no extra API cost.
 
-Rewind (later rebranded to [Limitless](https://www.limitless.ai/))
-records everything on your screen, indexes it with OCR, and lets
-you search your visual history.
+**deja-vu** is the best source of positioning language. Its comparison splits
+the market into retroactive indexing and forward capture; `sessionwiki` is
+retroactive *and* compiles a wiki. Its published benchmark also sets the bar
+for the recall benchmark this project must publish.
 
-**When to use Rewind:** You want to search across all your screen
-activity, not just AI coding sessions. You're on macOS and comfortable
-with a cloud-connected subscription app.
+**Built-in Claude Code memory** is the new baseline. Claude Code writes
+`MEMORY.md` and topic files by default, auto-loads the first 200 lines, and
+keeps them under `~/.claude/projects/<project>/memory/`. A plugin that only
+"remembers" is competing with a free feature. `sessionwiki` has to be the
+durable, cross-agent, auditable layer on top of it — which is why importing
+that memory is on the roadmap.
 
-**When to use sessionwiki:** You want structured, deep extraction from AI
-coding sessions specifically. You want a local-only, open-source tool
-that produces a deployable site.
+## Different shape
 
-**Key differences:**
-- Rewind captures everything (meetings, browsing, typing). sessionwiki
-  focuses on AI coding agent sessions.
-- Rewind is macOS-only and proprietary. sessionwiki is cross-platform,
-  open-source, and MIT-licensed.
-- Rewind stores data in a proprietary format. sessionwiki produces standard
-  markdown and HTML.
-- Rewind costs $24.95/month. sessionwiki is free.
+- **Mem0 / OpenMemory** — a memory API for applications.
+- **supermemory** — hosted memory with stop-hook extraction and a user profile.
+- **Letta / MemGPT** — an agent runtime with self-editing memory blocks; it
+  owns the agent loop.
+- **Graphiti / Zep** — a temporal knowledge graph with validity windows and
+  typed edges; not a wiki.
+- **Cipher** — an open-source memory layer for coding agents over MCP, shared
+  across IDEs and projects.
+- **claude-history** — a Rust TUI for fuzzy search; deliberately declined.
+- **CCHV** — a viewer with token analytics; the static site already covers
+  this.
+- **Mantra** — session replay with redaction; out of scope.
 
-### sessionwiki vs Pieces
+## When to pick sessionwiki
 
-[Pieces](https://pieces.app/) is a snippet manager that captures code
-context from your IDE and provides AI-powered search and suggestions.
+- You want your **existing** sessions imported, not only sessions from install
+  on.
+- You want an **auditable Markdown wiki** — pages in git, readable and
+  editable, plus a static site.
+- You use **several agents**: 10 adapters, one archive.
+- You want **no LLM required** — the `dummy` default writes metadata-only
+  pages — or **no extra API cost**: the `agent` backend has the running agent
+  write the pages.
 
-**When to use Pieces:** You want a general-purpose snippet manager that
-integrates with your IDE and captures code as you write it.
+## When to pick something else
 
-**When to use sessionwiki:** You want to compile complete AI session
-transcripts into a navigable knowledge base, not just snippets.
+- **Forward capture with structured observations** — claude-mem.
+- **Cloud sync** — Basic Memory Cloud.
+- **Semantic search out of the box** — MemPalace, claude-self-reflect.
+- **A memory API for an application you build** — Mem0.
 
-**Key differences:**
-- Pieces captures snippets. sessionwiki captures entire sessions with full
-  conversation context.
-- Pieces is an Electron app with cloud features. sessionwiki is a CLI tool
-  that produces static files.
-- Pieces has IDE plugins (VS Code, JetBrains). sessionwiki integrates at
-  the session-transcript level.
-- Pieces has a freemium model. sessionwiki is free and open source.
+## Sources
 
-### sessionwiki vs manual notes
-
-Writing your own notes in Obsidian, Notion, or plain text files.
-
-**When to use manual notes:** You have few sessions, enjoy the process
-of note-taking, or need to capture information beyond what's in your
-AI session transcripts.
-
-**When to use sessionwiki:** You have dozens or hundreds of sessions and
-want automated extraction, cross-referencing, and a browsable site
-without manual effort.
-
-**Key differences:**
-- Manual notes require discipline and time. sessionwiki is automated.
-- Manual notes capture what you think is important. sessionwiki captures
-  everything (and lets you search later).
-- Manual notes are as organized as you make them. sessionwiki enforces a
-  consistent schema (Karpathy's LLM Wiki pattern).
-- Manual notes don't produce a static site, activity heatmaps, or
-  AI-consumable exports.
-
-## sessionwiki's positioning
-
-sessionwiki occupies a specific niche:
-
-1. **Local-first.** No cloud, no API keys, no accounts. Your data stays
-   on your machine (or your own GitHub Pages).
-
-2. **Multi-agent.** Six adapters (Claude Code, Codex CLI, Cursor,
-   Copilot, Gemini CLI, PDF) with a clean adapter interface for adding
-   more.
-
-3. **Karpathy-standard.** Based on [Andrej Karpathy's LLM Wiki
-   pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
-   -- sources, entities, concepts, syntheses, comparisons, questions,
-   all interlinked with wikilinks.
-
-4. **Stdlib-only.** No numpy, no torch, no node, no database. Python
-   3.9+ with zero required dependencies beyond the standard library.
-
-5. **Dual-format.** Every page ships as HTML for humans AND as
-   machine-readable `.txt` + `.json` + `llms.txt` + JSON-LD for AI
-   agents.
-
-6. **Static output.** The result is a static site you can browse locally
-   or deploy anywhere. No server to maintain, no database to back up.
-
-## When sessionwiki is NOT the right tool
-
-- You need real-time memory for an AI application you're building (use mem0)
-- You want to record everything on your screen, not just AI sessions (use Rewind)
-- You want a snippet manager integrated into your IDE (use Pieces)
-- You want collaborative editing on a shared wiki (use Notion, Obsidian Publish, or Confluence)
-- You need server-side search or a database backend (sessionwiki is static-only by design)
+All facts on this page are taken from the
+[competitive map](competitive-map-2026-11.md#9-sources) (section 9).
