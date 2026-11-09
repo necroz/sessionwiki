@@ -121,9 +121,14 @@ def test_workflow_allows_manual_dispatch():
     assert "workflow_dispatch" in text
 
 
-def test_workflow_uses_lychee_action():
+def test_workflow_installs_lychee_directly():
     text = LINK_WORKFLOW.read_text(encoding="utf-8")
-    assert "lycheeverse/lychee-action" in text
+    # lychee-action downloads the binary with a bare `curl` and no retry:
+    # one transient GitHub HTTP error killed the job on 2026-11-08 before
+    # any link was checked. We install the pinned binary ourselves.
+    assert "uses: lycheeverse/lychee-action" not in text
+    assert "gh release download" in text
+    assert "--retry-all-errors" in text
 
 
 def test_workflow_uses_cache():

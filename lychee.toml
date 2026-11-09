@@ -7,8 +7,17 @@
 # ─── network ─────────────────────────────────────────────────────────
 timeout = 20
 max_redirects = 5
-max_retries = 3
-retry_wait_time = 2
+# GitHub sometimes answers 5xx to anonymous clients during incidents
+# (see the 2026-11-08 link-check false positive). Retry long enough to
+# ride those out instead of filing a broken-link issue.
+max_retries = 5
+retry_wait_time = 5
+# Never persist transient throttling/server errors in `.lycheecache`:
+# a cached 504 would replay as a failure on every later run.
+cache_exclude_status = "429,500.."
+# Keep the burst to github.com modest; the default of 128 concurrent
+# requests makes the edge more likely to throttle anonymous clients.
+max_concurrency = 32
 
 # ─── what to accept ─────────────────────────────────────────────────
 # Only error on 4xx/5xx. Ignore transient redirects and auth-gated URLs.
