@@ -465,3 +465,57 @@ Newest entries go at the bottom.
   card's step 3, or accept the workflow unverified? The pre-existing
   uncommitted `docs/tasks/AUTONOMOUS.md` change (scheduling notes) was
   left untouched and is not part of the card.
+
+## 2026-11-10 09:19 — card 29: Opt-in prompt recall hook
+
+- Status: done
+- Files: `sessionwiki/cli.py`, `tests/test_prompt_recall_hook.py` (new),
+  `README.md`, `CHANGELOG.md`
+- Gates: targeted `tests/test_prompt_recall_hook.py tests/test_mcp_recall.py`
+  23 passed (rc 0), full suite rc 0, lint 17 → 17 errors, version 2.0.5
+  (rc 0), ruff on the changed files 11 → 11 with none on the new lines
+  (`cli.py` has the same 11 errors at HEAD), the new test is
+  `ruff format`-clean, privacy grep: two pre-existing hits in this journal
+  (lines 208 and 391), none in the diff, synth state unchanged
+- Commit: bc537b8
+- Decisions: `_prompt_recall` is the card's snippet; added
+  `isinstance(data, dict)` so valid JSON that is not an object returns 0
+  (an error path the card does not list) and the `try/except Exception`
+  around `rank_query` that the card does require. The threshold follows the
+  card's recipe on 20 recent **distinct** prompts, skipping subagent
+  transcripts and duplicate descriptions: the newest 20 files alone were
+  17 copies of one hourly automation prompt and made the sample
+  degenerate. Top scores: 10.9, 13.1, 14.5, 15.3, 15.6, 20.1, 24.0, 24.6,
+  29.2, 39.8, 40.5, 40.9, 42.5, 42.6, 43.2, 44.4, 47.5, 51.1, 51.5, 611.3
+  (median 40.1); `_PROMPT_RECALL_MIN_SCORE = 40.0` admits exactly the top
+  10 of 20. Prompt lengths in that order: 107, 118, 104, 113, 53, 107, 27,
+  71, 119, 113, 118, 119, 54, 37, 33, 69, 118, 22, 47, 81 — no prompt text
+  is recorded. Observation: a fresh paraphrase of a past request scores
+  5–8, below the threshold, so the hook stays silent on most short
+  paraphrased prompts; the card defers plugin registration for the same
+  reason, and the number should be revisited after real use. Latency, 5
+  runs: the card's command 140/141/142/147/140 ms (median 141, silent) and
+  a calibration prompt with 3 hits 165/188/170/179/170 ms (median 170).
+  `uvx sessionwiki` runs published 2.0.5, which predates the flag
+  (`recall --prompt-hook` → rc 2, "unrecognized arguments"), so the hook
+  cannot be measured through uvx; uvx startup alone is 107 ms median
+  (507 ms cold). `docs/reference/cli.md` is not in the card's Files and its
+  recall section is not made false, so it stays untouched (follow-up: add
+  the flag there). The new `print(json.dumps({...}))` keeps `cmd_recall`'s
+  compact form: `cli.py` is not `ruff format`-clean at HEAD and the
+  adjacent SessionStart block has the same shape. The tests pin the
+  threshold low (0.0) and high (1e9) instead of depending on the calibrated
+  value, which is a tuned number on real data, not fixture logic.
+- Next card: auto-stop
+- Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
+  change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-10 09:19 — AUTOSTOP: queue empty
+
+- Status: done
+- Queue: АВТОСТОП: очередь пуста — no `todo` or `in-progress` cards remain.
+  Card 28 stays `blocked`: it needs a push and GitHub Actions results; the
+  branch `ci/macos-windows` is kept as the handoff.
+- Next card: none
+- Blockers: card 28 only.
+
