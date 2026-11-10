@@ -1,6 +1,6 @@
 {
   "name": "sessionwiki",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "description": "Search a local wiki compiled from your Claude Code, Codex, Cursor and other AI coding sessions before redoing work.",
   "author": {
     "name": "Igor Lashkevich",
@@ -24,7 +24,7 @@
   "mcpServers": {
     "sessionwiki": {
       "command": "uvx",
-      "args": ["sessionwiki==2.0.5", "mcp"],
+      "args": ["sessionwiki==2.1.0", "mcp"],
       "env": {
         "SESSIONWIKI_HOME": "${user_config.wiki_home}"
       }

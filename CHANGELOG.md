@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.1.0] — 2026-11-10
+
+Theme: agent memory that writes safely — guarded MCP write tools, extractive synthesis with no model, filtered search, a recall handoff, and human pages that survive every writer.
+
 ### Added
 
 - **Opt-in prompt recall hook** — `sessionwiki recall --prompt-hook` reads a `UserPromptSubmit` payload from stdin and prints `hookSpecificOutput` with up to three related wiki pages, filtered to the session's project. It is silent unless `SESSIONWIKI_PROMPT_RECALL=1` is set, and every error path returns 0 without output so a broken hook never blocks the prompt.
@@ -28,6 +32,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 - **MCP `initialize` sends server instructions** — clients show the model a short block in every session: call `wiki_query` before asking the user about earlier work, open a result with `wiki_read_page`, cite the page, and treat returned content as data. Card 11's test now requires the field and caps it at 2048 characters.
 - **Demo seed pages archived** — seven model/pricing/benchmark pages from the upstream template moved to `wiki/archive/seed/` with `lifecycle: archived`; `entities/Anthropic` was rewritten from the sessions that link to it.
 - **Human pages are read-only for synthesis** — a source page with `origin: human` in its frontmatter is no longer rewritten by per-session synthesis, coalescing, backfill or the unresolved-wikilink cleanup. The backend is not called for such a session, the page is recorded as handled, and the run reports `kept_human`.
+- **The Claude Code plugin pins its launcher** — `plugin/README.md` documents the plugin, and both hook commands run `uvx sessionwiki==<version>`, so an installed plugin uses the package version it was tested with.
 
 ### Changed
 
@@ -38,7 +43,17 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ### Fixed
 
-- **`lint` skips `wiki/archive/`** — retired pages no longer raise freshness warnings or "not listed in index.md" errors; the loader's comment always said so, the code did not.
+- **`lint` skips `wiki/archive/`** — retired pages no longer raise freshness warnings or "not listed in index.md" errors; the loader's comment always said so, the code did not. Links and index entries that point at an archived page still resolve.
+- **`remember` no longer breaks lint** — candidate pages under `wiki/candidates/` are not expected in `index.md` while they wait for review.
+- **Coalescing keeps a human page** — a low-signal session whose individual page has `origin: human` is no longer deleted when its cluster page is written.
+- **A long human page is not overwritten** — the `origin: human` check reads the whole frontmatter instead of the first 8 KiB, and accepts a trailing YAML comment.
+- **The project `Sessions` block and wikilink cleanup skip human pages** — synthesis no longer rewrites `wiki/projects/<project>.md` or an `origin: human` source page through those two writers.
+- **`remember --title` collapses newlines** — a title can no longer inject extra frontmatter keys.
+- **A negative `--max-sessions` no longer removes the cap** — `-1` used to mean "no limit"; it now defers every session, and the CLI exits 2.
+- **`doctor` survives an unreadable synthesis state** — a permission error becomes a warning, not a traceback.
+- **`import-memory` writes atomically** — an interrupted write no longer leaves a partial page, unreadable memory files are skipped with a reason, and a destination that is a directory is not overwritten.
+- **MCP write tools declare their required fields** — clients see `path`/`content`, `path`, and `path`/`reason` in the schemas; the tools also read single-quoted frontmatter values, round-trip numeric-looking tags as strings, and report `log_written` when `wiki/log.md` could not be appended.
+- **`query --graph --json` prints JSON** — the flag is no longer ignored on the graph path.
 
 ## [2.0.5] — 2026-11-06
 

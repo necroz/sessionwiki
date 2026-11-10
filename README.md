@@ -6,8 +6,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/necroz/sessionwiki/blob/master/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-v2.0.5-10B981.svg)](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/tests-2886%20passing-10B981.svg)](https://github.com/necroz/sessionwiki/tree/master/tests)
+[![Version](https://img.shields.io/badge/version-v2.1.0-10B981.svg)](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/tests-3091%20passing-10B981.svg)](https://github.com/necroz/sessionwiki/tree/master/tests)
 [![CI](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml)
 [![Link check](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml)
 [![Wiki checks](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml)
@@ -39,7 +39,7 @@ sessionwiki turns that history into a knowledge base:
 |---|---|
 | **10 sources** | Built in: Claude Code, Codex CLI, **ZCode**, **OpenCode**. Opt-in: Cursor, Gemini CLI, Copilot Chat, Copilot CLI, ChatGPT export, Obsidian — each with its own agent badge |
 | **Autosync** | Claude Code `Stop` hook, ZCode `Stop` hook + nightly systemd / launchd / Task Scheduler job, OpenCode `session.idle` plugin |
-| **Synthesis backends** | Ollama, **any OpenAI-compatible server** (vLLM, SGLang, LM Studio, LiteLLM, hosted), agent-delegate, offline dummy |
+| **Synthesis backends** | Ollama, **any OpenAI-compatible server** (vLLM, SGLang, LM Studio, LiteLLM, hosted), agent-delegate, **extractive** (no model), offline dummy |
 | **Signal over noise** | Low-signal session coalescing, wikilink cleanup, concurrency control, cost `--estimate` |
 | **Static site** | 365-day heatmap, token and cache stats, filterable sessions table, session pages with highlighted code, project pages with topics, session ↔ project graph, ⌘K search, dark mode |
 | **MCP server** | 15 tools: query, search, read, list sources, lint, sync, exports, dashboard, write/edit/archive pages (with a confirm step)… |
@@ -163,7 +163,7 @@ sessionwiki synthesize                # new sessions only; idempotent
 sessionwiki all --with-synth          # synthesize → build → graph → export → lint
 ```
 
-Backends: `ollama` (local), `openai` (any OpenAI-compatible `/v1`: vLLM, SGLang, LM Studio, LiteLLM, hosted APIs), `agent-delegate` (let your coding agent write the pages), `dummy` (offline stubs). sessionwiki warns when a non-loopback `base_url` would send transcripts off your machine. See [docs/modes/api/](https://github.com/necroz/sessionwiki/tree/master/docs/modes/api).
+Backends: `ollama` (local), `openai` (any OpenAI-compatible `/v1`: vLLM, SGLang, LM Studio, LiteLLM, hosted APIs), `agent-delegate` (let your coding agent write the pages), `extractive` (no model and no network: a useful page from the transcript itself), `dummy` (offline stubs). sessionwiki warns when a non-loopback `base_url` would send transcripts off your machine. See [docs/modes/api/](https://github.com/necroz/sessionwiki/tree/master/docs/modes/api).
 
 ## Ask your wiki from your agents (MCP)
 
