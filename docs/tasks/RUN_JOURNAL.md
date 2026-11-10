@@ -435,3 +435,33 @@ Newest entries go at the bottom.
 - Next card: 28
 - Blockers: none. The pre-existing uncommitted `docs/tasks/AUTONOMOUS.md`
   change (scheduling notes) was left untouched and is not part of the card.
+
+## 2026-11-10 08:36 — card 28: CI on macOS and Windows
+
+- Status: blocked
+- Files: `.github/workflows/ci.yml`, `CHANGELOG.md`
+- Gates: pytest rc 0, lint 17 → 17 errors, version 2.0.5 (rc 0), the new
+  job block is the card's snippet byte-for-byte (only the fence markers
+  differ), YAML parses and the job/matrix/step/env structure matches,
+  CLI smoke (`--version`, `adapters`, `init`, `doctor`) rc 0 in a `/tmp`
+  copy with `PYTHONUTF8=1`, privacy grep: two pre-existing hits in this
+  journal, none in the diff (the CI workflow's own privacy grep is the
+  other pre-existing hit), synth state unchanged (mtime 08:01, before this
+  run)
+- Commit: 45f5ac8 on branch `ci/macos-windows`, not merged
+- Decisions: the card's Verification items 1–3 — both matrix jobs green,
+  Ubuntu still green, PR body — need a push, `gh run view` and a PR;
+  `AUTONOMOUS.md` forbids pushes and PRs, so they were not run. The job is
+  the card's required change verbatim, but merging it without the matrix
+  result would record an unverified `done` (and card step 4 cannot count
+  skips it never saw). The branch is kept as the handoff: push it, read
+  `gh run view <run-id> --log-failed`, apply the card's step 3, then
+  `git switch master && git merge --ff-only ci/macos-windows` and set
+  Status to `done`. `performance-budget` still `needs: lint-and-test`; the
+  new job has no `needs`, as the card's snippet specifies.
+- Next card: 29 (28 is blocked, 29's dependencies 12, 17 and 20 are done)
+- Blockers: needs a push and GitHub Actions results. Question for the
+  maintainer: push `ci/macos-windows` and fix platform failures per the
+  card's step 3, or accept the workflow unverified? The pre-existing
+  uncommitted `docs/tasks/AUTONOMOUS.md` change (scheduling notes) was
+  left untouched and is not part of the card.
