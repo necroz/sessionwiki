@@ -86,6 +86,19 @@ WHERE automation_id = '<automation-id>';
 Automations created in the ZCode UI have no such binding. After the update,
 `SELECT target_task_id` must return `NULL`.
 
+An automation created from chat also has `project_id = NULL`. Each run then
+creates a session without a project, so the session does not appear in the
+project's session list. Bind the automation to the workspace project once:
+
+```sql
+UPDATE automations SET project_id = '<project-id>', host_id = 'local'
+WHERE automation_id = '<automation-id>';
+```
+
+`Run now` is ignored while a run of the same automation is active: the host
+returns `duplicate` and starts nothing. Check `automation_runs.outcome`
+instead of clicking again.
+
 ## Rules
 
 - `raw/` is immutable. `site/` is generated. Touch neither.
