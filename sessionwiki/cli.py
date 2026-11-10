@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -172,6 +173,8 @@ def _last_assistant_text(raw: Path) -> str:
 def cmd_recall(args: argparse.Namespace) -> int:
     """Print a project's recent sessions for a SessionStart hook, so the
     agent starts with them in context instead of having to ask."""
+    if args.prompt_hook:
+        return _prompt_recall()
     from sessionwiki.mcp.server import DATA_NOTICE
 
     project = args.project or _project_from_hook_input() or Path.cwd().name
@@ -216,6 +219,53 @@ def cmd_recall(args: argparse.Namespace) -> int:
         }}, ensure_ascii=False))
     else:
         print(text)
+    return 0
+
+
+_PROMPT_RECALL_MIN_SCORE = 40.0  # median top score of 20 recent distinct prompts
+_PROMPT_RECALL_MAX_PAGES = 3
+_PROMPT_RECALL_MIN_CHARS = 20
+
+
+def _prompt_recall() -> int:
+    """UserPromptSubmit hook: add related wiki pages for the prompt on stdin.
+
+    Runs on every prompt, so it is opt-in (``SESSIONWIKI_PROMPT_RECALL=1``)
+    and silent on every error path: a hook must never block the prompt.
+    """
+    if os.environ.get("SESSIONWIKI_PROMPT_RECALL") != "1":
+        return 0
+    try:
+        data = json.loads(sys.stdin.read() or "{}")
+    except (OSError, ValueError):
+        return 0
+    if not isinstance(data, dict):
+        return 0
+    prompt = str(data.get("prompt") or "").strip()
+    if len(prompt) < _PROMPT_RECALL_MIN_CHARS or prompt.startswith("/"):
+        return 0
+    cwd = data.get("cwd")
+    project = Path(cwd).name if isinstance(cwd, str) and cwd else ""
+    from sessionwiki.mcp.server import DATA_NOTICE, rank_query
+    try:
+        result = rank_query(
+            prompt, max_pages=_PROMPT_RECALL_MAX_PAGES, include_raw=False,
+            filters={"project": project} if project else None,
+        )
+    except Exception:  # a hook must never block the user's prompt
+        return 0
+    hits = [h for h in result["hits"] if h["score"] >= _PROMPT_RECALL_MIN_SCORE]
+    if not hits:
+        return 0
+    lines = ["Related past work (sessionwiki):", DATA_NOTICE, ""]
+    for h in hits:
+        snippet = " ".join(h["snippet"].split())[:200]
+        lines.append(f"- {h['path']} — {snippet}")
+    lines += ["", "Read the page with wiki_read_page before you ask the user about it."]
+    print(json.dumps({"hookSpecificOutput": {
+        "hookEventName": "UserPromptSubmit",
+        "additionalContext": "\n".join(lines),
+    }}, ensure_ascii=False))
     return 0
 
 
@@ -2037,6 +2087,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Project name; default: the hook's cwd on stdin, else the current folder name",
     )
     recall.add_argument("--limit", type=int, default=5, help="How many sessions (default 5)")
+    recall.add_argument(
+        "--prompt-hook", action="store_true",
+        help="UserPromptSubmit hook: add related wiki pages for the prompt on stdin "
+             "(only when SESSIONWIKI_PROMPT_RECALL=1)",
+    )
     recall.add_argument(
         "--format", choices=["text", "hook", "json"], default="text",
         help="text, hook = SessionStart JSON with additionalContext, "

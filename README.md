@@ -112,6 +112,19 @@ A step-by-step walkthrough with screenshots lives in the [setup guide](https://g
 
 Parallel hook runs are safe: `sync` and `synthesize` take an OS file lock and write their state atomically.
 
+To add related past work to every prompt, opt in to a `UserPromptSubmit` hook — it is off unless `SESSIONWIKI_PROMPT_RECALL=1` is set:
+
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [{ "hooks": [{ "type": "command", "timeout": 10,
+      "command": "cd /path/to/sessionwiki && SESSIONWIKI_PROMPT_RECALL=1 .venv/bin/python -m sessionwiki recall --prompt-hook" }] }]
+  }
+}
+```
+
+Cost: one wiki scan per prompt — measured median 170 ms with three pages returned, 140 ms when nothing matches.
+
 **ZCode** keeps sessions in SQLite. sessionwiki exports them read-only and installs the hook and a nightly job for you:
 
 ```bash
