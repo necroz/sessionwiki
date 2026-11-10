@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-06  
 **Base version:** v2.0.5  
-**Built from:** [competitive-map-2026-11.md](competitive-map-2026-11.md) (proposal IDs A1…E11 come from its section 5)  
+**Built from:** [competitive-map-2026-11.md](competitive-map-2026-11.md) (proposal IDs A1…E12 come from its section 5)  
 **Cards:** [tasks/README.md](tasks/README.md), cards 11–30  
 **Replaces:** the execution plan in [roadmap.md](roadmap.md) (2026-04-08, v0.1–v0.3 phases). That file stays as history.
 

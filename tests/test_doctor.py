@@ -103,3 +103,17 @@ def test_cmd_doctor_returns_zero_when_only_synthesis_warns(
     out = capsys.readouterr().out
     assert rc == 0
     assert "[warn] synthesis" in out
+
+
+def test_synthesis_check_survives_an_unreadable_state_file(tmp_path, monkeypatch):
+    import sessionwiki.synth.pipeline as pipeline
+
+    def boom(_path):
+        raise PermissionError("denied")
+
+    monkeypatch.setattr(pipeline, "_load_state", boom)
+
+    report = doctor._check_synthesis(tmp_path)
+
+    assert report["ok"] is False
+    assert "cannot read synthesis state" in report["detail"]

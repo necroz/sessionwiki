@@ -18,7 +18,7 @@ whose sessions this wiki compiles.
 
 ## Key Facts
 
-- Runs the Claude Code plugin directory where `sessionwiki` was submitted
+- Runs the Claude Code plugin directory where `sessionwiki` is being prepared for submission
   (session 2026-11-06).
 - Its Supported Regions Policy applies to the account's location; a VPN
   does not change it (session 2026-11-04).

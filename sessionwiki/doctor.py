@@ -90,7 +90,14 @@ def _check_synthesis(repo_root: Path) -> dict[str, Any]:
     from sessionwiki.synth.pipeline import _load_state
 
     raw_root = repo_root / "raw" / "sessions"
-    state = _load_state(repo_root / ".llmwiki-synth-state.json")
+    try:
+        state = _load_state(repo_root / ".llmwiki-synth-state.json")
+    except OSError as e:
+        # A broken install must not turn doctor into a traceback.
+        return {
+            "ok": False,
+            "detail": f"cannot read synthesis state: {e}",
+        }
     waiting = 0
     for p in raw_root.rglob("*.md") if raw_root.is_dir() else []:
         # Same skip as _discover_raw_sessions: underscore files are support

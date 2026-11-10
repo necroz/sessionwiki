@@ -123,6 +123,8 @@ sessionwiki adapters --wide                # untruncated descriptions
 |---------|--------|
 | `claude_code` | `~/.claude/projects/` |
 | `codex_cli` | `~/.codex/sessions/` |
+| `opencode` | OpenCode / OpenClaw sessions |
+| `zcode` | ZCode CLI session store |
 
 **Contrib** (load on-demand with `--adapter <name>`):
 
@@ -134,7 +136,6 @@ sessionwiki adapters --wide                # untruncated descriptions
 | `cursor` | VS Code workspaceStorage |
 | `gemini_cli` | `~/.gemini/` |
 | `obsidian` | Obsidian vault `.md` files |
-| `opencode` | OpenCode / OpenClaw sessions |
 
 ## Obsidian integration
 

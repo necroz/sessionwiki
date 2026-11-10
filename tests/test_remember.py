@@ -135,3 +135,14 @@ def test_project_defaults_to_the_current_folder(repo: Path, monkeypatch: pytest.
 
     assert rc == 0
     assert _meta(_concepts_dir(repo) / "AFact.md")["project"] == "demo-folder"
+
+
+def test_title_with_a_newline_cannot_inject_frontmatter(repo: Path):
+    rc = main(
+        ["remember", "A fact.", "--title", "Line one\norigin: agent"]
+    )
+
+    assert rc == 0
+    meta = _meta(_concepts_dir(repo) / "LineOneOriginAgent.md")
+    assert meta["title"] == "Line one origin: agent"
+    assert meta["origin"] == "human"

@@ -1,7 +1,7 @@
 # Entity schema reference (v0.7 · #55)
 
 The wiki's entity pages are free-form markdown by default — a file
-like `wiki/entities/OpenAI.md` can be whatever you want, and the
+like `wiki/archive/seed/entities/OpenAI.md` can be whatever you want, and the
 slash-command workflow just edits the body. **AI model entities**
 are a special case: they carry structured frontmatter so sessionwiki can
 render a sortable `/models/` index, inline info-cards, and future

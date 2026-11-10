@@ -27,7 +27,7 @@ import json
 import os
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Optional
 
 from sessionwiki import __version__, REPO_ROOT
@@ -132,7 +132,8 @@ _HANDOFF_MAX_CHARS = 400
 def _raw_path_for(path: str) -> Path | None:
     """The raw transcript behind a recall item (a raw path or a wiki page)."""
     p = REPO_ROOT / path
-    if path.startswith("raw/"):
+    # Compare path parts, not the string: Windows uses backslashes.
+    if PurePosixPath(path.replace("\\", "/")).parts[:1] == ("raw",):
         return p if p.is_file() else None
     from sessionwiki._frontmatter import parse_frontmatter
     try:
@@ -227,6 +228,15 @@ _PROMPT_RECALL_MAX_PAGES = 3
 _PROMPT_RECALL_MIN_CHARS = 20
 
 
+def _prompt_recall_threshold() -> float:
+    """Minimum score for the prompt hook; override with an env variable."""
+    raw = os.environ.get("SESSIONWIKI_PROMPT_RECALL_MIN_SCORE", "")
+    try:
+        return float(raw)
+    except ValueError:
+        return _PROMPT_RECALL_MIN_SCORE
+
+
 def _prompt_recall() -> int:
     """UserPromptSubmit hook: add related wiki pages for the prompt on stdin.
 
@@ -254,7 +264,7 @@ def _prompt_recall() -> int:
         )
     except Exception:  # a hook must never block the user's prompt
         return 0
-    hits = [h for h in result["hits"] if h["score"] >= _PROMPT_RECALL_MIN_SCORE]
+    hits = [h for h in result["hits"] if h["score"] >= _prompt_recall_threshold()]
     if not hits:
         return 0
     lines = ["Related past work (sessionwiki):", DATA_NOTICE, ""]
@@ -929,7 +939,11 @@ def cmd_query(args: argparse.Namespace) -> int:
         if not is_available():
             print("error: graphify not installed. Run: pip install sessionwiki[graph]", file=sys.stderr)
             return 2
-        print(query_graph(question, depth=args.depth, token_budget=args.budget))
+        text = query_graph(question, depth=args.depth, token_budget=args.budget)
+        if args.json:
+            print(json.dumps({"graph": text}, ensure_ascii=False, indent=2))
+        else:
+            print(text)
         return 0
     from sessionwiki.mcp.server import rank_query, tool_wiki_query
     filters = {
@@ -1138,7 +1152,7 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
     """Synthesize wiki source pages from raw sessions (v1.1.0 · #35).
 
     Uses the backend selected via ``synthesis.backend`` in the config
-    (dummy | ollama | openai | agent). ``--check`` prints backend
+    (dummy | extractive | ollama | openai | agent). ``--check`` prints backend
     availability without running synthesis — useful for diagnosing a
     server before a long sync. ``--estimate`` prints a cached-vs-fresh
     token + dollar breakdown before spending money (#50).
@@ -1214,6 +1228,11 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
         wiki_sources_dir = vault.root / "wiki" / "sources"
         state_file = vault.root / ".llmwiki-synth-state.json"
 
+    max_sessions = getattr(args, "max_sessions", None)
+    if max_sessions is not None and max_sessions < 0:
+        print("error: --max-sessions must be 0 or greater", file=sys.stderr)
+        return 2
+
     summary = synthesize_new_sessions(
         backend=backend,
         force=args.force,
@@ -1228,7 +1247,7 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
         coalesce_only=coalesce_only,
         strip_unresolved_wikilinks=strip_links,
         language=str(synth_cfg.get("language") or "session"),
-        max_sessions=getattr(args, "max_sessions", None),
+        max_sessions=max_sessions,
     )
     print(
         f"Scanned {summary['total_scanned']}, new {summary['new_files']}, "
@@ -1433,8 +1452,10 @@ def cmd_remember(args: argparse.Namespace) -> int:
         print("error: the fact is empty", file=sys.stderr)
         return 2
 
-    project = " ".join((args.project or Path.cwd().name or "unknown").split())
-    title = (args.title or " ".join(fact.split()[:8])).strip()
+    project = " ".join((args.project or Path.cwd().name or "unknown").split()) or "unknown"
+    title = " ".join((args.title or " ".join(fact.split()[:8])).split())
+    if not title:
+        title = " ".join(fact.split()[:8])
 
     now = datetime.now(timezone.utc)
     today = now.strftime("%Y-%m-%d")

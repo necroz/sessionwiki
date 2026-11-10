@@ -406,3 +406,72 @@ def test_tools_list_marks_write_tools_read_only_false():
     by_name = {tool["name"]: tool for tool in tools}
     for name in ("wiki_write_page", "wiki_update_frontmatter", "wiki_archive_page"):
         assert by_name[name]["annotations"]["readOnlyHint"] is False
+
+
+def test_write_tool_schemas_declare_required_fields():
+    tools = {tool["name"]: tool for tool in server.TOOLS}
+    assert tools["wiki_write_page"]["inputSchema"]["required"] == ["path", "content"]
+    assert tools["wiki_update_frontmatter"]["inputSchema"]["required"] == ["path"]
+    assert tools["wiki_archive_page"]["inputSchema"]["required"] == ["path", "reason"]
+
+
+def test_write_page_refuses_large_frontmatter_human_page(repo: Path):
+    page = repo / "wiki" / "concepts" / "Human.md"
+    page.parent.mkdir(parents=True)
+    tags = "\n".join(f"  - tag{i}" for i in range(800))
+    text = (
+        f'---\ntitle: "H"\ntype: concept\ntags:\n{tags}\n'
+        "origin: human\n---\n\nkeep me\n"
+    )
+    assert len(text.encode("utf-8")) > 8 * 1024
+    page.write_text(text, encoding="utf-8")
+
+    result = server.tool_wiki_write_page({
+        "path": "wiki/concepts/Human.md",
+        "content": GOOD_PAGE,
+        "mode": "replace",
+        "confirm": True,
+    })
+
+    assert "origin: human" in _error(result)
+    assert page.read_text(encoding="utf-8") == text
+
+
+def test_frontmatter_value_reads_both_quote_styles():
+    content = '---\ntitle: \'He said "hi"\'\ntype: \'a"b\'\n---\n\nbody\n'
+    assert server._frontmatter_value(content, "title") == 'He said "hi"'
+    assert server._frontmatter_value(content, "type") == 'a"b'
+
+
+def test_numeric_tag_round_trips_as_a_string():
+    text = set_frontmatter_fields(
+        '---\ntitle: "A"\n---\nbody\n', {"tags": ["2024", "v1.5"]}
+    )
+    assert parse_frontmatter(text)[0]["tags"] == ["2024", "v1.5"]
+
+
+def test_previews_append_no_edit_line_and_writes_append_one(repo: Path):
+    log = repo / "wiki" / "log.md"
+    log.write_text("# Log\n", encoding="utf-8")
+    page = repo / "wiki" / "concepts" / "A.md"
+    page.parent.mkdir(parents=True)
+    page.write_text(UPDATE_PAGE, encoding="utf-8")
+
+    server.tool_wiki_update_frontmatter({
+        "path": "wiki/concepts/A.md",
+        "fields": {"title": "B"},
+    })
+    assert log.read_text(encoding="utf-8") == "# Log\n"
+
+    server.tool_wiki_update_frontmatter({
+        "path": "wiki/concepts/A.md",
+        "fields": {"title": "B"},
+        "confirm": True,
+    })
+    server.tool_wiki_archive_page({
+        "path": "wiki/concepts/A.md",
+        "reason": "old",
+        "confirm": True,
+    })
+    text = log.read_text(encoding="utf-8")
+    assert text.count("] edit | wiki/concepts/A.md") == 2

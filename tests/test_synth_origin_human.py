@@ -253,3 +253,108 @@ def test_is_human_page_rejects_missing_and_llm_pages(tmp_path: Path):
         "---\ntitle: \"x\"\norigin: human\n---\n\nBody.\n", encoding="utf-8"
     )
     assert is_human_page(human) is True
+
+
+def test_is_human_page_reads_long_frontmatter_and_comments(tmp_path: Path):
+    long_page = tmp_path / "long.md"
+    tags = "\n".join(f"  - tag{i}" for i in range(800))
+    long_page.write_text(
+        f"---\ntitle: Long\ntags:\n{tags}\norigin: human\n---\n\nBody.\n",
+        encoding="utf-8",
+    )
+    assert len(long_page.read_bytes()) > 8 * 1024
+    assert is_human_page(long_page) is True
+
+    comment_page = tmp_path / "comment.md"
+    comment_page.write_text(
+        '---\ntitle: "x"\norigin: human  # hand written\n---\n\nBody.\n',
+        encoding="utf-8",
+    )
+    assert is_human_page(comment_page) is True
+
+
+def test_coalescing_keeps_a_human_individual_page(tmp_path: Path):
+    from datetime import date
+
+    raw = tmp_path / "raw"
+    sources = tmp_path / "wiki" / "sources" / "proj"
+    sessions = []
+    for day in ("01", "02", "03"):
+        day_date = f"2026-01-{day}"
+        slug = f"s{day}"
+        path = raw / "proj" / f"{day_date}-{slug}.md"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(NO_RESPONSE_BODY, encoding="utf-8")
+        sessions.append((path, {
+            "slug": slug,
+            "date": day_date,
+            "project": "proj",
+            "tool_calls": "0",
+            "token_totals": json.dumps({"output": 0}),
+        }, NO_RESPONSE_BODY))
+
+    sources.mkdir(parents=True)
+    human = sources / "2026-01-01-s01.md"
+    human.write_text(HUMAN_PAGE, encoding="utf-8")
+    human_before = human.read_text(encoding="utf-8")
+
+    agents = []
+    for day_date, slug in (("2026-01-02", "s02"), ("2026-01-03", "s03")):
+        page = sources / f"{day_date}-{slug}.md"
+        page.write_text(
+            f'---\ntitle: old\nlast_updated: {date.today().isoformat()}\n---\n\n'
+            "Auto-generated cluster page\n",
+            encoding="utf-8",
+        )
+        agents.append(page)
+
+    clusters, _, _ = _coalesce_low_signal_sessions(
+        sessions,
+        sources_out=tmp_path / "wiki" / "sources",
+        state={},
+        raw_dir=raw,
+        min_group=3,
+        window="all",
+    )
+
+    assert clusters == 1
+    assert human.read_text(encoding="utf-8") == human_before
+    assert all(not page.exists() for page in agents)
+
+
+def test_project_sessions_block_skips_a_human_page(tmp_path: Path):
+    from sessionwiki.synth.pipeline import _sync_project_sessions
+
+    wiki = tmp_path / "wiki"
+    source = wiki / "sources" / "proj" / "2026-01-01-s.md"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        "---\ntitle: S\ndate: 2026-01-01\n---\n\n## Summary\n\nDid a thing.\n",
+        encoding="utf-8",
+    )
+    page = wiki / "projects" / "proj.md"
+    page.parent.mkdir(parents=True)
+    page.write_text(HUMAN_PAGE, encoding="utf-8")
+    before = page.read_text(encoding="utf-8")
+
+    _sync_project_sessions(wiki, "proj")
+
+    assert page.read_text(encoding="utf-8") == before
+
+
+def test_wikilink_cleanup_skips_a_human_page(tmp_path: Path):
+    from sessionwiki.synth.pipeline import _strip_unresolved_wikilinks
+
+    wiki = tmp_path / "wiki"
+    page = wiki / "sources" / "proj" / "human.md"
+    page.parent.mkdir(parents=True)
+    page.write_text(
+        "---\ntitle: H\ntype: source\norigin: human\n---\n\nSee [[Missing]].\n",
+        encoding="utf-8",
+    )
+    before = page.read_text(encoding="utf-8")
+
+    removed = _strip_unresolved_wikilinks(wiki, wiki / "sources")
+
+    assert removed == 0
+    assert page.read_text(encoding="utf-8") == before

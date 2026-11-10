@@ -4,13 +4,13 @@
 > step-by-step checklist. Run the `/release <version>` slash command
 > for a guided walkthrough that follows the same steps.
 
-sessionwiki uses [semantic versioning](https://semver.org/) with a
-pre-`1.0.0` caveat: every `0.x.y` release can break compatibility
-freely. `1.0.0` will be the first stable release.
+sessionwiki uses [semantic versioning](https://semver.org/). The project is
+past 1.0: a major bump may break compatibility, a minor bump ships a
+coherent feature batch, and a patch bump ships a fix that cannot wait.
 
-Minor-version bumps (`0.X.0`) ship when a coherent feature batch
-lands (heatmap + tool chart + token usage = v0.8). Patch bumps
-(`0.X.y`) ship when a critical fix can't wait for the next minor.
+Minor-version bumps (`X.Y.0`) ship when a coherent feature batch
+lands. Patch bumps (`X.Y.Z`) ship when a critical fix can't wait for
+the next minor.
 
 ## Pre-flight
 
@@ -36,6 +36,10 @@ place that mentions the version is derivative and must match.
       users get plugin updates only when it changes) and both `version`
       fields in `server.json` (`tests/test_distribution_manifests.py`
       enforces both)
+- [ ] Update the `sessionwiki==X.Y.Z` launcher pin in
+      `plugin/.claude-plugin/plugin.json` and in
+      `plugin/hooks/hooks.json` (`test_plugin_launcher_is_pinned_to_the_package_version`
+      enforces both)
 - [ ] Update the version badge in `README.md`
       (`Version-vX.Y.Z-7C3AED.svg`)
 - [ ] Update the tests badge in `README.md` with the new passing count
@@ -59,7 +63,9 @@ place that mentions the version is derivative and must match.
 ## Commit + tag
 
 ```bash
-git add sessionwiki/__init__.py pyproject.toml README.md CHANGELOG.md
+git add sessionwiki/__init__.py pyproject.toml server.json \
+  plugin/.claude-plugin/plugin.json plugin/hooks/hooks.json \
+  README.md CHANGELOG.md docs/reference/cli.md
 git commit -m "release(vX.Y.Z): bump version + CHANGELOG"
 git tag vX.Y.Z
 git push origin master vX.Y.Z
@@ -88,8 +94,11 @@ The tag push triggers `.github/workflows/release.yml` which automatically:
 **Manual fallback** (if automation is broken):
 
 ```bash
-gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes --prerelease
+gh release create vX.Y.Z --title "vX.Y.Z" --generate-notes
 ```
+
+Add `--prerelease` only for a tag that contains `rc`, `alpha`, `beta` or
+`dev`; `release.yml` uses the same rule.
 
 ## Verify Pages deploy
 

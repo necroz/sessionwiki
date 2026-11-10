@@ -25,6 +25,7 @@ from sessionwiki._frontmatter import (
 )
 from sessionwiki.adapters.claude_code import ClaudeCodeAdapter
 from sessionwiki.convert import Redactor
+from sessionwiki.lock import atomic_write_text
 
 _NOTES_SUBDIR = Path("notes") / "claude-memory"
 # Canonical location in Claude Code.  `source_path` keeps this `~`-relative
@@ -48,8 +49,14 @@ def _project_entity(project: str) -> str:
 
 def _project_tag(project: str) -> str:
     """Make the project slug safe for the inline ``tags: [...]`` list."""
-    tag = re.sub(r"[^\w.\-/+ ]", "-", project)
-    return tag[:64] or "unknown"
+    tag = re.sub(r"[^\w.\-/+ ]", "-", project).strip()[:64]
+    if not tag:
+        return "unknown"
+    # The strict list serializer needs a word character first; a slug such
+    # as ".config" would otherwise raise and abort the whole import.
+    if not re.match(r"\w", tag):
+        tag = "project-" + re.sub(r"^\W+", "", tag)
+    return tag or "unknown"
 
 
 def _render_page(
@@ -119,18 +126,32 @@ def import_claude_memory(
             continue
         project = adapter.derive_project_slug(project_dir / "session.jsonl")
         for memory_file in sorted(memory_dir.glob("*.md")):
-            source_text = memory_file.read_text(encoding="utf-8", errors="replace")
+            dest = wiki_dir / _NOTES_SUBDIR / project / memory_file.name
+            rel = dest.relative_to(wiki_dir).as_posix()
+            try:
+                source_text = memory_file.read_text(
+                    encoding="utf-8", errors="replace"
+                )
+                mtime = memory_file.stat().st_mtime
+            except OSError as e:
+                skipped.append({
+                    "path": rel,
+                    "reason": f"cannot read memory file: {e}",
+                })
+                continue
             meta, body = parse_frontmatter(source_text)
             description = _one_line(redact(str(meta.get("description", ""))))
-            date = datetime.fromtimestamp(
-                memory_file.stat().st_mtime
-            ).strftime("%Y-%m-%d")
+            date = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
             page = _render_page(
                 project, memory_file, description, redact(body).strip(), date
             )
 
-            dest = wiki_dir / _NOTES_SUBDIR / project / memory_file.name
-            rel = dest.relative_to(wiki_dir).as_posix()
+            if dest.exists() and not dest.is_file():
+                skipped.append({
+                    "path": rel,
+                    "reason": "destination is not a regular file",
+                })
+                continue
             existing = None
             if dest.is_file():
                 if not is_human_page(dest):
@@ -139,13 +160,27 @@ def import_claude_memory(
                         "reason": "destination exists without origin: human",
                     })
                     continue
-                existing = dest.read_text(encoding="utf-8", errors="replace")
+                try:
+                    existing = dest.read_text(encoding="utf-8", errors="replace")
+                except OSError as e:
+                    skipped.append({
+                        "path": rel,
+                        "reason": f"cannot read destination: {e}",
+                    })
+                    continue
             if existing == page:
                 unchanged += 1
                 continue
             if not dry_run:
-                dest.parent.mkdir(parents=True, exist_ok=True)
-                dest.write_text(page, encoding="utf-8")
+                try:
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    atomic_write_text(dest, page)
+                except OSError as e:
+                    skipped.append({
+                        "path": rel,
+                        "reason": f"cannot write destination: {e}",
+                    })
+                    continue
             written.append(rel)
 
     return {"written": written, "unchanged": unchanged, "skipped": skipped}

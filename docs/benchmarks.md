@@ -106,6 +106,12 @@ hit@k is the share of queries with at least one expected page in the top k.
 The query set names private sessions and is not published. `base` is lexical
 ranking only; `graph` is lexical plus one graph hop, the shipped default.
 
+**Measured 2026-11-06 against the v2.0.5 wiki snapshot (~900 pages).** Cards
+20–21 changed the ranking weights and added filters after this run, so these
+numbers are a historical baseline, not a measurement of 2.1.0. Rerun before
+quoting them. The query set stays in `.metrics/` on the maintainer's machine;
+the archived reports are `.metrics/recall-{base,graph}-{k5,k10}.json`.
+
 ```bash
 .venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --k 5
 ```
@@ -119,14 +125,14 @@ ranking only; `graph` is lexical plus one graph hop, the shipped default.
 
 Each cell is recall / hit.
 
-What the numbers say:
+What the numbers said in that run:
 
-- At k=5 the graph hop raises overall recall from 0.556 to 0.635, mostly on
+- At k=5 the graph hop raised overall recall from 0.556 to 0.635, mostly on
   paraphrases.
-- At k=10 the graph hop is slightly worse (0.743 → 0.726): it pushes one
-  exact match out of the top 10. The "graph hop improves recall" claim holds
+- At k=10 the graph hop was slightly worse (0.743 → 0.726): it pushed one
+  exact match out of the top 10. The "graph hop improves recall" claim held
   only at k=5.
-- Paraphrase recall at k=5 is the weak spot.
+- Paraphrase recall at k=5 was the weak spot.
 - 24 queries are few: one query moves a per-kind number by 0.125. Treat the
   numbers as a direction, not as a claim.
 

@@ -833,3 +833,38 @@ def test_tools_consistency_unit_normalise_tool_counts_keys():
     assert _normalise_tool_counts_keys({"Read": 1}) == {"Read"}
     assert _normalise_tool_counts_keys('{"Read": 1, "Write": 2}') == {"Read", "Write"}
     assert _normalise_tool_counts_keys(42) == set()
+
+
+def test_link_to_an_archived_page_resolves(tmp_path: Path):
+    (tmp_path / "archive" / "seed").mkdir(parents=True)
+    (tmp_path / "archive" / "seed" / "Old.md").write_text(
+        "---\ntitle: Old\n---\n", encoding="utf-8"
+    )
+    (tmp_path / "entities").mkdir()
+    (tmp_path / "entities" / "Live.md").write_text(
+        "---\ntitle: Live\n---\n\nSee [[Old]].\n", encoding="utf-8"
+    )
+
+    assert LinkIntegrity().run(load_pages(tmp_path)) == []
+
+
+def test_index_link_to_an_archived_page_is_not_dead(tmp_path: Path):
+    (tmp_path / "archive" / "seed").mkdir(parents=True)
+    (tmp_path / "archive" / "seed" / "Old.md").write_text(
+        "---\ntitle: Old\n---\n", encoding="utf-8"
+    )
+    (tmp_path / "index.md").write_text(
+        "# Index\n\n- [Old](archive/seed/Old.md)\n", encoding="utf-8"
+    )
+
+    assert IndexSync().run(load_pages(tmp_path)) == []
+
+
+def test_candidates_are_not_required_in_the_index(tmp_path: Path):
+    (tmp_path / "candidates" / "concepts").mkdir(parents=True)
+    (tmp_path / "candidates" / "concepts" / "Fact.md").write_text(
+        "---\ntitle: Fact\ntype: concept\n---\n", encoding="utf-8"
+    )
+    (tmp_path / "index.md").write_text("# Index\n", encoding="utf-8")
+
+    assert IndexSync().run(load_pages(tmp_path)) == []

@@ -105,6 +105,8 @@ def format_frontmatter_value(value: Any) -> str:
     if isinstance(value, str):
         if "\n" in value or "\r" in value:
             raise ValueError("frontmatter values must not contain newlines")
+        if "\x00" in value:
+            raise ValueError("frontmatter values must not contain NUL bytes")
         if '"' in value:
             if "'" in value:
                 raise ValueError(
@@ -123,6 +125,10 @@ def format_frontmatter_value(value: Any) -> str:
                     f"invalid list item {item!r}: use letters, digits, '_', "
                     "'.', '-', '/', '+' and spaces; no commas or brackets"
                 )
+            # A bare "2024" or "1.5" parses back as a number, so quote any
+            # item whose scalar form would change type.
+            if _parse_scalar(item, coerce_bool=False) != item:
+                item = f'"{item}"'
             items.append(item)
         return "[" + ", ".join(items) + "]"
     raise ValueError(f"unsupported frontmatter value: {value!r}")
@@ -185,16 +191,33 @@ def set_frontmatter_fields(text: str, fields: dict[str, Any]) -> str:
 
 
 def is_human_page(path: Path) -> bool:
-    """True when an existing page says ``origin: human`` in its frontmatter."""
+    """True when an existing page says ``origin: human`` in its frontmatter.
+
+    Reads the whole file. A fixed-size head misses a page whose frontmatter
+    is longer, and a missed human page may be overwritten. Accepts a
+    trailing YAML comment after the value.
+    """
     if not path.is_file():
         return False
     try:
-        with path.open("rb") as f:
-            head = f.read(8 * 1024).decode("utf-8", errors="replace")
+        text = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return False
-    meta, _ = parse_frontmatter(head)
-    return str(meta.get("origin", "")).strip().lower() == "human"
+    meta, _ = parse_frontmatter(text)
+    if str(meta.get("origin", "")).strip().lower() == "human":
+        return True
+    # ``parse_frontmatter`` keeps a trailing ``# comment`` in the value.
+    raw, _ = parse_frontmatter_or_none(text)
+    if raw is None:
+        return False
+    for line in raw.splitlines():
+        m = re.match(r"^origin:\s*(.*?)\s*$", line, re.IGNORECASE)
+        if not m:
+            continue
+        value = m.group(1).split("#", 1)[0].strip().strip("'\"")
+        if value.lower() == "human":
+            return True
+    return False
 
 
 def _parse_scalar(raw: str, *, coerce_bool: bool = True) -> Any:

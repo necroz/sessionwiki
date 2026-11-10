@@ -283,10 +283,9 @@ Each adapter can be configured in the `adapters` section of `config.json`. The k
 | Cursor | `cursor` | yes (default on) | `roots` |
 | Gemini CLI | `gemini_cli` | yes (default on) | `roots` |
 | OpenCode / OpenClaw | `opencode` | yes (default on) | `roots` |
+| ZCode | `zcode` | yes (default on) | `roots` |
 | ChatGPT | `chatgpt` | yes (opt-in) | `enabled`, `conversations_json` |
 | Obsidian | `obsidian` | **no** (opt-in) | `vault_paths`, `exclude_folders`, `min_content_chars` |
-| Jira | `jira` | **no** (opt-in) | `server`, `email`, `api_token` / `api_token_env`, `jql`, `max_results` |
-| Meeting transcripts | `meeting` | **no** (opt-in) | `source_dirs`, `extensions` |
 
 Non-AI-session adapters are opt-in only (#326) — set `{name}.enabled: true` in this config to have them fire on `sync`.
 

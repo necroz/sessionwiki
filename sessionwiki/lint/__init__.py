@@ -83,19 +83,40 @@ def parse_frontmatter(text: str) -> dict[str, Any]:
     return meta
 
 
+class PageMap(dict):
+    """Loaded pages, plus archived targets kept for link resolution.
+
+    ``wiki/archive/`` is skipped by freshness and index rules, but a
+    ``[[link]]`` or an index entry that points at an archived page is still
+    valid. Rules read these sets instead of re-scanning the filesystem.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.archived_slugs: set[str] = set()
+        self.archived_paths: set[str] = set()
+
+
 def load_pages(wiki_dir: Optional[Path] = None) -> dict[str, dict[str, Any]]:
     """Load all wiki pages. Returns dict of relative_path → page dict.
 
     Each page dict has: ``path``, ``text``, ``meta`` (frontmatter), ``body``.
+    Archived pages are not returned as pages; their paths and slugs are kept
+    on ``PageMap`` so links to them still resolve.
     """
     root = wiki_dir or WIKI_DIR
     if not root.is_dir():
-        return {}
-    pages: dict[str, dict[str, Any]] = {}
+        return PageMap()
+    pages = PageMap()
     for p in sorted(root.rglob("*.md")):
         # Skip README and archive: wiki/archive/ keeps retired pages for
         # history, so freshness and index rules must not judge them.
-        if p.name == "README.md" or p.relative_to(root).parts[0] == "archive":
+        if p.name == "README.md":
+            continue
+        rel = str(p.relative_to(root))
+        if p.relative_to(root).parts[0] == "archive":
+            pages.archived_paths.add(rel)
+            pages.archived_slugs.add(p.stem)
             continue
         try:
             text = p.read_text(encoding="utf-8")
@@ -106,7 +127,6 @@ def load_pages(wiki_dir: Optional[Path] = None) -> dict[str, dict[str, Any]]:
         # used the legacy LF-only regex which would leave CRLF-prefixed
         # frontmatter intact in body output.
         meta, body = _parse_fm(text)
-        rel = str(p.relative_to(root))
         pages[rel] = {
             "path": p,
             "rel": rel,

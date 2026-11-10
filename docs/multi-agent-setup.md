@@ -8,6 +8,9 @@ sessionwiki reads sessions from multiple coding agents simultaneously. One `sess
 |---|---|---|---|
 | Claude Code | `claude_code` | `~/.claude/projects/` | Production |
 | Codex CLI | `codex_cli` | `~/.codex/sessions/` | Production |
+| ZCode | `zcode` | `~/.zcode/cli/db/db.sqlite` | Production |
+| OpenCode | `opencode` | `~/.local/share/opencode/opencode.db` | Production |
+| ChatGPT | `chatgpt` | `conversations.json` export | Opt-in |
 | GitHub Copilot Chat | `copilot_chat` | VS Code workspaceStorage | Production |
 | GitHub Copilot CLI | `copilot_cli` | `~/.copilot/session-state/` | Production |
 | Cursor | `cursor` | Cursor IDE workspaceStorage | Scaffold (SQLite parser in progress) |

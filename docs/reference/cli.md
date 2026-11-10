@@ -6,10 +6,10 @@ docs_shell: true
 
 # CLI reference
 
-**Every** `python3 -m sessionwiki <subcommand>` — with every flag, realistic
-examples, and expected output. If a command isn't listed here it isn't
-shipping. This page is generated against the live argparse tree, so
-adding a flag without documenting it will fail the guardrail test.
+**Every** `python3 -m sessionwiki <subcommand>` — with the flags that
+matter, realistic examples, and expected output. If a subcommand isn't
+listed here it isn't shipping. A guard test checks the subcommand
+headings; flags are reviewed by hand when the parser changes.
 
 Global flags: `-h` / `--help` on every command, `--version` at the root.
 
@@ -376,14 +376,17 @@ python3 -m sessionwiki doctor
 Typical output:
 
 ```
-sessionwiki doctor 2.0.5
+sessionwiki doctor 2.1.0
   [ok  ] python       3.12.4
   [ok  ] markdown     installed
   [ok  ] venv         active
   [ok  ] config       examples/sessions_config.json, config.local.json
   [ok  ] zcode_db     /home/me/.zcode/cli/db/db.sqlite
   [ok  ] zcode_export 842 session file(s) in /home/me/.llmwiki/zcode
+  [warn] synthesis    9 raw session(s) not synthesized, 0 page(s) waiting for the agent
 ```
+
+The `synthesis` check is informational: it never changes the exit code.
 
 ---
 
@@ -600,9 +603,18 @@ python3 -m sessionwiki synthesize                    # real run
 | `--force` | Ignore state, re-synth every source. |
 | `--estimate` | Print cached-vs-fresh token + dollar estimate (#50). |
 | `--coalesce-only` | Merge low-signal sessions into cluster pages; no backend call. |
+| `--backfill-only` | Add the user's request (`description`) to existing pages; no LLM. |
+| `--list-pending` | List prompts waiting for the agent-delegate backend. |
+| `--complete UUID` | Complete one pending synthesis from `--body` or stdin. |
+| `--page PATH` | Target page for `--complete`. |
+| `--body PATH` | Body file for `--complete` (default: stdin). |
+| `--max-sessions N` | Synthesize at most N sessions; the rest wait for the next run. |
+| `--vault PATH` | Keep `raw/`, `wiki/sources/` and the state file under a vault root. |
 
-Backend is picked from `synthesis.backend` in `sessions_config.json`
-(`dummy` by default, `ollama` for local, future `anthropic`). See
+Backend is picked from `synthesis.backend` in `sessions_config.json`:
+`dummy` (default, metadata-only), `extractive` (no model, no network),
+`ollama`, `openai` (any OpenAI-compatible server) or `agent` (pending
+prompts for the running agent). See
 [`reference/prompt-caching.md`](prompt-caching.md).
 
 ### Long sessions (chunking)
@@ -691,7 +703,7 @@ sessionwiki mcp
 SESSIONWIKI_HOME=~/sessionwiki uvx sessionwiki mcp
 ```
 
-Same server as `python3 -m sessionwiki.mcp`: JSON-RPC over stdin/stdout, 12
+Same server as `python3 -m sessionwiki.mcp`: JSON-RPC over stdin/stdout, 15
 `wiki_*` tools. MCP clients and the MCP Registry start the PyPI package this
 way. The data root is `$SESSIONWIKI_HOME` when set, the source checkout when run
 from a clone, and the current directory otherwise. MCP clients choose the working
@@ -706,19 +718,28 @@ sessionwiki recall                          # project = current folder name
 sessionwiki recall --project llm-wiki --limit 5
 sessionwiki recall --format hook            # SessionStart JSON (additionalContext)
 sessionwiki recall --format json            # machine-readable list
+sessionwiki recall --prompt-hook            # UserPromptSubmit hook (opt-in)
 ```
 
 Prints the latest sessions of one project, newest first: date, the
 user's original request, the first sentence of the summary and the
 page path. Sessions not synthesised yet come from `raw/sessions/`.
 Prints nothing when the project has no sessions; `--format json` prints
-a document with an empty `sessions` list instead.
+a document with an empty `sessions` list instead. The newest session also
+gets a `handoff` block: the end of its last assistant turn, stripped of
+code blocks and headings and capped at 400 characters.
 
 Meant for a `SessionStart` hook: agents rarely call memory tools on
 their own, so the hook puts recent work into context up front. With
 `--project` omitted it reads the hook's JSON from stdin and takes the
 project from its `cwd`. The Claude Code plugin and
 `sessionwiki zcode install` set the hook up.
+
+`--prompt-hook` is a separate `UserPromptSubmit` hook. It reads the prompt
+from stdin and prints up to three related pages, filtered to the session's
+project. It is silent unless `SESSIONWIKI_PROMPT_RECALL=1` is set, and every
+error path returns 0 without output. The score floor is 40 by default;
+`SESSIONWIKI_PROMPT_RECALL_MIN_SCORE` overrides it.
 
 ---
 

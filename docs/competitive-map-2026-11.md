@@ -5,6 +5,8 @@
 **Scope:** tools and discussions found on Reddit and Habr, checked against the current `sessionwiki` codebase (master, v2.0.5).  
 **Related:** [roadmap-2026-11.md](roadmap-2026-11.md) (the execution plan built from this map), [tasks/README.md](tasks/README.md) (implementation cards), [competitor-landscape.md](competitor-landscape.md), [feature-matrix.md](feature-matrix.md), [benchmarks.md](benchmarks.md).
 
+> **Snapshot.** This map describes v2.0.5 (2026-11-06). Cards 11–30 shipped in 2.1.0; rows that say "instructions not sent", "no filters", "12 tools" or "no `origin: human`" describe the snapshot, not current master.
+
 ---
 
 ## 1. Executive summary

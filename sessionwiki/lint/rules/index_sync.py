@@ -32,6 +32,7 @@ class IndexSync(LintRule):
         # form (`../`, `#anchor`, `?query`).
         # Parse markdown links in index.md (simple regex)
         link_re = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+        archived_paths = getattr(pages, "archived_paths", set())
         for match in link_re.finditer(index["body"]):
             href = match.group(2)
             if href.startswith(("http://", "https://", "mailto:")):
@@ -39,7 +40,7 @@ class IndexSync(LintRule):
             resolved = _resolve_index_href(href)
             if not resolved:
                 continue
-            if resolved in pages:
+            if resolved in pages or resolved in archived_paths:
                 listed_slugs.add(_basename(resolved).removesuffix(".md"))
             else:
                 issues.append({
@@ -61,6 +62,10 @@ class IndexSync(LintRule):
             # memory) are origin: human; the agent must not edit index.md
             # on their behalf. They stay checked for links and frontmatter.
             if str(pages[rel]["meta"].get("type", "")).lower() == "note":
+                continue
+            # Candidates are untrusted facts waiting for review; `remember`
+            # writes them on purpose and they do not belong in index.md.
+            if rel.replace("\\", "/").startswith("candidates/"):
                 continue
             slug = _page_slug(rel)
             if slug not in listed_slugs:

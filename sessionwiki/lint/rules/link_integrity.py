@@ -15,8 +15,10 @@ class LinkIntegrity(LintRule):
     auto_fixable = True
 
     def run(self, pages, *, llm_callback=None):
-        # Build set of known page slugs
+        # Build set of known page slugs. Archived pages are not loaded as
+        # pages, but a link to one is valid.
         slugs = {_page_slug(rel) for rel in pages}
+        slugs |= getattr(pages, "archived_slugs", set())
         issues = []
         for rel, page in pages.items():
             for target in set(WIKILINK_RE.findall(page["body"])):

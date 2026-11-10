@@ -87,7 +87,7 @@ sessionwiki does NOT write to `wiki/` directly. The agent does, via slash comman
 
 Owner: `sessionwiki/build.py`
 
-Converts every file under `raw/sessions/` (and any hand-authored files under `wiki/`) into static HTML. Uses `python-markdown` (the only runtime dep) — syntax highlighting runs in the browser via highlight.js loaded from a pinned jsdelivr CDN (v0.5, #73), so the build pipeline itself stays stdlib-only. Writes to `site/`.
+Converts every file under `raw/sessions/` (and any hand-authored files under `wiki/`) into static HTML. Uses `python-markdown` (the only runtime dep) — syntax highlighting runs in the browser via highlight.js loaded from a pinned jsdelivr CDN (v0.5, #73), so the build pipeline depends only on Python stdlib plus `markdown`. Writes to `site/`.
 
 Pages rendered (v0.9 surface):
 

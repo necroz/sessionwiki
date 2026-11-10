@@ -49,7 +49,7 @@ Requirements:
 - `ruff` (dev — lint)
 - `pytest` (dev — tests)
 
-No other runtime deps. That's a hard rule. Syntax highlighting runs in the browser via [highlight.js](https://highlightjs.org/) loaded from a CDN, so the build pipeline stays stdlib-only.
+No other runtime deps. That's a hard rule. Syntax highlighting runs in the browser via [highlight.js](https://highlightjs.org/) loaded from a CDN, so syntax highlighting adds no Python dependency.
 
 ## Project structure
 
@@ -209,15 +209,20 @@ Every adapter must ship with:
 
 ## Releases
 
-`v0.x` is pre-production. API, schema, and file layout may change.
+Follow the canonical checklist in
+[docs/maintainers/RELEASE_PROCESS.md](docs/maintainers/RELEASE_PROCESS.md).
+It lists every file that carries the version (`pyproject.toml`,
+`server.json`, both plugin manifests, the README badge) and the commit
+command that stages them.
 
-Release flow (Phase 6 of the framework):
+Short form:
 
-1. Bump version in `sessionwiki/__init__.py`
-2. Update `CHANGELOG.md`
-3. `git tag v0.x.y && git push origin v0.x.y`
-4. Create a GitHub Release (mark pre-release for 0.x)
-5. `.github/workflows/pages.yml` auto-deploys the demo site
+1. Bump the version in every file the checklist names.
+2. Move `CHANGELOG.md` entries from `## [Unreleased]` to the new version.
+3. `git tag vX.Y.Z && git push origin master vX.Y.Z`.
+4. The tag triggers `release.yml`, which creates the GitHub Release and
+   publishes to PyPI. Mark a release pre-release only for rc/alpha/beta/dev.
+5. `.github/workflows/pages.yml` auto-deploys the demo site.
 
 ## Questions?
 

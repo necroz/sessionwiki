@@ -118,3 +118,19 @@ def test_list_marker_from_the_transcript_is_not_doubled() -> None:
         page, "## Key Claims"
     )
     assert "- - " not in page
+
+
+def test_tools_used_as_a_string_is_not_split_into_letters() -> None:
+    meta = dict(META, tools_used="Bash")
+    page = ExtractiveSynthesizer().synthesize_source_page(RAW_BODY, meta, "")
+
+    claims = _section(page, "## Key Claims")
+    assert "- Tools: Bash" in claims
+    assert "B, a, s, h" not in claims
+
+
+def test_description_fence_never_reaches_the_summary() -> None:
+    meta = dict(META, description="```py\nx = 1\n``` Make recall fast")
+    page = ExtractiveSynthesizer().synthesize_source_page(RAW_BODY, meta, "")
+
+    assert "```" not in _section(page, "## Summary")

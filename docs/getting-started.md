@@ -38,7 +38,7 @@ setup.bat
 
 `setup.sh` / `setup.bat` does the following, idempotently:
 
-1. Installs `markdown` (the only runtime dep) via `pip install --user`. Syntax highlighting runs in the browser via highlight.js loaded from a CDN, so the build stays stdlib-only.
+1. Installs `markdown` (the only runtime dep) via `pip install --user`. Syntax highlighting runs in the browser via highlight.js loaded from a CDN, so syntax highlighting adds no Python dependency.
 2. Scaffolds `raw/`, `wiki/`, `site/` directories
 3. Runs `sessionwiki adapters` to show which agents are detected
 4. Does a dry-run of the first sync so you see what *would* be converted
@@ -159,7 +159,7 @@ The `( ... &) ; exit 0` pattern backgrounds the sync and makes sure it never blo
 
 - [architecture.md](architecture.md) — the 3-layer Karpathy + 8-layer build breakdown
 - [configuration-reference.md](configuration-reference.md) — every CLI flag, env var, and config option
-- [multi-agent-setup.md](multi-agent-setup.md) — running all 6 agents at once
+- [multi-agent-setup.md](multi-agent-setup.md) — running all 10 adapters at once
 - [privacy.md](privacy.md) — redaction + `.llmwikiignore` + localhost-only binding
 - [deploy/github-pages.md](deploy/github-pages.md) — deploy to GitHub Pages
 - [faq.md](faq.md) — common questions answered

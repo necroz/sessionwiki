@@ -16,6 +16,7 @@ on:
       - "CONTRIBUTING.md"
       - "docs/**/*.md"
       - "examples/**/*.md"
+      - "plugin/**/*.md"
       - "lychee.toml"
       - ".github/workflows/link-check.yml"
   workflow_dispatch:
@@ -104,7 +105,8 @@ jobs:
             CHANGELOG.md \
             CONTRIBUTING.md \
             'docs/**/*.md' \
-            'examples/**/*.md'
+            'examples/**/*.md' \
+            'plugin/**/*.md'
           code=$?
           set -e
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"

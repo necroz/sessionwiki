@@ -795,3 +795,20 @@ def test_force_with_unavailable_backend_keeps_existing_state(tmp_path: Path):
     assert summary["new_files"] == 1
     assert any("not available" in error for error in summary["errors"])
     assert json.loads(state_file.read_text(encoding="utf-8")) == {"old/key.md": 123.0}
+
+
+def test_negative_max_sessions_defers_everything(tmp_path: Path):
+    raw = _seed_three_raw(tmp_path)
+    wiki_sources = tmp_path / "wiki" / "sources"
+    wiki_sources.mkdir(parents=True)
+    log_file = tmp_path / "wiki" / "log.md"
+    log_file.write_text("# Log\n", encoding="utf-8")
+
+    summary = synthesize_new_sessions(
+        backend=DummySynthesizer(), raw_dir=raw, wiki_sources_dir=wiki_sources,
+        log_path=log_file, max_sessions=-1,
+    )
+
+    assert summary["synthesized"] == 0
+    assert summary["deferred"] == 3
+    assert not list(wiki_sources.rglob("*.md"))

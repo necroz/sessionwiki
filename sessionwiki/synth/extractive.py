@@ -142,7 +142,7 @@ class ExtractiveSynthesizer(DummySynthesizer):
         users = [text for role, text in turns if role == "User"]
         assistants = [text for role, text in turns if role == "Assistant"]
 
-        description = _collapse(_strip_wikilinks(str(meta.get("description") or "")))
+        description = self._clean(str(meta.get("description") or ""))
         request = description or (self._clean(users[0]) if users else "")
         request = _clip(request, _MAX_LINE_CHARS) or "(no request recorded)"
         last_answer = ""
@@ -158,7 +158,15 @@ class ExtractiveSynthesizer(DummySynthesizer):
         files = self._file_paths(raw_body)
         if files:
             claims.append("- Files: " + ", ".join(f"`{path}`" for path in files))
-        tools = [str(tool).strip() for tool in (meta.get("tools_used") or []) if str(tool).strip()]
+        raw_tools = meta.get("tools_used") or []
+        if isinstance(raw_tools, str):
+            # Frontmatter may store the inline list form as one string.
+            raw_tools = raw_tools.strip().strip("[]").split(",")
+        tools = [
+            str(tool).strip().strip("'\"")
+            for tool in raw_tools
+            if str(tool).strip()
+        ]
         if tools:
             claims.append("- Tools: " + ", ".join(tools))
         if not claims:

@@ -791,11 +791,12 @@ def _sync_project_sessions(wiki_dir: Path, project: str) -> None:
     """Rewrite the generated block in ``## Sessions`` from the source pages on disk.
 
     Only the text between the ``sessions:auto`` markers is regenerated; any
-    manual notes outside the markers are left untouched.
+    manual notes outside the markers are left untouched. A page with
+    ``origin: human`` is not touched at all.
     """
     page = wiki_dir / "projects" / f"{project}.md"
     sources = wiki_dir / "sources" / project
-    if not page.exists() or not sources.is_dir():
+    if not page.exists() or not sources.is_dir() or is_human_page(page):
         return
     rows: list[tuple[str, str, str]] = []
     for p in sorted(sources.glob("*.md")):
@@ -919,8 +920,13 @@ def _coalesce_low_signal_sessions(
         for row in rows:
             individual = _session_page_path(sources_out, row["meta"])
             # Delete only pages that still look machine-generated. A page
-            # edited after synthesis keeps its content and stays visible.
-            if individual.exists() and not _source_page_looks_edited(individual):
+            # edited after synthesis, or owned by the user, keeps its
+            # content and stays visible.
+            if (
+                individual.exists()
+                and not is_human_page(individual)
+                and not _source_page_looks_edited(individual)
+            ):
                 individual.unlink()
                 changed = True
             try:
@@ -1481,7 +1487,11 @@ def _synthesize_new_sessions_unlocked(
                     summary["errors"].append(f"index rebuild: {e}")
         return summary
 
-    if max_sessions is not None and max_sessions >= 0 and len(new_files) > max_sessions:
+    if max_sessions is not None and max_sessions < 0:
+        # A negative value used to mean "no limit", which let a typo remove
+        # the cap that protects a paid backend. Treat it as zero.
+        max_sessions = 0
+    if max_sessions is not None and len(new_files) > max_sessions:
         summary["deferred"] = len(new_files) - max_sessions
         new_files = new_files[:max_sessions]
         print(f"  deferred: {summary['deferred']} session(s) — run again to continue")

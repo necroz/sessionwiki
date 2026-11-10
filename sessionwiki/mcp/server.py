@@ -440,6 +440,7 @@ TOOLS = [
         ),
         "inputSchema": {
             "type": "object",
+            "required": ["path", "content"],
             "properties": {
                 "path": {
                     "type": "string",
@@ -490,6 +491,7 @@ TOOLS = [
         ),
         "inputSchema": {
             "type": "object",
+            "required": ["path"],
             "properties": {
                 "path": {
                     "type": "string",
@@ -536,6 +538,7 @@ TOOLS = [
         ),
         "inputSchema": {
             "type": "object",
+            "required": ["path", "reason"],
             "properties": {
                 "path": {
                     "type": "string",
@@ -661,6 +664,8 @@ def _resolve_wiki_write_path(rel: str) -> tuple[Path | None, str | None]:
     write tool, else (None, error message)."""
     if not isinstance(rel, str) or not rel.strip():
         return None, "path is required"
+    if "\x00" in rel:
+        return None, "path contains a NUL byte"
     raw = REPO_ROOT / rel
     if raw.is_symlink():
         return None, f"{rel} is a symlink; write tools refuse symlinks"
@@ -674,11 +679,11 @@ def _resolve_wiki_write_path(rel: str) -> tuple[Path | None, str | None]:
         return None, f"path is outside wiki/: {rel!r}"
     if any(part.startswith(".") for part in p.relative_to(REPO_ROOT.resolve()).parts):
         return None, f"path contains a hidden part: {rel!r}"
-    if p.suffix != ".md":
+    if p.suffix.casefold() != ".md":
         return None, f"only .md files can be written: {rel!r}"
-    if wiki_parts and wiki_parts[0] == "archive":
+    if wiki_parts and wiki_parts[0].casefold() == "archive":
         return None, f"{rel} is under wiki/archive/; use wiki_archive_page instead"
-    if is_system_file(p.name):
+    if is_system_file(p.name.casefold()):
         return None, f"{rel} is a system page; write tools never change it"
     if p.exists() and is_human_page(p):
         return None, f"{rel} has origin: human; sessionwiki tools never change it"
@@ -697,17 +702,18 @@ def _today() -> str:
     return date.today().isoformat()
 
 
-def _append_edit_log(rel: str, tool: str, action: str) -> None:
+def _append_edit_log(rel: str, tool: str, action: str) -> bool:
     """Append one ``edit`` line to wiki/log.md when that file exists."""
     log = REPO_ROOT / "wiki" / "log.md"
     if not log.is_file():
-        return
+        return False
     entry = f"\n## [{_today()}] edit | {rel} ({tool}: {action})\n"
     try:
         with log.open("a", encoding="utf-8") as handle:
             handle.write(entry)
     except OSError:
-        return
+        return False
+    return True
 
 
 _FILTER_KEYS = ("project", "type", "tag", "date_from", "date_to")
@@ -1077,8 +1083,15 @@ def _frontmatter_value(content: str, key: str) -> str:
         return ""
     end = content.find("\n---", 3)
     block = content[3:end] if end != -1 else content[3:]
-    m = re.search(rf"^{re.escape(key)}:\s*\"?([^\"\n]*)\"?\s*$", block, re.MULTILINE)
-    return m.group(1).strip() if m else ""
+    m = re.search(rf"^{re.escape(key)}:\s*(.*?)\s*$", block, re.MULTILINE)
+    if not m:
+        return ""
+    raw = m.group(1).strip()
+    # Both quote styles are valid YAML; the writer emits single quotes when
+    # the value itself contains a double quote.
+    if len(raw) >= 2 and raw[0] == raw[-1] and raw[0] in "\"'":
+        raw = raw[1:-1]
+    return raw
 
 
 def _body(content: str) -> str:
@@ -1721,22 +1734,24 @@ def tool_wiki_write_page(args: dict[str, Any]) -> dict[str, Any]:
         return _err("content is larger than 1 MiB")
 
     meta, _ = parse_frontmatter(content)
-    if not str(meta.get("title", "") or "").strip():
-        return _err("content needs frontmatter with a non-empty title")
-    if not str(meta.get("type", "") or "").strip():
-        return _err("content needs frontmatter with a non-empty type")
+    title = meta.get("title")
+    page_type = meta.get("type")
+    if not isinstance(title, str) or not title.strip():
+        return _err("content needs frontmatter with a non-empty string title")
+    if not isinstance(page_type, str) or not page_type.strip():
+        return _err("content needs frontmatter with a non-empty string type")
 
     mode = args.get("mode") or "create"
     if mode not in ("create", "replace"):
         return _err("mode must be 'create' or 'replace'")
 
-    exists = p.is_file()
+    exists = p.exists()
     if mode == "create" and exists:
         return _err(f"{rel} already exists; use mode='replace' to overwrite it")
     if mode == "replace" and not exists:
         return _err(f"{rel} does not exist; use mode='create' to create it")
 
-    old_bytes = p.stat().st_size if exists else 0
+    old_bytes = p.stat().st_size if p.is_file() else 0
     new_text = set_frontmatter_fields(
         content, {"origin": "agent", "last_updated": _today()}
     )
@@ -1749,8 +1764,11 @@ def tool_wiki_write_page(args: dict[str, Any]) -> dict[str, Any]:
     }
     if args.get("confirm") is not True:
         return _ok(json.dumps(payload, indent=2))
-    atomic_write_text(p, new_text)
-    _append_edit_log(payload["path"], "wiki_write_page", mode)
+    try:
+        atomic_write_text(p, new_text)
+    except OSError as e:
+        return _err(f"write error: {e}")
+    payload["log_written"] = _append_edit_log(payload["path"], "wiki_write_page", mode)
     payload["written"] = True
     return _ok(json.dumps(payload, indent=2))
 
@@ -1772,6 +1790,8 @@ def tool_wiki_update_frontmatter(args: dict[str, Any]) -> dict[str, Any]:
         return _err("give fields, add_tags or remove_tags")
     if fields is not None and not isinstance(fields, dict):
         return _err("fields must be an object")
+    if not fields and not add_tags and not remove_tags:
+        return _err("no change requested")
 
     try:
         text = p.read_text(encoding="utf-8")
@@ -1841,8 +1861,13 @@ def tool_wiki_update_frontmatter(args: dict[str, Any]) -> dict[str, Any]:
     }
     if args.get("confirm") is not True:
         return _ok(json.dumps(payload, indent=2))
-    atomic_write_text(p, new_text)
-    _append_edit_log(payload["path"], "wiki_update_frontmatter", "fields")
+    try:
+        atomic_write_text(p, new_text)
+    except OSError as e:
+        return _err(f"write error: {e}")
+    payload["log_written"] = _append_edit_log(
+        payload["path"], "wiki_update_frontmatter", "fields"
+    )
     payload["written"] = True
     return _ok(json.dumps(payload, indent=2))
 
@@ -1877,7 +1902,7 @@ def tool_wiki_archive_page(args: dict[str, Any]) -> dict[str, Any]:
         "previous_lifecycle": previous,
         "written": False,
     }
-    if previous == "archived":
+    if previous.casefold() == "archived":
         payload["note"] = "page is already archived"
         return _ok(json.dumps(payload, indent=2))
 
@@ -1895,8 +1920,13 @@ def tool_wiki_archive_page(args: dict[str, Any]) -> dict[str, Any]:
 
     if args.get("confirm") is not True:
         return _ok(json.dumps(payload, indent=2))
-    atomic_write_text(p, new_text)
-    _append_edit_log(payload["path"], "wiki_archive_page", "archive")
+    try:
+        atomic_write_text(p, new_text)
+    except OSError as e:
+        return _err(f"write error: {e}")
+    payload["log_written"] = _append_edit_log(
+        payload["path"], "wiki_archive_page", "archive"
+    )
     payload["written"] = True
     return _ok(json.dumps(payload, indent=2))
 
