@@ -519,3 +519,16 @@ Newest entries go at the bottom.
 - Next card: none
 - Blockers: card 28 only.
 
+## 2026-11-10 09:21 — AUTOSTOP: queue empty
+
+- Status: done
+- Queue: АВТОСТОП: очередь пуста — no `todo` or `in-progress` cards remain.
+  Card 28 is still `blocked`, so no card was taken.
+- Automation: `automation-3812212f-07c8-485c-a74a-35248befbd2e` already has
+  `enabled=0`, `lifecycle_status='paused'` (the 09:19 run paused it); this
+  fire arrived after that pause. `CronPauseSelf` was called again.
+- Commit: journal only, no code change.
+- Next card: none
+- Blockers: card 28 only. The pre-existing uncommitted
+  `docs/tasks/AUTONOMOUS.md` change (scheduling notes) was left untouched.
+
