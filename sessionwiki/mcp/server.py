@@ -466,7 +466,9 @@ TOOLS = [
         "description": (
             "Create or replace one Markdown page under wiki/. content is the whole page and "
             "must start with frontmatter that has title and type; it is capped at 1 MiB. "
-            "The tool sets origin: agent and last_updated (today) in it. mode='create' "
+            "The tool sets origin: agent and last_updated (today) in it; content with "
+            "confidence also gets confidence_measured (today) and confidence_pages "
+            "(wiki page count). mode='create' "
             "(default) fails if the page exists; mode='replace' overwrites it. Refused for "
             "paths outside wiki/, non-.md files, paths with a hidden segment or symlink, "
             "wiki/archive/, system pages (index, log, overview, ...) and pages with "
@@ -522,7 +524,9 @@ TOOLS = [
             "one), lifecycle (draft, reviewed, verified, stale, archived) and confidence "
             "(0.0-1.0); other keys are refused. add_tags and remove_tags change the tag list "
             "without replacing it. A call with no fields, add_tags or remove_tags is an "
-            "error. last_updated is set to today. Refused for system pages and pages with "
+            "error. last_updated is set to today; setting confidence also stamps "
+            "confidence_measured (today) and confidence_pages (wiki page count). "
+            "Refused for system pages and pages with "
             "origin: human. Without confirm=true it writes nothing and returns the old and "
             "new value of each field. Ask the user before confirm=true. Returns JSON {path, "
             "changes: {field: [old, new]}, written}. Use wiki_write_page to change the body "
@@ -757,6 +761,18 @@ def _write_rel(p: Path) -> str:
 
 def _today() -> str:
     return date.today().isoformat()
+
+
+def _wiki_page_count() -> int:
+    """Wiki page count — the corpus state a confidence was measured against."""
+    wiki = REPO_ROOT / "wiki"
+    return sum(1 for _ in wiki.rglob("*.md")) if wiki.is_dir() else 0
+
+
+def _confidence_provenance() -> dict[str, Any]:
+    """A confidence number needs its date and the book state (benchmarks
+    principle): stamp both whenever a write sets confidence."""
+    return {"confidence_measured": _today(), "confidence_pages": _wiki_page_count()}
 
 
 def _append_edit_log(rel: str, tool: str, action: str) -> bool:
@@ -1164,6 +1180,10 @@ def _hit_status(rel_path: str) -> str:
     if sources:
         count = len([s for s in sources.strip("[]").split(",") if s.strip()])
         parts.append(f"sources={count}")
+    measured = _frontmatter_value(head, "confidence_measured")
+    if confidence != "unset" and measured:
+        pages = _frontmatter_value(head, "confidence_pages")
+        parts.append(f"measured={measured}" + (f" ({pages} pages)" if pages else ""))
     return "status: " + " · ".join(parts)
 
 
@@ -1869,9 +1889,10 @@ def tool_wiki_write_page(args: dict[str, Any]) -> dict[str, Any]:
         return _err(f"{rel} does not exist; use mode='create' to create it")
 
     old_bytes = p.stat().st_size if p.is_file() else 0
-    new_text = set_frontmatter_fields(
-        content, {"origin": "agent", "last_updated": _today()}
-    )
+    extra: dict[str, Any] = {"origin": "agent", "last_updated": _today()}
+    if meta.get("confidence") not in (None, ""):
+        extra.update(_confidence_provenance())
+    new_text = set_frontmatter_fields(content, extra)
     payload = {
         "path": _write_rel(p),
         "action": mode,
@@ -1966,6 +1987,10 @@ def tool_wiki_update_frontmatter(args: dict[str, Any]) -> dict[str, Any]:
             new_fields["tags"] = final
             changes["tags"] = [_page_tags(text), final]
 
+        if "confidence" in new_fields:
+            for key, value in _confidence_provenance().items():
+                new_fields[key] = value
+                changes[key] = [meta.get(key), value]
         new_fields["last_updated"] = _today()
         new_text = set_frontmatter_fields(text, new_fields)
     except ValueError as e:

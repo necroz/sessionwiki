@@ -109,6 +109,22 @@ def test_lesson_page_is_returned_with_its_status(tmp_path: Path):
     ]
 
 
+def test_status_shows_confidence_measurement_provenance(tmp_path: Path):
+    _page(
+        tmp_path, "wiki/entities/Keycloak.md",
+        'title: "Keycloak"\ntype: entity\nconfidence: 0.85\n'
+        "confidence_measured: 2026-10-01\nconfidence_pages: 976",
+        "Keycloak is the identity provider.",
+    )
+
+    text = _query(tmp_path, "Keycloak")
+
+    assert _status_lines(text) == [
+        "status: type=entity · lifecycle=unset · confidence=0.85 · "
+        "updated=unset · measured=2026-10-01 (976 pages)"
+    ]
+
+
 def test_empty_sources_list_counts_zero(tmp_path: Path):
     _page(
         tmp_path, "wiki/entities/Vault.md",

@@ -241,6 +241,7 @@ Every entity page should declare `entity_type` in frontmatter:
 ## Confidence & lifecycle
 
 - `confidence: 0.85` — 4-factor score (source count, quality, recency, cross-refs)
+- `confidence_measured: 2026-11-11` / `confidence_pages: 976` — stamped automatically when a write sets confidence: the date and the corpus state at measurement time. A confidence without provenance is a lint warning; re-score when the sources change.
 - `lifecycle: draft` — one of: draft, reviewed, verified, stale, archived
 
 ## Hard rules

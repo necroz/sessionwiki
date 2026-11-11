@@ -242,3 +242,7 @@ Operations: `sync`, `ingest`, `query`, `lint`, `build`, `edit`.
    in its frontmatter is never rewritten by synthesis, coalescing,
    backfill, ingest or the MCP write tools. Put hand-written notes under
    `wiki/notes/`.
+7. **A confidence number carries its provenance.** The write tools stamp
+   `confidence_measured` (date) and `confidence_pages` (corpus size)
+   whenever confidence is set; a bare confidence is a lint warning.
+   Re-score when the sources change.

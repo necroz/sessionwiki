@@ -15,7 +15,8 @@ class FrontmatterValidity(LintRule):
     severity = "error"
 
     VALID_TYPES = {"source", "entity", "concept", "synthesis",
-                   "comparison", "question", "navigation", "context", "note"}
+                   "comparison", "question", "navigation", "context", "note",
+                   "lesson"}
     VALID_LIFECYCLES = {s.value for s in LifecycleState}
 
     def run(self, pages, *, llm_callback=None):
@@ -60,6 +61,15 @@ class FrontmatterValidity(LintRule):
                             "severity": "error",
                             "page": rel,
                             "message": f"confidence {c} out of range [0.0, 1.0]",
+                        })
+                    elif not meta.get("confidence_measured"):
+                        issues.append({
+                            "rule": self.name,
+                            "severity": "warning",
+                            "page": rel,
+                            "message": "confidence without provenance: stamp "
+                                       "confidence_measured and confidence_pages "
+                                       "when scoring",
                         })
                 except (ValueError, TypeError):
                     issues.append({
