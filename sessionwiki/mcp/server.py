@@ -89,22 +89,21 @@ TOOLS = [
         "name": "wiki_query",
         "description": (
             "Start here for questions about the user's past work ('what did I "
-            "decide about X', 'how did I fix Y'), in any language: session "
-            "pages keep the user's original request. Ranks wiki/ pages by "
-            "keyword matches, rare words weighted higher (no LLM, no "
-            "embeddings). Service pages are skipped and project overview "
-            "pages rank below sessions. Sessions that name the same tool or "
-            "topic as two or more top hits rank too, marked 'via <name>'. "
-            "If no wiki page matches, it falls back to raw transcripts (see "
-            "include_raw). Returns up to max_pages paths with a "
-            "~400-character snippet each, plus the start of wiki/overview.md; "
-            "with no match, the start of wiki/index.md. max_pages is clamped "
-            "to 1-50. Optional filters: project and type match frontmatter "
-            "exactly; tag must equal one whole tag, ignoring case; date_from and "
-            "date_to are YYYY-MM-DD, and an invalid date is ignored rather "
-            "than an error. Filters apply to wiki pages and raw transcripts. "
-            "Open a full page with wiki_read_page; use wiki_search for exact "
-            "wording."
+            "decide about X'), in any language: session pages keep the user's "
+            "original request. Ranks wiki/ pages by keyword matches, rare "
+            "words weighted higher (no LLM, no embeddings). Service pages are "
+            "skipped; project hubs rank below sessions. Pages sharing a tool "
+            "or topic name with two or more top hits rank too, marked 'via "
+            "<name>'. If no wiki page matches, falls back to raw transcripts "
+            "(see include_raw). Returns up to max_pages paths, each with a "
+            "status line (type, lifecycle, confidence, date, sources; raw "
+            "hits marked not yet in wiki) and a ~400-character snippet, plus "
+            "the start of wiki/overview.md; with no match, the start of "
+            "wiki/index.md. max_pages is clamped to 1-50. Optional filters: "
+            "project and type match frontmatter exactly; tag equals one whole "
+            "tag, ignoring case; date_from/date_to are YYYY-MM-DD, invalid "
+            "dates ignored. Filters apply to both layers. Open a full page "
+            "with wiki_read_page; use wiki_search for exact wording."
         ),
         "inputSchema": {
             "type": "object",
@@ -985,6 +984,7 @@ def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
         for hit in result["hits"]:
             linked = f", via {hit['via']}" if hit["via"] else ""
             out.append(f"## `{hit['path']}` (score: {hit['score']:.1f}{linked})\n")
+            out.append(_hit_status(hit["path"]) + "\n")
             out.append(hit["snippet"])
             out.append("")
     if result["scan_incomplete"]:
@@ -1120,6 +1120,39 @@ def _page_snippet(page: Path, tokens: list[str]) -> str:
     """Snippet for a page that came in through a link, not a word match."""
     content, _ = _read_capped(page, remaining_budget=_MCP_SCAN_PER_FILE_BYTES)
     return _extract_snippet(_body(content), tokens, max_chars=400)
+
+
+def _hit_status(rel_path: str) -> str:
+    """One line telling the reader which record it is looking at.
+
+    A wiki page is a curated record with a trust status; a raw transcript
+    is the session export and has not entered the wiki yet. Unset fields
+    stay visible: a record without a status is itself a signal.
+    """
+    head = _read_head(REPO_ROOT / rel_path)
+    if Path(rel_path).parts[0] == "raw":
+        day = _frontmatter_value(head, "date")
+        when = f" · {day}" if day else ""
+        return f"status: raw transcript{when} · not in the wiki yet"
+    if not head.startswith("---"):
+        return "status: no frontmatter"
+    kind = _frontmatter_value(head, "type") or "unset"
+    lifecycle = _frontmatter_value(head, "lifecycle") or "unset"
+    confidence = _frontmatter_value(head, "confidence") or "unset"
+    updated = (
+        _frontmatter_value(head, "last_updated")
+        or _frontmatter_value(head, "date")
+        or "unset"
+    )
+    parts = [
+        f"type={kind}", f"lifecycle={lifecycle}",
+        f"confidence={confidence}", f"updated={updated}",
+    ]
+    sources = _frontmatter_value(head, "sources")
+    if sources:
+        count = len([s for s in sources.strip("[]").split(",") if s.strip()])
+        parts.append(f"sources={count}")
+    return "status: " + " · ".join(parts)
 
 
 def _recency_factor(day: str, today: date) -> float:
