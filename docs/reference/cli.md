@@ -727,7 +727,14 @@ page path. Sessions not synthesised yet come from `raw/sessions/`.
 Prints nothing when the project has no sessions; `--format json` prints
 a document with an empty `sessions` list instead. The newest session also
 gets a `handoff` block: the end of its last assistant turn, stripped of
-code blocks and headings and capped at 400 characters.
+code blocks and headings and capped at 400 characters, with a pointer to
+the full record.
+
+The text and hook output obey a context budget of 4000 characters
+(`SESSIONWIKI_RECALL_MAX_CHARS` overrides it): requests and summaries clip
+at 200 characters, the oldest sessions drop first when the list is over
+budget, and the handoff fills what remains — or is omitted with a
+pointer. `--format json` stays complete for machine readers.
 
 Meant for a `SessionStart` hook: agents rarely call memory tools on
 their own, so the hook puts recent work into context up front. With
@@ -737,9 +744,11 @@ project from its `cwd`. The Claude Code plugin and
 
 `--prompt-hook` is a separate `UserPromptSubmit` hook. It reads the prompt
 from stdin and prints up to three related pages, filtered to the session's
-project. It is silent unless `SESSIONWIKI_PROMPT_RECALL=1` is set, and every
-error path returns 0 without output. The score floor is 40 by default;
-`SESSIONWIKI_PROMPT_RECALL_MIN_SCORE` overrides it.
+project, plus up to three approved lessons (`type: lesson`, lifecycle
+`reviewed` or `verified`) from `wiki/lessons/`. Draft lessons never reach
+the prompt. It is silent unless `SESSIONWIKI_PROMPT_RECALL=1` is set, and
+every error path returns 0 without output. The score floor is 40 by
+default; `SESSIONWIKI_PROMPT_RECALL_MIN_SCORE` overrides it.
 
 ---
 
@@ -790,6 +799,7 @@ Runs the same ranked lexical search with one graph hop as MCP
 | `--project NAME` | Only pages whose frontmatter `project` is `NAME`. |
 | `--type TYPE` | Only this page type: `source`, `entity`, `concept`, … |
 | `--tag TAG` | Only pages with this tag, e.g. the agent (`claude-code`, `zcode`). |
+| `--lifecycle STATES` | Only pages in these lifecycle states, comma-separated (`draft`, `reviewed`, `verified`, `stale`, `archived`). |
 | `--date-from YYYY-MM-DD` | Only pages dated on or after this day (inclusive). |
 | `--date-to YYYY-MM-DD` | Only pages dated on or before this day (inclusive). |
 | `--raw` | Always rank raw transcripts too. |

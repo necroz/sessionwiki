@@ -127,6 +127,29 @@ def _recent_sessions(project: str, limit: int) -> list[tuple[str, str, str, str]
 _TURN_RE = re.compile(r"^### Turn \d+ — (User|Assistant)\s*$", re.MULTILINE)
 _HANDOFF_TAIL_BYTES = 64 * 1024
 _HANDOFF_MAX_CHARS = 400
+# The injection is a context budget, not a dump: fields clip, the oldest
+# sessions drop first, and the handoff fills what remains. Every cut keeps
+# a pointer to the full record (MemGPT: lossy in front, lossless behind).
+_RECALL_FIELD_MAX_CHARS = 200
+_RECALL_MAX_CHARS = 4000
+_RECALL_HANDOFF_MIN_CHARS = 40
+
+
+def _clip(text: str, limit: int) -> str:
+    """Shorten text to limit chars, marking the cut with an ellipsis."""
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
+
+
+def _recall_budget() -> int:
+    """Char budget for the recall injection; override with an env variable."""
+    raw = os.environ.get("SESSIONWIKI_RECALL_MAX_CHARS", "")
+    try:
+        value = int(raw)
+    except ValueError:
+        return _RECALL_MAX_CHARS
+    return value if value > 0 else _RECALL_MAX_CHARS
 
 
 def _raw_path_for(path: str) -> Path | None:
@@ -200,19 +223,34 @@ def cmd_recall(args: argparse.Namespace) -> int:
         return 0
     if not items:
         return 0
+    budget = _recall_budget()
     lines = [f"Recent sessions in project '{project}' (sessionwiki):", DATA_NOTICE, ""]
     for day, request, summary, path in items:
-        what = f"«{request}»" if request else "(no request recorded)"
-        note = summary or "not in the wiki yet"
+        what = f"«{_clip(request, _RECALL_FIELD_MAX_CHARS)}»" if request else "(no request recorded)"
+        note = _clip(summary, _RECALL_FIELD_MAX_CHARS) or "not in the wiki yet"
         lines.append(f"- {day} {what} — {note} ({path})")
-    if handoff:
-        what = f"«{items[0][1]}»" if items[0][1] else "(no request recorded)"
-        lines += ["", f"Last session ended with ({what}, {items[0][0]}):", handoff]
-    lines += [
+    footer = [
         "",
         "Before you ask the user about earlier work, call the wiki_query tool; "
         "open a page with wiki_read_page.",
     ]
+    # The list is newest first: when the budget is tight, the oldest goes.
+    omitted = 0
+    while len(lines) > 3 and len("\n".join(lines + footer)) > budget:
+        lines.pop()
+        omitted += 1
+    if omitted:
+        lines.append(f"({omitted} older session(s) omitted: over the {budget}-char context budget)")
+    if handoff:
+        what = f"«{_clip(items[0][1], _RECALL_FIELD_MAX_CHARS)}»" if items[0][1] else "(no request recorded)"
+        header = f"Last session ended with ({what}, {items[0][0]}):"
+        pointer = f"(full record: {items[0][3]})"
+        room = budget - len("\n".join(lines + footer)) - len(header) - len(pointer) - 3
+        if room < _RECALL_HANDOFF_MIN_CHARS:
+            lines += ["", header, f"(handoff omitted: over the {budget}-char context budget)", pointer]
+        else:
+            lines += ["", header, _clip(handoff, min(_HANDOFF_MAX_CHARS, room)), pointer]
+    lines += footer
     text = "\n".join(lines)
     if args.format == "hook":
         print(json.dumps({"hookSpecificOutput": {
