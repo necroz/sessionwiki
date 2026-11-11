@@ -200,6 +200,17 @@ def test_lessons_alone_are_injected_without_page_hits(tmp_path: Path, monkeypatc
     assert rel in _ctx(out)
 
 
+def test_raw_transcript_alone_is_not_injected(tmp_path: Path, monkeypatch):
+    _page(
+        tmp_path / "raw" / "sessions" / "2026-11-05T09-00-app-cache.md",
+        {"slug": "cache", "project": "app", "date": "2026-11-05",
+         "description": f'"{_PROMPT}"'},
+        "## Conversation\n\nChunked large sessions by token budget.",
+    )
+    out, rc = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    assert (out, rc) == ("", 0)
+
+
 def test_lesson_snippet_shows_the_rule_not_the_frontmatter(tmp_path: Path, monkeypatch):
     rel = _lesson(tmp_path, "chunk-by-budget", "reviewed")
     out, _ = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))

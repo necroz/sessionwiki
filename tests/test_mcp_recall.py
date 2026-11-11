@@ -358,6 +358,43 @@ def test_recall_budget_of_one_char_is_honored(tmp_path: Path, monkeypatch):
     assert "собери релиз" not in text
 
 
+def test_recall_budget_of_zero_falls_back_to_the_default(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "0")
+    text = _recall(tmp_path, "--project", "app")
+    assert "собери релиз" in text
+    assert "older session(s) omitted" not in text
+
+
+def test_recall_counts_the_omitted_sessions_exactly(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "600")
+    text = _recall(tmp_path, "--project", "app")
+    assert "(1 older session(s) omitted" in text
+
+
+def test_drop_oldest_keeps_everything_at_exactly_the_budget():
+    from sessionwiki.cli import _drop_oldest_over_budget
+    lines = ["head", "notice", "", "- session one", "- session two"]
+    footer = ["", "footer"]
+    budget = len("\n".join(lines + footer))
+    assert _drop_oldest_over_budget(list(lines), footer, budget) == lines
+
+
+def test_handoff_stays_at_exactly_the_minimum_room():
+    from sessionwiki.cli import (
+        _RECALL_HANDOFF_MIN_CHARS, _recall_handoff_lines,
+    )
+    item = ("2026-11-07", "req", "", "raw/sessions/x.md")
+    header = "Last session ended with («req», 2026-11-07):"
+    pointer = "(full record: raw/sessions/x.md)"
+    budget = len(header) + len(pointer) + 3 + _RECALL_HANDOFF_MIN_CHARS
+    lines = _recall_handoff_lines(item, "y" * 100, 0, budget)
+    assert "handoff omitted" not in "\n".join(lines)
+    # room == the minimum: the handoff stays, clipped to exactly the room
+    assert "y" * (_RECALL_HANDOFF_MIN_CHARS - 1) + "…" in "\n".join(lines)
+
+
 def test_recall_handoff_comes_from_the_newest_session(tmp_path: Path):
     _seed_project(tmp_path)
     _raw_with_turns(tmp_path, "2026-11-07", "s5", "новый запрос",
