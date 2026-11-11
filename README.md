@@ -112,7 +112,7 @@ A step-by-step walkthrough with screenshots lives in the [setup guide](https://g
 
 Parallel hook runs are safe: `sync` and `synthesize` take an OS file lock and write their state atomically.
 
-To add related past work to every prompt, opt in to a `UserPromptSubmit` hook — it is off unless `SESSIONWIKI_PROMPT_RECALL=1` is set:
+To add related past work to every prompt, opt in to a `UserPromptSubmit` hook — it is off unless `SESSIONWIKI_PROMPT_RECALL=1` is set. It injects up to three related pages plus up to three approved lessons (`wiki/lessons/`, lifecycle `reviewed` or `verified`); draft lessons never reach the prompt:
 
 ```json
 {
@@ -123,7 +123,7 @@ To add related past work to every prompt, opt in to a `UserPromptSubmit` hook �
 }
 ```
 
-Cost: one wiki scan per prompt — measured median 170 ms with three pages returned, 140 ms when nothing matches.
+Cost: two wiki scans per prompt (pages, then lessons). A single scan measured a median of 170 ms with three pages returned, 140 ms when nothing matches (before lessons landed).
 
 **ZCode** keeps sessions in SQLite. sessionwiki exports them read-only and installs the hook and a nightly job for you:
 

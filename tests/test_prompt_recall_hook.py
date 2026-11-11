@@ -200,6 +200,14 @@ def test_lessons_alone_are_injected_without_page_hits(tmp_path: Path, monkeypatc
     assert rel in _ctx(out)
 
 
+def test_lesson_snippet_shows_the_rule_not_the_frontmatter(tmp_path: Path, monkeypatch):
+    rel = _lesson(tmp_path, "chunk-by-budget", "reviewed")
+    out, _ = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    line = next(ln for ln in _ctx(out).splitlines() if ln.startswith(f"- {rel}"))
+    assert "Chunk large sessions by token budget before synthesis." in line
+    assert "title:" not in line
+
+
 def test_at_most_three_lessons_are_injected(tmp_path: Path, monkeypatch):
     for i in range(4):
         _lesson(tmp_path, f"chunk-rule-{i}", "reviewed")

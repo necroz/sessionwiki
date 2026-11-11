@@ -925,7 +925,9 @@ def rank_query(
         # session page that holds the answer must win.
         weight = _QUERY_HUB_WEIGHT if rel.parts[0] in _QUERY_HUB_DIRS else 1.0
         weight *= _LIFECYCLE_WEIGHT.get(_frontmatter_value(content, "lifecycle").lower(), 1.0)
-        _collect(content, page, weight, content)
+        # Snippets show the body, not the YAML: a lesson's rule must fit
+        # the window (raw transcripts already snippet from the body).
+        _collect(content, page, weight, _body(content))
         links[page] = _page_links(content)
 
     # The wiki is the compiled layer and normally enough: source pages

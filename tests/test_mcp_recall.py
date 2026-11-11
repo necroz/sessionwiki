@@ -336,3 +336,34 @@ def test_recall_drops_oldest_sessions_when_over_budget(tmp_path: Path, monkeypat
     assert "собери релиз" in text  # newest stays
     assert "older session(s) omitted" in text
     assert "добавь кэш" not in text  # oldest goes first
+
+
+def test_recall_clips_to_exactly_the_field_limit(tmp_path: Path):
+    long_request = "x" * 300
+    _page(tmp_path / "wiki" / "sources" / "app" / "2026-11-05-long.md",
+          {"title": '"Session: long"', "type": "source", "slug": "long",
+           "project": "app", "date": "2026-11-05",
+           "description": f'"{long_request}"'},
+          "## Summary\n\nShort.")
+    text = _recall(tmp_path, "--project", "app")
+    clipped = re.search(r"«(x+…)»", text).group(1)
+    assert len(clipped) == 200
+
+
+def test_recall_budget_of_one_char_is_honored(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "1")
+    text = _recall(tmp_path, "--project", "app")
+    assert "older session(s) omitted" in text
+    assert "собери релиз" not in text
+
+
+def test_recall_handoff_comes_from_the_newest_session(tmp_path: Path):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "новый запрос",
+                    ("Assistant", "Новый ответ."))
+    _raw_with_turns(tmp_path, "2026-11-06", "s4", "собери релиз",
+                    ("Assistant", "Старый ответ."))
+    text = _recall(tmp_path, "--project", "app", "--limit", "2")
+    assert "Новый ответ." in text
+    assert "Старый ответ." not in text
