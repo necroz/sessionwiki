@@ -139,6 +139,80 @@ What the numbers said in that run:
 Experimental `prf` variants exist in `.metrics/` but are not published until
 their parameters are recorded.
 
+### Rerun 2026-11-11: fixed graph seed set
+
+Same 24 queries, the 2.1.0 wiki (976 pages). The graph hop used the top
+`max_pages` hits as seeds, so the ranking depended on how many results the
+caller asked for: the top 5 was not the first 5 of the top 10, and recall@20
+was *below* recall@10. The seed set is now always the top 10 hits
+(`_GRAPH_SEEDS`). Each cell is recall / hit.
+
+| k | Seeds | exact | paraphrase | relational | overall |
+|---|---|---:|---:|---:|---:|
+| 5 | `max_pages` (before) | 0.875 / 0.875 | 0.375 / 0.500 | 0.458 / 0.625 | 0.569 / 0.667 |
+| 5 | 10 (shipped) | 0.875 / 0.875 | 0.542 / 0.625 | 0.448 / 0.750 | 0.622 / 0.750 |
+| 10 | `max_pages` (before) | 1.000 / 1.000 | 0.750 / 0.875 | 0.562 / 0.750 | 0.771 / 0.875 |
+| 10 | 10 (shipped) | 1.000 / 1.000 | 0.750 / 0.875 | 0.562 / 0.750 | 0.771 / 0.875 |
+| 20 | `max_pages` (before) | 0.875 / 0.875 | 0.667 / 0.750 | 0.656 / 0.875 | 0.733 / 0.833 |
+| 20 | 10 (shipped) | 1.000 / 1.000 | 0.833 / 0.875 | 0.719 / 1.000 | 0.851 / 0.958 |
+
+The reason for the change is consistency, not the numbers: a shorter result
+list is now a prefix of a longer one, so recall cannot fall when `max_pages`
+grows. The gain at k=5 is two queries and is within the noise of this set.
+
+### Experiments 2026-11-11: what does not fix paraphrases, and what does
+
+Paraphrase recall at k=5 stays the weak spot. The cause is vocabulary, not
+the formula: most source pages are written in English by the synthesis model,
+half of the paraphrase queries are in Russian, and the rest use synonyms
+("audible tick" for "periodic beeping"). For one expected page no query word
+occurs on the page at all.
+
+Lexical variants, each added alone to the shipped ranking (baseline:
+paraphrase recall 0.542 at k=5 and 0.750 at k=10). The raw-transcript row was
+measured before the seed fix (baseline 0.375 and 0.750). None is shipped:
+every one moves single queries in both directions, and tuning weights on 24
+queries would fit the set, not the problem.
+
+| Variant | Paraphrase recall@5 | Paraphrase recall@10 | Side effect |
+|---|---:|---:|---|
+| Stop-word list | 0.417 | 0.708 | — |
+| Light RU/EN stemming | 0.417 | 0.500 | exact@10 1.000 → 0.875 |
+| Word-start match instead of substring | 0.458 | 0.583 | — |
+| Term frequency (BM25 `k1=1.2`) | 0.417 | 0.417 | exact@10 1.000 → 0.875 |
+| Bonus for adjacent query words | 0.500 | 0.750 | exact@10 1.000 → 0.875 |
+| `description` field boost | 0.458 | 0.625 | exact@5 0.875 → 0.625 |
+| `tags` field boost | 0.417 | 0.542 | exact@5 0.875 → 0.625 |
+| Always read raw transcripts (`include_raw=true`) | 0.250 | 0.458 | 0.32 s → 1.07 s per query |
+| Query given in Russian and English, joined | 0.500 | 0.667 | exact@10 1.000 → 0.875 |
+
+Embeddings, as an experiment outside the package (not shipped, no code in
+the repository): `intfloat/multilingual-e5-base`, one vector per page from
+`description` plus the first 2000 characters of the body, cosine similarity,
+fused with the lexical ranking by reciprocal rank fusion (`c=60`, equal
+weights). Embedding 1055 documents (wiki pages plus transcripts that have no
+page yet) took 6 s on one GPU.
+
+| k | Config | exact | paraphrase | relational | overall |
+|---|---|---:|---:|---:|---:|
+| 5 | lexical (shipped) | 0.875 / 0.875 | 0.542 / 0.625 | 0.448 / 0.750 | 0.622 / 0.750 |
+| 5 | vectors only | 1.000 / 1.000 | 0.417 / 0.500 | 0.604 / 1.000 | 0.674 / 0.833 |
+| 5 | hybrid RRF | 1.000 / 1.000 | 0.750 / 0.875 | 0.646 / 1.000 | 0.799 / 0.958 |
+| 10 | lexical (shipped) | 1.000 / 1.000 | 0.750 / 0.875 | 0.562 / 0.750 | 0.771 / 0.875 |
+| 10 | vectors only | 1.000 / 1.000 | 0.625 / 0.750 | 0.771 / 1.000 | 0.799 / 0.917 |
+| 10 | hybrid RRF | 1.000 / 1.000 | 0.792 / 0.875 | 0.719 / 1.000 | 0.837 / 0.958 |
+
+What this says:
+
+- Vectors alone are *worse* than the lexical ranking on paraphrases; the
+  hybrid is better than both on every kind. The result held for fusion
+  weights 2:1, 1:1 and 1:2 and for `c=10`, so it is not a tuned number.
+- This is the evidence for optional embeddings with hybrid fusion (proposal
+  A2 in the [competitive map](competitive-map-2026-11.md)). It is deferred:
+  it needs a provider decision (HTTP endpoint or local model) and must stay
+  off by default.
+- The same caveat applies: 24 queries, one corpus, no confidence intervals.
+
 ## Scaling notes
 
 - **1,000+ sessions**: build time scales linearly. Expect ~45 seconds.

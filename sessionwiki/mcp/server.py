@@ -1021,6 +1021,11 @@ _HEAD_BYTES = 8 * 1024
 # on more than _GRAPH_MAX_DF_SHARE of the pages (the project itself, Git,
 # Django) links nothing. scripts/eval_recall.py measures the effect.
 _GRAPH_HOP_WEIGHT = 0.3
+# The seed set is fixed, not max_pages: a seed set that grew with the
+# request made the top 5 differ from the first 5 of the top 10, and at
+# max_pages=20 the extra weak seeds pushed answers out (recall@20 was
+# below recall@10 on the eval set). See docs/benchmarks.md.
+_GRAPH_SEEDS = 10
 _GRAPH_MIN_SEEDS = 2
 _GRAPH_MAX_DF_SHARE = 0.05
 _GRAPH_MAX_NAME_LEN = 60
@@ -1064,7 +1069,7 @@ def _ranked_hits(
 ) -> list[dict[str, Any]]:
     """Top pages after the graph hop, as hit dicts."""
     lexical = {page: score for page, (score, _) in scored.items()}
-    bonus, via = _link_bonus(lexical, links, max_pages)
+    bonus, via = _link_bonus(lexical, links, _GRAPH_SEEDS)
     totals = {page: lexical.get(page, 0.0) + bonus.get(page, 0.0) for page in lexical.keys() | bonus.keys()}
     hits = []
     for page, score in sorted(totals.items(), key=lambda item: -item[1])[:max_pages]:
