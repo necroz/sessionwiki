@@ -807,6 +807,12 @@ def _valid_day(value: str) -> str:
         return ""
 
 
+def _lifecycle_matches(content: str, states: str) -> bool:
+    """True when the page's lifecycle is one of the comma-separated states."""
+    wanted = {s.strip().lower() for s in states.split(",")}
+    return _frontmatter_value(content, "lifecycle").lower() in wanted
+
+
 def _passes_filters(content: str, filters: dict[str, str]) -> bool:
     """True when the page's frontmatter matches every given filter."""
     if not filters:
@@ -817,10 +823,8 @@ def _passes_filters(content: str, filters: dict[str, str]) -> bool:
         return False
     if "tag" in filters and filters["tag"].lower() not in _tags(content):
         return False
-    if "lifecycle" in filters:
-        states = {s.strip().lower() for s in filters["lifecycle"].split(",")}
-        if _frontmatter_value(content, "lifecycle").lower() not in states:
-            return False
+    if "lifecycle" in filters and not _lifecycle_matches(content, filters["lifecycle"]):
+        return False
     day = _frontmatter_value(content, "date")[:10]
     if "date_from" in filters and (not day or day < filters["date_from"]):
         return False
@@ -1164,6 +1168,11 @@ def _hit_status(rel_path: str) -> str:
         return f"status: raw transcript{when} · not in the wiki yet"
     if not head.startswith("---"):
         return "status: no frontmatter"
+    return "status: " + " · ".join(_wiki_status_parts(head))
+
+
+def _wiki_status_parts(head: str) -> list[str]:
+    """Trust fields of a curated record; unset fields stay visible."""
     kind = _frontmatter_value(head, "type") or "unset"
     lifecycle = _frontmatter_value(head, "lifecycle") or "unset"
     confidence = _frontmatter_value(head, "confidence") or "unset"
@@ -1180,11 +1189,19 @@ def _hit_status(rel_path: str) -> str:
     if sources:
         count = len([s for s in sources.strip("[]").split(",") if s.strip()])
         parts.append(f"sources={count}")
+    measurement = _confidence_measurement(head, confidence)
+    if measurement:
+        parts.append(measurement)
+    return parts
+
+
+def _confidence_measurement(head: str, confidence: str) -> str:
+    """When and against what corpus the confidence was measured; '' if unknown."""
     measured = _frontmatter_value(head, "confidence_measured")
-    if confidence != "unset" and measured:
-        pages = _frontmatter_value(head, "confidence_pages")
-        parts.append(f"measured={measured}" + (f" ({pages} pages)" if pages else ""))
-    return "status: " + " · ".join(parts)
+    if confidence == "unset" or not measured:
+        return ""
+    pages = _frontmatter_value(head, "confidence_pages")
+    return f"measured={measured}" + (f" ({pages} pages)" if pages else "")
 
 
 def _recency_factor(day: str, today: date) -> float:
