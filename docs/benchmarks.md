@@ -114,7 +114,17 @@ the archived reports are `.metrics/recall-{base,graph}-{k5,k10}.json`.
 
 ```bash
 .venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --k 5
+.venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --k 5 --date-to 2026-11-10
 ```
+
+`--date-to` pins the wiki snapshot: only pages dated on or before that day
+are searched. Use it to compare two versions of the ranking. Without it the
+numbers drift as the wiki grows: sessions that discuss this benchmark quote
+its queries and outrank the expected pages. On 2026-11-11 four such
+transcripts moved paraphrase recall@10 from 0.750 to 0.667 with no change in
+the code; `--date-to 2026-11-10` gives 0.750 again. Pages without a `date`
+are left out of a pinned run, so compare only runs with the same `--date-to`
+(relational recall@10 is 0.594 pinned and 0.562 unpinned for that reason).
 
 | k | Config | exact | paraphrase | relational | overall |
 |---|---|---:|---:|---:|---:|

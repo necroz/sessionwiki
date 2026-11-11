@@ -6,6 +6,13 @@ It names real sessions, so keep it out of git (``.metrics/`` is ignored).
 
     .venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json
     .venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --k 10 --json out.json
+    .venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --date-to 2026-11-10
+
+The wiki grows every day, and sessions that discuss this benchmark quote its
+queries, so they outrank the expected pages. ``--date-to`` searches only
+pages dated on or before that day: two runs then see the same pages, and a
+change in the numbers is a change in the code. Pages without a ``date`` are
+left out, so compare only runs that use the same ``--date-to``.
 
 recall@k: share of a query's expected pages found in the top k, averaged
 over queries. hit@k: share of queries with at least one expected page in
@@ -19,6 +26,7 @@ import json
 import re
 import sys
 from collections.abc import Callable
+from datetime import date
 from pathlib import Path
 
 _RANKED_RE = re.compile(r"^## `([^`]+)`", re.MULTILINE)
@@ -72,11 +80,22 @@ def format_report(report: dict, k: int) -> str:
     return "\n".join(lines)
 
 
-def _wiki_query_ranker(k: int) -> Callable[[str], list[str]]:
+def _day(value: str) -> str:
+    """argparse type: a YYYY-MM-DD date. wiki_query ignores a bad date
+    filter silently, which here would measure the live wiki unnoticed."""
+    try:
+        return date.fromisoformat(value).isoformat()
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a YYYY-MM-DD date: {value!r}") from None
+
+
+def _wiki_query_ranker(k: int, date_to: str | None = None) -> Callable[[str], list[str]]:
     from sessionwiki.mcp.server import tool_wiki_query
 
+    snapshot = {"date_to": date_to} if date_to else {}
+
     def rank(question: str) -> list[str]:
-        result = tool_wiki_query({"question": question, "max_pages": k})
+        result = tool_wiki_query({"question": question, "max_pages": k, **snapshot})
         return ranked_paths(result["content"][0]["text"])
 
     return rank
@@ -87,11 +106,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("queries", type=Path)
     parser.add_argument("--k", type=int, default=5)
     parser.add_argument("--json", type=Path, help="write the full report here")
+    parser.add_argument(
+        "--date-to", type=_day, metavar="YYYY-MM-DD",
+        help="search only pages dated on or before this day (pins the wiki snapshot)",
+    )
     args = parser.parse_args(argv)
 
     queries = json.loads(args.queries.read_text(encoding="utf-8"))
-    report = evaluate(queries, _wiki_query_ranker(args.k))
+    report = evaluate(queries, _wiki_query_ranker(args.k, args.date_to))
+    report["date_to"] = args.date_to
 
+    if args.date_to:
+        print(f"wiki snapshot: pages dated on or before {args.date_to}")
     print(format_report(report, args.k))
     if args.json:
         args.json.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
