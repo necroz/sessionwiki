@@ -190,7 +190,13 @@ Backends: `ollama` (local), `openai` (any OpenAI-compatible `/v1`: vLLM, SGLang,
 
 From a source checkout, use `"command": "/path/to/sessionwiki/.venv/bin/sessionwiki"` with `"args": ["mcp"]`; the checkout is the data root, so no `env` is needed.
 
-Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query` (ranked search over wiki pages in any language, falling back to raw transcripts), `wiki_search` (exact text, optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and more — 12 in total, stdio transport, no SDK dependency, path-traversal guarded.
+Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query` (ranked search over wiki pages in any language, falling back to raw transcripts), `wiki_search` (exact text, optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and more — 15 in total, stdio transport, no SDK dependency, path-traversal guarded.
+
+<a href="https://glama.ai/mcp/servers/necroz/sessionwiki">
+  <img src="https://glama.ai/mcp/servers/necroz/sessionwiki/badge"
+       alt="sessionwiki on Glama — quality A, license A, maintenance B"
+       width="360">
+</a>
 
 ## CLI reference
 
