@@ -18,6 +18,7 @@ wiki/          YOU OWN THIS. LLM-generated pages that summarise, cross-reference
   entities/        People, companies, projects, products (TitleCase.md).
   concepts/        Ideas, frameworks, methods, theories (TitleCase.md).
   syntheses/       Saved query answers (kebab-case slug).
+  lessons/         Distilled experience injected into later attempts (kebab-case slug).
   comparisons/     Side-by-side diffs of two or more entities/concepts (kebab-case slug). [v0.2+]
   questions/       First-class open questions with state tracking (kebab-case slug). [v0.2+]
   archive/         Deprecated / demoted pages preserved for history. [v0.2+]
@@ -124,6 +125,41 @@ One-paragraph description.
 - [[RelatedConcept]]
 ```
 
+## Lesson Page Format
+
+Distilled experience carried into later attempts (Reflexion-style). The
+prompt hook injects up to three lessons whose lifecycle is `reviewed` or
+`verified`; `draft` lessons stay out until approved. Prefer external
+evidence (test result, review verdict, user correction) over the model's
+self-evaluation. Agent-written lessons start as `draft`; approve them
+with `wiki_update_frontmatter` (`lifecycle: reviewed`) after the user
+agrees.
+
+```markdown
+---
+title: "Short rule name"
+type: lesson
+tags: []
+sources: [session-slug]
+project: project-slug
+date: YYYY-MM-DD
+lifecycle: draft  # reviewed/verified = approved for auto-injection
+confidence: 0.7
+---
+
+## Situation
+When this applies.
+
+## Outcome
+What happened, with evidence.
+
+## Rule
+What to do differently next time. One or two sentences.
+
+## Connections
+- [[session-slug]] — where this was learned
+```
+
 ## Query Workflow
 
 Triggered by `/wiki-query <question>`.
@@ -157,6 +193,7 @@ Output a report to the chat. Ask the user if they want it saved to `wiki/lint-re
 - **Entity pages**: `TitleCase.md` (e.g., `OpenAI.md`, `AndrejKarpathy.md`)
 - **Concept pages**: `TitleCase.md` (e.g., `ReinforcementLearning.md`, `RAG.md`)
 - **Synthesis pages**: `kebab-case.md`
+- **Lesson pages**: `kebab-case.md`
 
 ## Index Format
 

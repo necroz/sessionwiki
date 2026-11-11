@@ -225,6 +225,8 @@ def cmd_recall(args: argparse.Namespace) -> int:
 
 _PROMPT_RECALL_MIN_SCORE = 40.0  # median top score of 20 recent distinct prompts
 _PROMPT_RECALL_MAX_PAGES = 3
+# Reflexion keeps 1-3 reflections in its buffer; the same cap applies here.
+_PROMPT_RECALL_MAX_LESSONS = 3
 _PROMPT_RECALL_MIN_CHARS = 20
 
 
@@ -239,6 +241,10 @@ def _prompt_recall_threshold() -> float:
 
 def _prompt_recall() -> int:
     """UserPromptSubmit hook: add related wiki pages for the prompt on stdin.
+
+    Also injects up to three approved lessons (type ``lesson``, lifecycle
+    ``reviewed`` or ``verified``) — experience carried into the next
+    attempt, Reflexion-style. Draft lessons stay out until approved.
 
     Runs on every prompt, so it is opt-in (``SESSIONWIKI_PROMPT_RECALL=1``)
     and silent on every error path: a hook must never block the prompt.
@@ -256,21 +262,43 @@ def _prompt_recall() -> int:
         return 0
     cwd = data.get("cwd")
     project = Path(cwd).name if isinstance(cwd, str) and cwd else ""
-    from sessionwiki.mcp.server import DATA_NOTICE, rank_query
+    from sessionwiki.mcp.server import (
+        DATA_NOTICE, _frontmatter_value, _read_head, rank_query,
+    )
     try:
         result = rank_query(
             prompt, max_pages=_PROMPT_RECALL_MAX_PAGES, include_raw=False,
             filters={"project": project} if project else None,
         )
+        lesson_filters = {"type": "lesson", "lifecycle": "reviewed,verified"}
+        if project:
+            lesson_filters["project"] = project
+        lesson_result = rank_query(
+            prompt, max_pages=_PROMPT_RECALL_MAX_LESSONS, include_raw=False,
+            filters=lesson_filters,
+        )
     except Exception:  # a hook must never block the user's prompt
         return 0
-    hits = [h for h in result["hits"] if h["score"] >= _prompt_recall_threshold()]
-    if not hits:
+    threshold = _prompt_recall_threshold()
+    lessons = [h for h in lesson_result["hits"] if h["score"] >= threshold]
+    # Lessons belong to the approved block only: as plain page hits they
+    # would bypass the lifecycle gate and leak drafts into the prompt.
+    hits = [
+        h for h in result["hits"]
+        if h["score"] >= threshold
+        and _frontmatter_value(_read_head(REPO_ROOT / h["path"]), "type") != "lesson"
+    ]
+    if not hits and not lessons:
         return 0
     lines = ["Related past work (sessionwiki):", DATA_NOTICE, ""]
     for h in hits:
         snippet = " ".join(h["snippet"].split())[:200]
         lines.append(f"- {h['path']} — {snippet}")
+    if lessons:
+        lines += ["", "Lessons from past work (approved):"]
+        for h in lessons:
+            snippet = " ".join(h["snippet"].split())[:200]
+            lines.append(f"- {h['path']} — {snippet}")
     lines += ["", "Read the page with wiki_read_page before you ask the user about it."]
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "UserPromptSubmit",
@@ -950,6 +978,7 @@ def cmd_query(args: argparse.Namespace) -> int:
         "project": args.project,
         "type": args.page_type,
         "tag": args.tag,
+        "lifecycle": args.lifecycle,
         "date_from": args.date_from,
         "date_to": args.date_to,
     }
@@ -2072,6 +2101,8 @@ def build_parser() -> argparse.ArgumentParser:
                      help="Only this page type: source, entity, concept, ...")
     qry.add_argument("--tag", default="",
                      help="Only pages with this tag, e.g. the agent")
+    qry.add_argument("--lifecycle", default="",
+                     help="Only pages in these lifecycle states, comma-separated")
     qry.add_argument("--date-from", dest="date_from", default="",
                      help="Only pages dated on or after YYYY-MM-DD")
     qry.add_argument("--date-to", dest="date_to", default="",

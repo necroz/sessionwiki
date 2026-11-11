@@ -98,12 +98,13 @@ TOOLS = [
             "(see include_raw). Returns up to max_pages paths, each with a "
             "status line (type, lifecycle, confidence, date, sources; raw "
             "hits marked not yet in wiki) and a ~400-character snippet, plus "
-            "the start of wiki/overview.md; with no match, the start of "
-            "wiki/index.md. max_pages is clamped to 1-50. Optional filters: "
-            "project and type match frontmatter exactly; tag equals one whole "
-            "tag, ignoring case; date_from/date_to are YYYY-MM-DD, invalid "
-            "dates ignored. Filters apply to both layers. Open a full page "
-            "with wiki_read_page; use wiki_search for exact wording."
+            "the start of overview.md (index.md when nothing matches). "
+            "max_pages clamps to 1-50. Optional filters: project and type "
+            "match frontmatter exactly; tag equals one whole tag, ignoring "
+            "case; lifecycle takes comma-separated states; date_from/date_to "
+            "are YYYY-MM-DD, invalid dates ignored. Filters apply to both "
+            "layers. Open a full page with wiki_read_page; use wiki_search "
+            "for exact wording."
         ),
         "inputSchema": {
             "type": "object",
@@ -143,6 +144,13 @@ TOOLS = [
                     "description": (
                         "Only pages with this tag, e.g. the agent: claude-code, "
                         "codex-cli, zcode, opencode."
+                    ),
+                },
+                "lifecycle": {
+                    "type": "string",
+                    "description": (
+                        "Only pages in these lifecycle states, comma-separated: "
+                        "draft, reviewed, verified, stale, archived."
                     ),
                 },
                 "date_from": {
@@ -765,7 +773,7 @@ def _append_edit_log(rel: str, tool: str, action: str) -> bool:
     return True
 
 
-_FILTER_KEYS = ("project", "type", "tag", "date_from", "date_to")
+_FILTER_KEYS = ("project", "type", "tag", "lifecycle", "date_from", "date_to")
 
 
 def _tags(content: str) -> set[str]:
@@ -793,6 +801,10 @@ def _passes_filters(content: str, filters: dict[str, str]) -> bool:
         return False
     if "tag" in filters and filters["tag"].lower() not in _tags(content):
         return False
+    if "lifecycle" in filters:
+        states = {s.strip().lower() for s in filters["lifecycle"].split(",")}
+        if _frontmatter_value(content, "lifecycle").lower() not in states:
+            return False
     day = _frontmatter_value(content, "date")[:10]
     if "date_from" in filters and (not day or day < filters["date_from"]):
         return False

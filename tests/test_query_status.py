@@ -92,6 +92,23 @@ def test_raw_transcript_hit_is_marked_as_not_curated(tmp_path: Path):
     ]
 
 
+def test_lesson_page_is_returned_with_its_status(tmp_path: Path):
+    _page(
+        tmp_path, "wiki/lessons/chunk-by-budget.md",
+        'title: "Chunk by budget"\ntype: lesson\nlifecycle: reviewed\n'
+        "date: 2026-11-05\nsources: [cache-session]",
+        "## Rule\n\nChunk large sessions by token budget before synthesis.",
+    )
+
+    text = _query(tmp_path, "chunk sessions")
+
+    assert "wiki/lessons/chunk-by-budget.md" in text
+    assert _status_lines(text) == [
+        "status: type=lesson · lifecycle=reviewed · confidence=unset · "
+        "updated=2026-11-05 · sources=1"
+    ]
+
+
 def test_empty_sources_list_counts_zero(tmp_path: Path):
     _page(
         tmp_path, "wiki/entities/Vault.md",

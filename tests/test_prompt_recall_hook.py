@@ -141,3 +141,68 @@ def test_rank_query_failure_prints_nothing(tmp_path: Path, monkeypatch):
         tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}), rank_query=_boom
     )
     assert (out, rc) == ("", 0)
+
+
+# ── Lessons: approved experience carried into the next attempt ────────────
+
+
+def _lesson(root: Path, slug: str, lifecycle: str, project: str = "app") -> str:
+    rel = f"wiki/lessons/{slug}.md"
+    _page(
+        root / rel,
+        {"title": f'"{slug}"', "type": "lesson", "project": project,
+         "lifecycle": lifecycle, "date": "2026-11-05"},
+        "## Situation\n\nWhen chunking large sessions.\n\n"
+        "## Rule\n\nChunk large sessions by token budget before synthesis.",
+    )
+    return rel
+
+
+def _ctx(out: str) -> str:
+    return json.loads(out)["hookSpecificOutput"]["additionalContext"]
+
+
+def test_approved_lesson_is_injected(tmp_path: Path, monkeypatch):
+    _seed(tmp_path)
+    rel = _lesson(tmp_path, "chunk-by-budget", "reviewed")
+    out, rc = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    assert rc == 0
+    ctx = _ctx(out)
+    assert "Lessons from past work (approved):" in ctx
+    assert rel in ctx
+
+
+def test_verified_lesson_is_injected(tmp_path: Path, monkeypatch):
+    _seed(tmp_path)
+    rel = _lesson(tmp_path, "chunk-by-budget", "verified")
+    out, _ = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    assert rel in _ctx(out)
+
+
+def test_draft_lesson_is_not_injected(tmp_path: Path, monkeypatch):
+    _seed(tmp_path)
+    rel = _lesson(tmp_path, "chunk-by-budget", "draft")
+    out, _ = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    assert rel not in _ctx(out)
+
+
+def test_lesson_of_another_project_is_not_injected(tmp_path: Path, monkeypatch):
+    _seed(tmp_path)
+    rel = _lesson(tmp_path, "chunk-by-budget", "reviewed", project="other")
+    out, _ = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    assert rel not in _ctx(out)
+
+
+def test_lessons_alone_are_injected_without_page_hits(tmp_path: Path, monkeypatch):
+    rel = _lesson(tmp_path, "chunk-by-budget", "reviewed")
+    out, rc = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    assert rc == 0
+    assert rel in _ctx(out)
+
+
+def test_at_most_three_lessons_are_injected(tmp_path: Path, monkeypatch):
+    for i in range(4):
+        _lesson(tmp_path, f"chunk-rule-{i}", "reviewed")
+    out, _ = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
+    lesson_lines = [ln for ln in _ctx(out).splitlines() if ln.startswith("- wiki/lessons/")]
+    assert len(lesson_lines) == 3
