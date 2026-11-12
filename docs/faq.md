@@ -24,7 +24,7 @@ See [multi-agent-setup.md](multi-agent-setup.md) for per-agent details.
 
 ## Do I need an API key?
 
-No. sessionwiki reads existing session files from your agents' local session stores. It does not call any LLM API. The wiki layer (`/wiki-ingest`, `/wiki-query`) uses your existing Claude Code (or other agent) session to do the LLM work.
+No. sessionwiki reads existing session files from your agents' local session stores. It does not call any LLM API. The default `extractive` backend writes a useful page from the transcript with no model at all. The wiki layer (`/wiki-ingest`, `/wiki-query`) uses your existing Claude Code (or other agent) session to do the LLM work.
 
 ## Why not use Claude Code's built-in memory?
 

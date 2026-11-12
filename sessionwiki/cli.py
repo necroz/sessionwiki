@@ -1278,7 +1278,7 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
     """Synthesize wiki source pages from raw sessions (v1.1.0 · #35).
 
     Uses the backend selected via ``synthesis.backend`` in the config
-    (dummy | extractive | ollama | openai | agent). ``--check`` prints backend
+    (extractive | dummy | ollama | openai | agent). ``--check`` prints backend
     availability without running synthesis — useful for diagnosing a
     server before a long sync. ``--estimate`` prints a cached-vs-fresh
     token + dollar breakdown before spending money (#50).
@@ -1424,7 +1424,7 @@ def _synthesize_estimate(config: dict | None = None) -> int:
     from sessionwiki.cache import MODEL_PRICING
 
     synth = (config or {}).get("synthesis", {}) or {}
-    backend = str(synth.get("backend") or "dummy")
+    backend = str(synth.get("backend") or "extractive")
     model = str(synth.get("model") or "")
     priced = model in MODEL_PRICING
 

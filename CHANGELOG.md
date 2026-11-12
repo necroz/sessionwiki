@@ -15,6 +15,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 - **MemoryTax benchmark harness** — `scripts/eval_memorytax.py` reproduces the MemoryTax method (arXiv 2610.29823) on the repository's own history: four methods (`wiki`, `raw` BM25, `agent-wiki`, `agent-raw`), two reader models, an LLM judge, a pinned corpus (`--date-to`) and a cost/accuracy report. `scripts/build_memorytax_questions.py` builds the question set, `scripts/memorytax_report.py` renders the table. The question set names private sessions and stays out of git.
 - **Published MemoryTax results** — `docs/benchmarks.md` now reports the 80-question run. Raw search beats wiki search on factual recall (60% against 12%), so the docs state the two-layer rule: the wiki is for orientation and synthesis, raw transcripts are for precise facts.
 
+### Changed
+
+- **The default synthesis backend is `extractive`** — a fresh install now writes a useful source page with no model and no network instead of a metadata-only stub. `dummy` stays available as an explicit choice, and an unknown backend name falls back to `extractive` with a warning.
+
 ## [2.2.0] — 2026-11-12
 
 Theme: memory that knows its own state — record status in every query hit, lessons carried into later attempts, bounded recall injection, confidence with measurement provenance, and pinned eval snapshots.

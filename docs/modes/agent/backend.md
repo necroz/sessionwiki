@@ -9,7 +9,7 @@ docs_passthrough: true
 
 # Agent backend — setup
 
-This page walks through enabling the `agent` synthesize backend (#316) — the Mode B companion to the Ollama / dummy backends.
+This page walks through enabling the `agent` synthesize backend (#316) — the Mode B companion to the Ollama / extractive / dummy backends.
 
 ## One-line enable
 

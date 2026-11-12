@@ -66,10 +66,10 @@ def resolve_backend(
     """Pick a synthesizer backend from ``cfg["synthesis"]["backend"]``.
 
     Supported values:
-      - ``"dummy"`` (default) — canned offline backend for previews/tests
-      - ``"extractive"`` — offline backend that picks the request, the
-        last answer, decisions, files and tools out of the transcript
-        (D1); no model, no network
+      - ``"extractive"`` (default) — offline backend that picks the
+        request, the last answer, decisions, files and tools out of the
+        transcript (D1); no model, no network
+      - ``"dummy"`` — canned offline backend for previews/tests
       - ``"ollama"`` — local Ollama HTTP backend (#35)
       - ``"openai"`` — any OpenAI-compatible ``/v1`` server (vLLM,
         SGLang, LM Studio, LiteLLM, hosted providers)
@@ -78,15 +78,15 @@ def resolve_backend(
         ``.llmwiki-pending-prompts/`` for the slash-command layer to
         pick up on the next agent turn.  No HTTP, no API key.
 
-    Unknown values fall back to the dummy backend with a warning so a
+    Unknown values fall back to the extractive backend with a warning so a
     typo in config.json doesn't crash sync.
     """
     synth_cfg = (cfg or {}).get("synthesis", {}) or {}
-    name = (synth_cfg.get("backend") or "dummy").strip().lower()
+    name = (synth_cfg.get("backend") or "extractive").strip().lower()
 
     if name == "ollama":
         # Imported lazily so the `urllib`-based module isn't loaded when
-        # users stick with the default dummy backend.
+        # users stick with the default extractive backend.
         from sessionwiki.synth.ollama import OllamaSynthesizer, load_ollama_config
 
         return _with_chunking(OllamaSynthesizer(config=load_ollama_config(cfg)), cfg)
@@ -109,18 +109,19 @@ def resolve_backend(
 
         return AgentDelegateSynthesizer()
 
+    if name not in {"dummy", "extractive"}:
+        import logging
+        logging.getLogger(__name__).warning(
+            "Unknown synthesis.backend %r — falling back to extractive", name
+        )
+        name = "extractive"
+
     if name == "extractive":
         # Offline, like the dummy backend, so no chunking wrapper: the
         # page is built from the body the call already carries.
         from sessionwiki.synth.extractive import ExtractiveSynthesizer
 
         return ExtractiveSynthesizer()
-
-    if name != "dummy":
-        import logging
-        logging.getLogger(__name__).warning(
-            "Unknown synthesis.backend %r — falling back to dummy", name
-        )
     return DummySynthesizer()
 
 

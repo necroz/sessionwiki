@@ -224,8 +224,8 @@ structural + 3 LLM-powered + `stale_candidates` (#51) +
 to produce `wiki/sources/<slug>.md`.
 
 **Wraps:** `python3 -m sessionwiki synthesize` (respects the
-`synthesis.backend` key in `sessions_config.json` — `dummy` / `ollama`
-and, in-progress on #315, `claude-api`).
+`synthesis.backend` key in `sessions_config.json` — `extractive` (default) /
+`dummy` / `ollama` / `openai` / `agent`).
 
 **Natural-language flags Claude translates:**
 

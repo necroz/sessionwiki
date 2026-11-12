@@ -612,7 +612,7 @@ python3 -m sessionwiki synthesize                    # real run
 | `--vault PATH` | Keep `raw/`, `wiki/sources/` and the state file under a vault root. |
 
 Backend is picked from `synthesis.backend` in `sessions_config.json`:
-`dummy` (default, metadata-only), `extractive` (no model, no network),
+`extractive` (default, no model and no network), `dummy` (metadata-only),
 `ollama`, `openai` (any OpenAI-compatible server) or `agent` (pending
 prompts for the running agent). See
 [`reference/prompt-caching.md`](prompt-caching.md).

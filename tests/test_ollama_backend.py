@@ -416,12 +416,12 @@ def test_ollama_http_error_message_truncates_long_body():
 # ─── Pipeline resolver ────────────────────────────────────────────────
 
 
-def test_resolve_backend_defaults_to_dummy_when_no_config():
-    from sessionwiki.synth.base import DummySynthesizer
+def test_resolve_backend_defaults_to_extractive_when_no_config():
+    from sessionwiki.synth.extractive import ExtractiveSynthesizer
     from sessionwiki.synth.pipeline import resolve_backend
 
-    assert isinstance(resolve_backend(None), DummySynthesizer)
-    assert isinstance(resolve_backend({}), DummySynthesizer)
+    assert isinstance(resolve_backend(None), ExtractiveSynthesizer)
+    assert isinstance(resolve_backend({}), ExtractiveSynthesizer)
 
 
 def test_resolve_backend_picks_ollama_when_configured():
@@ -436,12 +436,12 @@ def test_resolve_backend_picks_ollama_when_configured():
 
 
 def test_resolve_backend_falls_back_on_unknown_name(caplog):
-    from sessionwiki.synth.base import DummySynthesizer
+    from sessionwiki.synth.extractive import ExtractiveSynthesizer
     from sessionwiki.synth.pipeline import resolve_backend
 
     with caplog.at_level("WARNING"):
         backend = resolve_backend({"synthesis": {"backend": "magic"}})
-    assert isinstance(backend, DummySynthesizer)
+    assert isinstance(backend, ExtractiveSynthesizer)
     assert any("Unknown synthesis.backend" in r.message for r in caplog.records)
 
 
