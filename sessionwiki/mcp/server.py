@@ -30,7 +30,7 @@ import sys
 import time
 from collections import Counter, defaultdict
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any
 
 from sessionwiki import REPO_ROOT, __version__
@@ -89,18 +89,21 @@ TOOLS = [
         "name": "wiki_query",
         "description": (
             "Start here for questions about the user's past work ('what did I "
-            "decide about X', 'how did I fix Y'), in any language: session "
-            "pages keep the user's original request. Ranks wiki/ pages by "
-            "keyword matches, rare words weighted higher (no LLM, no "
-            "embeddings); service pages are skipped and project overview "
-            "pages rank below sessions. Sessions that name the same tool or "
-            "topic as two or more top hits rank too, marked 'via <name>'. "
-            "If no wiki page matches, it falls back "
-            "to raw transcripts (see include_raw). Returns up to max_pages "
-            "paths with a ~400-character snippet each, plus the start of "
-            "wiki/overview.md; with no match, the start of wiki/index.md. "
-            "Optional filters: project, type, tag, date_from, date_to. "
-            "Read-only. Open a full page with wiki_read_page; use wiki_search "
+            "decide about X'), in any language: session pages keep the user's "
+            "original request. Ranks wiki/ pages by keyword matches, rare "
+            "words weighted higher (no LLM, no embeddings). Service pages are "
+            "skipped; project hubs rank below sessions. Pages sharing a tool "
+            "or topic name with two or more top hits rank too, marked 'via "
+            "<name>'. If no wiki page matches, falls back to raw transcripts "
+            "(see include_raw). Returns up to max_pages paths, each with a "
+            "status line (type, lifecycle, confidence, date, sources; raw "
+            "hits marked not yet in wiki) and a ~400-character snippet, plus "
+            "the start of overview.md (index.md when nothing matches). "
+            "max_pages clamps to 1-50. Optional filters: project and type "
+            "match frontmatter exactly; tag equals one whole tag, ignoring "
+            "case; lifecycle takes comma-separated states; date_from/date_to "
+            "are YYYY-MM-DD, invalid dates ignored. Filters apply to both "
+            "layers. Open a full page with wiki_read_page; use wiki_search "
             "for exact wording."
         ),
         "inputSchema": {
@@ -112,8 +115,13 @@ TOOLS = [
                 },
                 "max_pages": {
                     "type": "integer",
-                    "description": "Maximum pages to return (default 5).",
+                    "description": (
+                        "Maximum pages to return (default 5). Values are "
+                        "clamped to 1-50."
+                    ),
                     "default": 5,
+                    "minimum": 1,
+                    "maximum": 50,
                 },
                 "include_raw": {
                     "type": "boolean",
@@ -138,6 +146,13 @@ TOOLS = [
                         "codex-cli, zcode, opencode."
                     ),
                 },
+                "lifecycle": {
+                    "type": "string",
+                    "description": (
+                        "Only pages in these lifecycle states, comma-separated: "
+                        "draft, reviewed, verified, stale, archived."
+                    ),
+                },
                 "date_from": {
                     "type": "string",
                     "description": "Only pages dated on or after YYYY-MM-DD.",
@@ -153,14 +168,16 @@ TOOLS = [
     {
         "name": "wiki_search",
         "description": (
-            "Find exact text: case-insensitive substring match, line by line, "
-            "over wiki/ pages, plus raw session transcripts in raw/sessions/ "
-            "when include_raw=true. Returns JSON {term, matches: [{path, line, "
-            "text}], truncated, scan_incomplete, files_scanned, files_total, "
-            "skipped_oversize_files}; stops at 200 matches (truncated), skips "
-            "files over 4 MiB and reads at most 256 MiB per call "
-            "(scan_incomplete). Read-only. Use wiki_query instead for ranked, "
-            "question-style lookup; open a hit with wiki_read_page."
+            "Find exact text: a case-insensitive substring match, line by "
+            "line, over wiki/ pages, plus raw session transcripts in "
+            "raw/sessions/ when include_raw=true. term is literal: regex and "
+            "glob characters have no special meaning. Returns JSON {term, "
+            "matches: [{path, line, text}], truncated, scan_incomplete, "
+            "files_scanned, files_total, skipped_oversize_files}. The scan "
+            "stops at 200 matches (truncated), skips files over 4 MiB and "
+            "reads at most 256 MiB per call (scan_incomplete). Read-only. Use "
+            "wiki_query instead for ranked, question-style lookup; open a hit "
+            "with wiki_read_page."
         ),
         "inputSchema": {
             "type": "object",
@@ -184,9 +201,12 @@ TOOLS = [
             "List raw session transcripts in raw/sessions/ (one markdown file "
             "per agent session), sorted by path, oldest first. Returns a JSON "
             "array of {path, project, date, filename, size_bytes}; project and "
-            "date come from each file's frontmatter. Read-only. Use it to see "
-            "which sessions exist for a project, then open one with "
-            "wiki_read_page."
+            "date come from each file's frontmatter, so either can be empty. "
+            "project is a case-sensitive substring match; omit it to list "
+            "every session, and an unknown value returns an empty array. "
+            "Read-only. Use it to see which sessions exist for a project, then "
+            "open one with wiki_read_page. To find sessions by content, use "
+            "wiki_search with include_raw=true instead."
         ),
         "inputSchema": {
             "type": "object",
@@ -206,12 +226,15 @@ TOOLS = [
         "name": "wiki_read_page",
         "description": (
             "Return the full text of one file, unmodified and not truncated. "
-            "path is relative to the sessionwiki folder and must be under "
-            "wiki/, raw/, docs/, examples/ or site/ (or README.md, "
-            "CHANGELOG.md, CONTRIBUTING.md, LICENSE). Returns an error if the "
-            "path is outside that set, escapes the folder, or does not exist. "
-            "Read-only. Get paths from wiki_query, wiki_search or "
-            "wiki_list_sources."
+            "path is relative to the sessionwiki folder and uses '/' "
+            "separators; absolute paths and '..' escapes are rejected, and "
+            "symlinks are resolved before the allowlist check. The file must "
+            "be under wiki/, raw/, docs/, examples/ or site/ (or be README.md, "
+            "CHANGELOG.md, CONTRIBUTING.md or LICENSE at the root). Returns an "
+            "error if the path is outside that set, does not exist, is not a "
+            "file, or is not valid UTF-8. Reads the whole file with no size "
+            "cap, so very large files are returned in full. Get paths from "
+            "wiki_query, wiki_search or wiki_list_sources."
         ),
         "inputSchema": {
             "type": "object",
@@ -233,10 +256,11 @@ TOOLS = [
             "Check the link structure of wiki/: find orphan pages (no inbound "
             "[[wikilinks]]; index, overview and log are exempt) and broken "
             "[[wikilinks]] that point to no page. Returns JSON {total_pages, "
-            "orphan_count, orphans, broken_link_count, broken_links}, listing "
-            "at most 50 of each. Read-only: it reports and changes nothing. "
-            "Use it after wiki_sync or before publishing; use wiki_lifecycle "
-            "or wiki_confidence to review page quality."
+            "orphan_count, orphans, broken_link_count, broken_links}; the "
+            "counts cover every page, while each list stops at 50 items. "
+            "Read-only: it reports and changes nothing. Use it after wiki_sync "
+            "or before publishing; use wiki_lifecycle or wiki_confidence to "
+            "review page quality."
         ),
         "inputSchema": {
             "type": "object",
@@ -249,12 +273,13 @@ TOOLS = [
             "Convert new agent sessions (Claude Code, Codex, Cursor, ZCode, "
             "OpenCode, ...) from their local session stores into markdown under "
             "raw/sessions/. Dry run by default: it only reports what would "
-            "change. It writes only with dry_run=false and confirm=true; ask "
-            "the user before that. A real run adds new files and never "
-            "overwrites existing ones, so repeating it is safe; it may also "
-            "rebuild site/. Returns the converter's output (last 256 KB) and "
-            "fails after 120 s. Use it when wiki_list_sources lacks recent "
-            "sessions."
+            "change. It writes only when both dry_run=false and confirm=true "
+            "are set; ask the user before that. A real run adds new files and "
+            "never overwrites existing ones, so repeating it is safe. It may "
+            "also rebuild site/. There is no project or date filter: every new "
+            "session is imported. Returns the converter's stdout and stderr as "
+            "one text block, last 256 KB, with a truncation marker; fails after "
+            "120 s. Use it when wiki_list_sources lacks recent sessions."
         ),
         "inputSchema": {
             "type": "object",
@@ -290,9 +315,11 @@ TOOLS = [
             "'llms-full-txt' (all pages flattened), 'jsonld' (schema.org "
             "graph), 'sitemap' (sitemap.xml), 'rss' (feed of recent pages), "
             "'manifest' (build manifest.json), or 'list' (JSON list of the "
-            "export files that exist, with sizes). Output is cut at 200 KB. "
-            "Read-only. Fails if the file is missing; run `sessionwiki build` "
-            "first. For specific facts wiki_query is cheaper."
+            "export files that exist, with sizes). Output is plain text, "
+            "except 'list' which is JSON, and is cut at 200 KB; for a larger "
+            "file, read it from site/ with wiki_read_page. Read-only. Fails if "
+            "the file is missing; run `sessionwiki build` first. For specific "
+            "facts wiki_query is cheaper."
         ),
         "inputSchema": {
             "type": "object",
@@ -312,11 +339,14 @@ TOOLS = [
         "name": "wiki_confidence",
         "description": (
             "List wiki pages whose frontmatter confidence (0.0-1.0) is between "
-            "min_confidence and max_confidence; pages without a confidence "
-            "value are left out. Returns plain text: the match count, then up "
-            "to 50 lines of 'score path - title', lowest score first. "
-            "Read-only. Use max_confidence=0.5 to find weak pages to recheck; "
-            "use wiki_dashboard for the overall distribution."
+            "min_confidence and max_confidence. Pages without a confidence "
+            "value, or with a value that is not a number, are skipped. Values "
+            "are compared as given and not clamped; min_confidence greater "
+            "than max_confidence returns an empty list. Returns plain text: "
+            "the match count, then up to 50 lines of 'score path - title', "
+            "lowest score first, ending with '... and N more' when the list is "
+            "cut. Read-only. Use max_confidence=0.5 to find weak pages to "
+            "recheck; use wiki_dashboard for the overall distribution."
         ),
         "inputSchema": {
             "type": "object",
@@ -340,9 +370,10 @@ TOOLS = [
             "List wiki pages whose frontmatter lifecycle equals state (draft, "
             "reviewed, verified, stale or archived). Returns plain text: the "
             "match count, then up to 50 lines of 'last_updated path - title', "
-            "newest first. Read-only. Use 'stale' or 'draft' to find pages to "
-            "update; use wiki_dashboard to see how many pages are in each "
-            "state."
+            "newest first, ending with '... and N more' when the list is cut. "
+            "There is no paging parameter; the count tells you how many pages "
+            "remain. Read-only. Use 'stale' or 'draft' to find pages to update; "
+            "use wiki_dashboard to see how many pages are in each state."
         ),
         "inputSchema": {
             "type": "object",
@@ -363,8 +394,10 @@ TOOLS = [
             "per type (source, entity, concept, ...), pages per lifecycle "
             "state, and how many pages have high (>=0.8), medium, low (<0.5) "
             "or no confidence. Returns plain-text Markdown. Read-only, no "
-            "parameters. Call it first to see the wiki's size and health, then "
-            "use wiki_lifecycle or wiki_confidence for the page lists."
+            "parameters. No cache: every call re-reads wiki/ from disk, so the "
+            "numbers are current and the cost grows with the wiki. Call it "
+            "first to see the wiki's size and health, then use wiki_lifecycle "
+            "or wiki_confidence for the page lists."
         ),
         "inputSchema": {
             "type": "object",
@@ -378,10 +411,11 @@ TOOLS = [
             "projects, concepts): wiki pages with type: entity. name matches a "
             "case-insensitive substring of the title or path; entity_type "
             "matches exactly; when both are given both must match; with "
-            "neither, every entity is listed. Returns plain text: the count, "
-            "then up to 50 lines of '[type] path - title', sorted by title. "
-            "Read-only. Use wiki_query for free-text questions and "
-            "wiki_category_browse for tags."
+            "neither, every entity is listed. A name with no match returns a "
+            "zero count, not an error. Returns plain text: the count, then up "
+            "to 50 lines of '[type] path - title', sorted by title. Read-only. "
+            "Use wiki_query for free-text questions and wiki_category_browse "
+            "for tags."
         ),
         "inputSchema": {
             "type": "object",
@@ -402,11 +436,14 @@ TOOLS = [
         "name": "wiki_category_browse",
         "description": (
             "Browse the wiki by tag (the 'tags' frontmatter field; 'category' "
-            "here means tag). Without tag: lists tags used by at least "
-            "min_count pages, most used first, up to 100. With tag: lists up "
-            "to 50 pages with that tag as 'path - title' (min_count is "
-            "ignored). Returns plain text. Read-only. Use wiki_entity_search "
-            "for named things and wiki_query for free-text questions."
+            "here means tag). Tag names are lowercased and matched exactly. "
+            "Without tag: lists tags used by at least min_count pages, most "
+            "used first, up to 100. The count line reports every tag that "
+            "passes min_count; when more than 100 qualify, only the first 100 "
+            "are shown. With tag: lists up to 50 pages with that tag as "
+            "'path - title' (min_count is ignored). Returns plain text. "
+            "Read-only. Use wiki_entity_search for named things and wiki_query "
+            "for free-text questions."
         ),
         "inputSchema": {
             "type": "object",
@@ -428,10 +465,13 @@ TOOLS = [
         "name": "wiki_write_page",
         "description": (
             "Create or replace one Markdown page under wiki/. content is the whole page and "
-            "must start with frontmatter that has title and type. The tool sets origin: agent "
-            "and last_updated (today) in it. mode='create' (default) fails if the page "
-            "exists; mode='replace' overwrites it. Refused for paths outside wiki/, non-.md "
-            "files, wiki/archive/, system pages (index, log, overview, ...) and pages with "
+            "must start with frontmatter that has title and type; it is capped at 1 MiB. "
+            "The tool sets origin: agent and last_updated (today) in it; content with "
+            "confidence also gets confidence_measured (today) and confidence_pages "
+            "(wiki page count). mode='create' "
+            "(default) fails if the page exists; mode='replace' overwrites it. Refused for "
+            "paths outside wiki/, non-.md files, paths with a hidden segment or symlink, "
+            "wiki/archive/, system pages (index, log, overview, ...) and pages with "
             "origin: human. Without confirm=true it writes nothing and returns a preview. "
             "Ask the user before confirm=true. A real write is atomic and adds a line to "
             "wiki/log.md. Returns JSON {path, action, written, old_bytes, new_bytes}. Put new "
@@ -483,11 +523,14 @@ TOOLS = [
             "byte for byte. fields may set title, type, tags (a list that replaces the old "
             "one), lifecycle (draft, reviewed, verified, stale, archived) and confidence "
             "(0.0-1.0); other keys are refused. add_tags and remove_tags change the tag list "
-            "without replacing it. last_updated is set to today. Refused for system pages "
-            "and pages with origin: human. Without confirm=true it writes nothing and returns "
-            "the old and new value of each field. Ask the user before confirm=true. Returns "
-            "JSON {path, changes: {field: [old, new]}, written}. Use wiki_write_page to "
-            "change the body and wiki_archive_page to retire a page."
+            "without replacing it. A call with no fields, add_tags or remove_tags is an "
+            "error. last_updated is set to today; setting confidence also stamps "
+            "confidence_measured (today) and confidence_pages (wiki page count). "
+            "Refused for system pages and pages with "
+            "origin: human. Without confirm=true it writes nothing and returns the old and "
+            "new value of each field. Ask the user before confirm=true. Returns JSON {path, "
+            "changes: {field: [old, new]}, written}. Use wiki_write_page to change the body "
+            "and wiki_archive_page to retire a page."
         ),
         "inputSchema": {
             "type": "object",
@@ -531,10 +574,12 @@ TOOLS = [
             "Retire one page under wiki/ without deleting it: set lifecycle: archived, "
             "archived_reason and last_updated in its frontmatter. The file stays where it "
             "is, so links keep working, and wiki_update_frontmatter with lifecycle: reviewed "
-            "restores it. Nothing is ever deleted. Refused for system pages and pages with "
-            "origin: human. Without confirm=true it writes nothing and returns a preview. "
-            "Ask the user before confirm=true. Returns JSON {path, previous_lifecycle, "
-            "written}. Use wiki_lifecycle with state 'archived' to list archived pages."
+            "restores it. reason is required, at most 200 characters and one line; a longer "
+            "or multiline value is an error, not truncated. An already archived page returns "
+            "written=false with a note. Refused for system pages and pages with origin: human. "
+            "Without confirm=true it writes nothing and returns a preview. Ask the user before "
+            "confirm=true. Returns JSON {path, previous_lifecycle, written}. Use wiki_lifecycle "
+            "with state 'archived' to list archived pages."
         ),
         "inputSchema": {
             "type": "object",
@@ -621,10 +666,26 @@ _READ_PAGE_ALLOWED_ROOT_FILES: frozenset[str] = frozenset({
 })
 
 
+def _is_absolute(rel: str) -> bool:
+    """True for a POSIX or Windows absolute path on any host OS.
+
+    ``REPO_ROOT / rel`` silently drops REPO_ROOT when ``rel`` is absolute,
+    so an absolute path inside the repo would otherwise pass the guard.
+    """
+    return rel.startswith(("/", "\\")) or PureWindowsPath(rel).drive != ""
+
+
+def _path_error(rel: str) -> str:
+    """Error text for a path that `_safe_path` refused."""
+    if _is_absolute(rel):
+        return f"path must be relative to the sessionwiki folder, not absolute: {rel!r}"
+    return f"path escapes repo root: {rel!r}"
+
+
 def _safe_path(rel: str) -> Path | None:
-    """Resolve a user-supplied path relative to REPO_ROOT and refuse if it
-    escapes the repo (path traversal guard)."""
-    if not rel:
+    """Resolve a user-supplied relative path against REPO_ROOT and refuse
+    an absolute path or one that escapes the repo (path traversal guard)."""
+    if not rel or _is_absolute(rel):
         return None
     p = (REPO_ROOT / rel).resolve()
     try:
@@ -671,7 +732,7 @@ def _resolve_wiki_write_path(rel: str) -> tuple[Path | None, str | None]:
         return None, f"{rel} is a symlink; write tools refuse symlinks"
     p = _safe_path(rel)
     if p is None:
-        return None, f"path escapes repo root: {rel!r}"
+        return None, _path_error(rel)
     wiki_root = (REPO_ROOT / "wiki").resolve()
     try:
         wiki_parts = p.relative_to(wiki_root).parts
@@ -702,6 +763,18 @@ def _today() -> str:
     return date.today().isoformat()
 
 
+def _wiki_page_count() -> int:
+    """Wiki page count — the corpus state a confidence was measured against."""
+    wiki = REPO_ROOT / "wiki"
+    return sum(1 for _ in wiki.rglob("*.md")) if wiki.is_dir() else 0
+
+
+def _confidence_provenance() -> dict[str, Any]:
+    """A confidence number needs its date and the book state (benchmarks
+    principle): stamp both whenever a write sets confidence."""
+    return {"confidence_measured": _today(), "confidence_pages": _wiki_page_count()}
+
+
 def _append_edit_log(rel: str, tool: str, action: str) -> bool:
     """Append one ``edit`` line to wiki/log.md when that file exists."""
     log = REPO_ROOT / "wiki" / "log.md"
@@ -716,7 +789,7 @@ def _append_edit_log(rel: str, tool: str, action: str) -> bool:
     return True
 
 
-_FILTER_KEYS = ("project", "type", "tag", "date_from", "date_to")
+_FILTER_KEYS = ("project", "type", "tag", "lifecycle", "date_from", "date_to")
 
 
 def _tags(content: str) -> set[str]:
@@ -734,6 +807,12 @@ def _valid_day(value: str) -> str:
         return ""
 
 
+def _lifecycle_matches(content: str, states: str) -> bool:
+    """True when the page's lifecycle is one of the comma-separated states."""
+    wanted = {s.strip().lower() for s in states.split(",")}
+    return _frontmatter_value(content, "lifecycle").lower() in wanted
+
+
 def _passes_filters(content: str, filters: dict[str, str]) -> bool:
     """True when the page's frontmatter matches every given filter."""
     if not filters:
@@ -743,6 +822,8 @@ def _passes_filters(content: str, filters: dict[str, str]) -> bool:
     if "type" in filters and _frontmatter_value(content, "type") != filters["type"]:
         return False
     if "tag" in filters and filters["tag"].lower() not in _tags(content):
+        return False
+    if "lifecycle" in filters and not _lifecycle_matches(content, filters["lifecycle"]):
         return False
     day = _frontmatter_value(content, "date")[:10]
     if "date_from" in filters and (not day or day < filters["date_from"]):
@@ -844,7 +925,9 @@ def rank_query(
         # session page that holds the answer must win.
         weight = _QUERY_HUB_WEIGHT if rel.parts[0] in _QUERY_HUB_DIRS else 1.0
         weight *= _LIFECYCLE_WEIGHT.get(_frontmatter_value(content, "lifecycle").lower(), 1.0)
-        _collect(content, page, weight, content)
+        # Snippets show the body, not the YAML: a lesson's rule must fit
+        # the window (raw transcripts already snippet from the body).
+        _collect(content, page, weight, _body(content))
         links[page] = _page_links(content)
 
     # The wiki is the compiled layer and normally enough: source pages
@@ -902,7 +985,14 @@ def rank_query(
 
 def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
     question = (args.get("question") or "").strip()
-    max_pages = int(args.get("max_pages", 5))
+    try:
+        max_pages = int(args.get("max_pages", 5))
+    except (TypeError, ValueError):
+        return _err("max_pages must be an integer between 1 and 50")
+    # Clients may ignore JSON Schema bounds; keep the slice positive and
+    # bounded here so `0` cannot silence the search and `-1` cannot return
+    # every page but the last.
+    max_pages = max(1, min(max_pages, 50))
     # None = automatic: transcripts are read only when no wiki page
     # matches. True / False force them on / off.
     include_raw = args.get("include_raw")
@@ -928,6 +1018,7 @@ def tool_wiki_query(args: dict[str, Any]) -> dict[str, Any]:
         for hit in result["hits"]:
             linked = f", via {hit['via']}" if hit["via"] else ""
             out.append(f"## `{hit['path']}` (score: {hit['score']:.1f}{linked})\n")
+            out.append(_hit_status(hit["path"]) + "\n")
             out.append(hit["snippet"])
             out.append("")
     if result["scan_incomplete"]:
@@ -964,6 +1055,11 @@ _HEAD_BYTES = 8 * 1024
 # on more than _GRAPH_MAX_DF_SHARE of the pages (the project itself, Git,
 # Django) links nothing. scripts/eval_recall.py measures the effect.
 _GRAPH_HOP_WEIGHT = 0.3
+# The seed set is fixed, not max_pages: a seed set that grew with the
+# request made the top 5 differ from the first 5 of the top 10, and at
+# max_pages=20 the extra weak seeds pushed answers out (recall@20 was
+# below recall@10 on the eval set). See docs/benchmarks.md.
+_GRAPH_SEEDS = 10
 _GRAPH_MIN_SEEDS = 2
 _GRAPH_MAX_DF_SHARE = 0.05
 _GRAPH_MAX_NAME_LEN = 60
@@ -1007,7 +1103,7 @@ def _ranked_hits(
 ) -> list[dict[str, Any]]:
     """Top pages after the graph hop, as hit dicts."""
     lexical = {page: score for page, (score, _) in scored.items()}
-    bonus, via = _link_bonus(lexical, links, max_pages)
+    bonus, via = _link_bonus(lexical, links, _GRAPH_SEEDS)
     totals = {page: lexical.get(page, 0.0) + bonus.get(page, 0.0) for page in lexical.keys() | bonus.keys()}
     hits = []
     for page, score in sorted(totals.items(), key=lambda item: -item[1])[:max_pages]:
@@ -1058,6 +1154,56 @@ def _page_snippet(page: Path, tokens: list[str]) -> str:
     """Snippet for a page that came in through a link, not a word match."""
     content, _ = _read_capped(page, remaining_budget=_MCP_SCAN_PER_FILE_BYTES)
     return _extract_snippet(_body(content), tokens, max_chars=400)
+
+
+def _hit_status(rel_path: str) -> str:
+    """One line telling the reader which record it is looking at.
+
+    A wiki page is a curated record with a trust status; a raw transcript
+    is the session export and has not entered the wiki yet. Unset fields
+    stay visible: a record without a status is itself a signal.
+    """
+    head = _read_head(REPO_ROOT / rel_path)
+    if Path(rel_path).parts[0] == "raw":
+        day = _frontmatter_value(head, "date")
+        when = f" · {day}" if day else ""
+        return f"status: raw transcript{when} · not in the wiki yet"
+    if not head.startswith("---"):
+        return "status: no frontmatter"
+    return "status: " + " · ".join(_wiki_status_parts(head))
+
+
+def _wiki_status_parts(head: str) -> list[str]:
+    """Trust fields of a curated record; unset fields stay visible."""
+    kind = _frontmatter_value(head, "type") or "unset"
+    lifecycle = _frontmatter_value(head, "lifecycle") or "unset"
+    confidence = _frontmatter_value(head, "confidence") or "unset"
+    updated = (
+        _frontmatter_value(head, "last_updated")
+        or _frontmatter_value(head, "date")
+        or "unset"
+    )
+    parts = [
+        f"type={kind}", f"lifecycle={lifecycle}",
+        f"confidence={confidence}", f"updated={updated}",
+    ]
+    sources = _frontmatter_value(head, "sources")
+    if sources:
+        count = len([s for s in sources.strip("[]").split(",") if s.strip()])
+        parts.append(f"sources={count}")
+    measurement = _confidence_measurement(head, confidence)
+    if measurement:
+        parts.append(measurement)
+    return parts
+
+
+def _confidence_measurement(head: str, confidence: str) -> str:
+    """When and against what corpus the confidence was measured; '' if unknown."""
+    measured = _frontmatter_value(head, "confidence_measured")
+    if confidence == "unset" or not measured:
+        return ""
+    pages = _frontmatter_value(head, "confidence_pages")
+    return f"measured={measured}" + (f" ({pages} pages)" if pages else "")
 
 
 def _recency_factor(day: str, today: date) -> float:
@@ -1308,7 +1454,7 @@ def tool_wiki_read_page(args: dict[str, Any]) -> dict[str, Any]:
         return _err("path is required")
     p = _safe_path(rel)
     if p is None:
-        return _err(f"path escapes repo root: {rel!r}")
+        return _err(_path_error(rel))
     # #482: restrict to documented allowlist (wiki/, raw/, docs/,
     # examples/, site/, plus README/CHANGELOG/etc. at the root).
     # Reject .git/, .env, .llmwiki-state.json, node_modules, etc.
@@ -1325,6 +1471,8 @@ def tool_wiki_read_page(args: dict[str, Any]) -> dict[str, Any]:
         return _err(f"path is not a file: {rel}")
     try:
         content = p.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return _err(f"file is not valid UTF-8: {rel}")
     except OSError as e:
         return _err(f"read error: {e}")
     return _ok(f"{DATA_NOTICE}\n\n{content}")
@@ -1499,8 +1647,13 @@ def tool_wiki_confidence(args: dict[str, Any]) -> dict[str, Any]:
     """List pages filtered by confidence score range (v1.0 · #159)."""
     from sessionwiki.lint import load_pages
 
-    min_c = float(args.get("min_confidence", 0.0))
-    max_c = float(args.get("max_confidence", 1.0))
+    bounds: dict[str, float] = {}
+    for key, default in (("min_confidence", 0.0), ("max_confidence", 1.0)):
+        try:
+            bounds[key] = float(args.get(key, default))
+        except (TypeError, ValueError):
+            return _err(f"{key} must be a number")
+    min_c, max_c = bounds["min_confidence"], bounds["max_confidence"]
 
     wiki = REPO_ROOT / "wiki"
     pages = load_pages(wiki)
@@ -1647,7 +1800,10 @@ def tool_wiki_category_browse(args: dict[str, Any]) -> dict[str, Any]:
     from sessionwiki.lint import load_pages
 
     tag = (args.get("tag") or "").strip().lower()
-    min_count = int(args.get("min_count", 1))
+    try:
+        min_count = int(args.get("min_count", 1))
+    except (TypeError, ValueError):
+        return _err("min_count must be an integer")
 
     wiki = REPO_ROOT / "wiki"
     pages = load_pages(wiki)
@@ -1752,9 +1908,10 @@ def tool_wiki_write_page(args: dict[str, Any]) -> dict[str, Any]:
         return _err(f"{rel} does not exist; use mode='create' to create it")
 
     old_bytes = p.stat().st_size if p.is_file() else 0
-    new_text = set_frontmatter_fields(
-        content, {"origin": "agent", "last_updated": _today()}
-    )
+    extra: dict[str, Any] = {"origin": "agent", "last_updated": _today()}
+    if meta.get("confidence") not in (None, ""):
+        extra.update(_confidence_provenance())
+    new_text = set_frontmatter_fields(content, extra)
     payload = {
         "path": _write_rel(p),
         "action": mode,
@@ -1849,6 +2006,10 @@ def tool_wiki_update_frontmatter(args: dict[str, Any]) -> dict[str, Any]:
             new_fields["tags"] = final
             changes["tags"] = [_page_tags(text), final]
 
+        if "confidence" in new_fields:
+            for key, value in _confidence_provenance().items():
+                new_fields[key] = value
+                changes[key] = [meta.get(key), value]
         new_fields["last_updated"] = _today()
         new_text = set_frontmatter_fields(text, new_fields)
     except ValueError as e:

@@ -233,3 +233,31 @@ def test_a_better_match_archived_page_is_lower_not_removed(tmp_path: Path):
     assert paths[0] == FRESH_TWIN
     scores = {hit["path"]: hit["score"] for hit in result["hits"]}
     assert scores[FRESH_TWIN] > scores[BETTER_ARCHIVED]
+
+
+def _lifecycle_page(root: Path, slug: str, state: str) -> None:
+    front = {"title": slug, "type": "concept"}
+    if state:
+        front["lifecycle"] = state
+    _page(root / "wiki" / "concepts" / f"{slug}.md", front,
+          "## Summary\n\nWidget lifecycle states.")
+
+
+def test_lifecycle_filter_keeps_only_the_listed_states(tmp_path: Path):
+    for slug, state in [("draft-page", "draft"), ("reviewed-page", "reviewed"),
+                        ("verified-page", "verified"), ("no-state-page", "")]:
+        _lifecycle_page(tmp_path, slug, state)
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query(
+            "widget", include_raw=False, filters={"lifecycle": "reviewed,verified"},
+        )
+    assert {Path(p).stem for p in _paths(result)} == {"reviewed-page", "verified-page"}
+
+
+def test_lifecycle_filter_ignores_case_and_spaces(tmp_path: Path):
+    _lifecycle_page(tmp_path, "reviewed-page", "reviewed")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query(
+            "widget", include_raw=False, filters={"lifecycle": " Reviewed , VERIFIED "},
+        )
+    assert {Path(p).stem for p in _paths(result)} == {"reviewed-page"}

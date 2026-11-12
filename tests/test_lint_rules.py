@@ -164,10 +164,25 @@ def test_completeness_still_flags_regular_pages():
 def test_validity_good_values():
     pages = {"a.md": _mk_page({
         "title": "A", "type": "entity", "lifecycle": "draft",
-        "entity_type": "tool", "confidence": "0.8"
+        "entity_type": "tool", "confidence": "0.8",
+        "confidence_measured": "2026-11-11",
     }, "")}
     issues = FrontmatterValidity().run(pages)
     assert issues == []
+
+
+def test_validity_lesson_type_is_valid():
+    pages = {"a.md": _mk_page({"title": "A", "type": "lesson"}, "")}
+    issues = FrontmatterValidity().run(pages)
+    assert issues == []
+
+
+def test_validity_confidence_without_provenance_warns():
+    pages = {"a.md": _mk_page({"title": "A", "type": "entity",
+                                "confidence": "0.8"}, "")}
+    issues = FrontmatterValidity().run(pages)
+    assert any(i["severity"] == "warning" and "provenance" in i["message"]
+               for i in issues)
 
 
 def test_validity_bad_type():

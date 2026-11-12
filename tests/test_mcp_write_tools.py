@@ -325,6 +325,52 @@ def test_update_preview_shows_changes_and_writes_nothing(repo: Path):
     assert page.read_text(encoding="utf-8") == before
 
 
+def test_update_confidence_stamps_measurement_provenance(repo: Path):
+    page = repo / "wiki" / "a.md"
+    page.write_text(UPDATE_PAGE, encoding="utf-8")
+    data = _payload(server.tool_wiki_update_frontmatter({
+        "path": "wiki/a.md", "fields": {"confidence": 0.8}, "confirm": True,
+    }))
+    assert data["written"] is True
+    meta, _ = parse_frontmatter(page.read_text(encoding="utf-8"))
+    assert meta["confidence_measured"] == date.today().isoformat()
+    assert meta["confidence_pages"] == 1
+
+
+def test_update_without_confidence_adds_no_provenance(repo: Path):
+    page = repo / "wiki" / "a.md"
+    page.write_text(UPDATE_PAGE, encoding="utf-8")
+    server.tool_wiki_update_frontmatter({
+        "path": "wiki/a.md", "fields": {"title": "B"}, "confirm": True,
+    })
+    meta, _ = parse_frontmatter(page.read_text(encoding="utf-8"))
+    assert "confidence_measured" not in meta
+    assert "confidence_pages" not in meta
+
+
+def test_update_preview_lists_the_provenance_changes(repo: Path):
+    page = repo / "wiki" / "a.md"
+    page.write_text(UPDATE_PAGE, encoding="utf-8")
+    data = _payload(server.tool_wiki_update_frontmatter({
+        "path": "wiki/a.md", "fields": {"confidence": 0.8},
+    }))
+    assert data["written"] is False
+    assert data["changes"]["confidence_measured"] == [None, date.today().isoformat()]
+    assert data["changes"]["confidence_pages"] == [None, 1]
+
+
+def test_write_page_confidence_stamps_measurement_provenance(repo: Path):
+    content = '---\ntitle: "N"\ntype: concept\nconfidence: 0.7\n---\n\nBody.\n'
+    data = _payload(server.tool_wiki_write_page({
+        "path": "wiki/n.md", "content": content, "confirm": True,
+    }))
+    assert data["written"] is True
+    meta, _ = parse_frontmatter((repo / "wiki" / "n.md").read_text(encoding="utf-8"))
+    assert meta["confidence_measured"] == date.today().isoformat()
+    # The corpus state at measurement time: the new page is not in it yet.
+    assert meta["confidence_pages"] == 0
+
+
 def test_update_never_changes_human_page(repo: Path):
     page = repo / "wiki" / "hand.md"
     original = '---\ntitle: "H"\ntype: concept\norigin: human\n---\nbody\n'

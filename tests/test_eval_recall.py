@@ -75,3 +75,49 @@ def test_ranked_paths_are_read_from_the_wiki_query_output():
     text = "# Query: x\n\n## `wiki/sources/p/a.md` (score: 3.0)\nsnippet\n## `raw/sessions/b.md` (score: 1.0)\n"
 
     assert eval_recall.ranked_paths(text) == ["wiki/sources/p/a.md", "raw/sessions/b.md"]
+
+
+def _snapshot_wiki(tmp_path: Path) -> Path:
+    """An old page that holds the answer and a newer one that quotes the query."""
+    sources = tmp_path / "wiki" / "sources" / "app"
+    sources.mkdir(parents=True)
+    (sources / "2026-01-01-old.md").write_text(
+        '---\ntitle: "Session: old"\ntype: source\ndate: 2026-01-01\n---\n\nKeycloak login.\n',
+        encoding="utf-8",
+    )
+    (sources / "2026-02-01-new.md").write_text(
+        '---\ntitle: "Keycloak"\ntype: source\ndate: 2026-02-01\n---\n\nKeycloak keycloak.\n',
+        encoding="utf-8",
+    )
+    queries = tmp_path / "q.json"
+    queries.write_text(json.dumps([{"id": "q1", "kind": "exact", "question": "keycloak",
+                                    "expected": ["wiki/sources/app/2026-01-01-old.md"]}]))
+    return queries
+
+
+def test_date_to_pins_the_wiki_snapshot(tmp_path: Path, capsys):
+    from unittest.mock import patch
+
+    from sessionwiki.mcp import server
+
+    queries = _snapshot_wiki(tmp_path)
+    live, pinned = tmp_path / "live.json", tmp_path / "pinned.json"
+
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        eval_recall.main([str(queries), "--k", "1", "--json", str(live)])
+        eval_recall.main([str(queries), "--k", "1", "--date-to", "2026-01-31", "--json", str(pinned)])
+
+    assert json.loads(live.read_text())["overall"]["recall"] == 0.0
+    report = json.loads(pinned.read_text())
+    assert report["overall"]["recall"] == 1.0
+    assert report["date_to"] == "2026-01-31"
+    assert "2026-01-31" in capsys.readouterr().out
+
+
+def test_invalid_date_to_is_rejected(tmp_path: Path):
+    import pytest
+
+    queries = _snapshot_wiki(tmp_path)
+
+    with pytest.raises(SystemExit):
+        eval_recall.main([str(queries), "--date-to", "last week"])

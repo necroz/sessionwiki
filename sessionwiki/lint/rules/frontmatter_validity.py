@@ -15,7 +15,8 @@ class FrontmatterValidity(LintRule):
     severity = "error"
 
     VALID_TYPES = {"source", "entity", "concept", "synthesis",
-                   "comparison", "question", "navigation", "context", "note"}
+                   "comparison", "question", "navigation", "context", "note",
+                   "lesson"}
     VALID_LIFECYCLES = {s.value for s in LifecycleState}
 
     def run(self, pages, *, llm_callback=None):
@@ -50,22 +51,31 @@ class FrontmatterValidity(LintRule):
                     "message": f"invalid entity_type {et!r} (expected one of {list(ENTITY_TYPES)})",
                 })
 
-            conf = meta.get("confidence", "")
-            if conf:
-                try:
-                    c = float(conf)
-                    if not (0.0 <= c <= 1.0):
-                        issues.append({
-                            "rule": self.name,
-                            "severity": "error",
-                            "page": rel,
-                            "message": f"confidence {c} out of range [0.0, 1.0]",
-                        })
-                except (ValueError, TypeError):
-                    issues.append({
-                        "rule": self.name,
-                        "severity": "error",
-                        "page": rel,
-                        "message": f"confidence not numeric: {conf!r}",
-                    })
+            issues += self._confidence_issues(meta, rel)
         return issues
+
+    def _confidence_issues(self, meta: dict, rel: str) -> list[dict]:
+        """A confidence must be a number in range and carry provenance."""
+        conf = meta.get("confidence", "")
+        if not conf:
+            return []
+        try:
+            c = float(conf)
+        except (ValueError, TypeError):
+            return [{
+                "rule": self.name, "severity": "error", "page": rel,
+                "message": f"confidence not numeric: {conf!r}",
+            }]
+        if not (0.0 <= c <= 1.0):
+            return [{
+                "rule": self.name, "severity": "error", "page": rel,
+                "message": f"confidence {c} out of range [0.0, 1.0]",
+            }]
+        if not meta.get("confidence_measured"):
+            return [{
+                "rule": self.name, "severity": "warning", "page": rel,
+                "message": "confidence without provenance: stamp "
+                           "confidence_measured and confidence_pages "
+                           "when scoring",
+            }]
+        return []

@@ -118,3 +118,27 @@ def test_tiny_wiki_where_every_page_shares_a_name_does_not_crash(tmp_path):
     with patch.object(server, "REPO_ROOT", tmp_path):
         result = server.tool_wiki_query({"question": "keycloak setup"})
     assert result["isError"] is False
+
+
+def test_shorter_result_list_is_a_prefix_of_a_longer_one(tmp_path: Path):
+    """The graph hop must not depend on how many results the caller wants.
+
+    Four weaker hits name Vault. When the seed set shrank with max_pages,
+    only two of them were seeds at max_pages=5, the pages that name Vault
+    got a different bonus, and the top 5 differed from the first 5 of the
+    top 10.
+    """
+    for i in range(3):
+        _source(tmp_path, f"oidc{i}", "Reviewed the OIDC setup.", ["Common"])
+    for i in range(4):
+        _source(tmp_path, f"carrier{i}", "Rotated the OIDC client secret.", ["Vault", "Common"])
+    neighbour = _source(tmp_path, "neighbour", "Moved the signing keys.", ["Vault", "Common"])
+    for i in range(120):
+        _source(tmp_path, f"filler{i}", f"Routine maintenance number {i}.", ["Common"])
+
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        short = _ranked(tool_wiki_query({"question": "OIDC", "max_pages": 5})["content"][0]["text"])
+        long = _ranked(tool_wiki_query({"question": "OIDC", "max_pages": 10})["content"][0]["text"])
+
+    assert short == long[:5]
+    assert neighbour in long

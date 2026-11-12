@@ -22,6 +22,7 @@ wiki/          LLM-maintained. Pages you write that summarise and cross-referenc
   entities/        People, companies, projects, products.
   concepts/        Ideas, frameworks, methods.
   syntheses/       Saved query answers.
+  lessons/         Distilled experience injected into later attempts.
 
 site/          GENERATED. Static HTML from `python3 -m sessionwiki build`. Do not edit.
 ```
@@ -148,6 +149,41 @@ One paragraph.
 - [[Other]]
 ```
 
+### Lesson page (`wiki/lessons/<slug>.md`)
+
+Distilled experience carried into later attempts (Reflexion-style). The
+prompt hook injects up to three lessons whose lifecycle is `reviewed` or
+`verified`; `draft` lessons stay out until approved. Prefer external
+evidence (test result, review verdict, user correction) over the model's
+self-evaluation. Agent-written lessons start as `draft`; approve them
+with `wiki_update_frontmatter` (`lifecycle: reviewed`) after the user
+agrees.
+
+```markdown
+---
+title: "Short rule name"
+type: lesson
+tags: []
+sources: [session-slug]
+project: project-slug
+date: YYYY-MM-DD
+lifecycle: draft  # reviewed/verified = approved for auto-injection
+confidence: 0.7
+---
+
+## Situation
+When this applies.
+
+## Outcome
+What happened, with evidence.
+
+## Rule
+What to do differently next time. One or two sentences.
+
+## Connections
+- [[session-slug]] — where this was learned
+```
+
 ### Index
 
 ```markdown
@@ -184,6 +220,7 @@ Parse recent entries with: `grep "^## \[" wiki/log.md | tail -10`
 - Source slugs: `kebab-case`
 - Entity / concept pages: `TitleCase.md`
 - Synthesis pages: `kebab-case.md`
+- Lesson pages: `kebab-case.md`
 
 ## Cross-project wiki access
 
@@ -204,6 +241,7 @@ Every entity page should declare `entity_type` in frontmatter:
 ## Confidence & lifecycle
 
 - `confidence: 0.85` — 4-factor score (source count, quality, recency, cross-refs)
+- `confidence_measured: 2026-11-11` / `confidence_pages: 976` — stamped automatically when a write sets confidence: the date and the corpus state at measurement time. A confidence without provenance is a lint warning; re-score when the sources change.
 - `lifecycle: draft` — one of: draft, reviewed, verified, stale, archived
 
 ## Hard rules

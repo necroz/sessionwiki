@@ -127,6 +127,29 @@ def _recent_sessions(project: str, limit: int) -> list[tuple[str, str, str, str]
 _TURN_RE = re.compile(r"^### Turn \d+ — (User|Assistant)\s*$", re.MULTILINE)
 _HANDOFF_TAIL_BYTES = 64 * 1024
 _HANDOFF_MAX_CHARS = 400
+# The injection is a context budget, not a dump: fields clip, the oldest
+# sessions drop first, and the handoff fills what remains. Every cut keeps
+# a pointer to the full record (MemGPT: lossy in front, lossless behind).
+_RECALL_FIELD_MAX_CHARS = 200
+_RECALL_MAX_CHARS = 4000
+_RECALL_HANDOFF_MIN_CHARS = 40
+
+
+def _clip(text: str, limit: int) -> str:
+    """Shorten text to limit chars, marking the cut with an ellipsis."""
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
+
+
+def _recall_budget() -> int:
+    """Char budget for the recall injection; override with an env variable."""
+    raw = os.environ.get("SESSIONWIKI_RECALL_MAX_CHARS", "")
+    try:
+        value = int(raw)
+    except ValueError:
+        return _RECALL_MAX_CHARS
+    return value if value > 0 else _RECALL_MAX_CHARS
 
 
 def _raw_path_for(path: str) -> Path | None:
@@ -178,42 +201,31 @@ def cmd_recall(args: argparse.Namespace) -> int:
         return _prompt_recall()
     from sessionwiki.mcp.server import DATA_NOTICE
 
-    project = args.project or _project_from_hook_input() or Path.cwd().name
+    project = _recall_project(args)
     items = _recent_sessions(project, args.limit)
     handoff = ""
     if items:
         raw = _raw_path_for(items[0][3])
         handoff = _last_assistant_text(raw) if raw else ""
     if args.format == "json":
-        print(json.dumps({
-            "project": project,
-            "notice": DATA_NOTICE,
-            "sessions": [
-                {"date": day, "request": request, "summary": summary, "path": path}
-                for day, request, summary, path in items
-            ],
-            "handoff": (
-                {"path": items[0][3], "date": items[0][0], "text": handoff}
-                if items else None
-            ),
-        }, ensure_ascii=False, indent=2))
+        print(json.dumps(_recall_json_document(project, items, handoff, DATA_NOTICE),
+                         ensure_ascii=False, indent=2))
         return 0
     if not items:
         return 0
-    lines = [f"Recent sessions in project '{project}' (sessionwiki):", DATA_NOTICE, ""]
-    for day, request, summary, path in items:
-        what = f"«{request}»" if request else "(no request recorded)"
-        note = summary or "not in the wiki yet"
-        lines.append(f"- {day} {what} — {note} ({path})")
-    if handoff:
-        what = f"«{items[0][1]}»" if items[0][1] else "(no request recorded)"
-        lines += ["", f"Last session ended with ({what}, {items[0][0]}):", handoff]
-    lines += [
+    budget = _recall_budget()
+    footer = [
         "",
         "Before you ask the user about earlier work, call the wiki_query tool; "
         "open a page with wiki_read_page.",
     ]
-    text = "\n".join(lines)
+    lines = [f"Recent sessions in project '{project}' (sessionwiki):", DATA_NOTICE, ""]
+    lines += _recall_session_lines(items)
+    lines = _drop_oldest_over_budget(lines, footer, budget)
+    if handoff:
+        used = len("\n".join(lines + footer))
+        lines += _recall_handoff_lines(items[0], handoff, used, budget)
+    text = "\n".join(lines + footer)
     if args.format == "hook":
         print(json.dumps({"hookSpecificOutput": {
             "hookEventName": "SessionStart", "additionalContext": text,
@@ -223,8 +235,68 @@ def cmd_recall(args: argparse.Namespace) -> int:
     return 0
 
 
+def _recall_project(args: argparse.Namespace) -> str:
+    """Explicit project, else the hook's cwd, else the current folder."""
+    return args.project or _project_from_hook_input() or Path.cwd().name
+
+
+def _recall_json_document(project: str, items: list[tuple[str, str, str, str]],
+                          handoff: str, notice: str) -> dict:
+    """Machine-readable recall: complete, no clipping, no budget."""
+    return {
+        "project": project,
+        "notice": notice,
+        "sessions": [
+            {"date": day, "request": request, "summary": summary, "path": path}
+            for day, request, summary, path in items
+        ],
+        "handoff": (
+            {"path": items[0][3], "date": items[0][0], "text": handoff}
+            if items else None
+        ),
+    }
+
+
+def _recall_session_lines(items: list[tuple[str, str, str, str]]) -> list[str]:
+    """One clipped line per session, newest first."""
+    lines = []
+    for day, request, summary, path in items:
+        what = f"«{_clip(request, _RECALL_FIELD_MAX_CHARS)}»" if request else "(no request recorded)"
+        note = _clip(summary, _RECALL_FIELD_MAX_CHARS) or "not in the wiki yet"
+        lines.append(f"- {day} {what} — {note} ({path})")
+    return lines
+
+
+def _drop_oldest_over_budget(lines: list[str], footer: list[str], budget: int) -> list[str]:
+    """The list is newest first: when the budget is tight, the oldest goes.
+
+    ``lines`` carries three header rows before the session rows.
+    """
+    omitted = 0
+    while len(lines) > 3 and len("\n".join(lines + footer)) > budget:
+        lines.pop()
+        omitted += 1
+    if omitted:
+        lines.append(f"({omitted} older session(s) omitted: over the {budget}-char context budget)")
+    return lines
+
+
+def _recall_handoff_lines(item: tuple[str, str, str, str], handoff: str, used: int, budget: int) -> list[str]:
+    """The handoff fills the remaining budget; every cut keeps a pointer."""
+    day, request, _, path = item
+    what = f"«{_clip(request, _RECALL_FIELD_MAX_CHARS)}»" if request else "(no request recorded)"
+    header = f"Last session ended with ({what}, {day}):"
+    pointer = f"(full record: {path})"
+    room = budget - used - len(header) - len(pointer) - 3
+    if room < _RECALL_HANDOFF_MIN_CHARS:
+        return ["", header, f"(handoff omitted: over the {budget}-char context budget)", pointer]
+    return ["", header, _clip(handoff, min(_HANDOFF_MAX_CHARS, room)), pointer]
+
+
 _PROMPT_RECALL_MIN_SCORE = 40.0  # median top score of 20 recent distinct prompts
 _PROMPT_RECALL_MAX_PAGES = 3
+# Reflexion keeps 1-3 reflections in its buffer; the same cap applies here.
+_PROMPT_RECALL_MAX_LESSONS = 3
 _PROMPT_RECALL_MIN_CHARS = 20
 
 
@@ -240,43 +312,96 @@ def _prompt_recall_threshold() -> float:
 def _prompt_recall() -> int:
     """UserPromptSubmit hook: add related wiki pages for the prompt on stdin.
 
+    Also injects up to three approved lessons (type ``lesson``, lifecycle
+    ``reviewed`` or ``verified``) — experience carried into the next
+    attempt, Reflexion-style. Draft lessons stay out until approved.
+
     Runs on every prompt, so it is opt-in (``SESSIONWIKI_PROMPT_RECALL=1``)
     and silent on every error path: a hook must never block the prompt.
     """
     if os.environ.get("SESSIONWIKI_PROMPT_RECALL") != "1":
         return 0
-    try:
-        data = json.loads(sys.stdin.read() or "{}")
-    except (OSError, ValueError):
+    parsed = _prompt_recall_input()
+    if parsed is None:
         return 0
-    if not isinstance(data, dict):
+    prompt, project = parsed
+    queries = _prompt_recall_queries(prompt, project)
+    if queries is None:
         return 0
-    prompt = str(data.get("prompt") or "").strip()
-    if len(prompt) < _PROMPT_RECALL_MIN_CHARS or prompt.startswith("/"):
+    hits, lessons = _prompt_recall_hits(*queries)
+    if not hits and not lessons:
         return 0
-    cwd = data.get("cwd")
-    project = Path(cwd).name if isinstance(cwd, str) and cwd else ""
-    from sessionwiki.mcp.server import DATA_NOTICE, rank_query
-    try:
-        result = rank_query(
-            prompt, max_pages=_PROMPT_RECALL_MAX_PAGES, include_raw=False,
-            filters={"project": project} if project else None,
-        )
-    except Exception:  # a hook must never block the user's prompt
-        return 0
-    hits = [h for h in result["hits"] if h["score"] >= _prompt_recall_threshold()]
-    if not hits:
-        return 0
+    from sessionwiki.mcp.server import DATA_NOTICE
     lines = ["Related past work (sessionwiki):", DATA_NOTICE, ""]
-    for h in hits:
-        snippet = " ".join(h["snippet"].split())[:200]
-        lines.append(f"- {h['path']} — {snippet}")
+    lines += [_recall_hit_line(h) for h in hits]
+    if lessons:
+        lines += ["", "Lessons from past work (approved):"]
+        lines += [_recall_hit_line(h) for h in lessons]
     lines += ["", "Read the page with wiki_read_page before you ask the user about it."]
     print(json.dumps({"hookSpecificOutput": {
         "hookEventName": "UserPromptSubmit",
         "additionalContext": "\n".join(lines),
     }}, ensure_ascii=False))
     return 0
+
+
+def _prompt_recall_input() -> tuple[str, str] | None:
+    """(prompt, project) from the hook's stdin; None when it must stay silent."""
+    try:
+        data = json.loads(sys.stdin.read() or "{}")
+    except (OSError, ValueError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    prompt = str(data.get("prompt") or "").strip()
+    if len(prompt) < _PROMPT_RECALL_MIN_CHARS or prompt.startswith("/"):
+        return None
+    cwd = data.get("cwd")
+    project = Path(cwd).name if isinstance(cwd, str) and cwd else ""
+    return prompt, project
+
+
+def _prompt_recall_queries(prompt: str, project: str) -> tuple[dict, dict] | None:
+    """Page hits and approved-lesson hits; None on any ranking error."""
+    from sessionwiki.mcp.server import rank_query
+    try:
+        result = rank_query(
+            prompt, max_pages=_PROMPT_RECALL_MAX_PAGES, include_raw=False,
+            filters={"project": project} if project else None,
+        )
+        lesson_filters = {"type": "lesson", "lifecycle": "reviewed,verified"}
+        if project:
+            lesson_filters["project"] = project
+        lesson_result = rank_query(
+            prompt, max_pages=_PROMPT_RECALL_MAX_LESSONS, include_raw=False,
+            filters=lesson_filters,
+        )
+    except Exception:  # a hook must never block the user's prompt
+        return None
+    return result, lesson_result
+
+
+def _prompt_recall_hits(result: dict, lesson_result: dict) -> tuple[list[dict], list[dict]]:
+    """Threshold-filtered pages and lessons, kept apart.
+
+    Lessons belong to the approved block only: as plain page hits they
+    would bypass the lifecycle gate and leak drafts into the prompt.
+    """
+    from sessionwiki.mcp.server import _frontmatter_value, _read_head
+    threshold = _prompt_recall_threshold()
+    lessons = [h for h in lesson_result["hits"] if h["score"] >= threshold]
+    hits = [
+        h for h in result["hits"]
+        if h["score"] >= threshold
+        and _frontmatter_value(_read_head(REPO_ROOT / h["path"]), "type") != "lesson"
+    ]
+    return hits, lessons
+
+
+def _recall_hit_line(hit: dict) -> str:
+    """One injection line: path and a flattened, clipped snippet."""
+    snippet = " ".join(hit["snippet"].split())[:200]
+    return f"- {hit['path']} — {snippet}"
 
 
 def cmd_import_memory(args: argparse.Namespace) -> int:
@@ -950,6 +1075,7 @@ def cmd_query(args: argparse.Namespace) -> int:
         "project": args.project,
         "type": args.page_type,
         "tag": args.tag,
+        "lifecycle": args.lifecycle,
         "date_from": args.date_from,
         "date_to": args.date_to,
     }
@@ -2072,6 +2198,8 @@ def build_parser() -> argparse.ArgumentParser:
                      help="Only this page type: source, entity, concept, ...")
     qry.add_argument("--tag", default="",
                      help="Only pages with this tag, e.g. the agent")
+    qry.add_argument("--lifecycle", default="",
+                     help="Only pages in these lifecycle states, comma-separated")
     qry.add_argument("--date-from", dest="date_from", default="",
                      help="Only pages dated on or after YYYY-MM-DD")
     qry.add_argument("--date-to", dest="date_to", default="",

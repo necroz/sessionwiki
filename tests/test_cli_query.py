@@ -101,3 +101,17 @@ def test_graph_without_graphify_returns_2(tmp_path: Path, capsys):
         rc, _, err = _run(["chunking", "--graph"], capsys)
     assert rc == 2
     assert "graphify not installed" in err
+
+
+def test_lifecycle_flag_filters_pages(tmp_path: Path, capsys):
+    _page(tmp_path / "wiki" / "concepts" / "Draft.md",
+          {"title": "Draft chunking", "type": "concept", "lifecycle": "draft"},
+          "## Summary\n\nChunking draft page.")
+    _page(tmp_path / "wiki" / "concepts" / "Reviewed.md",
+          {"title": "Reviewed chunking", "type": "concept", "lifecycle": "reviewed"},
+          "## Summary\n\nChunking reviewed page.")
+    with patch.object(cli, "REPO_ROOT", tmp_path), patch.object(server, "REPO_ROOT", tmp_path):
+        rc, out, _ = _run(["chunking", "--lifecycle", "reviewed", "--json"], capsys)
+    assert rc == 0
+    paths = [hit["path"] for hit in json.loads(out)["hits"]]
+    assert paths == ["wiki/concepts/Reviewed.md"]

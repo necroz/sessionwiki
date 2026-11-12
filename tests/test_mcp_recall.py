@@ -280,3 +280,127 @@ def test_recall_json_has_a_handoff_key(tmp_path: Path):
     }
     empty = json.loads(_recall(tmp_path, "--project", "nope", "--format", "json"))
     assert empty["handoff"] is None
+
+
+# ─── recall context budget ────────────────────────────────────────────
+
+
+def test_recall_clips_long_requests_and_summaries(tmp_path: Path):
+    long_request = "очень длинный запрос " * 30
+    long_summary = "A very long summary sentence. " * 20
+    _page(tmp_path / "wiki" / "sources" / "app" / "2026-11-05-long.md",
+          {"title": '"Session: long"', "type": "source", "slug": "long",
+           "project": "app", "date": "2026-11-05",
+           "description": f'"{long_request.strip()}"'},
+          f"## Summary\n\n{long_summary}")
+    text = _recall(tmp_path, "--project", "app")
+    assert long_request.strip() not in text
+    assert long_summary not in text
+    assert "…" in text
+
+
+def test_recall_json_keeps_the_full_request(tmp_path: Path):
+    long_request = "очень длинный запрос " * 30
+    _page(tmp_path / "wiki" / "sources" / "app" / "2026-11-05-long.md",
+          {"title": '"Session: long"', "type": "source", "slug": "long",
+           "project": "app", "date": "2026-11-05",
+           "description": f'"{long_request.strip()}"'},
+          "## Summary\n\nShort.")
+    payload = json.loads(_recall(tmp_path, "--project", "app", "--format", "json"))
+    assert payload["sessions"][0]["request"] == long_request.strip()
+
+
+def test_recall_handoff_points_at_the_full_record(tmp_path: Path):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "почини сборку",
+                    ("Assistant", "Сборку починил."))
+    text = _recall(tmp_path, "--project", "app", "--limit", "1")
+    assert "(full record: raw/sessions/2026-11-07T09-00-app-s5.md)" in text
+
+
+def test_recall_omits_the_handoff_when_over_budget(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "почини сборку",
+                    ("Assistant", "Сборку починил."))
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "500")
+    text = _recall(tmp_path, "--project", "app", "--limit", "1")
+    assert "handoff omitted" in text
+    assert "Сборку починил." not in text
+    assert "(full record: raw/sessions/2026-11-07T09-00-app-s5.md)" in text
+
+
+def test_recall_drops_oldest_sessions_when_over_budget(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "600")
+    text = _recall(tmp_path, "--project", "app")
+    assert "собери релиз" in text  # newest stays
+    assert "older session(s) omitted" in text
+    assert "добавь кэш" not in text  # oldest goes first
+
+
+def test_recall_clips_to_exactly_the_field_limit(tmp_path: Path):
+    long_request = "x" * 300
+    _page(tmp_path / "wiki" / "sources" / "app" / "2026-11-05-long.md",
+          {"title": '"Session: long"', "type": "source", "slug": "long",
+           "project": "app", "date": "2026-11-05",
+           "description": f'"{long_request}"'},
+          "## Summary\n\nShort.")
+    text = _recall(tmp_path, "--project", "app")
+    clipped = re.search(r"«(x+…)»", text).group(1)
+    assert len(clipped) == 200
+
+
+def test_recall_budget_of_one_char_is_honored(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "1")
+    text = _recall(tmp_path, "--project", "app")
+    assert "older session(s) omitted" in text
+    assert "собери релиз" not in text
+
+
+def test_recall_budget_of_zero_falls_back_to_the_default(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "0")
+    text = _recall(tmp_path, "--project", "app")
+    assert "собери релиз" in text
+    assert "older session(s) omitted" not in text
+
+
+def test_recall_counts_the_omitted_sessions_exactly(tmp_path: Path, monkeypatch):
+    _seed_project(tmp_path)
+    monkeypatch.setenv("SESSIONWIKI_RECALL_MAX_CHARS", "600")
+    text = _recall(tmp_path, "--project", "app")
+    assert "(1 older session(s) omitted" in text
+
+
+def test_drop_oldest_keeps_everything_at_exactly_the_budget():
+    from sessionwiki.cli import _drop_oldest_over_budget
+    lines = ["head", "notice", "", "- session one", "- session two"]
+    footer = ["", "footer"]
+    budget = len("\n".join(lines + footer))
+    assert _drop_oldest_over_budget(list(lines), footer, budget) == lines
+
+
+def test_handoff_stays_at_exactly_the_minimum_room():
+    from sessionwiki.cli import (
+        _RECALL_HANDOFF_MIN_CHARS, _recall_handoff_lines,
+    )
+    item = ("2026-11-07", "req", "", "raw/sessions/x.md")
+    header = "Last session ended with («req», 2026-11-07):"
+    pointer = "(full record: raw/sessions/x.md)"
+    budget = len(header) + len(pointer) + 3 + _RECALL_HANDOFF_MIN_CHARS
+    lines = _recall_handoff_lines(item, "y" * 100, 0, budget)
+    assert "handoff omitted" not in "\n".join(lines)
+    # room == the minimum: the handoff stays, clipped to exactly the room
+    assert "y" * (_RECALL_HANDOFF_MIN_CHARS - 1) + "…" in "\n".join(lines)
+
+
+def test_recall_handoff_comes_from_the_newest_session(tmp_path: Path):
+    _seed_project(tmp_path)
+    _raw_with_turns(tmp_path, "2026-11-07", "s5", "новый запрос",
+                    ("Assistant", "Новый ответ."))
+    _raw_with_turns(tmp_path, "2026-11-06", "s4", "собери релиз",
+                    ("Assistant", "Старый ответ."))
+    text = _recall(tmp_path, "--project", "app", "--limit", "2")
+    assert "Новый ответ." in text
+    assert "Старый ответ." not in text
