@@ -14,6 +14,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 - **MemoryTax benchmark harness** — `scripts/eval_memorytax.py` reproduces the MemoryTax method (arXiv 2610.29823) on the repository's own history: four methods (`wiki`, `raw` BM25, `agent-wiki`, `agent-raw`), two reader models, an LLM judge, a pinned corpus (`--date-to`) and a cost/accuracy report. `scripts/build_memorytax_questions.py` builds the question set, `scripts/memorytax_report.py` renders the table. The question set names private sessions and stays out of git.
 - **Published MemoryTax results** — `docs/benchmarks.md` now reports the 80-question run. Raw search beats wiki search on factual recall (60% against 12%), so the docs state the two-layer rule: the wiki is for orientation and synthesis, raw transcripts are for precise facts.
+- **CI runs on macOS and Windows** — a new `cross-platform` job runs the install, CLI smoke and the full test suite on `macos-latest` and `windows-latest` for every push and pull request. Windows/macOS breakage was the top reason users left comparable memory plugins.
 
 ### Changed
 
