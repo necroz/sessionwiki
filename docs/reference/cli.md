@@ -376,7 +376,7 @@ python3 -m sessionwiki doctor
 Typical output:
 
 ```
-sessionwiki doctor 2.1.0
+sessionwiki doctor 2.2.0
   [ok  ] python       3.12.4
   [ok  ] markdown     installed
   [ok  ] venv         active

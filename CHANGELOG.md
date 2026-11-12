@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.2.0] — 2026-11-12
+
+Theme: memory that knows its own state — record status in every query hit, lessons carried into later attempts, bounded recall injection, confidence with measurement provenance, and pinned eval snapshots.
+
 ### Added
 
 - **Record status with every `wiki_query` hit** — each hit prints a status line: type, lifecycle, confidence, update date and source count. Unset fields stay visible, and raw transcripts are marked as not yet in the wiki, so a curated record is tellable from a session export.
