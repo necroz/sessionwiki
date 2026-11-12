@@ -110,7 +110,8 @@ ranking only; `graph` is lexical plus one graph hop, the shipped default.
 20–21 changed the ranking weights and added filters after this run, so these
 numbers are a historical baseline, not a measurement of 2.1.0. Rerun before
 quoting them. The query set stays in `.metrics/` on the maintainer's machine;
-the archived reports are `.metrics/recall-{base,graph}-{k5,k10}.json`.
+the archived reports are `.metrics/recall-{base,graph}-{k5,k10}.json` and,
+for the expanded set, `.metrics/recall-v2-k{5,10,20}.json`.
 
 ```bash
 .venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --k 5
@@ -222,6 +223,51 @@ What this says:
   it needs a provider decision (HTTP endpoint or local model) and must stay
   off by default.
 - The same caveat applies: 24 queries, one corpus, no confidence intervals.
+
+### Expanded set: 103 queries, 2026-11-12
+
+The 24-query set was too small to publish a point estimate: one query moved
+a per-kind number by 0.125. The set now has 103 queries — 41 exact, 38
+paraphrase and 24 relational — sampled across the projects in the corpus
+(larisa-ngdu, neuromerch, workspace_default, workspace_drafts,
+audio-transcript, llm-wiki, Projects, doc-checker and others). The
+definitions are unchanged; the shipped ranking is lexical plus one graph
+hop, and `--date-to 2026-11-10` pins the same 976-page snapshot.
+
+| k | exact (41) | paraphrase (38) | relational (24) | overall (103) | 95% CI recall | 95% CI hit |
+|---|---|---|---:|---:|---:|---:|
+| 5 | 82.9 / 82.9 | 71.1 / 73.7 | 33.7 / 58.3 | 67.1 / 73.8 | 58.7–75.0 | 65.0–81.6 |
+| 10 | 90.2 / 90.2 | 88.6 / 92.1 | 38.5 / 58.3 | 77.6 / 83.5 | 69.9–84.4 | 75.7–90.3 |
+| 20 | 92.7 / 92.7 | 93.0 / 94.7 | 46.5 / 70.8 | 82.0 / 88.3 | 75.2–88.4 | 81.6–94.2 |
+
+Each cell is recall / hit; the interval is a percentile bootstrap over
+queries (2000 resamples, seed 0).
+
+What the larger set says:
+
+- **The shape of the old result holds.** Exact and paraphrase questions are
+  mostly found by k=10; relational questions are the weak spot at every
+  depth (33.7% recall at k=5, 46.5% at k=20).
+- **The interval is the honest cost of a small sample.** Even with 103
+  queries the 95% interval on overall recall@5 is about ±8 points. Quote the
+  interval, not the point.
+- **Do not compare across sets.** The expanded set has more paraphrase
+  queries and more multi-page expectations than the 24-query set, so 71.1%
+  paraphrase recall@5 here is not comparable with 54.2% there. Compare runs
+  only on the same set and the same `--date-to`.
+- **Relational recall is the retrieval gap.** One graph hop does not
+  assemble evidence from several sessions — the same multi-hop weakness the
+  MemoryTax run shows below.
+
+The query set names private sessions and stays out of git. `--validate`
+checks the schema and that every expected path exists before a run; it exits
+without searching when the wiki has moved a page.
+
+```bash
+.venv/bin/python scripts/eval_recall.py .metrics/recall-queries-v2.json --validate
+.venv/bin/python scripts/eval_recall.py .metrics/recall-queries-v2.json \
+    --k 5 --date-to 2026-11-10 --bootstrap 2000 --seed 0
+```
 
 ## MemoryTax: does the curated wiki beat searching raw sessions?
 
