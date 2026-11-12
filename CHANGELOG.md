@@ -10,8 +10,19 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Added
+
+- **Record status with every `wiki_query` hit** — each hit prints a status line: type, lifecycle, confidence, update date and source count. Unset fields stay visible, and raw transcripts are marked as not yet in the wiki, so a curated record is tellable from a session export.
+- **Lesson records carried into later attempts** — `wiki/lessons/` pages (situation, outcome, rule) store distilled experience with source and date. The prompt hook injects up to three approved lessons (`lifecycle: reviewed/verified`) next to the related pages; draft lessons never reach the prompt and cannot bypass the gate through the plain page block. A new comma-separated `--lifecycle` filter in `wiki_query` and the CLI `query` command serves the approval gate.
+- **Context budget for the SessionStart injection** — requests and summaries clip at 200 characters, the oldest sessions drop first over budget, and the handoff fills what remains or is omitted; every cut keeps a pointer to the full record. Budget: 4000 characters, `SESSIONWIKI_RECALL_MAX_CHARS` overrides. JSON output stays complete.
+- **Confidence measurement provenance** — the write tools stamp `confidence_measured` (today) and `confidence_pages` (wiki page count) whenever confidence is set, the query status line shows the measurement context, and lint warns about a bare confidence number. The `lesson` page type is now valid in frontmatter.
+- **`eval_recall.py --date-to` pins the wiki snapshot** — a recall run searches only pages dated on or before the given day, prints the snapshot date and records it in the JSON report, so runs with the same `--date-to` are comparable. An invalid date is an error, and undated pages are left out of a pinned run.
+
 ### Fixed
 
+- **Query snippets show the body, not the YAML frontmatter** — a wiki page used to snippet from the frontmatter, pushing a lesson's rule out of the 200-character injection clip. Wiki pages now snippet from the body, as raw transcripts already did.
+- **Graph hop seeds no longer depend on the result count** — seeds are always the top 10 hits, so a shorter result list prefixes a longer one; recall@20 no longer falls below recall@10.
+- **MCP tools guard their parameters** — `wiki_query` clamps `max_pages` to 1–50 and rejects a non-numeric value; `wiki_confidence` and `wiki_category_browse` return a clear error for non-numeric bounds; `wiki_read_page` reports a non-UTF-8 file as a normal error; `_safe_path` rejects absolute paths. Tool descriptions state the limits, filter semantics and edge-case behavior.
 - **Audit previews mask every secret on the line** — `sessionwiki audit` masked only its own match in each finding preview, so a second secret (or the username) on the same line stayed clear text in the report and the JSON output. Every preview now masks all sensitive ranges on the line, overlapping matches merge into one mask, and `max_findings` is an exact cap instead of overshooting by one finding per pattern.
 
 ### Security
