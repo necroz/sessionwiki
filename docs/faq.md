@@ -26,6 +26,22 @@ See [multi-agent-setup.md](multi-agent-setup.md) for per-agent details.
 
 No. sessionwiki reads existing session files from your agents' local session stores. It does not call any LLM API. The wiki layer (`/wiki-ingest`, `/wiki-query`) uses your existing Claude Code (or other agent) session to do the LLM work.
 
+## Why not use Claude Code's built-in memory?
+
+Built-in memory does its job: the agent writes `MEMORY.md` and topic files, and the first 200 lines load automatically. It is per project and per agent, and it has no history: sessions from before you enabled it are not in it. sessionwiki complements it. `sessionwiki import-memory` mirrors `~/.claude/projects/*/memory/*.md` into `wiki/notes/claude-memory/` with `origin: human`, so synthesis never rewrites those pages. The wiki adds cross-agent history, search over every past session and a static site.
+
+## Why not use claude-mem?
+
+claude-mem is one of the most popular memory plugins, and it is good at forward capture: hooks record new sessions and a model writes structured observations. The frequent complaints are cost (a model call per session) and day-zero import (early versions did not import sessions that already existed). sessionwiki starts from the history you already have: 10 adapters read transcripts already on disk. It also has a no-LLM path: `extractive` writes useful pages with no model, `agent-delegate` lets the running agent write pages on your subscription, and `--estimate` / `--max-sessions` cap the paid backends. See [competitor-landscape.md](competitor-landscape.md).
+
+## Why not just grep my sessions or use a session search tool?
+
+A search tool returns raw fragments. You still have to read them and connect them. sessionwiki keeps the raw layer (`wiki_search` with `include_raw=true`) and adds a compiled wiki on top: a summary page per session, project pages, cross-links, confidence and lifecycle. The [benchmarks](benchmarks.md) show the split: raw search wins on precise facts (numbers, hashes, dates), the wiki wins on orientation — "what did we do in this project and where did we stop". Use both.
+
+## Why not use mem0 or another memory API?
+
+mem0 and similar tools are memory layers for applications: you send facts to an API and get them back later. sessionwiki is a local record of work you already did. It reads your agents' session stores, redacts secrets, and builds a wiki you can read, edit, diff and publish. Nothing leaves the machine unless you point synthesis at a remote endpoint. If you need a memory API inside your own product, use mem0; if you need your own coding history to stop disappearing, use sessionwiki.
+
 ## Can I use it offline?
 
 Yes. The entire build pipeline runs offline. The only external resource is highlight.js loaded from a CDN in the generated HTML for syntax highlighting. If the CDN is unreachable (firewall, offline), code blocks render as plain text -- everything else works normally.

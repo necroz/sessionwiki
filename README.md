@@ -33,6 +33,8 @@ sessionwiki turns that history into a knowledge base:
 - **Usable by your agents.** A built-in MCP server lets Claude Code, ZCode or any MCP client search past decisions before redoing them.
 - **Yours.** Everything runs locally; transcripts are redacted on the way in, and `sessionwiki audit` checks the output before you publish anything.
 
+Already using Claude Code's built-in memory, claude-mem or a session search tool? The [FAQ](https://github.com/necroz/sessionwiki/blob/master/docs/faq.md#why-not-use-claude-codes-built-in-memory) explains what sessionwiki adds — and when another tool is the better choice.
+
 ## Highlights
 
 | | |
