@@ -25,6 +25,9 @@ on:
       - ".github/workflows/cross-browser.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   smoke:
     name: ${{ matrix.browser }} smoke

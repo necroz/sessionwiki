@@ -14,6 +14,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 - **Audit previews mask every secret on the line** — `sessionwiki audit` masked only its own match in each finding preview, so a second secret (or the username) on the same line stayed clear text in the report and the JSON output. Every preview now masks all sensitive ranges on the line, overlapping matches merge into one mask, and `max_findings` is an exact cap instead of overshooting by one finding per pattern.
 
+### Security
+
+- **E2E and cross-browser workflows limit GITHUB_TOKEN** — both workflows now declare `permissions: contents: read`, so a compromised step cannot write to the repository.
+
 ## [2.1.0] — 2026-11-10
 
 Theme: agent memory that writes safely — guarded MCP write tools, extractive synthesis with no model, filtered search, a recall handoff, and human pages that survive every writer.
