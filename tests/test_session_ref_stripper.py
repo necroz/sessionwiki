@@ -165,9 +165,10 @@ def test_strip_handles_multiple_anchors_in_one_body():
         '<a href="user_profile.md">profile</a>.</p>'
     )
     out = strip_dead_session_refs(html)
-    # Two stripped, one intact.
+    # Two stripped, one intact. The whole external anchor must survive —
+    # a bare URL substring check would also pass on a corrupted href.
     assert out.count("session-ref dead-link") == 2
-    assert "https://gh.com" in out
+    assert '<a href="https://gh.com">github</a>' in out
 
 
 def test_strip_preserves_anchor_attributes_on_real_links():

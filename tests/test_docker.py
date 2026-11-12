@@ -158,7 +158,7 @@ def test_publish_tags_include_latest_only_for_stable():
 
 def test_publish_logs_into_ghcr():
     text = PUBLISH_WORKFLOW.read_text(encoding="utf-8")
-    assert "ghcr.io" in text
+    assert "registry: ghcr.io" in text
     assert "docker/login-action" in text
 
 
