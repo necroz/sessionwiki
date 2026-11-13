@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "SESSIONWIKI_HOME=\"$CLAUDE_PLUGIN_OPTION_WIKI_HOME\" uvx sessionwiki==2.2.0 recall --format hook",
+            "command": "SESSIONWIKI_HOME=\"$CLAUDE_PLUGIN_OPTION_WIKI_HOME\" uvx sessionwiki==2.3.0 recall --format hook",
             "timeout": 30
           }
         ]

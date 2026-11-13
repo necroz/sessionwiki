@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.3.0] — 2026-11-13
+
+Theme: pre-Reddit readiness — honest benchmarks, a useful no-model default, cross-platform CI, and Windows correctness.
+
 ### Added
 
 - **Recall benchmark expanded to 103 queries** — 41 exact, 38 paraphrase and 24 relational queries over the 2026-11-10 snapshot. `scripts/eval_recall.py --bootstrap N` adds a percentile confidence interval over queries, and `--validate` checks the schema and expected paths before a run. `docs/benchmarks.md` reports recall/hit at k=5, 10 and 20 with 95% intervals and states that results are comparable only on the same query set and snapshot.
