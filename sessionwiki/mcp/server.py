@@ -1071,6 +1071,10 @@ _LINK_RE = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
 
 def _page_links(content: str) -> dict[str, str]:
     """Names a page links to: normalised key -> name as first written."""
+    # Pages written on Windows carry CRLF; the line-anchored section
+    # regex below would miss "## Connections\r\n" and the graph hop
+    # would find no neighbours.
+    content = content.replace("\r\n", "\n")
     names = _LINK_RE.findall(content)
     section = _CONNECTIONS_RE.search(content)
     if section:
