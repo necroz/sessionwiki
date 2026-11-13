@@ -2161,8 +2161,24 @@ def error_response(req_id: Any, code: int, message: str) -> dict[str, Any]:
     }
 
 
+def _force_utf8(stream) -> None:
+    """Force a stdio stream to UTF-8.
+
+    MCP JSON-RPC is UTF-8, but on Windows a redirected stdin/stdout
+    defaults to the ANSI code page (e.g. cp1251), which mangles non-ASCII
+    requests and responses. Streams without ``reconfigure`` (StringIO,
+    pytest capture) are left untouched.
+    """
+    try:
+        stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass
+
+
 def main() -> int:
     """Run the MCP server on stdin/stdout."""
+    _force_utf8(sys.stdin)
+    _force_utf8(sys.stdout)
     try:
         for line in sys.stdin:
             line = line.strip()
