@@ -104,3 +104,64 @@ def test_synth_save_state_is_atomic(tmp_path: Path) -> None:
     assert sorted(p.name for p in tmp_path.iterdir()) == [
         ".llmwiki-synth-state.json"
     ]
+
+
+def _fake_nt_os(monkeypatch, lock):
+    # Patch lock.os (not the global os.name) so pathlib still builds
+    # PosixPath on Linux while lock.acquire takes the Windows branch.
+    import os as real_os
+    import types
+
+    monkeypatch.setattr(
+        lock, "os", types.SimpleNamespace(name="nt", fstat=real_os.fstat)
+    )
+
+
+def _fake_msvcrt(monkeypatch, locking):
+    import sys
+    import types
+
+    fake = types.ModuleType("msvcrt")
+    fake.LK_NBLCK = 1
+    fake.LK_UNLCK = 2
+    fake.locking = locking
+    monkeypatch.setitem(sys.modules, "msvcrt", fake)
+
+
+def test_windows_acquire_does_not_read_locked_byte(tmp_path, monkeypatch) -> None:
+    # Windows msvcrt locks are mandatory: reading a byte another process
+    # holds raises PermissionError. acquire() must not read file content.
+    from sessionwiki import lock
+
+    _fake_nt_os(monkeypatch, lock)
+    _fake_msvcrt(monkeypatch, lambda fd, mode, n: None)
+
+    class NoReadHandle:
+        def __init__(self, real):
+            self._real = real
+
+        def read(self, *a, **k):
+            raise PermissionError("locked byte")
+
+        def __getattr__(self, name):
+            return getattr(self._real, name)
+
+    real_open = open
+
+    def fake_open(*a, **k):
+        return NoReadHandle(real_open(*a, **k))
+
+    monkeypatch.setattr(lock, "open", fake_open, raising=False)
+    assert lock.FileLock(tmp_path / "s.lock").acquire() is True
+
+
+def test_windows_busy_lock_returns_false(tmp_path, monkeypatch) -> None:
+    from sessionwiki import lock
+
+    _fake_nt_os(monkeypatch, lock)
+
+    def busy(fd, mode, n):
+        raise OSError("busy")
+
+    _fake_msvcrt(monkeypatch, busy)
+    assert lock.FileLock(tmp_path / "s.lock", timeout=0).acquire() is False
