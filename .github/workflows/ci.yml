@@ -102,7 +102,10 @@ jobs:
         shell: bash
         env:
           PYTHONUTF8: "1"
-        run: python -m pytest tests/ -q
+        # Timing-ratio perf tests are noisy on shared macOS/Windows
+        # runners and fail on scheduling jitter, not on a regression.
+        # They stay covered on Linux in lint-and-test.
+        run: python -m pytest tests/ -q -m "not slow"
 
   performance-budget:
     runs-on: ubuntu-latest
