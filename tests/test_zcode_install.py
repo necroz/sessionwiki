@@ -13,6 +13,34 @@ def _hook_config(home: Path) -> Path:
     return home / ".zcode" / "cli" / "config.json"
 
 
+def test_windowless_python_prefers_pythonw(tmp_path, monkeypatch):
+    import types
+
+    py = tmp_path / "python.exe"
+    py.write_text("")
+    # POSIX: never swapped.
+    assert install._windowless_python(str(py)) == str(py)
+    # Windows without pythonw.exe: unchanged. Patch install.os (not the
+    # global os.name) so pathlib still builds PosixPath on Linux.
+    monkeypatch.setattr(install, "os", types.SimpleNamespace(name="nt"))
+    assert install._windowless_python(str(py)) == str(py)
+    # Windows with pythonw.exe beside python.exe: prefer the windowless one.
+    (tmp_path / "pythonw.exe").write_text("")
+    assert install._windowless_python(str(py)) == str(tmp_path / "pythonw.exe")
+
+
+def test_hook_command_uses_pythonw_on_windows(tmp_path, monkeypatch):
+    import types
+
+    py = tmp_path / "python.exe"
+    py.write_text("")
+    (tmp_path / "pythonw.exe").write_text("")
+    monkeypatch.setattr(install, "os", types.SimpleNamespace(name="nt"))
+    cmd = install._hook_command(str(py), build=False)
+    assert cmd.startswith('start "" /B ')
+    assert "pythonw.exe" in cmd
+
+
 def test_install_hook_preserves_existing_and_is_idempotent(tmp_path):
     config_path = _hook_config(tmp_path)
     config_path.parent.mkdir(parents=True)
