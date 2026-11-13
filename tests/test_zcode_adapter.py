@@ -8,6 +8,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from sessionwiki.adapters import REGISTRY, discover_adapters
 from sessionwiki.adapters.status import adapter_status
 from sessionwiki.adapters.zcode import ZcodeAdapter
@@ -157,6 +159,7 @@ def test_example_config_redacts_url_credentials() -> None:
     assert "<REDACTED>" in redacted
 
 
+@pytest.mark.skipif(os.name == "nt", reason="bash hook is POSIX-only; Windows uses a cmd start /B wrapper")
 def test_zcode_autosync_hook_is_valid_bash() -> None:
     script = REPO_ROOT / "scripts" / "zcode_sync_hook.sh"
     assert script.exists(), f"missing hook script: {script}"

@@ -269,20 +269,24 @@ def test_parse_since_accepts_date_and_datetime() -> None:
 
 
 @pytest.mark.parametrize(
-    ("directory", "expected"),
+    ("rel_parts", "expected"),
     [
-        ("/home/test/Projects/demo", "demo"),
-        ("/home/test/Projects/demo/nested", "demo"),
-        ("/home/test/Work/project-a", "project-a"),
-        ("/tmp/foo", "foo"),
-        ("/home/test/Projects/bad name", "bad_name"),
+        (("Projects", "demo"), "demo"),
+        (("Projects", "demo", "nested"), "demo"),
+        (("Work", "project-a"), "project-a"),
+        (("Projects", "bad name"), "bad_name"),
     ],
 )
-def test_project_slug_for_directory(directory: str, expected: str) -> None:
-    assert (
-        export.project_slug_for_directory(directory, home=Path("/home/test"))
-        == expected
-    )
+def test_project_slug_for_directory(tmp_path, rel_parts, expected) -> None:
+    # Build paths from a real tmp_path home so the test is platform-native:
+    # POSIX literals plus a drive-less home fail on Windows/macOS.
+    directory = str(tmp_path.joinpath(*rel_parts))
+    assert export.project_slug_for_directory(directory, home=tmp_path) == expected
+
+
+def test_project_slug_outside_home_uses_basename(tmp_path) -> None:
+    outside = tmp_path.parent / "foo"
+    assert export.project_slug_for_directory(str(outside), home=tmp_path) == "foo"
 
 
 def test_session_to_records_maps_user_assistant_and_tool(tmp_path: Path) -> None:

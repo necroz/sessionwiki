@@ -24,7 +24,7 @@ def test_adapter_has_schema_versions():
 
 def test_adapter_has_default_roots_for_all_platforms():
     roots = OpenCodeAdapter.DEFAULT_ROOTS
-    root_strs = [str(r) for r in roots]
+    root_strs = [r.as_posix() for r in roots]
     # sessionwiki export corpus is the primary source
     assert roots[0] == Path.home() / ".llmwiki" / "opencode"
     # macOS
@@ -36,7 +36,7 @@ def test_adapter_has_default_roots_for_all_platforms():
 
 
 def test_adapter_includes_openclaw_variant():
-    root_strs = [str(r) for r in OpenCodeAdapter.DEFAULT_ROOTS]
+    root_strs = [r.as_posix() for r in OpenCodeAdapter.DEFAULT_ROOTS]
     # OpenClaw community fork uses its own dir
     assert any("openclaw" in r for r in root_strs)
 

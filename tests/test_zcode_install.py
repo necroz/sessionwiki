@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
+
+import pytest
 
 from sessionwiki import cli
 from sessionwiki.zcode import install
@@ -88,6 +91,7 @@ def test_install_hook_dry_run_writes_nothing(tmp_path):
     assert not config_path.exists()
 
 
+@pytest.mark.skipif(os.name == "nt", reason="systemd is Linux-only; POSIX path literals")
 def test_install_systemd_writes_service_and_timer(tmp_path):
     install.install_systemd(
         home=tmp_path,
@@ -107,6 +111,7 @@ def test_install_systemd_writes_service_and_timer(tmp_path):
     assert "Unit=sessionwiki-zcode.service" in timer
 
 
+@pytest.mark.skipif(os.name == "nt", reason="launchd is macOS-only; POSIX path literals")
 def test_install_launchd_writes_plist(tmp_path):
     path = install.install_launchd(
         home=tmp_path,
