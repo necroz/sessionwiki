@@ -29,10 +29,12 @@ from sessionwiki.mcp.server import (
 
 def test_read_capped_returns_text_under_cap(tmp_path: Path):
     p = tmp_path / "small.md"
-    p.write_text("hello world\n", encoding="utf-8")
+    # write_bytes avoids Windows CRLF translation: _read_capped counts
+    # raw bytes, so the corpus must be byte-exact on every platform.
+    p.write_bytes(b"hello world\n")
     text, consumed = _read_capped(p, remaining_budget=100_000)
     assert text == "hello world\n"
-    assert consumed == len("hello world\n")
+    assert consumed == 12
 
 
 def test_read_capped_skips_oversize_file_entirely(tmp_path: Path):

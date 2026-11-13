@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 import stat
 import subprocess
@@ -25,6 +26,9 @@ def _fake_repo(tmp_path: Path, script_name: str) -> Path:
     return tmp_path
 
 
+@pytest.mark.skipif(
+    os.name == "nt", reason="POSIX shell scripts; Windows uses .bat twins"
+)
 @pytest.mark.parametrize("script_name", ["build.sh", "sync.sh", "serve.sh"])
 def test_wrapper_scripts_prefer_venv_python(tmp_path: Path, script_name: str):
     root = _fake_repo(tmp_path, script_name)

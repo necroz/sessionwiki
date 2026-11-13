@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -499,8 +500,17 @@ def test_write_jsonl_uses_distinct_temp_files(tmp_path: Path, monkeypatch) -> No
 
     def replace(src, dst):
         seen.append(Path(src).name)
-        barrier.wait(timeout=5)
-        real_replace(src, dst)
+        barrier.wait(timeout=30)
+        # Windows can raise PermissionError replacing a file another
+        # thread still holds open; retry briefly instead of flaking.
+        for attempt in range(5):
+            try:
+                real_replace(src, dst)
+                break
+            except PermissionError:
+                if attempt == 4:
+                    raise
+                time.sleep(0.05)
 
     monkeypatch.setattr(session_export.os, "replace", replace)
 
