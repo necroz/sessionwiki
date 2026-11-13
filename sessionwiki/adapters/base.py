@@ -17,8 +17,9 @@ from typing import Any, Iterator
 
 # #sec-7 (#551): project slugs flow into raw/ + site/ paths. The same
 # sanitiser regex is used by build.py for project_slug rendering — keep
-# them aligned. Anything outside [A-Za-z0-9._-] gets replaced with `_`,
-# leading dots are stripped so the slug can't form a hidden directory.
+# them aligned. Anything outside [\w.-] (unicode letters/digits kept)
+# gets replaced with `_`, leading dots are stripped so the slug can't
+# form a hidden directory.
 _PROJECT_SLUG_RE = _re.compile(r"[^\w.-]")
 
 

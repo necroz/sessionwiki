@@ -32,7 +32,7 @@ from sessionwiki.lock import FileLock, atomic_write_text, lock_path_for
 # #py-m1 (#587) / #arch-h5 (#610): import directly from _frontmatter
 # instead of via build.py. The build module pulls in 145+ transitive
 # imports; the parser sits cleanly in _frontmatter.py with no deps.
-from sessionwiki._frontmatter import is_human_page, parse_frontmatter
+from sessionwiki._frontmatter import _parse_scalar, is_human_page, parse_frontmatter
 from sessionwiki.synth.base import BaseSynthesizer, DummySynthesizer
 
 
@@ -1247,12 +1247,12 @@ def _build_source_page(
         "---",
         f'title: "{title}"',
         "type: source",
-        f"slug: {slug}",
+        f"slug: {_fm_scalar(slug)}",
         *_description_lines(meta),
         f"tags: [{', '.join(tags)}]",
         f"date: {date}",
         f"source_file: {source_file}",
-        f"project: {project}",
+        f"project: {_fm_scalar(project)}",
         f"model: {model}",
         f"last_updated: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}",
         "---",
@@ -1265,6 +1265,15 @@ def _build_source_page(
 # their own language. The page body is synthesised in English, so this
 # line is what lets a question asked in the user's language find the
 # page (wiki_query, site search).
+def _fm_scalar(value: str) -> str:
+    """Bare YAML scalar, quoted only when it would re-parse as a non-string.
+
+    A slug like ``42720e39`` or ``-13`` is coerced to int/float by the
+    frontmatter parser; quoting keeps the original token on the next parse.
+    """
+    return f'"{value}"' if _parse_scalar(value) != value else value
+
+
 _DESCRIPTION_MAX_CHARS = 300
 
 
@@ -1306,7 +1315,7 @@ def backfill_source_descriptions(
         if not page_meta or page_meta.get("description"):
             continue
         if not page_meta.get("slug") and meta.get("slug"):
-            lines = [f"slug: {_normalise_slug(str(meta['slug']))}", *lines]
+            lines = [f"slug: {_fm_scalar(_normalise_slug(str(meta['slug'])))}", *lines]
         updated += 1
         if dry_run:
             continue

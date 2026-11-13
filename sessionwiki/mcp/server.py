@@ -2183,6 +2183,7 @@ def main() -> int:
     """Run the MCP server on stdin/stdout."""
     _force_utf8(sys.stdin)
     _force_utf8(sys.stdout)
+    _force_utf8(sys.stderr)
     try:
         for line in sys.stdin:
             line = line.strip()
