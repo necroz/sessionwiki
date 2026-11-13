@@ -87,7 +87,10 @@ def _hook_command(
         + " --lock-timeout 0"
     )
     if os.name == "nt":
-        return f'start "" /B {base}'
+        # pythonw.exe may have no console (sys.stdout is None); --quiet
+        # keeps autosync_log off stdout so print() never crashes. The
+        # POSIX branch silences via redirection instead.
+        return f'start "" /B {base} --quiet'
     return f'nohup {base} >/dev/null 2>&1 &'
 
 

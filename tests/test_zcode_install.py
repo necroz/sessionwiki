@@ -39,6 +39,9 @@ def test_hook_command_uses_pythonw_on_windows(tmp_path, monkeypatch):
     cmd = install._hook_command(str(py), build=False)
     assert cmd.startswith('start "" /B ')
     assert "pythonw.exe" in cmd
+    # pythonw.exe may have no console (sys.stdout is None); --quiet keeps
+    # autosync_log off stdout so the hook never crashes on print().
+    assert "--quiet" in cmd
 
 
 def test_install_hook_preserves_existing_and_is_idempotent(tmp_path):
