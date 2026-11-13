@@ -24,6 +24,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 ### Fixed
 
 - **Windows compatibility** — the file lock no longer crashes with `PermissionError` when another autosync holds it (msvcrt mandatory lock; `fstat` replaces a content read). The MCP server forces UTF-8 on stdin and stdout, so non-ASCII queries and responses survive the Windows ANSI code page. Legacy state migration now matches Windows backslash paths. Numeric-looking slugs (`42720e39`, `-13`) no longer crash synthesis. Non-ASCII (e.g. Cyrillic) project names are preserved in slugs instead of collapsing to underscores, while the overview prompt-injection guard stays ASCII-only. The Windows Stop hook prefers `pythonw.exe` and runs `--quiet`, so it neither flashes a console nor crashes on a missing stdout.
+- **Windows-authored pages keep their graph links** — a `## Connections` section with CRLF line endings is normalised before parsing, so the `wiki_query` graph hop finds neighbours in pages written on Windows instead of returning lexical matches only. This was the remaining failure in the first `windows-latest` CI run.
 
 ## [2.2.0] — 2026-11-12
 
