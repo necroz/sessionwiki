@@ -83,7 +83,7 @@ merge conflicts. Card 30 also edits `mcp/server.py`, but only appends to
 | 25 | [Extractive synthesis backend](25-extractive-backend.md) | 2 | D1 | P0 | M | — | done |
 | 26 | [import-memory for Claude Code auto memory](26-import-claude-memory.md) | 2 | C5 | P0 | M | 22 | done |
 | 27 | [remember a fact as a candidate](27-remember-command.md) | 2 | C4 | P1 | S | 22 | done |
-| 28 | [CI on macOS and Windows](28-ci-macos-windows.md) | 2 | E5 | P0 | M | — | blocked |
+| 28 | [CI on macOS and Windows](28-ci-macos-windows.md) | 2 | E5 | P0 | M | — | done |
 | 29 | [Opt-in prompt recall hook](29-prompt-recall-hook.md) | 2 | C1 | P1 | M | 12, 17, 20 | done |
 
 Phase 3 items (ranking decision, embeddings, anchors, observations,
@@ -99,7 +99,6 @@ Cards that need extra care from the reviewer:
   check the eval numbers in the PR body.
 - **22** and **26** touch what the pipeline may overwrite. Read the diff of
   every write site.
-- **28** needs `gh` and a pushed branch; the model cannot verify it locally.
 - **29** needs calibration and latency numbers; reject the PR without them.
 
 ## Before you start
