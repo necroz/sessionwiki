@@ -383,7 +383,7 @@ def run_export(
                 print(f"error: {session_id}: {exc}", file=sys.stderr)
                 continue
             stats["written"] += 1
-            new_rel = str(out_path.relative_to(out_dir))
+            new_rel = out_path.relative_to(out_dir).as_posix()
             if isinstance(previous, dict):
                 old_rel = previous.get("path")
                 if old_rel and old_rel != new_rel:

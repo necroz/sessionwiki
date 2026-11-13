@@ -154,7 +154,7 @@ def _add_source_backlink(content: str, source_path: Path) -> str:
         rel = source_path
     backlink = (
         f"\n\n---\n\n## sessionwiki Source\n\n"
-        f"Generated from `{rel}` by [sessionwiki](https://github.com/necroz/sessionwiki).\n"
+        f"Generated from `{rel.as_posix()}` by [sessionwiki](https://github.com/necroz/sessionwiki).\n"
         f"Do not edit directly — re-run `sessionwiki build` and `export-obsidian` "
         f"to refresh.\n"
     )

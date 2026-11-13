@@ -1111,7 +1111,7 @@ def _ranked_hits(
         via_name = via[page] if bonus.get(page, 0.0) > lexical.get(page, 0.0) else ""
         snippet = scored[page][1] if page in scored else _page_snippet(page, tokens)
         hits.append({
-            "path": str(page.relative_to(REPO_ROOT)),
+            "path": page.relative_to(REPO_ROOT).as_posix(),
             "score": round(score, 1),
             "via": via_name,
             "snippet": snippet,
@@ -1370,7 +1370,7 @@ def tool_wiki_search(args: dict[str, Any]) -> dict[str, Any]:
             if term_lower in line.lower():
                 hits.append(
                     {
-                        "path": str(p.relative_to(REPO_ROOT)),
+                        "path": p.relative_to(REPO_ROOT).as_posix(),
                         "line": i,
                         "text": line.strip()[:200],
                     }
@@ -1438,7 +1438,7 @@ def tool_wiki_list_sources(args: dict[str, Any]) -> dict[str, Any]:
             continue
         out.append(
             {
-                "path": str(p.relative_to(REPO_ROOT)),
+                "path": p.relative_to(REPO_ROOT).as_posix(),
                 "project": project,
                 "date": meta.get("date", ""),
                 "filename": p.name,

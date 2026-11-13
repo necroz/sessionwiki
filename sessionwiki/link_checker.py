@@ -93,10 +93,10 @@ def check_site(site_dir: Path) -> dict[str, Any]:
                 line_num = content[: match.start()].count("\n") + 1
                 broken.append(
                     {
-                        "source": str(html_file.relative_to(site_dir)),
+                        "source": html_file.relative_to(site_dir).as_posix(),
                         "line": line_num,
                         "href": url,
-                        "resolved": str(target.relative_to(site_dir)) if target.is_relative_to(site_dir) else str(target),
+                        "resolved": target.relative_to(site_dir).as_posix() if target.is_relative_to(site_dir) else str(target),
                     }
                 )
 

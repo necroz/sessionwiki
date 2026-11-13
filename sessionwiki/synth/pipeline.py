@@ -882,7 +882,7 @@ def _coalesce_low_signal_sessions(
         bucket = date[:7] if window == "month" else "all"
         key = f"{project}\x00{bucket}"
         try:
-            rel = str(p.relative_to(raw_dir))
+            rel = p.relative_to(raw_dir).as_posix()
         except ValueError:
             continue
         groups.setdefault(key, []).append({
@@ -976,7 +976,7 @@ def _coalesce_low_signal_sessions(
         project = str(meta.get("project") or p.parent.name)
         slug = str(meta.get("slug") or p.stem)
         try:
-            rel_by_slug[(project, slug)] = str(p.relative_to(raw_dir))
+            rel_by_slug[(project, slug)] = p.relative_to(raw_dir).as_posix()
         except ValueError:
             continue
 
@@ -1433,7 +1433,7 @@ def _synthesize_new_sessions_unlocked(
 
     new_files: list[tuple[Path, dict[str, Any], str]] = []
     for p, meta, body in sessions:
-        rel = str(p.relative_to(raw_root))
+        rel = p.relative_to(raw_root).as_posix()
         try:
             mtime = p.stat().st_mtime
         except OSError:
@@ -1473,7 +1473,7 @@ def _synthesize_new_sessions_unlocked(
             new_files = [
                 item
                 for item in new_files
-                if str(item[0].relative_to(raw_root)) not in coalesced_rels
+                if item[0].relative_to(raw_root).as_posix() not in coalesced_rels
             ]
             summary["new_files"] = len(new_files)
             for project in affected:
@@ -1541,7 +1541,7 @@ def _synthesize_new_sessions_unlocked(
         # (42720e39, -13) never reaches them as int/float.
         meta["slug"] = raw_slug
         meta["project"] = project
-        rel = str(p.relative_to(raw_dir or RAW_SESSIONS))
+        rel = p.relative_to(raw_dir or RAW_SESSIONS).as_posix()
         slug = _normalise_slug(raw_slug)
         date = str(meta.get("date", "")).strip()
         filename = f"{date}-{slug}" if date else slug
