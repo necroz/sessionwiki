@@ -247,8 +247,11 @@ def _migrate_legacy_state(
             continue
         # Legacy absolute-path key. Try to infer the adapter from the path.
         inferred: Optional[str] = None
+        # Hint tokens are POSIX; a legacy key written on Windows uses
+        # backslashes. Normalise separators so the match works on both.
+        k_posix = k.replace("\\", "/")
         for name, token in hints:
-            if name in known_names and token in k:
+            if name in known_names and token in k_posix:
                 inferred = name
                 break
         if inferred is None:

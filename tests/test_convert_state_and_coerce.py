@@ -103,6 +103,21 @@ def test_migrate_maps_claude_code_absolute_paths(monkeypatch, tmp_path):
     assert migrated["claude_code::.claude/projects/x/session.jsonl"] == 1.5
 
 
+def test_migrate_maps_windows_backslash_paths(monkeypatch, tmp_path):
+    # A legacy key written on Windows uses backslashes. The hint tokens
+    # are POSIX, so matching must normalise separators first. (The exact
+    # home-relative key is only assertable on Windows: PosixPath does not
+    # split backslash components, so here we pin adapter inference.)
+    monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
+    win_key = str(
+        tmp_path / ".claude" / "projects" / "x" / "session.jsonl"
+    ).replace("/", "\\")
+    migrated, count = _migrate_legacy_state({win_key: 1.5}, ["claude_code"])
+    assert count == 1
+    assert any(k.startswith("claude_code::") for k in migrated)
+    assert 1.5 in migrated.values()
+
+
 def test_migrate_handles_codex_and_obsidian(monkeypatch, tmp_path):
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
     legacy = {
