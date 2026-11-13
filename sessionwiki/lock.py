@@ -66,9 +66,11 @@ class FileLock:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         handle = open(self.path, "a+", encoding="utf-8")
         if os.name == "nt":
-            # msvcrt locks a byte range; make sure byte 0 exists.
-            handle.seek(0)
-            if not handle.read(1):
+            # msvcrt locks a byte range; make sure byte 0 exists. Use fstat,
+            # not read(): Windows locks are mandatory, so reading a byte
+            # another process holds raises PermissionError before the
+            # non-blocking acquire loop can treat the lock as busy.
+            if os.fstat(handle.fileno()).st_size == 0:
                 handle.write("0")
                 handle.flush()
         deadline = time.monotonic() + self.timeout

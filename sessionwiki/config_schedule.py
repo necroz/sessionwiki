@@ -52,13 +52,13 @@ def should_run_after_sync(schedule: str) -> bool:
 
 
 def load_synthesis_backend(config_path: Path | None = None) -> str:
-    """Return ``synthesis.backend`` from sessions config (default: ``dummy``)."""
+    """Return ``synthesis.backend`` from sessions config (default: ``extractive``)."""
     data = _load_sessions_config(config_path)
     synthesis = data.get("synthesis", {})
     if not isinstance(synthesis, dict):
-        return "dummy"
-    backend = synthesis.get("backend", "dummy")
-    return str(backend) if backend else "dummy"
+        return "extractive"
+    backend = synthesis.get("backend", "extractive")
+    return str(backend) if backend else "extractive"
 
 
 def synthesis_status_hint(backend: str | None = None) -> str | None:

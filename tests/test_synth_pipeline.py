@@ -26,6 +26,32 @@ def _isolated_synth_state(tmp_path, monkeypatch):
     )
 
 
+def test_normalise_slug_coerces_numeric():
+    from sessionwiki.synth.pipeline import _normalise_slug
+
+    assert _normalise_slug(42) == "42"
+    assert _normalise_slug(None) == "unknown"
+    assert isinstance(_normalise_slug(4.272e43), str)  # no TypeError
+
+
+def test_synthesize_numeric_slug_and_project(tmp_path):
+    from sessionwiki.synth import pipeline
+
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    (raw / "s.md").write_text(
+        "---\nslug: 42720e39\nproject: -13\ndate: 2026-11-12\n---\nbody\n",
+        encoding="utf-8",
+    )
+    summary = pipeline.synthesize_new_sessions(
+        raw_dir=raw,
+        wiki_sources_dir=tmp_path / "wiki" / "sources",
+        state_file=tmp_path / "state.json",
+        lock_timeout=0,
+    )
+    assert summary["errors"] == []
+
+
 def test_synth_state_is_isolated(tmp_path):
     from sessionwiki.synth import pipeline
 

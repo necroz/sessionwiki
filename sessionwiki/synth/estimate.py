@@ -132,7 +132,7 @@ def synthesize_estimate_report(
         keys_to_try.add(name)
         if hasattr(p, "relative_to"):
             try:
-                keys_to_try.add(str(p.relative_to(_RAW)))
+                keys_to_try.add(p.relative_to(_RAW).as_posix())
             except (ValueError, AttributeError):
                 pass
         keys_to_try.add(str(p))

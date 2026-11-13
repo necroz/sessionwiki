@@ -26,7 +26,7 @@ you can open, inspect and edit.
 | **Imports past sessions (retroactive)** | Yes — 10 adapters read transcripts already on disk | — | Early versions: no day-zero import | — | — | Yes — import of old sessions | — | Yes — 44 harnesses (claimed) | Yes — 30+ providers (claimed) |
 | **Captures new sessions (forward)** | Yes — `Stop` hooks for Claude Code and ZCode, OpenCode `session.idle` | Yes — the agent writes the files by default | Yes — hooks | Yes — checkpoints and `/remember` | Yes — lifecycle hooks | — | — | — | — |
 | **Output a human can read (Markdown pages)** | Yes — `wiki/` pages + static site | Yes — `MEMORY.md` + topic files | — | Yes — Markdown/local files | Yes — git-backed Markdown wiki | Yes — local files + viewer | — | — | — |
-| **Needs an LLM** | No — `dummy` is the default; `extractive` writes useful pages with no model; `agent` adds no API cost; `ollama`/`openai` optional | Yes — the agent writes the files | Yes — a model summarizes every session | — | No — zero-LLM default | No — keyless BM25 default | — | No — no LLM | — |
+| **Needs an LLM** | No — `extractive` is the default and writes useful pages with no model; `dummy` gives metadata-only stubs; `agent` adds no API cost; `ollama`/`openai` optional | Yes — the agent writes the files | Yes — a model summarizes every session | — | No — zero-LLM default | No — keyless BM25 default | — | No — no LLM | — |
 | **Runs locally** | Yes — local-first, no cloud | Yes — files under `~/.claude/projects/<project>/memory/` | — | Yes — local Markdown; Basic Memory Cloud for sync | Yes — git-backed | Yes — local files | Yes — verbatim local storage | — | — |
 | **MCP server** | Yes — 15 tools | — | — | Yes — progressive tool discovery | Yes — MCP for access | Yes — exposes its knowledge over MCP | Yes — 47 tools (claimed) | — | — |
 | **Agents supported** | 10 adapters: 4 built in + 6 opt-in | Claude Code | Claude Code | Claude Code (plugin) | Cross-agent handoff | — | — | 44 harnesses (claimed) | 30+ providers (claimed) |
@@ -101,9 +101,9 @@ that memory is on the roadmap.
 - You want an **auditable Markdown wiki** — pages in git, readable and
   editable, plus a static site.
 - You use **several agents**: 10 adapters, one archive.
-- You want **no LLM required** — the `extractive` backend writes useful pages
-  with no model or network, and the `dummy` default writes metadata-only
-  pages — or **no extra API cost**: the `agent` backend has the running agent
+- You want **no LLM required** — the default `extractive` backend writes
+  useful pages with no model or network, and `dummy` gives metadata-only
+  stubs — or **no extra API cost**: the `agent` backend has the running agent
   write the pages.
 
 ## When to pick something else

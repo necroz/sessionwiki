@@ -57,6 +57,13 @@ def test_non_string_slug_replaced(slug):
     assert _validate_overview_slug(slug) == "_invalid_"
 
 
+def test_unicode_slug_is_rejected_ascii_guard_stays():
+    # #486: the overview prompt guard stays ASCII-only even though the
+    # path-safety slug regex now preserves unicode. Do not align them.
+    assert _validate_overview_slug("Проект") == "_invalid_"
+    assert _validate_overview_slug("日本語") == "_invalid_"
+
+
 def _meta(slug: str, *, project: str = "demo") -> dict:
     return {
         "slug": slug,

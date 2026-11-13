@@ -193,7 +193,7 @@ sessionwiki sync --adapter obsidian
 | `build` | `synthesize` | `false` | Auto-synthesize overview on build |
 | `schedule` | `build` | `on-sync` | When to auto-build: `on-sync`, `daily`, `manual` |
 | `schedule` | `lint` | `manual` | When to auto-lint: `on-sync`, `daily`, `manual` |
-| `synthesis` | `backend` | `dummy` | LLM backend: `dummy`, `ollama` |
+| `synthesis` | `backend` | `extractive` | LLM backend: `extractive` (default, no model), `dummy`, `ollama`, `openai`, `agent` |
 | `synthesis` | `model` | `llama3.1:8b` | Model for synthesis |
 | `synthesis` | `base_url` | `http://127.0.0.1:11434` | Ollama server URL |
 | `synthesis` | `timeout` | `60` | Synthesis timeout (seconds) |

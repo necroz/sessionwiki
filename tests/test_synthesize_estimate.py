@@ -269,6 +269,15 @@ def test_estimate_notes_openai_backend_with_unpriced_model(capsys, monkeypatch):
     assert "backend 'openai'" in out
 
 
+def test_estimate_defaults_to_extractive_backend(capsys, monkeypatch):
+    from sessionwiki.cli import _synthesize_estimate
+
+    monkeypatch.setattr("sessionwiki.cli.synthesize_estimate_report", _stub_report)
+    _synthesize_estimate({})
+    out = capsys.readouterr().out
+    assert "backend 'extractive'" in out
+
+
 def test_estimate_notes_dummy_backend(capsys, monkeypatch):
     from sessionwiki.cli import _synthesize_estimate
 

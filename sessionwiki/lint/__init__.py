@@ -113,7 +113,7 @@ def load_pages(wiki_dir: Optional[Path] = None) -> dict[str, dict[str, Any]]:
         # history, so freshness and index rules must not judge them.
         if p.name == "README.md":
             continue
-        rel = str(p.relative_to(root))
+        rel = p.relative_to(root).as_posix()
         if p.relative_to(root).parts[0] == "archive":
             pages.archived_paths.add(rel)
             pages.archived_slugs.add(p.stem)

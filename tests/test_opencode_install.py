@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+import json
+import os
+
+import pytest
+
 from sessionwiki.opencode import install
 
 
 def test_install_plugin_writes_index_ts(tmp_path):
+    python_exe = str(tmp_path / "venv" / "bin" / "python")
     messages = install.install_plugin(
         home=tmp_path,
-        python_exe="/venv/bin/python",
+        python_exe=python_exe,
         repo_root=tmp_path / "repo",
     )
 
@@ -27,8 +33,8 @@ def test_install_plugin_writes_index_ts(tmp_path):
     assert "sessionwiki" in text
     assert "opencode" in text
     assert "autosync" in text
-    assert "/venv/bin/python" in text
-    assert str(tmp_path / "repo") in text
+    assert json.dumps(python_exe) in text
+    assert json.dumps(str(tmp_path / "repo")) in text
     assert any("installed" in message.lower() for message in messages)
 
 
@@ -84,7 +90,7 @@ def test_install_plugin_dry_run_writes_nothing(tmp_path):
 
 
 def test_install_plugin_escapes_paths_with_spaces(tmp_path):
-    python_exe = "/tmp/venv with space/bin/python"
+    python_exe = str(tmp_path / "venv with space" / "bin" / "python")
     repo_root = tmp_path / "repo with space"
 
     install.install_plugin(
@@ -94,8 +100,8 @@ def test_install_plugin_escapes_paths_with_spaces(tmp_path):
     )
 
     text = install.plugin_path(home=tmp_path).read_text(encoding="utf-8")
-    assert f'"{python_exe}"' in text
-    assert f'"{repo_root}"' in text
+    assert json.dumps(python_exe) in text
+    assert json.dumps(str(repo_root)) in text
 
 
 def test_install_plugin_handles_async_spawn_errors(tmp_path):
@@ -142,6 +148,7 @@ def test_plugin_path_honours_xdg_config_home(tmp_path, monkeypatch):
     )
 
 
+@pytest.mark.skipif(os.name == "nt", reason="Path.home() uses USERPROFILE on Windows, not HOME")
 def test_plugin_path_ignores_empty_xdg_config_home(tmp_path, monkeypatch):
     monkeypatch.setenv("XDG_CONFIG_HOME", "")
     monkeypatch.setenv("HOME", str(tmp_path))

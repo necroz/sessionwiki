@@ -112,7 +112,7 @@ def iter_docs_pages(
         if not is_shell and not include_passthrough:
             continue
         title = meta.get("title") or _first_h1(body) or path.stem
-        rel = str(path.relative_to(docs_dir)).replace("\\", "/")
+        rel = path.relative_to(docs_dir).as_posix()
         yield DocsPage(
             source=path,
             rel=rel,

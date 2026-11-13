@@ -24,7 +24,23 @@ See [multi-agent-setup.md](multi-agent-setup.md) for per-agent details.
 
 ## Do I need an API key?
 
-No. sessionwiki reads existing session files from your agents' local session stores. It does not call any LLM API. The wiki layer (`/wiki-ingest`, `/wiki-query`) uses your existing Claude Code (or other agent) session to do the LLM work.
+No. sessionwiki reads existing session files from your agents' local session stores. It does not call any LLM API. The default `extractive` backend writes a useful page from the transcript with no model at all. The wiki layer (`/wiki-ingest`, `/wiki-query`) uses your existing Claude Code (or other agent) session to do the LLM work.
+
+## Why not use Claude Code's built-in memory?
+
+Built-in memory does its job: the agent writes `MEMORY.md` and topic files, and the first 200 lines load automatically. It is per project and per agent, and it has no history: sessions from before you enabled it are not in it. sessionwiki complements it. `sessionwiki import-memory` mirrors `~/.claude/projects/*/memory/*.md` into `wiki/notes/claude-memory/` with `origin: human`, so synthesis never rewrites those pages. The wiki adds cross-agent history, search over every past session and a static site.
+
+## Why not use claude-mem?
+
+claude-mem is one of the most popular memory plugins, and it is good at forward capture: hooks record new sessions and a model writes structured observations. The frequent complaints are cost (a model call per session) and day-zero import (early versions did not import sessions that already existed). sessionwiki starts from the history you already have: 10 adapters read transcripts already on disk. It also has a no-LLM path: `extractive` writes useful pages with no model, `agent-delegate` lets the running agent write pages on your subscription, and `--estimate` / `--max-sessions` cap the paid backends. See [competitor-landscape.md](competitor-landscape.md).
+
+## Why not just grep my sessions or use a session search tool?
+
+A search tool returns raw fragments. You still have to read them and connect them. sessionwiki keeps the raw layer (`wiki_search` with `include_raw=true`) and adds a compiled wiki on top: a summary page per session, project pages, cross-links, confidence and lifecycle. The [benchmarks](benchmarks.md) show the split: raw search wins on precise facts (numbers, hashes, dates), the wiki wins on orientation — "what did we do in this project and where did we stop". Use both.
+
+## Why not use mem0 or another memory API?
+
+mem0 and similar tools are memory layers for applications: you send facts to an API and get them back later. sessionwiki is a local record of work you already did. It reads your agents' session stores, redacts secrets, and builds a wiki you can read, edit, diff and publish. Nothing leaves the machine unless you point synthesis at a remote endpoint. If you need a memory API inside your own product, use mem0; if you need your own coding history to stop disappearing, use sessionwiki.
 
 ## Can I use it offline?
 
@@ -86,6 +102,15 @@ Use the `/wiki-update` command inside your coding agent session. It performs a s
 ## What Python version do I need?
 
 Python 3.9 or later. The only runtime dependency is the `markdown` package. Everything else uses the standard library.
+
+## Does it work on Windows?
+
+Yes. Sync, build, and the MCP server run on Windows. A few notes:
+
+- **Deep clone paths.** If `git clone` fails with "Filename too long", enable long paths: `git config --global core.longpaths true`.
+- **Stop hook.** The ZCode Stop hook prefers `pythonw.exe` (no console window) when it sits beside `python.exe`. The nightly run uses Task Scheduler; `sessionwiki zcode install` writes an `autosync.cmd` wrapper and prints the `schtasks` command.
+- **Non-ASCII search.** The MCP server forces UTF-8 on stdin/stdout, so Cyrillic and other non-ASCII queries work regardless of the system code page.
+- **Project names.** Non-ASCII (e.g. Cyrillic) project folder names are preserved in slugs, so distinct projects stay distinct.
 
 ## Can I export to other formats?
 

@@ -224,24 +224,39 @@ def make_db(tmp_path: Path) -> Path:
 
 
 @pytest.mark.parametrize(
-    ("directory", "expected"),
+    ("rel_parts", "expected"),
     [
-        ("/home/test/Projects/demo_project", "demo_project"),
-        ("/home/test/Projects/other-app/tmp/work", "other-app"),
-        ("/home/test/.zcode/workspace/default", "workspace_default"),
-        ("/home/test/.zcode/workspace/draft-abc", "workspace_drafts"),
-        ("/home/test/.zcode/workspace/draft-xyz", "workspace_drafts"),
-        ("/home/test/ZCodeProject", "ZCodeProject"),
-        ("/home/test/Work/project-a", "project-a"),
-        ("/home/test/Work", "Work"),
-        ("/tmp/foo", "foo"),
-        ("/home/test/Projects/bad name", "bad_name"),
-        ("/", "unknown"),
+        (("Projects", "demo_project"), "demo_project"),
+        (("Projects", "other-app", "tmp", "work"), "other-app"),
+        ((".zcode", "workspace", "default"), "workspace_default"),
+        ((".zcode", "workspace", "draft-abc"), "workspace_drafts"),
+        ((".zcode", "workspace", "draft-xyz"), "workspace_drafts"),
+        (("ZCodeProject",), "ZCodeProject"),
+        (("Work", "project-a"), "project-a"),
+        (("Work",), "Work"),
+        (("Projects", "bad name"), "bad_name"),
     ],
 )
-def test_project_slug_for_directory(directory: str, expected: str) -> None:
+def test_project_slug_for_directory(tmp_path, rel_parts, expected) -> None:
+    # Build paths from a real tmp_path home so the test is platform-native:
+    # POSIX literals plus a drive-less home fail on Windows.
     exporter = load_exporter()
-    assert exporter.project_slug_for_directory(directory, home=Path("/home/test")) == expected
+    directory = str(tmp_path.joinpath(*rel_parts))
+    assert exporter.project_slug_for_directory(directory, home=tmp_path) == expected
+
+
+def test_project_slug_outside_home_uses_basename(tmp_path) -> None:
+    exporter = load_exporter()
+    outside = tmp_path.parent / "foo"
+    assert exporter.project_slug_for_directory(str(outside), home=tmp_path) == "foo"
+
+
+def test_project_slug_root_is_unknown(tmp_path) -> None:
+    exporter = load_exporter()
+    assert (
+        exporter.project_slug_for_directory(tmp_path.anchor, home=tmp_path)
+        == "unknown"
+    )
 
 
 def test_iso_from_ms_formats_utc() -> None:

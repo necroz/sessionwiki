@@ -121,3 +121,86 @@ def test_invalid_date_to_is_rejected(tmp_path: Path):
 
     with pytest.raises(SystemExit):
         eval_recall.main([str(queries), "--date-to", "last week"])
+
+
+def test_bootstrap_ci_brackets_the_mean_and_is_deterministic():
+    values = [1.0, 1.0, 0.0, 0.5, 1.0, 0.0, 0.5, 1.0]
+
+    first = eval_recall.bootstrap_ci(values, resamples=2000, seed=7)
+    second = eval_recall.bootstrap_ci(values, resamples=2000, seed=7)
+
+    assert first == second
+    low, high = first
+    assert 0.0 <= low <= sum(values) / len(values) <= high <= 1.0
+
+
+def test_bootstrap_ci_collapses_when_every_value_is_equal():
+    assert eval_recall.bootstrap_ci([1.0, 1.0, 1.0], resamples=500, seed=1) == (1.0, 1.0)
+    assert eval_recall.bootstrap_ci([0.0, 0.0], resamples=500, seed=1) == (0.0, 0.0)
+
+
+def test_bootstrap_empty_input_returns_zero_interval():
+    assert eval_recall.bootstrap_ci([], resamples=100, seed=1) == (0.0, 0.0)
+
+
+def test_main_writes_bootstrap_ci_when_requested(tmp_path: Path, capsys):
+    from unittest.mock import patch
+
+    from sessionwiki.mcp import server
+
+    page = tmp_path / "wiki" / "sources" / "app" / "2026-01-01-s1.md"
+    page.parent.mkdir(parents=True)
+    page.write_text('---\ntitle: "Session: s1"\ntype: source\n---\n\nKeycloak login.\n', encoding="utf-8")
+    queries = tmp_path / "q.json"
+    queries.write_text(json.dumps([
+        {"id": "q1", "kind": "exact", "question": "keycloak",
+         "expected": ["wiki/sources/app/2026-01-01-s1.md"]},
+        {"id": "q2", "kind": "exact", "question": "missing",
+         "expected": ["wiki/sources/app/2026-01-01-s1.md"]},
+    ]))
+    out = tmp_path / "report.json"
+
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        assert eval_recall.main([
+            str(queries), "--k", "3", "--json", str(out), "--bootstrap", "500",
+        ]) == 0
+
+    ci = json.loads(out.read_text())["ci"]
+    assert ci["resamples"] == 500
+    assert ci["level"] == 0.95
+    assert 0.0 <= ci["recall"][0] <= ci["recall"][1] <= 1.0
+    assert "95% CI" in capsys.readouterr().out
+
+
+def test_validate_accepts_a_set_whose_expected_paths_exist(tmp_path: Path):
+    queries = tmp_path / "q.json"
+    queries.write_text(json.dumps([
+        {"id": "q1", "kind": "exact", "question": "keycloak",
+         "expected": ["README.md"]},
+    ]))
+
+    assert eval_recall.main([str(queries), "--validate"]) == 0
+
+
+def test_validate_reports_a_missing_expected_path(tmp_path: Path, capsys):
+    queries = tmp_path / "q.json"
+    queries.write_text(json.dumps([
+        {"id": "q1", "kind": "exact", "question": "keycloak",
+         "expected": ["wiki/sources/missing.md"]},
+    ]))
+
+    assert eval_recall.main([str(queries), "--validate"]) == 2
+    assert "wiki/sources/missing.md" in capsys.readouterr().err
+
+
+def test_validate_reports_duplicate_ids_and_unknown_kinds(tmp_path: Path, capsys):
+    queries = tmp_path / "q.json"
+    queries.write_text(json.dumps([
+        {"id": "q1", "kind": "exact", "question": "a", "expected": ["README.md"]},
+        {"id": "q1", "kind": "vibes", "question": "b", "expected": ["README.md"]},
+    ]))
+
+    assert eval_recall.main([str(queries), "--validate"]) == 2
+    err = capsys.readouterr().err
+    assert "duplicate id q1" in err
+    assert "unknown kind 'vibes'" in err

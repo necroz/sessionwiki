@@ -32,7 +32,7 @@ from sessionwiki.lock import FileLock, atomic_write_text, lock_path_for
 # #py-m1 (#587) / #arch-h5 (#610): import directly from _frontmatter
 # instead of via build.py. The build module pulls in 145+ transitive
 # imports; the parser sits cleanly in _frontmatter.py with no deps.
-from sessionwiki._frontmatter import is_human_page, parse_frontmatter
+from sessionwiki._frontmatter import _parse_scalar, is_human_page, parse_frontmatter
 from sessionwiki.synth.base import BaseSynthesizer, DummySynthesizer
 
 
@@ -43,14 +43,20 @@ _SLUG_UNSAFE = re.compile(r'[\s/\\:*?"<>|]+')
 _SLUG_DASH_RUN = re.compile(r"-{2,}")
 
 
-def _normalise_slug(raw: str) -> str:
+def _normalise_slug(raw: Any) -> str:
     """Return a URL-safe + shell-safe slug. Preserves case + unicode.
 
     Examples:
       ``"00 - Master Framework Index"`` → ``"00-Master-Framework-Index"``
       ``"path/with/slashes"``            → ``"path-with-slashes"``
       ``"weird:chars<here>"``            → ``"weird-chars-here"``
+
+    Frontmatter may coerce a numeric-looking slug (``42720e39``, ``-13``)
+    to int/float; coerce to str so ``re.sub`` never sees a non-string.
     """
+    if raw is None:
+        return "unknown"
+    raw = str(raw)
     if not raw:
         return "unknown"
     cleaned = _SLUG_UNSAFE.sub("-", raw)
@@ -66,10 +72,10 @@ def resolve_backend(
     """Pick a synthesizer backend from ``cfg["synthesis"]["backend"]``.
 
     Supported values:
-      - ``"dummy"`` (default) — canned offline backend for previews/tests
-      - ``"extractive"`` — offline backend that picks the request, the
-        last answer, decisions, files and tools out of the transcript
-        (D1); no model, no network
+      - ``"extractive"`` (default) — offline backend that picks the
+        request, the last answer, decisions, files and tools out of the
+        transcript (D1); no model, no network
+      - ``"dummy"`` — canned offline backend for previews/tests
       - ``"ollama"`` — local Ollama HTTP backend (#35)
       - ``"openai"`` — any OpenAI-compatible ``/v1`` server (vLLM,
         SGLang, LM Studio, LiteLLM, hosted providers)
@@ -78,15 +84,15 @@ def resolve_backend(
         ``.llmwiki-pending-prompts/`` for the slash-command layer to
         pick up on the next agent turn.  No HTTP, no API key.
 
-    Unknown values fall back to the dummy backend with a warning so a
+    Unknown values fall back to the extractive backend with a warning so a
     typo in config.json doesn't crash sync.
     """
     synth_cfg = (cfg or {}).get("synthesis", {}) or {}
-    name = (synth_cfg.get("backend") or "dummy").strip().lower()
+    name = (synth_cfg.get("backend") or "extractive").strip().lower()
 
     if name == "ollama":
         # Imported lazily so the `urllib`-based module isn't loaded when
-        # users stick with the default dummy backend.
+        # users stick with the default extractive backend.
         from sessionwiki.synth.ollama import OllamaSynthesizer, load_ollama_config
 
         return _with_chunking(OllamaSynthesizer(config=load_ollama_config(cfg)), cfg)
@@ -109,18 +115,19 @@ def resolve_backend(
 
         return AgentDelegateSynthesizer()
 
+    if name not in {"dummy", "extractive"}:
+        import logging
+        logging.getLogger(__name__).warning(
+            "Unknown synthesis.backend %r — falling back to extractive", name
+        )
+        name = "extractive"
+
     if name == "extractive":
         # Offline, like the dummy backend, so no chunking wrapper: the
         # page is built from the body the call already carries.
         from sessionwiki.synth.extractive import ExtractiveSynthesizer
 
         return ExtractiveSynthesizer()
-
-    if name != "dummy":
-        import logging
-        logging.getLogger(__name__).warning(
-            "Unknown synthesis.backend %r — falling back to dummy", name
-        )
     return DummySynthesizer()
 
 
@@ -875,7 +882,7 @@ def _coalesce_low_signal_sessions(
         bucket = date[:7] if window == "month" else "all"
         key = f"{project}\x00{bucket}"
         try:
-            rel = str(p.relative_to(raw_dir))
+            rel = p.relative_to(raw_dir).as_posix()
         except ValueError:
             continue
         groups.setdefault(key, []).append({
@@ -969,7 +976,7 @@ def _coalesce_low_signal_sessions(
         project = str(meta.get("project") or p.parent.name)
         slug = str(meta.get("slug") or p.stem)
         try:
-            rel_by_slug[(project, slug)] = str(p.relative_to(raw_dir))
+            rel_by_slug[(project, slug)] = p.relative_to(raw_dir).as_posix()
         except ValueError:
             continue
 
@@ -1198,9 +1205,9 @@ def _build_source_page(
     its current frontmatter ``tags`` are preserved verbatim (maintainer
     curation is never overwritten on re-synthesize).
     """
-    slug = meta.get("slug", "unknown")
+    slug = str(meta.get("slug") or "unknown")
     title = meta.get("title", f"Source: {slug}")
-    project = meta.get("project", "unknown")
+    project = str(meta.get("project") or "unknown")
     date = meta.get("date", "")
     model = meta.get("model", "")
     source_file = meta.get("source_file", "")
@@ -1240,12 +1247,12 @@ def _build_source_page(
         "---",
         f'title: "{title}"',
         "type: source",
-        f"slug: {slug}",
+        f"slug: {_fm_scalar(slug)}",
         *_description_lines(meta),
         f"tags: [{', '.join(tags)}]",
         f"date: {date}",
         f"source_file: {source_file}",
-        f"project: {project}",
+        f"project: {_fm_scalar(project)}",
         f"model: {model}",
         f"last_updated: {datetime.now(timezone.utc).strftime('%Y-%m-%d')}",
         "---",
@@ -1258,6 +1265,15 @@ def _build_source_page(
 # their own language. The page body is synthesised in English, so this
 # line is what lets a question asked in the user's language find the
 # page (wiki_query, site search).
+def _fm_scalar(value: str) -> str:
+    """Bare YAML scalar, quoted only when it would re-parse as a non-string.
+
+    A slug like ``42720e39`` or ``-13`` is coerced to int/float by the
+    frontmatter parser; quoting keeps the original token on the next parse.
+    """
+    return f'"{value}"' if _parse_scalar(value) != value else value
+
+
 _DESCRIPTION_MAX_CHARS = 300
 
 
@@ -1299,7 +1315,7 @@ def backfill_source_descriptions(
         if not page_meta or page_meta.get("description"):
             continue
         if not page_meta.get("slug") and meta.get("slug"):
-            lines = [f"slug: {_normalise_slug(str(meta['slug']))}", *lines]
+            lines = [f"slug: {_fm_scalar(_normalise_slug(str(meta['slug'])))}", *lines]
         updated += 1
         if dry_run:
             continue
@@ -1426,7 +1442,7 @@ def _synthesize_new_sessions_unlocked(
 
     new_files: list[tuple[Path, dict[str, Any], str]] = []
     for p, meta, body in sessions:
-        rel = str(p.relative_to(raw_root))
+        rel = p.relative_to(raw_root).as_posix()
         try:
             mtime = p.stat().st_mtime
         except OSError:
@@ -1466,7 +1482,7 @@ def _synthesize_new_sessions_unlocked(
             new_files = [
                 item
                 for item in new_files
-                if str(item[0].relative_to(raw_root)) not in coalesced_rels
+                if item[0].relative_to(raw_root).as_posix() not in coalesced_rels
             ]
             summary["new_files"] = len(new_files)
             for project in affected:
@@ -1527,9 +1543,14 @@ def _synthesize_new_sessions_unlocked(
         item: tuple[Path, dict[str, Any], str],
     ) -> tuple[str, str, Optional[float], str, str, Optional[str]]:
         p, meta, body = item
-        raw_slug = meta.get("slug", p.stem)
-        project = meta.get("project", p.parent.name)
-        rel = str(p.relative_to(raw_dir or RAW_SESSIONS))
+        raw_slug = str(meta.get("slug") or p.stem)
+        project = str(meta.get("project") or p.parent.name)
+        # Backends read meta["slug"]/meta["project"] directly and feed them
+        # to regexes; normalise the dict so a numeric frontmatter value
+        # (42720e39, -13) never reaches them as int/float.
+        meta["slug"] = raw_slug
+        meta["project"] = project
+        rel = p.relative_to(raw_dir or RAW_SESSIONS).as_posix()
         slug = _normalise_slug(raw_slug)
         date = str(meta.get("date", "")).strip()
         filename = f"{date}-{slug}" if date else slug
@@ -1616,7 +1637,7 @@ def _synthesize_new_sessions_unlocked(
     ):
         projects_touched: dict[str, int] = {}
         for p, meta, _ in new_files:
-            project = meta.get("project", p.parent.name)
+            project = str(meta.get("project") or p.parent.name)
             projects_touched[project] = projects_touched.get(project, 0) + 1
         parts: list[str] = []
         if summary["synthesized"]:

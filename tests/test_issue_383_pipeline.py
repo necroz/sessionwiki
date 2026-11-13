@@ -15,6 +15,12 @@ def test_all_parser_accepts_with_synth_flag():
     assert args.synth_force is True
 
 
+def test_load_synthesis_backend_defaults_to_extractive(tmp_path):
+    from sessionwiki.config_schedule import load_synthesis_backend
+
+    assert load_synthesis_backend(tmp_path / "missing.json") == "extractive"
+
+
 def test_synthesis_status_hint_for_dummy_backend():
     from sessionwiki.config_schedule import synthesis_status_hint
 

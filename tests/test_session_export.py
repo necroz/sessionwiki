@@ -20,6 +20,46 @@ def test_both_exporters_use_the_shared_helpers() -> None:
         assert getattr(opencode_export, name) is getattr(common, name)
 
 
+def test_safe_project_slug_preserves_cyrillic() -> None:
+    from sessionwiki.adapters.base import _safe_project_slug
+
+    assert _safe_project_slug("Проект") == "Проект"
+    assert _safe_project_slug("Проект") != _safe_project_slug("Другой")
+
+
+def test_project_slug_cyrillic_distinct(tmp_path) -> None:
+    # Two distinct Cyrillic project dirs must not collapse to one slug.
+    a = common.project_slug_for_directory(
+        str(tmp_path / "Projects" / "Проект"), home=tmp_path
+    )
+    b = common.project_slug_for_directory(
+        str(tmp_path / "Projects" / "Другой"), home=tmp_path
+    )
+    assert a == "Проект" and b == "Другой" and a != b
+
+
+def test_cyrillic_project_survives_adapter_and_build_gates(tmp_path) -> None:
+    # End-to-end: adapter slug → raw frontmatter → build gate. Two
+    # Cyrillic projects must never converge on one directory.
+    from sessionwiki.adapters.base import _safe_project_slug
+    from sessionwiki.build import discover_sources
+
+    adapter_a = _safe_project_slug("Проект")
+    adapter_b = _safe_project_slug("Другой")
+    assert adapter_a != adapter_b
+
+    for project in (adapter_a, adapter_b):
+        d = tmp_path / "raw" / "sessions" / project
+        d.mkdir(parents=True)
+        (d / "s.md").write_text(
+            f"---\ntitle: x\ntype: source\nproject: {project}\nslug: s\n---\n\nbody\n",
+            encoding="utf-8",
+        )
+
+    sources = discover_sources(tmp_path / "raw" / "sessions")
+    assert {meta["project"] for _p, meta, _b in sources} == {"Проект", "Другой"}
+
+
 def test_extra_rule_runs_after_projects_and_before_configured_roots(tmp_path) -> None:
     home = tmp_path / "home"
     calls: list[Path] = []

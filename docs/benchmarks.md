@@ -110,7 +110,8 @@ ranking only; `graph` is lexical plus one graph hop, the shipped default.
 20–21 changed the ranking weights and added filters after this run, so these
 numbers are a historical baseline, not a measurement of 2.1.0. Rerun before
 quoting them. The query set stays in `.metrics/` on the maintainer's machine;
-the archived reports are `.metrics/recall-{base,graph}-{k5,k10}.json`.
+the archived reports are `.metrics/recall-{base,graph}-{k5,k10}.json` and,
+for the expanded set, `.metrics/recall-v2-k{5,10,20}.json`.
 
 ```bash
 .venv/bin/python scripts/eval_recall.py .metrics/recall-queries.json --k 5
@@ -222,6 +223,136 @@ What this says:
   it needs a provider decision (HTTP endpoint or local model) and must stay
   off by default.
 - The same caveat applies: 24 queries, one corpus, no confidence intervals.
+
+### Expanded set: 103 queries, 2026-11-12
+
+The 24-query set was too small to publish a point estimate: one query moved
+a per-kind number by 0.125. The set now has 103 queries — 41 exact, 38
+paraphrase and 24 relational — sampled across the projects in the corpus
+(larisa-ngdu, neuromerch, workspace_default, workspace_drafts,
+audio-transcript, llm-wiki, Projects, doc-checker and others). The
+definitions are unchanged; the shipped ranking is lexical plus one graph
+hop, and `--date-to 2026-11-10` pins the same 976-page snapshot.
+
+| k | exact (41) | paraphrase (38) | relational (24) | overall (103) | 95% CI recall | 95% CI hit |
+|---|---|---|---:|---:|---:|---:|
+| 5 | 82.9 / 82.9 | 71.1 / 73.7 | 33.7 / 58.3 | 67.1 / 73.8 | 58.7–75.0 | 65.0–81.6 |
+| 10 | 90.2 / 90.2 | 88.6 / 92.1 | 38.5 / 58.3 | 77.6 / 83.5 | 69.9–84.4 | 75.7–90.3 |
+| 20 | 92.7 / 92.7 | 93.0 / 94.7 | 46.5 / 70.8 | 82.0 / 88.3 | 75.2–88.4 | 81.6–94.2 |
+
+Each cell is recall / hit; the interval is a percentile bootstrap over
+queries (2000 resamples, seed 0).
+
+What the larger set says:
+
+- **The shape of the old result holds.** Exact and paraphrase questions are
+  mostly found by k=10; relational questions are the weak spot at every
+  depth (33.7% recall at k=5, 46.5% at k=20).
+- **The interval is the honest cost of a small sample.** Even with 103
+  queries the 95% interval on overall recall@5 is about ±8 points. Quote the
+  interval, not the point.
+- **Do not compare across sets.** The expanded set has more paraphrase
+  queries and more multi-page expectations than the 24-query set, so 71.1%
+  paraphrase recall@5 here is not comparable with 54.2% there. Compare runs
+  only on the same set and the same `--date-to`.
+- **Relational recall is the retrieval gap.** One graph hop does not
+  assemble evidence from several sessions — the same multi-hop weakness the
+  MemoryTax run shows below.
+
+The query set names private sessions and stays out of git. `--validate`
+checks the schema and that every expected path exists before a run; it exits
+without searching when the wiki has moved a page.
+
+```bash
+.venv/bin/python scripts/eval_recall.py .metrics/recall-queries-v2.json --validate
+.venv/bin/python scripts/eval_recall.py .metrics/recall-queries-v2.json \
+    --k 5 --date-to 2026-11-10 --bootstrap 2000 --seed 0
+```
+
+## MemoryTax: does the curated wiki beat searching raw sessions?
+
+The MemoryTax paper ([arXiv 2610.29823](https://arxiv.org/abs/2610.29823))
+asks whether designed memory (Mem0, Zep) beats an agent that searches the raw
+conversation history. This reproduction runs the same comparison on this
+repository's own history: the curated `wiki/` plays designed memory,
+`raw/sessions/` plays raw history.
+
+Method: 80 questions in four kinds — single-fact (35), multi-hop (20),
+temporal (15), open (10). Four methods answer every question:
+
+- `wiki` — `wiki_query` over curated pages plus one answer call (the Mem0
+  analogue).
+- `raw` — BM25 over raw session turns plus one answer call (the BM25
+  analogue).
+- `agent-wiki` — a tool loop (read, grep, list) scoped to `wiki/`.
+- `agent-raw` — the same loop scoped to `raw/sessions/`.
+
+Two reader models: `deepseek-v4.1-flash` (weak) and `qwen4-max-preview`
+(strong). An LLM judge (`glm-5.3-flash`) grades every answer; an empty answer
+counts as wrong. Cost is the list price of the answer calls; the judge is
+excluded, as in the paper. The corpus is pinned to 2026-11-10 so pages about
+this benchmark cannot leak into the answers. The question set names real
+sessions and stays out of git.
+
+**Measured 2026-11-12 against the v2.2.0 wiki snapshot (1016 raw sessions,
+68 MB).** accuracy is the share of correct answers; cost is USD per run.
+
+| method | model | n | single | multi | temporal | open | all | cost | $/correct | empty |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| wiki | weak | 80 | 29% | 0% | 7% | 0% | 14% | 0.026 | 0.002 | 0% |
+| wiki | strong | 80 | 23% | 5% | 7% | 0% | 12% | 0.278 | 0.028 | 1% |
+| raw | weak | 80 | 71% | 30% | 60% | 10% | 51% | 0.198 | 0.005 | 4% |
+| raw | strong | 80 | 80% | 30% | 67% | 40% | 60% | 2.204 | 0.046 | 5% |
+| agent-wiki | weak | 80 | 60% | 20% | 27% | 20% | 39% | 0.432 | 0.014 | 44% |
+| agent-wiki | strong | 80 | 54% | 10% | 27% | 20% | 34% | 16.665 | 0.617 | 36% |
+| agent-raw | weak | 80 | 80% | 20% | 53% | 10% | 51% | 0.402 | 0.010 | 42% |
+| agent-raw | strong | 80 | 94% | 30% | 73% | 40% | 68% | 12.237 | 0.227 | 24% |
+
+What the numbers say:
+
+- **Raw search beats wiki search on facts.** `raw`/strong answers 60% of
+  questions correctly against 12% for `wiki`/strong. With an agent loop the
+  gap is 68% against 34%. The wiki loses granular facts (numbers, hashes,
+  dates) during synthesis — the "writer ceiling" from the paper.
+- **BM25 over raw sessions is the best price/accuracy point.** `raw`/strong
+  reaches 60% for $2.20. `agent-raw`/strong reaches 68% for $12.24 — 5.5
+  times the cost for 8 points.
+- **The wiki is cheap but imprecise.** `wiki`/weak costs $0.026, uses 121k
+  tokens and never returns an empty answer. It suits rough context, not
+  precise facts.
+- **A stronger reader helps raw search, not the wiki.** `raw` moves from 51%
+  to 60% and `agent-raw` from 51% to 68%. `wiki` stays at 12–14%, and
+  `agent-wiki` falls from 39% to 34%: the reader cannot recover what the
+  writer dropped.
+- **`agent-wiki` never reaches the Pareto frontier.** `agent-raw` dominates
+  it: cheaper and more accurate.
+- **Multi-hop is hard for every method** (0–30%). One BM25 query or a short
+  agent loop does not collect evidence from two sessions.
+
+What this means for the product: the wiki is not a fact database, and this
+benchmark measures only factual recall. sessionwiki ships both layers:
+`wiki/` for cheap orientation, synthesis and cross-project overview, and raw
+transcripts for precise facts. `wiki_search` reads raw transcripts with
+`include_raw=true`, and `wiki_query` falls back to them when no wiki page
+matches. Use the wiki to find where to look; use the raw layer to quote the
+number, hash or date.
+
+Caveats: one run per cell, 80 questions, and a fact-heavy set (55 of 80
+questions are single-fact or temporal), which biases the comparison against
+a wiki designed for synthesis. The judge sometimes penalizes a verbose but
+correct answer, and the agent harness is minimal (12 steps, three tools), so
+multi-hop is understated. Empty answers count as wrong without a retry, while
+the paper retried failed runs. Prices are estimated from public list prices.
+The wiki covers projects unevenly.
+
+Reproduce (the question set stays in `.metrics/`, which is gitignored):
+
+```bash
+.venv/bin/python scripts/eval_memorytax.py run .metrics/memorytax-questions.json \
+    --methods wiki,raw --models weak,strong --date-to 2026-11-10
+.venv/bin/python scripts/eval_memorytax.py judge .metrics/memorytax-runs.jsonl
+.venv/bin/python scripts/eval_memorytax.py report .metrics/memorytax-runs.jsonl
+```
 
 ## Scaling notes
 

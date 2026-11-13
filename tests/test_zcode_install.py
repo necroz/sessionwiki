@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
+
+import pytest
 
 from sessionwiki import cli
 from sessionwiki.zcode import install
@@ -11,6 +14,37 @@ from sessionwiki.zcode import install
 
 def _hook_config(home: Path) -> Path:
     return home / ".zcode" / "cli" / "config.json"
+
+
+def test_windowless_python_prefers_pythonw(tmp_path, monkeypatch):
+    import types
+
+    py = tmp_path / "python.exe"
+    py.write_text("")
+    # POSIX: never swapped.
+    assert install._windowless_python(str(py)) == str(py)
+    # Windows without pythonw.exe: unchanged. Patch install.os (not the
+    # global os.name) so pathlib still builds PosixPath on Linux.
+    monkeypatch.setattr(install, "os", types.SimpleNamespace(name="nt"))
+    assert install._windowless_python(str(py)) == str(py)
+    # Windows with pythonw.exe beside python.exe: prefer the windowless one.
+    (tmp_path / "pythonw.exe").write_text("")
+    assert install._windowless_python(str(py)) == str(tmp_path / "pythonw.exe")
+
+
+def test_hook_command_uses_pythonw_on_windows(tmp_path, monkeypatch):
+    import types
+
+    py = tmp_path / "python.exe"
+    py.write_text("")
+    (tmp_path / "pythonw.exe").write_text("")
+    monkeypatch.setattr(install, "os", types.SimpleNamespace(name="nt"))
+    cmd = install._hook_command(str(py), build=False)
+    assert cmd.startswith('start "" /B ')
+    assert "pythonw.exe" in cmd
+    # pythonw.exe may have no console (sys.stdout is None); --quiet keeps
+    # autosync_log off stdout so the hook never crashes on print().
+    assert "--quiet" in cmd
 
 
 def test_install_hook_preserves_existing_and_is_idempotent(tmp_path):
@@ -57,6 +91,7 @@ def test_install_hook_dry_run_writes_nothing(tmp_path):
     assert not config_path.exists()
 
 
+@pytest.mark.skipif(os.name == "nt", reason="systemd is Linux-only; POSIX path literals")
 def test_install_systemd_writes_service_and_timer(tmp_path):
     install.install_systemd(
         home=tmp_path,
@@ -76,6 +111,7 @@ def test_install_systemd_writes_service_and_timer(tmp_path):
     assert "Unit=sessionwiki-zcode.service" in timer
 
 
+@pytest.mark.skipif(os.name == "nt", reason="launchd is macOS-only; POSIX path literals")
 def test_install_launchd_writes_plist(tmp_path):
     path = install.install_launchd(
         home=tmp_path,

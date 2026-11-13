@@ -56,7 +56,7 @@ def _check_config(repo_root: Path) -> dict[str, Any]:
         repo_root / "config.json",
         repo_root / "config.local.json",
     )
-    present = [str(path.relative_to(repo_root)) for path in candidates if path.is_file()]
+    present = [path.relative_to(repo_root).as_posix() for path in candidates if path.is_file()]
     return {
         "ok": candidates[0].is_file(),
         "detail": ", ".join(present) if present else "no config files found",
@@ -104,7 +104,7 @@ def _check_synthesis(repo_root: Path) -> dict[str, Any]:
         # files, not sessions.
         if p.name.startswith("_"):
             continue
-        rel = str(p.relative_to(raw_root))
+        rel = p.relative_to(raw_root).as_posix()
         try:
             mtime = p.stat().st_mtime
         except OSError:

@@ -105,7 +105,7 @@ def _recent_sessions(project: str, limit: int) -> list[tuple[str, str, str, str]
         if _is_subagent(meta, page.name):
             continue
         items.append((str(meta.get("date", "")), str(meta.get("description", "")),
-                      _first_sentence(body), str(page.relative_to(REPO_ROOT))))
+                      _first_sentence(body), page.relative_to(REPO_ROOT).as_posix()))
     raw = REPO_ROOT / "raw" / "sessions"
     for transcript in raw.rglob("*.md") if raw.is_dir() else []:
         try:
@@ -119,7 +119,7 @@ def _recent_sessions(project: str, limit: int) -> list[tuple[str, str, str, str]
         if _is_subagent(meta, transcript.name):
             continue
         items.append((str(meta.get("date", "")), str(meta.get("description", "")),
-                      "", str(transcript.relative_to(REPO_ROOT))))
+                      "", transcript.relative_to(REPO_ROOT).as_posix()))
     items.sort(key=lambda item: (item[0], item[3]), reverse=True)
     return items[:limit]
 
@@ -1278,7 +1278,7 @@ def cmd_synthesize(args: argparse.Namespace) -> int:
     """Synthesize wiki source pages from raw sessions (v1.1.0 · #35).
 
     Uses the backend selected via ``synthesis.backend`` in the config
-    (dummy | extractive | ollama | openai | agent). ``--check`` prints backend
+    (extractive | dummy | ollama | openai | agent). ``--check`` prints backend
     availability without running synthesis — useful for diagnosing a
     server before a long sync. ``--estimate`` prints a cached-vs-fresh
     token + dollar breakdown before spending money (#50).
@@ -1424,7 +1424,7 @@ def _synthesize_estimate(config: dict | None = None) -> int:
     from sessionwiki.cache import MODEL_PRICING
 
     synth = (config or {}).get("synthesis", {}) or {}
-    backend = str(synth.get("backend") or "dummy")
+    backend = str(synth.get("backend") or "extractive")
     model = str(synth.get("model") or "")
     priced = model in MODEL_PRICING
 
@@ -1615,7 +1615,7 @@ def cmd_remember(args: argparse.Namespace) -> int:
         f"- [[{entity}]] — project\n"
     )
     path.write_text(content, encoding="utf-8")
-    print(f"  remembered → {path.relative_to(REPO_ROOT)}")
+    print(f"  remembered → {path.relative_to(REPO_ROOT).as_posix()}")
     print("  review with: sessionwiki candidates list")
     return 0
 

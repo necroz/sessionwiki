@@ -57,18 +57,40 @@ def _cmd_escape(text: str) -> str:
     return text.replace("%", "%%")
 
 
+def _windowless_python(python_exe: str) -> str:
+    """On Windows prefer pythonw.exe (no console) for the Stop hook.
+
+    The hook fires after every reply; ``start /B`` with python.exe can
+    flash a console window. pythonw.exe has no console subsystem. Fall
+    back to python.exe when pythonw.exe is not beside it.
+    """
+    if os.name != "nt":
+        return python_exe
+    p = Path(python_exe)
+    if p.name.lower() == "python.exe":
+        candidate = p.with_name("pythonw.exe")
+        if candidate.exists():
+            return str(candidate)
+    return python_exe
+
+
 def _hook_command(
     python_exe: str, *, build: bool, coalesce: bool = False
 ) -> str:
     # The Stop hook fires after every reply. --lock-timeout 0 skips when a
     # cycle is already running instead of queueing a process that waits up
     # to 600 s; the nightly timer (no flag) is the run that waits.
+    if os.name == "nt":
+        python_exe = _windowless_python(python_exe)
     base = (
         _autosync_command(python_exe, build=build, coalesce=coalesce)
         + " --lock-timeout 0"
     )
     if os.name == "nt":
-        return f'start "" /B {base}'
+        # pythonw.exe may have no console (sys.stdout is None); --quiet
+        # keeps autosync_log off stdout so print() never crashes. The
+        # POSIX branch silences via redirection instead.
+        return f'start "" /B {base} --quiet'
     return f'nohup {base} >/dev/null 2>&1 &'
 
 

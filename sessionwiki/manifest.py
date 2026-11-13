@@ -82,7 +82,7 @@ def build_manifest(site_dir: Path) -> dict[str, Any]:
         rel = p.relative_to(site_dir)
         files.append(
             {
-                "path": str(rel),
+                "path": rel.as_posix(),
                 "size": size,
                 "sha256": sha256_hex(p),
             }

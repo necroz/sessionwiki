@@ -10,6 +10,22 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Added
+
+- **Recall benchmark expanded to 103 queries** — 41 exact, 38 paraphrase and 24 relational queries over the 2026-11-10 snapshot. `scripts/eval_recall.py --bootstrap N` adds a percentile confidence interval over queries, and `--validate` checks the schema and expected paths before a run. `docs/benchmarks.md` reports recall/hit at k=5, 10 and 20 with 95% intervals and states that results are comparable only on the same query set and snapshot.
+- **MemoryTax benchmark harness** — `scripts/eval_memorytax.py` reproduces the MemoryTax method (arXiv 2610.29823) on the repository's own history: four methods (`wiki`, `raw` BM25, `agent-wiki`, `agent-raw`), two reader models, an LLM judge, a pinned corpus (`--date-to`) and a cost/accuracy report. `scripts/build_memorytax_questions.py` builds the question set, `scripts/memorytax_report.py` renders the table. The question set names private sessions and stays out of git.
+- **Published MemoryTax results** — `docs/benchmarks.md` now reports the 80-question run. Raw search beats wiki search on factual recall (60% against 12%), so the docs state the two-layer rule: the wiki is for orientation and synthesis, raw transcripts are for precise facts.
+- **CI runs on macOS and Windows** — a new `cross-platform` job runs the install, CLI smoke and the full test suite on `macos-latest` and `windows-latest` for every push and pull request. The job skips `slow` timing tests: a ratio assertion failed on scheduler jitter on a shared macOS runner, and the timing tests stay covered on Linux. Windows/macOS breakage was the top reason users left comparable memory plugins.
+
+### Changed
+
+- **The default synthesis backend is `extractive`** — a fresh install now writes a useful source page with no model and no network instead of a metadata-only stub. `dummy` stays available as an explicit choice, and an unknown backend name falls back to `extractive` with a warning.
+
+### Fixed
+
+- **Windows compatibility** — the file lock no longer crashes with `PermissionError` when another autosync holds it (msvcrt mandatory lock; `fstat` replaces a content read). The MCP server forces UTF-8 on stdin and stdout, so non-ASCII queries and responses survive the Windows ANSI code page. Legacy state migration now matches Windows backslash paths. Numeric-looking slugs (`42720e39`, `-13`) no longer crash synthesis. Non-ASCII (e.g. Cyrillic) project names are preserved in slugs instead of collapsing to underscores, while the overview prompt-injection guard stays ASCII-only. The Windows Stop hook prefers `pythonw.exe` and runs `--quiet`, so it neither flashes a console nor crashes on a missing stdout.
+- **Windows-authored pages keep their graph links** — a `## Connections` section with CRLF line endings is normalised before parsing, so the `wiki_query` graph hop finds neighbours in pages written on Windows instead of returning lexical matches only. This was the remaining failure in the first `windows-latest` CI run.
+
 ## [2.2.0] — 2026-11-12
 
 Theme: memory that knows its own state — record status in every query hit, lessons carried into later attempts, bounded recall injection, confidence with measurement provenance, and pinned eval snapshots.

@@ -119,7 +119,7 @@ def scan_pages() -> dict[str, dict[str, Any]]:
         out_links = set(WIKILINK_RE.findall(text))
         site_url = _compute_site_url(text, rel.parts, slug, type_)
         pages[slug] = {
-            "path": str(p.relative_to(REPO_ROOT)),
+            "path": p.relative_to(REPO_ROOT).as_posix(),
             "type": type_,
             "title": title,
             "out_links": out_links,

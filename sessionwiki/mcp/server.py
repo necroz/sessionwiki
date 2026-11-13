@@ -1071,6 +1071,10 @@ _LINK_RE = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
 
 def _page_links(content: str) -> dict[str, str]:
     """Names a page links to: normalised key -> name as first written."""
+    # Pages written on Windows carry CRLF; the line-anchored section
+    # regex below would miss "## Connections\r\n" and the graph hop
+    # would find no neighbours.
+    content = content.replace("\r\n", "\n")
     names = _LINK_RE.findall(content)
     section = _CONNECTIONS_RE.search(content)
     if section:
@@ -1111,7 +1115,7 @@ def _ranked_hits(
         via_name = via[page] if bonus.get(page, 0.0) > lexical.get(page, 0.0) else ""
         snippet = scored[page][1] if page in scored else _page_snippet(page, tokens)
         hits.append({
-            "path": str(page.relative_to(REPO_ROOT)),
+            "path": page.relative_to(REPO_ROOT).as_posix(),
             "score": round(score, 1),
             "via": via_name,
             "snippet": snippet,
@@ -1370,7 +1374,7 @@ def tool_wiki_search(args: dict[str, Any]) -> dict[str, Any]:
             if term_lower in line.lower():
                 hits.append(
                     {
-                        "path": str(p.relative_to(REPO_ROOT)),
+                        "path": p.relative_to(REPO_ROOT).as_posix(),
                         "line": i,
                         "text": line.strip()[:200],
                     }
@@ -1438,7 +1442,7 @@ def tool_wiki_list_sources(args: dict[str, Any]) -> dict[str, Any]:
             continue
         out.append(
             {
-                "path": str(p.relative_to(REPO_ROOT)),
+                "path": p.relative_to(REPO_ROOT).as_posix(),
                 "project": project,
                 "date": meta.get("date", ""),
                 "filename": p.name,
@@ -2161,8 +2165,25 @@ def error_response(req_id: Any, code: int, message: str) -> dict[str, Any]:
     }
 
 
+def _force_utf8(stream) -> None:
+    """Force a stdio stream to UTF-8.
+
+    MCP JSON-RPC is UTF-8, but on Windows a redirected stdin/stdout
+    defaults to the ANSI code page (e.g. cp1251), which mangles non-ASCII
+    requests and responses. Streams without ``reconfigure`` (StringIO,
+    pytest capture) are left untouched.
+    """
+    try:
+        stream.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError, OSError):
+        pass
+
+
 def main() -> int:
     """Run the MCP server on stdin/stdout."""
+    _force_utf8(sys.stdin)
+    _force_utf8(sys.stdout)
+    _force_utf8(sys.stderr)
     try:
         for line in sys.stdin:
             line = line.strip()

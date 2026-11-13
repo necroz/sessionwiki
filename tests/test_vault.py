@@ -423,10 +423,12 @@ def test_very_long_slug_allowed(tmp_path: Path):
 
 
 def test_cli_sync_accepts_vault_flag():
+    from pathlib import Path
+
     from sessionwiki.cli import build_parser
     parser = build_parser()
     args = parser.parse_args(["sync", "--vault", "/tmp/some-vault"])
-    assert str(args.vault) == "/tmp/some-vault"
+    assert args.vault == Path("/tmp/some-vault")
 
 
 def test_cli_sync_defaults_vault_to_none():
@@ -447,10 +449,12 @@ def test_cli_sync_allow_overwrite_flag():
 
 
 def test_cli_build_accepts_vault_flag():
+    from pathlib import Path
+
     from sessionwiki.cli import build_parser
     parser = build_parser()
     args = parser.parse_args(["build", "--vault", "/tmp/v"])
-    assert str(args.vault) == "/tmp/v"
+    assert args.vault == Path("/tmp/v")
 
 
 def test_cli_sync_bad_vault_path_exits_with_error(tmp_path: Path, capsys):
@@ -593,10 +597,12 @@ def test_synth_state_file_with_spaces_in_path(tmp_path: Path):
 
 def test_cli_synthesize_accepts_vault_flag():
     """CLI exposes --vault flag on `synthesize` (#420)."""
+    from pathlib import Path
+
     from sessionwiki.cli import build_parser
     parser = build_parser()
     args = parser.parse_args(["synthesize", "--vault", "/tmp/myvault"])
-    assert str(args.vault) == "/tmp/myvault"
+    assert args.vault == Path("/tmp/myvault")
 
 
 def test_cli_synthesize_default_vault_is_none():

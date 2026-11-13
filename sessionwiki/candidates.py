@@ -140,7 +140,7 @@ def list_candidates(
             created = meta.get("last_updated") or meta.get("date")
             out.append({
                 "slug": path.stem,
-                "rel_path": str(path.relative_to(wiki_dir)),
+                "rel_path": path.relative_to(wiki_dir).as_posix(),
                 "abs_path": path,
                 "kind": sub,
                 "title": meta.get("title", path.stem),
@@ -208,7 +208,7 @@ def merge(
     appended = (
         target.read_text(encoding="utf-8").rstrip() +
         f"\n\n## Candidate merge — {today}\n\n" +
-        f"Merged from `{candidate.relative_to(wiki_dir)}`:\n\n" +
+        f"Merged from `{candidate.relative_to(wiki_dir).as_posix()}`:\n\n" +
         candidate_body.strip() + "\n"
     )
     target.write_text(appended, encoding="utf-8")

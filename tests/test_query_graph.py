@@ -68,6 +68,17 @@ def _ranked(text: str) -> list[str]:
     return re.findall(r"^## `([^`]+)`", text, re.MULTILINE)
 
 
+def test_page_links_parses_crlf_connections():
+    # Windows-authored pages have CRLF line endings; the Connections
+    # section must still parse so the graph hop finds neighbours.
+    content = (
+        "## Summary\r\n\r\ntext\r\n\r\n"
+        "## Connections\r\n\r\n- Keycloak — why\r\n- Common — related\r\n"
+    )
+    links = server._page_links(content)
+    assert links.get("keycloak") == "Keycloak"
+
+
 def test_neighbour_without_the_query_words_is_returned(tmp_path: Path):
     pages = _seed(tmp_path)
 

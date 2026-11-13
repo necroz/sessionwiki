@@ -82,7 +82,7 @@ def _extract_wiki_nodes(wiki_dir: Path) -> dict[str, Any]:
     for md in sorted(wiki_dir.rglob("*.md")):
         text = md.read_text(encoding="utf-8", errors="replace")
         rel = md.relative_to(wiki_dir)
-        raw_id = str(rel.with_suffix("")).replace("/", "_").replace(" ", "_")
+        raw_id = rel.with_suffix("").as_posix().replace("/", "_").replace(" ", "_")
         # Cap node ID at 120 chars to avoid filesystem issues on export
         node_id = raw_id[:120] if len(raw_id) > 120 else raw_id
 
@@ -120,9 +120,9 @@ def _extract_wiki_nodes(wiki_dir: Path) -> dict[str, Any]:
             "id": node_id,
             "label": label,
             "type": page_type,
-            "file": str(rel),
+            "file": rel.as_posix(),
             "file_type": "document",
-            "source_file": str(rel),
+            "source_file": rel.as_posix(),
             "category": category,
             "tags": tags,
         })
@@ -140,7 +140,7 @@ def _extract_wiki_nodes(wiki_dir: Path) -> dict[str, Any]:
                 "type": "wikilink",
                 "relation": "links_to",
                 "confidence": "EXTRACTED",
-                "source_file": str(rel),
+                "source_file": rel.as_posix(),
             })
 
         # Collect project membership for enrichment
