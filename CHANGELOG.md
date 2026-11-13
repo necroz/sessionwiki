@@ -21,6 +21,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 - **The default synthesis backend is `extractive`** — a fresh install now writes a useful source page with no model and no network instead of a metadata-only stub. `dummy` stays available as an explicit choice, and an unknown backend name falls back to `extractive` with a warning.
 
+### Fixed
+
+- **Windows compatibility** — the file lock no longer crashes with `PermissionError` when another autosync holds it (msvcrt mandatory lock; `fstat` replaces a content read). The MCP server forces UTF-8 on stdin and stdout, so non-ASCII queries and responses survive the Windows ANSI code page. Legacy state migration now matches Windows backslash paths. Numeric-looking slugs (`42720e39`, `-13`) no longer crash synthesis. Non-ASCII (e.g. Cyrillic) project names are preserved in slugs instead of collapsing to underscores, while the overview prompt-injection guard stays ASCII-only. The Windows Stop hook prefers `pythonw.exe` and runs `--quiet`, so it neither flashes a console nor crashes on a missing stdout.
+
 ## [2.2.0] — 2026-11-12
 
 Theme: memory that knows its own state — record status in every query hit, lessons carried into later attempts, bounded recall injection, confidence with measurement provenance, and pinned eval snapshots.
