@@ -24,7 +24,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
 
-_PROJECT_SLUG_RE = re.compile(r"[^A-Za-z0-9._-]")
+_PROJECT_SLUG_RE = re.compile(r"[^\w.-]")
 
 
 class SchemaError(RuntimeError):
@@ -254,7 +254,7 @@ def project_slug_for_directory(
 
 def safe_filename(value: str) -> str:
     """Make a session id safe as a file name (no separators, no dotfiles)."""
-    return re.sub(r"[^A-Za-z0-9._-]", "_", value).lstrip(".") or "session"
+    return re.sub(r"[^\w.-]", "_", value).lstrip(".") or "session"
 
 
 def _atomic_write(path: Path, write: Callable[[Any], None]) -> None:

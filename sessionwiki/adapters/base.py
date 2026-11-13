@@ -19,7 +19,7 @@ from typing import Any, Iterator
 # sanitiser regex is used by build.py for project_slug rendering — keep
 # them aligned. Anything outside [A-Za-z0-9._-] gets replaced with `_`,
 # leading dots are stripped so the slug can't form a hidden directory.
-_PROJECT_SLUG_RE = _re.compile(r"[^A-Za-z0-9._-]")
+_PROJECT_SLUG_RE = _re.compile(r"[^\w.-]")
 
 
 def _safe_project_slug(raw: str) -> str:

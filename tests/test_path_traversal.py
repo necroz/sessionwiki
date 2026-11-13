@@ -65,11 +65,14 @@ def test_safe_slug_strips_quotes():
     assert _safe_slug("'single'") == "single"
 
 
-def test_safe_slug_handles_unicode_by_rejecting():
-    # Unicode chars (CJK / emoji) are outside [A-Za-z0-9._-] → fallback.
-    # This is conservative; safe Unicode handling is out-of-scope.
-    assert _safe_slug("日本語") == "_unknown"
-    assert _safe_slug("project🦀") == "_unknown"
+def test_safe_slug_preserves_unicode_letters():
+    # Unicode letters are word chars (\w) → preserved; emoji are not.
+    assert _safe_slug("日本語") == "日本語"
+    assert _safe_slug("Проект") == "Проект"
+    assert _safe_slug("project🦀") == "_unknown"  # emoji not \w
+    # Traversal guards stay intact regardless of the character class.
+    assert _safe_slug("../etc") == "_unknown"
+    assert _safe_slug("a/b") == "_unknown"
 
 
 def test_safe_slug_handles_none():

@@ -99,7 +99,7 @@ from sessionwiki._frontmatter import (  # noqa: E402
 # #405 path-traversal guard. Site paths are composed by joining `out_dir`
 # with `project_slug` and other slug values from frontmatter. A poisoned
 # `project: ../../etc/passwd` would otherwise write outside `out_dir`.
-_SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+_SAFE_SLUG_RE = re.compile(r"^[\w.-]+$")
 
 
 def _safe_slug(value: str | None, *, fallback: str = "_unknown") -> str:
@@ -107,10 +107,10 @@ def _safe_slug(value: str | None, *, fallback: str = "_unknown") -> str:
 
     Rejects empty values, traversal segments (``..``), absolute paths
     (leading ``/`` or backslash), null bytes, and anything containing
-    characters outside ``[A-Za-z0-9._-]``. Falls back to ``fallback`` so
-    the build keeps going on poisoned frontmatter — the offending
-    session lands under a clearly abnormal slug rather than escaping
-    ``out_dir``.
+    characters outside ``[\\w.-]`` (unicode letters and digits are kept).
+    Falls back to ``fallback`` so the build keeps going on poisoned
+    frontmatter — the offending session lands under a clearly abnormal
+    slug rather than escaping ``out_dir``.
     """
     if not value:
         return fallback
@@ -2275,7 +2275,10 @@ def _resolve_claude_path(claude_path: Optional[str]) -> Optional[Path]:
 # - Length cap 80 chars (real slugs are far shorter)
 # - Charset: alphanumerics + `.`, `_`, `-` (no whitespace, no shell
 #   metachars, no NUL bytes, no unicode-confusable categories)
-_SAFE_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}$")
+# Deliberately ASCII-only and separate from the path-safety _SAFE_SLUG_RE:
+# unicode letters are fine in a directory name but confusable in an LLM
+# prompt, so the overview guard stays stricter.
+_OVERVIEW_SLUG_RE = re.compile(r"^[A-Za-z0-9._-]{1,80}$")
 
 # #486: cap the total prompt size sent to the claude CLI. 32 KB is well
 # inside any LLM's context, well inside macOS's ~256 KB argv limit, and
@@ -2301,7 +2304,7 @@ def _validate_overview_slug(s: Any) -> str:
     """
     if not isinstance(s, str):
         return "_invalid_"
-    if not _SAFE_SLUG_RE.match(s):
+    if not _OVERVIEW_SLUG_RE.match(s):
         return "_invalid_"
     return s
 
