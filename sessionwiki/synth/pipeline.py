@@ -43,14 +43,20 @@ _SLUG_UNSAFE = re.compile(r'[\s/\\:*?"<>|]+')
 _SLUG_DASH_RUN = re.compile(r"-{2,}")
 
 
-def _normalise_slug(raw: str) -> str:
+def _normalise_slug(raw: Any) -> str:
     """Return a URL-safe + shell-safe slug. Preserves case + unicode.
 
     Examples:
       ``"00 - Master Framework Index"`` → ``"00-Master-Framework-Index"``
       ``"path/with/slashes"``            → ``"path-with-slashes"``
       ``"weird:chars<here>"``            → ``"weird-chars-here"``
+
+    Frontmatter may coerce a numeric-looking slug (``42720e39``, ``-13``)
+    to int/float; coerce to str so ``re.sub`` never sees a non-string.
     """
+    if raw is None:
+        return "unknown"
+    raw = str(raw)
     if not raw:
         return "unknown"
     cleaned = _SLUG_UNSAFE.sub("-", raw)
@@ -1199,9 +1205,9 @@ def _build_source_page(
     its current frontmatter ``tags`` are preserved verbatim (maintainer
     curation is never overwritten on re-synthesize).
     """
-    slug = meta.get("slug", "unknown")
+    slug = str(meta.get("slug") or "unknown")
     title = meta.get("title", f"Source: {slug}")
-    project = meta.get("project", "unknown")
+    project = str(meta.get("project") or "unknown")
     date = meta.get("date", "")
     model = meta.get("model", "")
     source_file = meta.get("source_file", "")
@@ -1528,8 +1534,13 @@ def _synthesize_new_sessions_unlocked(
         item: tuple[Path, dict[str, Any], str],
     ) -> tuple[str, str, Optional[float], str, str, Optional[str]]:
         p, meta, body = item
-        raw_slug = meta.get("slug", p.stem)
-        project = meta.get("project", p.parent.name)
+        raw_slug = str(meta.get("slug") or p.stem)
+        project = str(meta.get("project") or p.parent.name)
+        # Backends read meta["slug"]/meta["project"] directly and feed them
+        # to regexes; normalise the dict so a numeric frontmatter value
+        # (42720e39, -13) never reaches them as int/float.
+        meta["slug"] = raw_slug
+        meta["project"] = project
         rel = str(p.relative_to(raw_dir or RAW_SESSIONS))
         slug = _normalise_slug(raw_slug)
         date = str(meta.get("date", "")).strip()
@@ -1617,7 +1628,7 @@ def _synthesize_new_sessions_unlocked(
     ):
         projects_touched: dict[str, int] = {}
         for p, meta, _ in new_files:
-            project = meta.get("project", p.parent.name)
+            project = str(meta.get("project") or p.parent.name)
             projects_touched[project] = projects_touched.get(project, 0) + 1
         parts: list[str] = []
         if summary["synthesized"]:
