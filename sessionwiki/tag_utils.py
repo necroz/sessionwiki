@@ -25,26 +25,35 @@ NOISE_TAGS: set[str] = {
 }
 
 
-def parse_tags_field(raw: Any) -> list[str]:
+def parse_tags_field(raw: Any, *, keep_noise: bool = False) -> list[str]:
     """Parse a YAML ``tags:`` field into a cleaned list of lowercase tags.
 
-    Handles three input shapes:
+    Handles four input shapes:
       - ``None`` / empty string → ``[]``
+      - a real ``list``/``tuple`` (e.g. from the canonical frontmatter
+        parser's block lists) → items stringified and cleaned
       - ``"[a, b]"`` (YAML list as string) → ``["a", "b"]``
       - ``"a, b"`` (plain comma list) → ``["a", "b"]``
 
     Strips surrounding brackets, quotes, and whitespace. Filters out
-    NOISE_TAGS. Always lowercases.
+    NOISE_TAGS unless ``keep_noise=True`` (query tag matching must keep
+    agent tags like ``claude-code``). Always lowercases.
     """
     if not raw:
         return []
-    raw = str(raw).strip()
-    # Strip YAML-list brackets if present
-    if raw.startswith("[") and raw.endswith("]"):
-        raw = raw[1:-1]
-    # Split and clean each tag
-    parts = [p.strip().strip('"').strip("'") for p in raw.split(",")]
-    return [p.lower() for p in parts if p and p.lower() not in NOISE_TAGS]
+    if isinstance(raw, (list, tuple)):
+        parts = [str(item).strip().strip('"').strip("'").strip() for item in raw]
+    else:
+        raw = str(raw).strip()
+        # Strip YAML-list brackets if present
+        if raw.startswith("[") and raw.endswith("]"):
+            raw = raw[1:-1]
+        # Split and clean each tag
+        parts = [p.strip().strip('"').strip("'") for p in raw.split(",")]
+    cleaned = [p.lower() for p in parts if p]
+    if keep_noise:
+        return cleaned
+    return [p for p in cleaned if p not in NOISE_TAGS]
 
 
 def scan_tags(pages: dict[str, dict[str, Any]]) -> dict[str, list[str]]:
