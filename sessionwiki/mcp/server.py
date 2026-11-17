@@ -681,6 +681,23 @@ def _append_edit_log(rel: str, tool: str, action: str) -> bool:
     return True
 
 
+def _commit_or_preview(
+    p: Path, new_text: str, payload: dict[str, Any], tool: str, action: str,
+    *, confirm: bool,
+) -> dict[str, Any]:
+    """Shared write-tool tail: preview unless confirm=True, then an atomic
+    write plus an edit-log line. ``payload`` carries path and written=False."""
+    if not confirm:
+        return _ok(json.dumps(payload, indent=2))
+    try:
+        atomic_write_text(p, new_text)
+    except OSError as e:
+        return _err(f"write error: {e}")
+    payload["log_written"] = _append_edit_log(payload["path"], tool, action)
+    payload["written"] = True
+    return _ok(json.dumps(payload, indent=2))
+
+
 _FILTER_KEYS = ("project", "type", "tag", "lifecycle", "date_from", "date_to")
 
 
@@ -1666,15 +1683,10 @@ def tool_wiki_write_page(args: dict[str, Any]) -> dict[str, Any]:
         "old_bytes": old_bytes,
         "new_bytes": len(new_text.encode("utf-8")),
     }
-    if args.get("confirm") is not True:
-        return _ok(json.dumps(payload, indent=2))
-    try:
-        atomic_write_text(p, new_text)
-    except OSError as e:
-        return _err(f"write error: {e}")
-    payload["log_written"] = _append_edit_log(payload["path"], "wiki_write_page", mode)
-    payload["written"] = True
-    return _ok(json.dumps(payload, indent=2))
+    return _commit_or_preview(
+        p, new_text, payload, "wiki_write_page", mode,
+        confirm=args.get("confirm") is True,
+    )
 
 
 def tool_wiki_update_frontmatter(args: dict[str, Any]) -> dict[str, Any]:
@@ -1767,17 +1779,10 @@ def tool_wiki_update_frontmatter(args: dict[str, Any]) -> dict[str, Any]:
         "changes": changes,
         "written": False,
     }
-    if args.get("confirm") is not True:
-        return _ok(json.dumps(payload, indent=2))
-    try:
-        atomic_write_text(p, new_text)
-    except OSError as e:
-        return _err(f"write error: {e}")
-    payload["log_written"] = _append_edit_log(
-        payload["path"], "wiki_update_frontmatter", "fields"
+    return _commit_or_preview(
+        p, new_text, payload, "wiki_update_frontmatter", "fields",
+        confirm=args.get("confirm") is True,
     )
-    payload["written"] = True
-    return _ok(json.dumps(payload, indent=2))
 
 
 def tool_wiki_archive_page(args: dict[str, Any]) -> dict[str, Any]:
@@ -1826,17 +1831,10 @@ def tool_wiki_archive_page(args: dict[str, Any]) -> dict[str, Any]:
     except ValueError as e:
         return _err(str(e))
 
-    if args.get("confirm") is not True:
-        return _ok(json.dumps(payload, indent=2))
-    try:
-        atomic_write_text(p, new_text)
-    except OSError as e:
-        return _err(f"write error: {e}")
-    payload["log_written"] = _append_edit_log(
-        payload["path"], "wiki_archive_page", "archive"
+    return _commit_or_preview(
+        p, new_text, payload, "wiki_archive_page", "archive",
+        confirm=args.get("confirm") is True,
     )
-    payload["written"] = True
-    return _ok(json.dumps(payload, indent=2))
 
 
 TOOL_IMPLS = {
