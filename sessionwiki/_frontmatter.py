@@ -52,12 +52,31 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
     meta_text = m.group(1)
     body = m.group(2)
     meta: dict[str, Any] = {}
-    for line in meta_text.splitlines():
-        mm = re.match(r"^([a-zA-Z_][\w-]*):\s*(.*)$", line)
+    lines = meta_text.splitlines()
+    i = 0
+    while i < len(lines):
+        mm = re.match(r"^([a-zA-Z_][\w-]*):\s*(.*)$", lines[i])
         if not mm:
+            i += 1
             continue
         key, raw = mm.group(1), mm.group(2).strip()
+        if not raw:
+            # Block list: subsequent `- item` lines belong to this key.
+            # Items parse like inline-list items (no bool coercion).
+            items = []
+            j = i + 1
+            while j < len(lines):
+                im = re.match(r"^\s+-\s*(.*)$", lines[j])
+                if not im:
+                    break
+                items.append(_parse_scalar(im.group(1), coerce_bool=False))
+                j += 1
+            if items:
+                meta[key] = items
+                i = j
+                continue
         meta[key] = _parse_scalar(raw)
+        i += 1
     return meta, body
 
 
