@@ -13,6 +13,7 @@ It never edits files. Exit code is 1 only with ``--fail-on-findings``.
 
 from __future__ import annotations
 
+import bisect
 import json
 import os
 import re
@@ -22,7 +23,7 @@ from typing import Any, Iterable, Optional, Sequence
 
 from sessionwiki import REPO_ROOT
 from sessionwiki.config import resolve_config
-from sessionwiki.convert import _DEFAULT_TOKEN_PATTERNS
+from sessionwiki.convert import _DEFAULT_TOKEN_PATTERNS, _merge_spans, find_split_spans
 
 DEFAULT_RELATIVE_PATHS = ("raw", "wiki", "site")
 TEXT_EXTENSIONS = {
@@ -47,16 +48,6 @@ def _iter_files(paths: Sequence[Path]) -> Iterable[Path]:
                 yield child
 
 
-def _merge_ranges(ranges: Sequence[tuple[int, int]]) -> list[tuple[int, int]]:
-    merged: list[tuple[int, int]] = []
-    for start, end in sorted(ranges):
-        if merged and start <= merged[-1][1]:
-            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
-        else:
-            merged.append((start, end))
-    return merged
-
-
 def _preview(line: str, ranges: Sequence[tuple[int, int]], limit: int = 180) -> str:
     masked = line
     for start, end in sorted(ranges, reverse=True):
@@ -70,8 +61,9 @@ def _line_findings(
     line: str,
     user_re: Optional[re.Pattern[str]],
     secret_patterns: Sequence[tuple[re.Pattern[str], str]],
+    extra: Sequence[tuple[int, int, str]] = (),
 ) -> Iterable[dict[str, Any]]:
-    matches: list[tuple[int, int, str]] = []
+    matches: list[tuple[int, int, str]] = list(extra)
     if user_re is not None:
         matches.extend(
             (match.start(), match.end(), "username") for match in user_re.finditer(line)
@@ -82,9 +74,10 @@ def _line_findings(
         )
     if not matches:
         return
+    matches = sorted(set(matches))
     # Mask every sensitive range on the line in each preview, so one
     # finding never leaks another match as clear text.
-    ranges = _merge_ranges([(start, end) for start, end, _ in matches])
+    ranges = _merge_spans([(start, end) for start, end, _ in matches])
     for _start, _end, kind in matches:
         yield {
             "path": str(file_path),
@@ -92,6 +85,51 @@ def _line_findings(
             "kind": kind,
             "preview": _preview(line, ranges),
         }
+
+
+def _multiline_matches(
+    text: str, secret_patterns: Sequence[tuple[re.Pattern[str], str]]
+) -> list[tuple[int, int, str]]:
+    """Matches a line-by-line scan cannot see: a PEM key between its
+    BEGIN and END lines, and a token wrapped onto the next line."""
+    found: list[tuple[int, int, str]] = []
+    for pattern, kind in secret_patterns:
+        for m in pattern.finditer(text):
+            if "\n" in m.group() or "\r" in m.group():
+                found.append((m.start(), m.end(), kind))
+    patterns = [pattern for pattern, _ in secret_patterns]
+    found.extend(
+        (start, end, secret_patterns[idx][1])
+        for start, end, idx in find_split_spans(text, patterns)
+    )
+    return found
+
+
+def _split_lines(text: str) -> tuple[list[str], list[int]]:
+    """Lines without terminators and the offset where each one starts."""
+    lines: list[str] = []
+    starts: list[int] = []
+    offset = 0
+    for chunk in text.splitlines(keepends=True):
+        starts.append(offset)
+        lines.append((chunk.splitlines() or [""])[0])
+        offset += len(chunk)
+    return lines, starts
+
+
+def _extras_by_line(
+    matches: Sequence[tuple[int, int, str]], lines: Sequence[str], starts: Sequence[int]
+) -> dict[int, list[tuple[int, int, str]]]:
+    """Report a multi-line match on its first line, masked to that line's end."""
+    by_line: dict[int, list[tuple[int, int, str]]] = {}
+    for start, end, kind in matches:
+        index = bisect.bisect_right(starts, start) - 1
+        line_start = starts[index]
+        line_end = line_start + len(lines[index])
+        by_line.setdefault(index, []).append(
+            (start - line_start, min(end, line_end) - line_start, kind)
+        )
+    return by_line
 
 
 def _compile_user_patterns(patterns: Sequence[str]) -> list[re.Pattern[str]]:
@@ -145,11 +183,16 @@ def audit_paths(
             continue
         text = raw.decode("utf-8", errors="replace")
         files_scanned += 1
-        for line_number, line in enumerate(text.splitlines(), 1):
+        lines, starts = _split_lines(text)
+        extras = _extras_by_line(_multiline_matches(text, secret_patterns), lines, starts)
+        for index, line in enumerate(lines):
             remaining = max_findings - len(findings)
             findings.extend(
                 islice(
-                    _line_findings(file_path, line_number, line, user_re, secret_patterns),
+                    _line_findings(
+                        file_path, index + 1, line, user_re, secret_patterns,
+                        extras.get(index, ()),
+                    ),
                     remaining,
                 )
             )

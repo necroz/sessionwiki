@@ -161,8 +161,6 @@ cp examples/sessions_config.json config.json
     "real_username": "",
     "replacement_username": "USER",
     "extra_patterns": [
-      "(?i)(api[_-]?key|secret|token|bearer|password)[\"'\\s:=]+[\\w\\-\\.]{8,}",
-      "sk-[A-Za-z0-9]{20,}",
       "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
     ]
   },
@@ -203,7 +201,7 @@ cp examples/sessions_config.json config.json
 | `filters` | `drop_record_types` | list | [3 types] | JSONL record types to discard |
 | `redaction` | `real_username` | string | `$USER` | Your OS username (auto-detected if empty) |
 | `redaction` | `replacement_username` | string | `USER` | Replacement in path redaction |
-| `redaction` | `extra_patterns` | list | [3 regexes] | Additional Python regex patterns to redact |
+| `redaction` | `extra_patterns` | list | [email regex] | Additional Python regex patterns to redact. Replaces the default list; the 29 built-in secret patterns always run. A named group `secret` limits the mask to that group |
 | `truncation` | `tool_result_chars` | int | 500 | Max chars per tool result |
 | `truncation` | `bash_stdout_lines` | int | 5 | Max lines from bash output |
 | `truncation` | `write_content_preview_lines` | int | 5 | Max lines from Write tool preview |

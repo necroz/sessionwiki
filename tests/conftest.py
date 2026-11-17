@@ -17,3 +17,11 @@ if str(REPO_ROOT) not in sys.path:
 
 FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures"
 SNAPSHOTS_DIR = REPO_ROOT / "tests" / "snapshots"
+
+
+def pytest_terminal_summary(terminalreporter):
+    """After a failure, print the fake-secret seed so the run can be repeated."""
+    if terminalreporter.stats.get("failed"):
+        from tests.fake_secrets import SEED
+
+        terminalreporter.write_line(f"fake secrets: rerun with FAKE_SECRET_SEED={SEED}")

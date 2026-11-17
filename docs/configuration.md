@@ -23,7 +23,7 @@ Minimal config:
 }
 ```
 
-> Replace `your-unix-username` with the output of `whoami`. The converter uses it to scrub paths like `/Users/<name>/…` or `/home/<name>/…` before writing to `raw/`.
+> Replace `your-unix-username` with the output of `whoami`. The converter uses it to scrub home paths like `/Users/<name>/…` or `/home/<name>/…`, and the name in `ssh <name>@host`, `ls -l` and similar output, before writing to `raw/`. See [privacy.md](privacy.md).
 
 ## Full schema
 
@@ -56,11 +56,11 @@ Minimal config:
     // What to replace real_username with.
     "replacement_username": "USER",
 
-    // Additional regexes to redact (Python re syntax).
-    // Anything matching → "<REDACTED>".
+    // Additional regexes to redact (Python re syntax), on top of the
+    // built-in secret patterns, which always run. Anything matching →
+    // "<REDACTED>"; a named group `secret` limits the mask to that group.
+    // This list replaces the default one (emails only).
     "extra_patterns": [
-      "(?i)(api[_-]?key|secret|token|bearer|password)[\"'\\s:=]+[\\w\\-\\.]{8,}",
-      "sk-[A-Za-z0-9]{20,}",
       "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
     ]
   },

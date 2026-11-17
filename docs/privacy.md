@@ -16,30 +16,50 @@ These are non-negotiable and enforced in both code and CI:
 
 ## What gets redacted
 
-Everything in this table is redacted at the **converter** layer — the moment each `.jsonl` record is parsed into markdown. The redaction happens before the file hits `raw/`.
+The converter redacts each record the moment it parses the `.jsonl` into markdown, before the file reaches `raw/`. Redaction runs on user prompts, assistant text, tool inputs and tool results.
 
-| Pattern | What matches | Replacement |
+| Layer | What matches | Replacement |
 |---|---|---|
-| Username in paths | `/Users/<you>/…` and `/home/<you>/…` | `/Users/USER/…` |
-| API key tokens | `(?i)(api[_-]?key\|secret\|token\|bearer\|password)[\"'\s:=]+[\w\-\.]{8,}` | `<REDACTED>` |
-| Anthropic/OpenAI keys | `sk-[A-Za-z0-9]{20,}` | `<REDACTED>` |
-| Emails | `[\w.+-]+@[a-zA-Z0-9-]+\.[\w.-]+` | `<REDACTED>` |
-| Thinking blocks | `<thinking>…</thinking>` | dropped entirely (configurable) |
+| Username in home paths | `/Users/<you>`, `/home/<you>`, `C:\Users\<you>` (any drive, either slash), WSL `/mnt/<d>/Users/<you>` and `\\wsl$\…\home\<you>`, Cygwin `/cygdrive/<d>/Users/<you>`, `\\?\C:\Users\<you>` | `USER` in place of the name |
+| Username in other contexts | Claude Code folder names (`-home-<you>-Projects-x`, `-Users-<you>-…`), `<you>@host`, the owner and group columns of `ls -l`, `id` output (`uid=1000(<you>)`), `USER=`, `LOGNAME=`, `User=`, `Group=`, `-U <you>`, `-u <you>`, `--user=`, `git -c user.name=`, `/tmp/pytest-of-<you>`, `[sudo] password for <you>`, and the name alone on a line (`whoami`) | `USER` in place of the name |
+| 29 built-in secret patterns | **Prefix tokens:** GitHub (`ghp_`, `gho_`, `ghs_`, `ghu_`, `github_pat_`), GitLab `glpat-`, AWS `AKIA…`, Slack `xox[abprs]-`, Anthropic `sk-ant-api…`, OpenAI `sk-`, `sk-proj-`, `sk-svcacct-`, Google `AIza…`, Stripe `sk_live_`, `pk_live_`, `rk_live_`, npm `npm_`, Hugging Face `hf_`, Telegram bot tokens, JWT. **Blocks:** PEM and PGP private keys. **Values in context:** Slack and Discord webhook paths, the password in `scheme://user:<password>@host`, `Authorization: Basic\|Token\|Digest`, `mysql -p<password>`, `sshpass -p <password>`, `aws_secret_access_key`, and keyword + value (`api_key`, `secret`, `client_secret`, `token`, `bearer`, `password`, `passwd`, `NAME_PWD`, then `:`, `=`, quotes, whitespace, URL-encoded `%3D`/`%3A`/`%22` or JSON-escaped quotes, then 8+ characters) | `<REDACTED>`; for values in context only the value, so `MYSQL_PWD=<REDACTED>` keeps the name |
+| Default `extra_patterns` | email addresses | `<REDACTED>` |
+| Thinking blocks | `thinking` content blocks | dropped entirely (`drop_thinking_blocks`) |
 
-All patterns live in `examples/sessions_config.json` under `redaction.extra_patterns`. You can add your own (company domain, customer names, internal hostnames, etc.).
+The built-in secret patterns live in code (`_DEFAULT_TOKEN_PATTERNS` in `sessionwiki/convert.py`) and always run. Your config cannot turn them off. The `extra_patterns` list lives in `examples/sessions_config.json` and holds only the email pattern, because an address is not a secret. A `redaction.extra_patterns` list in `config.json` or `config.local.json` replaces it: copy the email pattern into your list if you want to keep it. A pattern with a named group `secret` masks only that group.
+
+Stripe test keys (`sk_test_…`) are not redacted, because they are meant to ship in code. A keyword value that starts with `/`, `~`, `$`, `^`, `%`, `|` or `-` is not redacted, because it is a path, a variable or a flag, not a secret.
+
+### Secrets split across lines
+
+A terminal, an editor or a chat window can wrap a long token onto two or more lines. The redactor handles these cases:
+
+- **Hard-wrapped tokens.** The redactor joins a line break that sits between two token characters (`A–Z`, `a–z`, `0–9`, `_`, `-`) and runs every pattern on the joined text. A match that crosses a joined break is redacted as a whole, with both halves and the break.
+- **Shell continuations.** A `\` at the end of a line always joins the next line, as the shell does. `Bearer \` with the token on the next line is redacted.
+- **Keyword on one line, value on the next.** `password:` followed by the value on the next line matches the keyword pattern, because the separator set includes the line break.
+- **PEM keys without an END line.** A truncated paste or a preview can lose the END line. When the BEGIN line ends a line, the redactor masks everything from BEGIN to the end of the text block.
+- **Truncation.** The converter redacts a field first and truncates it after. A token cut at the 200-character Bash summary limit, the Write preview line limit or the 120-character description limit cannot slip under a pattern threshold.
+
+Limits of the joined pass:
+
+- A dot does not join, because a sentence ends with a dot far more often than a wrap splits a JWT at its dot. A JWT split exactly at a dot is not caught.
+- A match that runs into `NAME=` or `name:` on the next line is dropped. That is the next line of an `.env` or YAML file, not the tail of a token. The value on its own line is still redacted.
+- When a secret ends a line and the next line starts with a word without indentation, that word can be redacted too. The redactor prefers an extra word to a leaked half key.
+- A secret split between two separate messages or tool results is not joined, because each one is redacted on its own.
 
 ## What is NOT redacted by default
 
 - **File paths that are not under your home directory.** `/opt/foo` and `/var/log/bar` are rendered as-is.
 - **Relative paths.** `src/main.py` is rendered as-is.
 - **Tool arguments that aren't recognised.** Bash commands get the first line preserved; Read/Write paths get the path preserved.
-- **Text content inside user prompts** — because the prompt IS the signal. If you pasted a contract or a password into a prompt, it's in `raw/`.
+- **Secrets that match no pattern.** A bare password with no keyword before it, a customer name or an internal hostname stays as-is in prompts and tool output. Add your own pattern for these.
+- **Your username in free text.** The name in a sentence (`git grep <you>`) or in output with no known context stays as-is. `sessionwiki audit` finds every occurrence.
 
-**This is why `raw/` is gitignored and the server is localhost-only.**
+**This is why `raw/` is gitignored and the server is localhost-only.** Run `sessionwiki audit` before you publish anything. It scans `raw/`, `wiki/` and `site/` with the same patterns, including PEM keys and wrapped tokens that span lines.
 
 ## Adding your own redaction patterns
 
-Edit `config.json`:
+Edit `config.local.json`:
 
 ```jsonc
 {
@@ -47,21 +67,18 @@ Edit `config.json`:
     "real_username": "your-unix-username",
     "replacement_username": "USER",
     "extra_patterns": [
-      // defaults...
-      "(?i)(api[_-]?key|secret|token|bearer|password)[\"'\\s:=]+[\\w\\-\\.]{8,}",
-      "sk-[A-Za-z0-9]{20,}",
+      // the default (emails):
       "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+",
 
       // yours:
       "acmecorp\\.internal",
-      "ACME-[0-9A-Z]{6,}",
-      "ghp_[A-Za-z0-9]{36}"
+      "ACME-[0-9A-Z]{6,}"
     ]
   }
 }
 ```
 
-Re-run `./sync.sh --force` to apply the new patterns to existing sessions.
+Re-run `sessionwiki sync --force` to apply the new patterns to existing sessions. Without `--force`, `sync` never overwrites a file that already exists in `raw/`.
 
 ## `.llmwikiignore` — coarse-grained exclusion
 

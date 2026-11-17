@@ -9,6 +9,7 @@ mtime, so re-running on unchanged files is a fast no-op.
 
 from __future__ import annotations
 
+import bisect
 import fnmatch as _fnmatch  # #py-m11 (#597): module-level alias
 import json
 import re
@@ -37,9 +38,10 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "redaction": {
         "real_username": "",
         "replacement_username": "USER",
+        # Keyword + value and `sk-` keys are built-in token patterns
+        # now (`_DEFAULT_TOKEN_PATTERNS`); only the email pattern stays
+        # optional, because an address is not a secret.
         "extra_patterns": [
-            r"(?i)(api[_-]?key|secret|token|bearer|password)[\"'\s:=]+[\w\-\.]{8,}",
-            r"sk-[A-Za-z0-9]{20,}",
             r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+",
         ],
     },
@@ -574,6 +576,8 @@ def most_common_model(records: list[dict[str, Any]]) -> str:
 # - PEM private keys: full BEGIN/END envelope
 #
 # These run AFTER user `extra_patterns` so users can override.
+_KEYWORD_SEP = r"""(?:["'\s:=\\]|%3[ADad]|%22)+"""
+
 _DEFAULT_TOKEN_PATTERNS = [
     # GitHub
     re.compile(r"\bghp_[A-Za-z0-9_]{20,}\b"),
@@ -607,13 +611,246 @@ _DEFAULT_TOKEN_PATTERNS = [
     # opening; payload likewise.
     re.compile(r"\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b"),
     # #484: PEM-encoded private keys. Multi-line via `re.DOTALL`.
+    # A key with no END line (a preview or a truncated paste) is
+    # redacted to the end of the text when its BEGIN line ends a line;
+    # a BEGIN header quoted inside a sentence stays as it is.
     re.compile(
-        r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY-----"
-        r".*?"
-        r"-----END (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY-----",
+        r"-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY(?: BLOCK)?-----"
+        r"(?:.*?"
+        r"-----END (?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY(?: BLOCK)?-----"
+        r"|[ \t]*(?:\r?\n.*)?\Z)",
         re.DOTALL,
     ),
+    # GitLab personal access tokens, Hugging Face tokens.
+    re.compile(r"\bglpat-[A-Za-z0-9_-]{20,}\b"),
+    re.compile(r"\bhf_[A-Za-z0-9]{30,}\b"),
+    # Telegram bot token: `<bot id>:AA<33 chars>`.
+    re.compile(r"\b\d{8,10}:AA[A-Za-z0-9_-]{33}(?![A-Za-z0-9_-])"),
+    # Slack and Discord webhooks: the host stays visible.
+    re.compile(
+        r"https://hooks\.slack\.com/services/"
+        r"(?P<secret>T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]{20,})"
+    ),
+    re.compile(
+        r"https://(?:ptb\.|canary\.)?discord(?:app)?\.com/api/webhooks/"
+        r"(?P<secret>\d+/[A-Za-z0-9_-]{20,})"
+    ),
+    # Password in a URL: `scheme://user:<password>@host`.
+    re.compile(r"\b[A-Za-z][A-Za-z0-9+.-]*://[^\s:/@]*:(?P<secret>[^\s:/@]+)@"),
+    # `Authorization: Basic|Token|Digest <credentials>` (Bearer is
+    # covered by the keyword pattern below).
+    re.compile(
+        r"(?i)\bauthorization[\"']?\s*[:=]\s*[\"']?(?:basic|token|digest)\s+"
+        r"(?P<secret>[A-Za-z0-9+/=._~-]{8,})"
+    ),
+    # Passwords given on a command line.
+    re.compile(r"\bmysql(?:dump|admin|sh)?\b[^\n]*?\s-p(?P<secret>[^\s'\"]{4,})"),
+    re.compile(r"\bsshpass\s+-p\s*(?P<secret>'[^'\n]+'|\"[^\"\n]+\"|\S+)"),
+    # AWS secret access key: 40 chars that may hold `/` and `+`.
+    re.compile(
+        r"(?i)aws[_-]?secret[_-]?access[_-]?key" + _KEYWORD_SEP
+        + r"(?P<secret>[A-Za-z0-9/+=]{40})"
+    ),
+    # Keyword + value. This used to live only in the default
+    # `extra_patterns`, so a user list in config.local.json (which
+    # replaces the default list) dropped it. The separator also takes
+    # URL-encoded `=`/`:`/`"` and JSON-escaped quotes; the keyword name
+    # stays visible.
+    re.compile(
+        r"(?i)(?:api[_-]?key|secret[_-]?access[_-]?key|client[_-]?secret|secret"
+        r"|token|bearer|passwd|password"
+        # `pwd` is also the shell command and `$PWD`: only `NAME_PWD=`
+        # or `pwd:` counts.
+        r"|(?<!\$)pwd(?=[\s\"']*(?:[:=]|%3[ADad])))" + _KEYWORD_SEP
+        # A value that starts like a path, a `$VAR`, a regex anchor or a
+        # flag is code, not a secret.
+        + r"(?![/~^$%|-])(?P<secret>[^\s\"'`<>,;:=|()\[\]{}\\]{8,})"
+    ),
 ]
+
+
+def _redact_matches(pattern: re.Pattern[str], text: str) -> str:
+    """Replace each match, or only its ``secret`` group when it has one."""
+    if "secret" not in pattern.groupindex:
+        return pattern.sub("<REDACTED>", text)
+
+    def _repl(m: re.Match[str]) -> str:
+        start, end = m.span("secret")
+        if start < 0:
+            return m.group()
+        base = m.start()
+        return m.group()[: start - base] + "<REDACTED>" + m.group()[end - base:]
+
+    return pattern.sub(_repl, text)
+
+
+def _secret_span(m: re.Match[str]) -> tuple[int, int]:
+    if "secret" in m.re.groupindex and m.start("secret") >= 0:
+        return m.span("secret")
+    return m.span()
+
+
+# ─── username outside home paths ──────────────────────────────────────────
+
+# `ls -l` / `ls -la`: mode, link count, owner, group.
+_LS_LONG_LINE_RE = re.compile(
+    r"(?:^[ \t]*|(?<=: ))"
+    r"(?P<head>[-dlcbps][rwxsStT-]{9}[.+@]?[ \t]+\d+[ \t]+)"
+    r"(?P<owner>\S+)(?:(?P<gap>[ \t]+)(?P<group>\S+))?",
+    re.MULTILINE,
+)
+
+
+_USERNAME_LEADS = (
+    r"\bUSER=", r"\bLOGNAME=", r"\bUSERNAME=", r"\bUser=", r"\bGroup=",
+    r"password for ",
+    r" -U ", r" -u ", r"--user=", r"--username=",
+    r"user\.name=", r"user\.name=\"", r"pytest-of-",
+)
+
+
+def _username_context_pattern(user: str) -> re.Pattern[str]:
+    u = re.escape(user)
+    end = r"(?![\w.-])"
+    return re.compile(
+        # Fail fast at every position that does not start the name.
+        r"(?=" + u + r")(?:"
+        # Claude Code flattens `/home/<u>/x` into `-home-<u>-x` for its
+        # project and scratchpad folders.
+        r"(?:(?<=-home-)|(?<=-Users-))" + u + r"(?=-|$|[\s/\\'\"`])"
+        # ssh / scp / rsync / git over ssh: `<u>@host`.
+        + r"|(?<![\w.@-])" + u + r"(?=@[A-Za-z0-9\[])"
+        # `id`: `uid=1000(<u>) gid=1000(<u>) groups=1000(<u>)`.
+        + r"|(?<=\()" + u + r"(?=\))"
+        # Environment dumps, systemd units, client flags, git identity,
+        # per-user temp folders.
+        + r"|(?:" + "|".join(f"(?<={c})" for c in _USERNAME_LEADS) + r")" + u + end
+        # `whoami`: the name alone on a line.
+        + r"|^" + u + r"(?=[ \t\r]*$)"
+        + r")",
+        re.MULTILINE,
+    )
+
+
+# ─── secrets split across lines ────────────────────────────────────────────
+#
+# A terminal, an editor or a chat UI can hard-wrap a long token onto two
+# or more lines. Each pattern then sees only a part: the head may be too
+# short to match, and the tail never matches. The joined view removes each
+# line break that sits between two token characters, runs the patterns on
+# the result and maps every match that crosses a removed break back to the
+# original text.
+#
+# A match that continues into an assignment (`NAME=` or `name:`) on the
+# next line is dropped: that is the next line of an `.env` or YAML file,
+# not the tail of a wrapped token. The line-local pass still redacts the
+# value on its own line.
+#
+# A break joins only between two token characters. A dot does not join:
+# a sentence ends with one far more often than a wrap splits a JWT at its
+# dot. A dash after the break joins only when a token character follows
+# it, so a markdown bullet (`- item`) stays apart. A shell continuation
+# (`\` before the break) always joins, as the shell itself does, so
+# `Bearer \` and the token on the next line read as one string.
+_JOINABLE = frozenset(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-"
+)
+_LINE_BREAK_RE = re.compile(r"\\?\r?\n")
+_ASSIGNMENT_CHARS = frozenset("=:")
+
+
+def _is_wrap(text: str, start: int, end: int) -> bool:
+    """Whether the break ``text[start:end]`` may split one string."""
+    if start == 0 or end >= len(text):
+        return False
+    if text[start] == "\\":
+        return True
+    before, after = text[start - 1], text[end]
+    if before not in _JOINABLE or after not in _JOINABLE:
+        return False
+    if after == "-":
+        return end + 1 < len(text) and text[end + 1] in _JOINABLE
+    return True
+
+
+def _joined_view(text: str) -> Optional[tuple[str, list[int], list[int]]]:
+    """Remove line breaks between token characters.
+
+    Returns ``(joined, cuts, removed)`` or ``None`` when no break is
+    joinable. ``cuts[i]`` is the joined index where break ``i`` was
+    removed; ``removed[i]`` is the total length removed up to and
+    including that break.
+    """
+    pieces: list[str] = []
+    cuts: list[int] = []
+    removed: list[int] = []
+    last = 0
+    total = 0
+    for m in _LINE_BREAK_RE.finditer(text):
+        start, end = m.start(), m.end()
+        if not _is_wrap(text, start, end):
+            continue
+        pieces.append(text[last:start])
+        total += end - start
+        cuts.append(start - (total - (end - start)))
+        removed.append(total)
+        last = end
+    if not cuts:
+        return None
+    pieces.append(text[last:])
+    return "".join(pieces), cuts, removed
+
+
+def _to_original(index: int, cuts: list[int], removed: list[int], *, is_end: bool) -> int:
+    """Map a joined index back to the original text."""
+    # A start index sitting on a cut belongs after the break; an end
+    # index sitting on a cut belongs before it.
+    i = bisect.bisect_left(cuts, index) if is_end else bisect.bisect_right(cuts, index)
+    return index + (removed[i - 1] if i else 0)
+
+
+def find_split_spans(
+    text: str, patterns: Iterable[re.Pattern[str]]
+) -> list[tuple[int, int, int]]:
+    """Find matches that cross a joinable line break.
+
+    Returns ``(start, end, pattern_index)`` in original-text coordinates.
+    Matches that stay on one line are left to the caller's line-local
+    pass, so user patterns with anchors keep their meaning.
+    """
+    view = _joined_view(text)
+    if view is None:
+        return []
+    joined, cuts, removed = view
+    spans: list[tuple[int, int, int]] = []
+    for idx, pattern in enumerate(patterns):
+        for m in pattern.finditer(joined):
+            js, je = m.start(), m.end()
+            first = bisect.bisect_right(cuts, js)
+            if first >= len(cuts) or cuts[first] >= je:
+                continue  # no removed break inside the match
+            if je < len(joined) and joined[je] in _ASSIGNMENT_CHARS:
+                continue  # ran into `NAME=` / `name:` on the next line
+            ss, se = _secret_span(m)
+            inner = bisect.bisect_right(cuts, ss)
+            if inner >= len(cuts) or cuts[inner] >= se:
+                continue  # the break is in the keyword, not in the secret
+            spans.append((
+                _to_original(ss, cuts, removed, is_end=False),
+                _to_original(se, cuts, removed, is_end=True),
+                idx,
+            ))
+    return spans
+
+
+def _merge_spans(spans: Iterable[tuple[int, int]]) -> list[tuple[int, int]]:
+    merged: list[tuple[int, int]] = []
+    for start, end in sorted(spans):
+        if merged and start <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+        else:
+            merged.append((start, end))
+    return merged
 
 
 class Redactor:
@@ -641,16 +878,48 @@ class Redactor:
     def __call__(self, text: str) -> str:
         if not text:
             return text
-        if self.real_user:
+        if self.real_user and self.real_user in text:
             text = self._redact_username(text)
+            text = self._redact_username_contexts(text)
+        # Wrapped secrets first: once the line-local pass has replaced
+        # the head of a token, its tail no longer touches it.
+        spans = find_split_spans(text, [*self.patterns, *_DEFAULT_TOKEN_PATTERNS])
+        for start, end in reversed(_merge_spans((s, e) for s, e, _ in spans)):
+            text = text[:start] + "<REDACTED>" + text[end:]
         for pat in self.patterns:
-            text = pat.sub("<REDACTED>", text)
+            text = _redact_matches(pat, text)
         # #416: default token redaction runs unconditionally so users
         # never accidentally publish credentials by forgetting to
         # configure `extra_patterns`.
         for pat in _DEFAULT_TOKEN_PATTERNS:
-            text = pat.sub("<REDACTED>", text)
+            text = _redact_matches(pat, text)
         return text
+
+    def _redact_username_contexts(self, text: str) -> str:
+        """Replace the real username where it is not inside a home path.
+
+        A probe over 1165 converted sessions found the username in 644
+        of them after home-path redaction: Claude Code's flattened
+        project folders (`-home-<u>-Projects-x`), `ssh <u>@host`, the
+        owner and group columns of `ls -l`, `id` output and `USER=`.
+        Each form below needs a context, so a username that is also an
+        ordinary word is not replaced everywhere.
+        """
+        cached = getattr(self, "_username_context_cache", None)
+        if not cached or cached[0] != self.real_user:
+            cached = (self.real_user, _username_context_pattern(self.real_user))
+            self._username_context_cache = cached
+        user, repl = self.real_user, self.repl_user
+        text = cached[1].sub(repl, text)
+
+        def _ls_columns(m: re.Match[str]) -> str:
+            owner = repl if m.group("owner") == user else m.group("owner")
+            if m.group("group") is None:
+                return m.group("head") + owner
+            group = repl if m.group("group") == user else m.group("group")
+            return m.group("head") + owner + m.group("gap") + group
+
+        return _LS_LONG_LINE_RE.sub(_ls_columns, text)
 
     def _redact_username(self, text: str) -> str:
         """Replace the real username in home-directory paths.
@@ -711,7 +980,10 @@ class Redactor:
         pattern = re.compile(
             r"(?P<prefix>" + "|".join(prefixes) + r")"
             + r"(?P<user>" + u + r")"
-            + r"(?=$|[/\\])"
+            # End of the name: not followed by a name character, or by
+            # a dot that continues one (`alice.old`). A trailing slash,
+            # a space or the end of a sentence all end it.
+            + r"(?![\w-]|\.[\w-])"
         )
         # Cache for next call.
         self._username_pattern_cache = (self.real_user, pattern)
@@ -933,11 +1205,13 @@ def summarize_tool_use(block: dict[str, Any], redact: Redactor, config: dict[str
     trunc = config.get("truncation", {})
 
     if name == "Bash":
-        cmd = inp.get("command", "") or ""
-        first_line = cmd.splitlines()[0] if cmd else ""
-        if len(cmd.splitlines()) > 1:
+        # Redact the whole command before the cut: a token wrapped onto
+        # line 2 or cut at 200 chars must not slip under a pattern.
+        cmd_lines = redact(inp.get("command", "") or "").splitlines()
+        first_line = cmd_lines[0] if cmd_lines else ""
+        if len(cmd_lines) > 1:
             first_line += " …"
-        return f"`Bash`: `{redact(truncate_chars(first_line, 200))}`"
+        return f"`Bash`: `{truncate_chars(first_line, 200)}`"
 
     if name == "Read":
         fp = inp.get("file_path", "")
@@ -963,10 +1237,10 @@ def summarize_tool_use(block: dict[str, Any], redact: Redactor, config: dict[str
     if name == "Write":
         fp = inp.get("file_path", "")
         content = inp.get("content", "") or ""
-        preview = truncate_lines(content, trunc.get("write_content_preview_lines", 5))
+        preview = truncate_lines(redact(content), trunc.get("write_content_preview_lines", 5))
         return (
             f"`Write`: `{redact(fp)}` ({len(content)} chars)\n\n"
-            f"```\n{redact(preview)}\n```"
+            f"```\n{preview}\n```"
         )
 
     if name == "Edit":
@@ -994,11 +1268,11 @@ def summarize_tool_use(block: dict[str, Any], redact: Redactor, config: dict[str
 
     if name == "WebSearch":
         q = inp.get("query", "")
-        return f"`WebSearch`: {redact(truncate_chars(q, 200))}"
+        return f"`WebSearch`: {truncate_chars(redact(q), 200)}"
 
     if name == "Task":
         desc = inp.get("description", "") or inp.get("subagent_type", "")
-        return f"`Task`: {redact(truncate_chars(desc, 200))}"
+        return f"`Task`: {truncate_chars(redact(desc), 200)}"
 
     keys = ", ".join(inp.keys())
     return f"`{name}` (inputs: {keys})"
@@ -1225,6 +1499,9 @@ def derive_description(records: list[dict[str, Any]], redact: "Redactor") -> str
                     break
         if not text:
             continue
+        # Redact before the line pick and the cut, so a token that
+        # wraps or crosses the 120-char limit is masked as a whole.
+        text = redact(text)
 
         # First non-empty line (skip code-fence opens + path-noise).
         for raw_line in text.splitlines():
@@ -1244,7 +1521,7 @@ def derive_description(records: list[dict[str, Any]], redact: "Redactor") -> str
                 if cut < MAX_CHARS // 2:
                     cut = MAX_CHARS - 3
                 line = line[:cut].rstrip() + "..."
-            return redact(line)
+            return line
     return ""
 
 

@@ -16,10 +16,8 @@
     "_comment": "Set real_username to the part of your home path to replace. Auto-detected from $USER if empty.",
     "real_username": "",
     "replacement_username": "USER",
+    "_comment_patterns": "Secrets (tokens, keys, keyword + value, URL passwords) are built-in patterns and always run. List your own patterns here; this list replaces the default one, which only redacts emails.",
     "extra_patterns": [
-      "(?i)(api[_-]?key|secret|token|bearer|password)[\"'\\s:=]+[\\w\\-\\.]{8,}",
-      "(?i)[a-z][a-z0-9+.-]*://[^/\\s:]+:[^@\\s]+@",
-      "sk-[A-Za-z0-9]{20,}",
       "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+"
     ]
   },
