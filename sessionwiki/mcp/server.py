@@ -701,10 +701,20 @@ def _commit_or_preview(
 _FILTER_KEYS = ("project", "type", "tag", "lifecycle", "date_from", "date_to")
 
 
-def _meta_tags(meta: dict[str, Any]) -> set[str]:
+def _raw_if_bool(meta: dict[str, Any], content: str, key: str) -> Any:
+    """Bool coercion loses the YAML spelling (`no` ≠ `false`); filters and
+    status lines must match what the page actually says, so bool-coerced
+    scalars are re-read as raw text. Rare path — the hot loop stays typed."""
+    value = meta.get(key, "")
+    if isinstance(value, bool):
+        return _legacy_frontmatter_value(content.lstrip("\ufeff"), key)
+    return value
+
+
+def _meta_tags(meta: dict[str, Any], content: str) -> set[str]:
     # keep_noise: query tag matching must keep agent tags (claude-code);
     # the canonical parser yields block lists as real lists now.
-    return set(parse_tags_field(meta.get("tags"), keep_noise=True))
+    return set(parse_tags_field(_raw_if_bool(meta, content, "tags"), keep_noise=True))
 
 
 def _valid_day(value: str) -> str:
@@ -723,19 +733,19 @@ def _lifecycle_matches(meta: dict[str, Any], states: str) -> bool:
     return str(meta.get("lifecycle", "") or "").lower() in wanted
 
 
-def _passes_filters(meta: dict[str, Any], filters: dict[str, str]) -> bool:
+def _passes_filters(meta: dict[str, Any], filters: dict[str, str], content: str) -> bool:
     """True when the page's parsed frontmatter matches every given filter."""
     if not filters:
         return True
-    if "project" in filters and str(meta.get("project", "") or "") != filters["project"]:
+    if "project" in filters and str(_raw_if_bool(meta, content, "project") or "") != filters["project"]:
         return False
-    if "type" in filters and str(meta.get("type", "") or "") != filters["type"]:
+    if "type" in filters and str(_raw_if_bool(meta, content, "type") or "") != filters["type"]:
         return False
-    if "tag" in filters and filters["tag"].lower() not in _meta_tags(meta):
+    if "tag" in filters and filters["tag"].lower() not in _meta_tags(meta, content):
         return False
     if "lifecycle" in filters and not _lifecycle_matches(meta, filters["lifecycle"]):
         return False
-    day = str(meta.get("date", "") or "")[:10]
+    day = str(_raw_if_bool(meta, content, "date") or "")[:10]
     if "date_from" in filters and (not day or day < filters["date_from"]):
         return False
     if "date_to" in filters and (not day or day > filters["date_to"]):
@@ -826,7 +836,7 @@ def rank_query(
         # Filtered-out pages are not collected, are not registered as a raw
         # target and are not in `links`, so the graph hop cannot pull them
         # back in either.
-        if not _passes_filters(meta, filters):
+        if not _passes_filters(meta, filters, content):
             continue
         if page_type == "source":
             slug = str(meta.get("slug", "") or "") or page.stem[11:]
@@ -864,7 +874,7 @@ def rank_query(
                 continue
             budget -= consumed
             meta, body = parse_frontmatter(content)
-            if not _passes_filters(meta, filters):
+            if not _passes_filters(meta, filters, content):
                 continue
             target = page_by_slug.get(str(meta.get("slug", "") or ""), raw)
             snippet_src = body.lstrip() if content.lstrip("\ufeff").startswith("---") else body
@@ -1088,25 +1098,25 @@ def _hit_status(rel_path: str) -> str:
     if not head.lstrip("\ufeff").startswith("---"):
         return "status: no frontmatter"
     meta, _ = parse_frontmatter(head)
-    return "status: " + " · ".join(_wiki_status_parts(meta))
+    return "status: " + " · ".join(_wiki_status_parts(meta, head))
 
 
-def _wiki_status_parts(meta: dict[str, Any]) -> list[str]:
+def _wiki_status_parts(meta: dict[str, Any], head: str = "") -> list[str]:
     """Trust fields of a curated record; unset fields stay visible."""
-    kind = str(meta.get("type", "") or "") or "unset"
-    lifecycle = str(meta.get("lifecycle", "") or "") or "unset"
-    conf_raw = meta.get("confidence", "")
+    kind = str(_raw_if_bool(meta, head, "type") or "") or "unset"
+    lifecycle = str(_raw_if_bool(meta, head, "lifecycle") or "") or "unset"
+    conf_raw = _raw_if_bool(meta, head, "confidence")
     confidence = str(conf_raw) if conf_raw not in (None, "") else "unset"
     updated = (
-        str(meta.get("last_updated", "") or "")
-        or str(meta.get("date", "") or "")
+        str(_raw_if_bool(meta, head, "last_updated") or "")
+        or str(_raw_if_bool(meta, head, "date") or "")
         or "unset"
     )
     parts = [
         f"type={kind}", f"lifecycle={lifecycle}",
         f"confidence={confidence}", f"updated={updated}",
     ]
-    sources = meta.get("sources")
+    sources = _raw_if_bool(meta, head, "sources")
     if isinstance(sources, list):
         # An explicit empty list still reads as sources=0 (the old raw
         # "[]" string was truthy); a missing key stays silent.

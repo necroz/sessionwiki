@@ -304,3 +304,42 @@ def test_raw_fallback_merges_bom_transcript_by_slug(tmp_path: Path):
         result = rank_query("uniquequerytoken")  # no wiki hit -> raw fallback
     assert "wiki/sources/BomRaw.md" in _paths(result)
     assert "raw/sessions/bom.md" not in _paths(result)
+
+
+# ─── scalar bool-looking values keep their YAML spelling (review fix) ─
+
+
+def test_query_tag_filter_matches_scalar_boolish_tag(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "NoTag.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: NoTag\ntype: concept\ntags: no\n---\n\nNorwegian language page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("norwegian", include_raw=False, filters={"tag": "no"})
+    assert "wiki/concepts/NoTag.md" in _paths(result)
+
+
+def test_query_project_filter_matches_boolish_scalar_no(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "NoProject.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: NoProject\ntype: concept\nproject: no\n---\n\nBoolish project page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("boolish", include_raw=False, filters={"project": "no"})
+    assert "wiki/concepts/NoProject.md" in _paths(result)
+
+
+def test_query_project_filter_true_keeps_yaml_spelling(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "TrueProject.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: TrueProject\ntype: concept\nproject: true\n---\n\nTrue project page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("true project", include_raw=False, filters={"project": "true"})
+    assert "wiki/concepts/TrueProject.md" in _paths(result)
+
+
+def test_status_line_keeps_boolish_scalar_spelling(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "YesConf.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: YesConf\ntype: concept\nconfidence: yes\n---\n\nStatus spelling page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = tool_wiki_query({"question": "status spelling"})
+    assert "confidence=yes" in result["content"][0]["text"]
