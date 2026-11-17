@@ -646,6 +646,17 @@ _DEFAULT_TOKEN_PATTERNS = [
     # Passwords given on a command line.
     re.compile(r"\bmysql(?:dump|admin|sh)?\b[^\n]*?\s-p(?P<secret>[^\s'\"]{4,})"),
     re.compile(r"\bsshpass\s+-p\s*(?P<secret>'[^'\n]+'|\"[^\"\n]+\"|\S+)"),
+    # `SSHPASS=` (read by `sshpass -e`), `DB_PASS=`, `PGPASS=`: an
+    # upper-case name ending in PASS. `PASSWORD` is the keyword rule's.
+    re.compile(
+        r"\b[A-Z][A-Z0-9_]*PASS\s*=\s*"
+        r"(?P<secret>'[^'\n]+'|\"[^\"\n]+\"|[^\s'\"`;|&$][^\s'\"`;|&]*)"
+    ),
+    # A password piped into `sudo -S`.
+    re.compile(
+        r"\becho\s+(?P<secret>'[^'\n]+'|\"[^\"\n]+\"|[^\s'\"|;&]+)"
+        r"\s*\|\s*sudo\b[^|\n]*?\s-S\b"
+    ),
     # AWS secret access key: 40 chars that may hold `/` and `+`.
     re.compile(
         r"(?i)aws[_-]?secret[_-]?access[_-]?key" + _KEYWORD_SEP
