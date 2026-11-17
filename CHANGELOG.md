@@ -10,6 +10,10 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [2.3.1] — 2026-11-17
+
+Theme: redaction that keeps up with real transcripts — wrapped secrets, more formats, and the username outside home paths.
+
 ### Fixed
 
 - **Secrets split across lines are redacted** — a token that a terminal or an editor wrapped onto two or more lines used to match in part or not at all, so its tail (or the whole key, when the head was short) reached `raw/`. The redactor now joins a line break between two token characters, or a shell `\` continuation, and redacts every match that crosses it. A match that runs into `NAME=` or `name:` on the next line is dropped, so `.env` and YAML files keep their next key. A PEM private key with no END line is redacted to the end of the text block.
