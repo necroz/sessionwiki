@@ -42,7 +42,7 @@ Two different QA surfaces that are easy to confuse:
 
 | Command | Checks | Severity model | When to run |
 |---|---|---|---|
-| [`sessionwiki lint`](../reference/cli.md#lint--run-13-wiki-quality-rules) / `/wiki-lint` | **Wiki content quality** — frontmatter completeness, `[[wikilink]]` integrity, orphans, duplicate titles, stale pages, cache-tier consistency, tag-topic convention, stale references | 15 rules with `error` / `warning` / `info` severities; `--fail-on-errors` exits non-zero only on errors | After every `/wiki-sync` or `/wiki-build` |
+| [`sessionwiki lint`](../reference/cli.md#lint--run-16-wiki-quality-rules) / `/wiki-lint` | **Wiki content quality** — frontmatter completeness, `[[wikilink]]` integrity, orphans, duplicate titles, stale pages, tag-topic convention, stale references, tool and count consistency | 16 rules with `error` / `warning` / `info` severities; `--fail-on-errors` exits non-zero only on errors | After every `/wiki-sync` or `/wiki-build` |
 | [`sessionwiki eval`](../reference/cli.md#eval--structural-eval-checks-over-wiki) | **Structural corpus health** — site-wide metrics (total pages, orphan ratio, avg outbound links, broken-link rate, duplicate-slug rate, content-length distribution) | Pass / fail against configurable thresholds | In CI, weekly, or when comparing two wiki snapshots |
 
 In plain English: **lint** checks each page against its contract;

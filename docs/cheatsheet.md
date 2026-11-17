@@ -47,7 +47,7 @@ From Claude Code, run these slash commands in order:
 | `graph` | Build the knowledge graph (Graphify default, builtin fallback) |
 | `query` | Search the knowledge graph with a question |
 | `export` | AI-consumable exports (llms-txt, jsonld, sitemap, rss, marp, ...) |
-| `lint` | Run 14 wiki-quality rules |
+| `lint` | Run 16 wiki-quality rules |
 | `candidates` | Approval workflow (list / promote / merge / discard) |
 | `synthesize` | LLM-backed source-page synthesis with auto-tagging |
 | `version` | Print version |
@@ -82,7 +82,7 @@ sessionwiki export ai-readme               # ai-readme.md
 ## Quality
 
 ```bash
-sessionwiki lint                           # 14 rules (8 structural + 3 LLM + 2 v1.1)
+sessionwiki lint                           # 16 rules (13 structural + 3 LLM)
 sessionwiki lint --json --fail-on-errors   # CI-friendly
 sessionwiki lint --rules link_integrity,orphan_detection
 sessionwiki lint --include-llm             # + contradiction/claim/summary checks

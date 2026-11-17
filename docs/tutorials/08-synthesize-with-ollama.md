@@ -10,13 +10,14 @@ docs_shell: true
 **You'll need:** [Ollama](https://ollama.com/) running locally + at
 least 8 GB RAM for `llama3.1:8b`.
 **Result:** every new session's `wiki/sources/<slug>.md` is synthesized
-by a local LLM instead of the dummy backend — no API key, no bill.
+by a local LLM instead of the default `extractive` backend — no API key, no bill.
 
 ## Why this matters
 
-The default `synthesis.backend` is `"dummy"` — fast, deterministic,
-but the page it produces is a skeleton.  Good for tests, not for
-reading.  When you want actual LLM-written summaries **without** a
+The default `synthesis.backend` is `"extractive"` — fast, deterministic,
+and offline. It copies the request, decisions, files and tools out of the
+transcript, but it does not write a summary in its own words. When you want
+actual LLM-written summaries **without** a
 Claude / OpenAI API key, point the pipeline at a local Ollama model.
 
 ## Steps
@@ -108,7 +109,7 @@ ls wiki/sources/<your-project>/ | head
 cat wiki/sources/<your-project>/$(ls wiki/sources/<your-project>/ | head -1)
 ```
 
-The frontmatter is the same as the dummy backend; the body is the
+The frontmatter is the same as with the `extractive` backend; the body is the
 LLM's prose (one-paragraph summary + key claims + connections).
 
 ## Verify
