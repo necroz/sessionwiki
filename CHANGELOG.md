@@ -10,6 +10,23 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Secrets split across lines are redacted** — a token that a terminal or an editor wrapped onto two or more lines used to match in part or not at all, so its tail (or the whole key, when the head was short) reached `raw/`. The redactor now joins a line break between two token characters, or a shell `\` continuation, and redacts every match that crosses it. A match that runs into `NAME=` or `name:` on the next line is dropped, so `.env` and YAML files keep their next key. A PEM private key with no END line is redacted to the end of the text block.
+- **Fields are redacted before they are truncated** — the Bash summary, the Write preview, the WebSearch and Task summaries and the session description cut the text first and redacted it after, so a token cut at the limit slipped under the pattern threshold, and a Write preview leaked the body of a PEM key whose END line was past the cut.
+- **The username is redacted outside home paths** — a probe found the username in 644 of 1165 converted sessions after home-path redaction. The redactor now also replaces it in Claude Code folder names (`-home-<u>-Projects-x`), `<u>@host`, the owner and group columns of `ls -l`, `id` output, `USER=`/`LOGNAME=`/`User=`/`Group=`, `-U`/`-u`/`--user=` flags, `git -c user.name=`, `/tmp/pytest-of-<u>`, the `sudo` prompt and a `whoami` line, and in a home path with no trailing slash (`find /home/<u> -maxdepth 1`). On the same corpus 69 sessions keep the name, all in free text.
+- **Eleven more built-in secret patterns** — GitLab `glpat-`, Hugging Face `hf_`, Telegram bot tokens, Slack and Discord webhooks, the password in `scheme://user:<password>@host`, `Authorization: Basic|Token|Digest`, `mysql -p<password>`, `sshpass -p <password>`, `aws_secret_access_key` and keyword + value. The probe showed `sshpass` passwords and `*_pwd` values in clear text in `raw/`. The keyword pattern now also takes `client_secret`, `passwd`, `NAME_PWD`, URL-encoded and JSON-escaped separators, and masks only the value, so `MYSQL_PWD=<REDACTED>` keeps the name. A pattern with a named group `secret` masks only that group, in built-in and user patterns alike.
+- **PGP private keys are redacted** — the PEM pattern expected `PGP PRIVATE KEY-----`, but the real header is `PGP PRIVATE KEY BLOCK-----`, so a PGP key never matched.
+- **`audit` finds secrets that span lines** — the audit scanned line by line, so it never saw a PEM key between its BEGIN and END lines or a wrapped token. It now reports such a secret once, on its first line, with the line masked from the match to the end.
+
+### Changed
+
+- **Keyword + value and `sk-` keys are built-in patterns** — they used to live only in the default `extra_patterns`, and a `redaction.extra_patterns` list in `config.local.json` replaces that list, so any own pattern dropped them. The default `extra_patterns` now holds only the email pattern. Redaction is about 2.5 times slower than in 2.3.0 (about 0.9 s per MB of transcript); `sync` converts only new sessions. Run `sessionwiki sync --force` to apply the new rules to existing `raw/` files.
+
+### Documentation
+
+- `docs/privacy.md` lists the 29 built-in secret patterns, every username context, how split secrets are handled and where the joined pass stops. README counts 29 secret patterns. The configuration docs show the new default `extra_patterns`. The lint reference lists the 16 registered rules instead of 13–15, and tutorial 08 names `extractive` as the default backend.
+
 ## [2.3.0] — 2026-11-13
 
 Theme: pre-Reddit readiness — honest benchmarks, a useful no-model default, cross-platform CI, and Windows correctness.

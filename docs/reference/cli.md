@@ -410,7 +410,9 @@ python3 -m sessionwiki audit --fail-on-findings
 
 Findings are grouped as `username`, `secret` (built-in token patterns),
 or `pattern` (user `redaction.extra_patterns`). Matched text is masked
-in the preview.
+in the preview. A secret that spans lines (a PEM key between its BEGIN
+and END lines, a token wrapped onto the next line) is reported once, on
+its first line.
 
 ---
 
@@ -478,7 +480,7 @@ python3 -m sessionwiki export all --out ~/custom-site
 
 ---
 
-## `lint` — run 14 wiki-quality rules
+## `lint` — run 16 wiki-quality rules
 
 ```bash
 python3 -m sessionwiki lint
@@ -501,11 +503,14 @@ python3 -m sessionwiki lint --wiki-dir ~/another-wiki
 
 ### Rules
 
-8 structural (`frontmatter_completeness`, `frontmatter_validity`,
-`link_integrity`, `orphan_detection`, `content_freshness`,
-`entity_consistency`, `duplicate_detection`, `index_sync`) + 3 LLM-powered
-(`contradiction_detection`, `claim_verification`, `summary_accuracy`) +
-2 v1.1+ (`stale_candidates`, `cache_tier_consistency`).
+13 structural (`frontmatter_completeness`, `frontmatter_validity`,
+`frontmatter_count_consistency`, `link_integrity`, `orphan_detection`,
+`content_freshness`, `entity_consistency`, `duplicate_detection`,
+`index_sync`, `stale_candidates`, `stale_reference_detection`,
+`tags_topics_convention`, `tools_consistency`) + 3 LLM-powered
+(`contradiction_detection`, `claim_verification`, `summary_accuracy`).
+`frontmatter_validity` also warns about a `confidence` value without
+`confidence_measured` and `confidence_pages`.
 
 ### Expected output
 
