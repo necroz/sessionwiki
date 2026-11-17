@@ -225,3 +225,19 @@ def test_at_most_three_lessons_are_injected(tmp_path: Path, monkeypatch):
     out, _ = _hook(tmp_path, monkeypatch, stdin=json.dumps({"prompt": _PROMPT, "cwd": "/home/u/Projects/app"}))
     lesson_lines = [ln for ln in _ctx(out).splitlines() if ln.startswith("- wiki/lessons/")]
     assert len(lesson_lines) == 3
+
+
+# ─── _frontmatter_value head-read regressions (MCP surface refactor) ──
+
+
+def test_frontmatter_value_tolerates_unterminated_head():
+    from sessionwiki.mcp.server import _frontmatter_value
+
+    head = "---\ntype: lesson\n" + "x" * 9000  # no closing fence in 8 KiB
+    assert _frontmatter_value(head, "type") == "lesson"
+
+
+def test_frontmatter_value_reads_bom_page():
+    from sessionwiki.mcp.server import _frontmatter_value
+
+    assert _frontmatter_value("\ufeff---\ntype: source\n---\n", "type") == "source"

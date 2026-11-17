@@ -43,6 +43,7 @@ from sessionwiki._frontmatter import (
 from sessionwiki._system_pages import is_system_file
 from sessionwiki.lifecycle import LifecycleState
 from sessionwiki.lock import atomic_write_text
+from sessionwiki.tag_utils import parse_tags_field
 
 
 SERVER_INFO = {
@@ -792,9 +793,10 @@ def _append_edit_log(rel: str, tool: str, action: str) -> bool:
 _FILTER_KEYS = ("project", "type", "tag", "lifecycle", "date_from", "date_to")
 
 
-def _tags(content: str) -> set[str]:
-    raw = _frontmatter_value(content, "tags").strip().strip("[]")
-    return {t.strip().strip("'\"").lower() for t in raw.split(",") if t.strip()}
+def _meta_tags(meta: dict[str, Any]) -> set[str]:
+    # keep_noise: query tag matching must keep agent tags (claude-code);
+    # the canonical parser yields block lists as real lists now.
+    return set(parse_tags_field(meta.get("tags"), keep_noise=True))
 
 
 def _valid_day(value: str) -> str:
@@ -807,25 +809,25 @@ def _valid_day(value: str) -> str:
         return ""
 
 
-def _lifecycle_matches(content: str, states: str) -> bool:
+def _lifecycle_matches(meta: dict[str, Any], states: str) -> bool:
     """True when the page's lifecycle is one of the comma-separated states."""
     wanted = {s.strip().lower() for s in states.split(",")}
-    return _frontmatter_value(content, "lifecycle").lower() in wanted
+    return str(meta.get("lifecycle", "") or "").lower() in wanted
 
 
-def _passes_filters(content: str, filters: dict[str, str]) -> bool:
-    """True when the page's frontmatter matches every given filter."""
+def _passes_filters(meta: dict[str, Any], filters: dict[str, str]) -> bool:
+    """True when the page's parsed frontmatter matches every given filter."""
     if not filters:
         return True
-    if "project" in filters and _frontmatter_value(content, "project") != filters["project"]:
+    if "project" in filters and str(meta.get("project", "") or "") != filters["project"]:
         return False
-    if "type" in filters and _frontmatter_value(content, "type") != filters["type"]:
+    if "type" in filters and str(meta.get("type", "") or "") != filters["type"]:
         return False
-    if "tag" in filters and filters["tag"].lower() not in _tags(content):
+    if "tag" in filters and filters["tag"].lower() not in _meta_tags(meta):
         return False
-    if "lifecycle" in filters and not _lifecycle_matches(content, filters["lifecycle"]):
+    if "lifecycle" in filters and not _lifecycle_matches(meta, filters["lifecycle"]):
         return False
-    day = _frontmatter_value(content, "date")[:10]
+    day = str(meta.get("date", "") or "")[:10]
     if "date_from" in filters and (not day or day < filters["date_from"]):
         return False
     if "date_to" in filters and (not day or day > filters["date_to"]):
@@ -881,21 +883,21 @@ def rank_query(
     docs_scanned = 0
     links: dict[Path, dict[str, str]] = {}
 
-    def _collect(content: str, target: Path, weight: float, snippet_src: str) -> None:
+    def _collect(content: str, target: Path, weight: float, snippet_src: str, meta: dict[str, Any]) -> None:
         nonlocal docs_scanned
         docs_scanned += 1
         lower = content.lower()
         present = frozenset(tok for tok in tokens if tok in lower)
         for tok in present:
             doc_freq[tok] += 1
-        title = _frontmatter_value(content, "title").lower()
+        title = str(meta.get("title", "") or "").lower()
         in_title = frozenset(tok for tok in tokens if tok in title)
         phrase = query_lower in lower
         if present or phrase:
             hits.append((
                 target, present, phrase, in_title, bool(title) and query_lower in title,
                 len(content), weight, _extract_snippet(snippet_src, tokens, max_chars=400),
-                _frontmatter_value(content, "date"),
+                str(meta.get("date", "") or ""),
             ))
 
     for page in sorted(wiki.rglob("*.md")):
@@ -907,7 +909,8 @@ def rank_query(
             continue
         budget -= consumed
         rel = page.relative_to(wiki)
-        page_type = _frontmatter_value(content, "type")
+        meta, body = parse_frontmatter(content)
+        page_type = str(meta.get("type", "") or "")
         # Service pages describe the wiki, they don't answer questions;
         # index.md and overview.md are already part of every response.
         if page_type in _QUERY_SKIP_TYPES or (len(rel.parts) == 1 and rel.name in _QUERY_SKIP_ROOT_FILES):
@@ -915,19 +918,20 @@ def rank_query(
         # Filtered-out pages are not collected, are not registered as a raw
         # target and are not in `links`, so the graph hop cannot pull them
         # back in either.
-        if not _passes_filters(content, filters):
+        if not _passes_filters(meta, filters):
             continue
         if page_type == "source":
-            slug = _frontmatter_value(content, "slug") or page.stem[11:]
+            slug = str(meta.get("slug", "") or "") or page.stem[11:]
             if slug:
                 page_by_slug[slug] = page
         # A project hub mentions everything its sessions mention; the
         # session page that holds the answer must win.
         weight = _QUERY_HUB_WEIGHT if rel.parts[0] in _QUERY_HUB_DIRS else 1.0
-        weight *= _LIFECYCLE_WEIGHT.get(_frontmatter_value(content, "lifecycle").lower(), 1.0)
+        weight *= _LIFECYCLE_WEIGHT.get(str(meta.get("lifecycle", "") or "").lower(), 1.0)
         # Snippets show the body, not the YAML: a lesson's rule must fit
         # the window (raw transcripts already snippet from the body).
-        _collect(content, page, weight, _body(content))
+        snippet_src = body.lstrip() if content.lstrip("\ufeff").startswith("---") else body
+        _collect(content, page, weight, snippet_src, meta)
         links[page] = _page_links(content)
 
     # The wiki is the compiled layer and normally enough: source pages
@@ -951,10 +955,12 @@ def rank_query(
             if consumed == 0:
                 continue
             budget -= consumed
-            if not _passes_filters(content, filters):
+            meta, body = parse_frontmatter(content)
+            if not _passes_filters(meta, filters):
                 continue
-            target = page_by_slug.get(_frontmatter_value(content, "slug"), raw)
-            _collect(content, target, 1.0, _body(content))
+            target = page_by_slug.get(str(meta.get("slug", "") or ""), raw)
+            snippet_src = body.lstrip() if content.lstrip("\ufeff").startswith("---") else body
+            _collect(content, target, 1.0, snippet_src, meta)
 
     # Rare words decide the match: "палец" in 3 transcripts outweighs
     # "дома" in 400 (BM25-style inverse document frequency).
@@ -1172,41 +1178,47 @@ def _hit_status(rel_path: str) -> str:
         day = _frontmatter_value(head, "date")
         when = f" · {day}" if day else ""
         return f"status: raw transcript{when} · not in the wiki yet"
-    if not head.startswith("---"):
+    if not head.lstrip("\ufeff").startswith("---"):
         return "status: no frontmatter"
-    return "status: " + " · ".join(_wiki_status_parts(head))
+    meta, _ = parse_frontmatter(head)
+    return "status: " + " · ".join(_wiki_status_parts(meta))
 
 
-def _wiki_status_parts(head: str) -> list[str]:
+def _wiki_status_parts(meta: dict[str, Any]) -> list[str]:
     """Trust fields of a curated record; unset fields stay visible."""
-    kind = _frontmatter_value(head, "type") or "unset"
-    lifecycle = _frontmatter_value(head, "lifecycle") or "unset"
-    confidence = _frontmatter_value(head, "confidence") or "unset"
+    kind = str(meta.get("type", "") or "") or "unset"
+    lifecycle = str(meta.get("lifecycle", "") or "") or "unset"
+    conf_raw = meta.get("confidence", "")
+    confidence = str(conf_raw) if conf_raw not in (None, "") else "unset"
     updated = (
-        _frontmatter_value(head, "last_updated")
-        or _frontmatter_value(head, "date")
+        str(meta.get("last_updated", "") or "")
+        or str(meta.get("date", "") or "")
         or "unset"
     )
     parts = [
         f"type={kind}", f"lifecycle={lifecycle}",
         f"confidence={confidence}", f"updated={updated}",
     ]
-    sources = _frontmatter_value(head, "sources")
-    if sources:
-        count = len([s for s in sources.strip("[]").split(",") if s.strip()])
+    sources = meta.get("sources")
+    if isinstance(sources, list):
+        # An explicit empty list still reads as sources=0 (the old raw
+        # "[]" string was truthy); a missing key stays silent.
+        parts.append(f"sources={len(sources)}")
+    elif sources:
+        count = len([s for s in str(sources).strip("[]").split(",") if s.strip()])
         parts.append(f"sources={count}")
-    measurement = _confidence_measurement(head, confidence)
+    measurement = _confidence_measurement(meta, confidence)
     if measurement:
         parts.append(measurement)
     return parts
 
 
-def _confidence_measurement(head: str, confidence: str) -> str:
+def _confidence_measurement(meta: dict[str, Any], confidence: str) -> str:
     """When and against what corpus the confidence was measured; '' if unknown."""
-    measured = _frontmatter_value(head, "confidence_measured")
+    measured = str(meta.get("confidence_measured", "") or "")
     if confidence == "unset" or not measured:
         return ""
-    pages = _frontmatter_value(head, "confidence_pages")
+    pages = str(meta.get("confidence_pages", "") or "")
     return f"measured={measured}" + (f" ({pages} pages)" if pages else "")
 
 
@@ -1227,10 +1239,9 @@ def _read_head(p: Path) -> str:
         return ""
 
 
-def _frontmatter_value(content: str, key: str) -> str:
-    """Value of one top-level key in the leading YAML frontmatter, or ''."""
-    if not content.startswith("---"):
-        return ""
+def _legacy_frontmatter_value(content: str, key: str) -> str:
+    """Pre-canonical regex reader; tolerates an unterminated frontmatter
+    block in an 8 KiB head read (the prompt-recall hook relies on it)."""
     end = content.find("\n---", 3)
     block = content[3:end] if end != -1 else content[3:]
     m = re.search(rf"^{re.escape(key)}:\s*(.*?)\s*$", block, re.MULTILINE)
@@ -1244,13 +1255,36 @@ def _frontmatter_value(content: str, key: str) -> str:
     return raw
 
 
+def _stringify_meta_value(value: Any) -> str:
+    """Render a typed frontmatter value the way the raw YAML read it."""
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return repr(value)
+    if isinstance(value, list):
+        return "[" + ", ".join(str(item) for item in value) + "]"
+    return str(value)
+
+
+def _frontmatter_value(content: str, key: str) -> str:
+    """Value of one top-level frontmatter key as text, or ''.
+
+    Thin delegate to the canonical parser (BOM/CRLF-safe, block lists).
+    Unterminated head reads fall back to the legacy regex so the
+    prompt-recall hook keeps working on long-frontmatter pages.
+    """
+    meta, _ = parse_frontmatter(content)
+    if not meta and content.lstrip("\ufeff").startswith("---"):
+        return _legacy_frontmatter_value(content.lstrip("\ufeff"), key)
+    return _stringify_meta_value(meta.get(key, ""))
+
+
 def _body(content: str) -> str:
     """Content without the leading frontmatter block."""
-    if content.startswith("---"):
-        end = content.find("\n---", 3)
-        if end != -1:
-            return content[end + 4:].lstrip()
-    return content
+    fm, body = parse_frontmatter_or_none(content)
+    return content if fm is None else body.lstrip()
 
 
 
@@ -1397,30 +1431,16 @@ def tool_wiki_search(args: dict[str, Any]) -> dict[str, Any]:
     }, indent=2))
 
 
-_FRONTMATTER_HEAD_BYTES = 8 * 1024
-
-
 def _source_meta(p: Path) -> dict[str, str]:
     """Read ``project`` and ``date`` from a raw session's frontmatter.
 
     Reads only the head of the file. raw/sessions/ is flat, so the
     frontmatter is the only place that names the project.
     """
-    try:
-        with p.open("rb") as f:
-            head = f.read(_FRONTMATTER_HEAD_BYTES).decode("utf-8", errors="replace")
-    except OSError:
+    meta, _ = parse_frontmatter(_read_head(p))
+    if not meta:
         return {}
-    if not head.startswith("---"):
-        return {}
-    end = head.find("\n---", 3)
-    block = head[3:end] if end != -1 else head[3:]
-    meta: dict[str, str] = {}
-    for key in ("project", "date"):
-        m = re.search(rf"^{key}:\s*\"?([^\"\n]*)\"?\s*$", block, re.MULTILINE)
-        if m:
-            meta[key] = m.group(1).strip()
-    return meta
+    return {key: str(meta.get(key, "") or "") for key in ("project", "date")}
 
 
 def tool_wiki_list_sources(args: dict[str, Any]) -> dict[str, Any]:
