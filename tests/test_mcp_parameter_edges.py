@@ -12,8 +12,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 from sessionwiki.mcp.server import (
-    tool_wiki_category_browse,
-    tool_wiki_confidence,
     tool_wiki_query,
     tool_wiki_read_page,
     tool_wiki_write_page,
@@ -107,19 +105,3 @@ def test_write_page_rejects_absolute_path_inside_repo(tmp_path: Path):
     assert result["isError"]
     assert not target.exists()
 
-
-def test_confidence_rejects_non_numeric_bounds(tmp_path: Path):
-    (tmp_path / "wiki").mkdir()
-    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
-        low = tool_wiki_confidence({"min_confidence": "low"})
-        high = tool_wiki_confidence({"max_confidence": None})
-    assert low["isError"] and "min_confidence" in low["content"][0]["text"]
-    assert high["isError"] and "max_confidence" in high["content"][0]["text"]
-
-
-def test_category_browse_rejects_non_integer_min_count(tmp_path: Path):
-    (tmp_path / "wiki").mkdir()
-    with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
-        result = tool_wiki_category_browse({"min_count": "x"})
-    assert result["isError"]
-    assert "min_count" in result["content"][0]["text"]

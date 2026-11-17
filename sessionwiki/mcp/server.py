@@ -336,60 +336,8 @@ TOOLS = [
             "required": ["format"],
         },
     },
-    # v1.0 (#159) — 5 new MCP tools for confidence, lifecycle, dashboard,
-    # entity search, and category browse.
-    {
-        "name": "wiki_confidence",
-        "description": (
-            "List wiki pages whose frontmatter confidence (0.0-1.0) is between "
-            "min_confidence and max_confidence. Pages without a confidence "
-            "value, or with a value that is not a number, are skipped. Values "
-            "are compared as given and not clamped; min_confidence greater "
-            "than max_confidence returns an empty list. Returns plain text: "
-            "the match count, then up to 50 lines of 'score path - title', "
-            "lowest score first, ending with '... and N more' when the list is "
-            "cut. Read-only. Use max_confidence=0.5 to find weak pages to "
-            "recheck; use wiki_dashboard for the overall distribution."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "min_confidence": {
-                    "type": "number",
-                    "description": "Only return pages with confidence >= this (0.0-1.0). Default 0.",
-                    "default": 0.0,
-                },
-                "max_confidence": {
-                    "type": "number",
-                    "description": "Only return pages with confidence <= this (0.0-1.0). Default 1.0.",
-                    "default": 1.0,
-                },
-            },
-        },
-    },
-    {
-        "name": "wiki_lifecycle",
-        "description": (
-            "List wiki pages whose frontmatter lifecycle equals state (draft, "
-            "reviewed, verified, stale or archived). Returns plain text: the "
-            "match count, then up to 50 lines of 'last_updated path - title', "
-            "newest first, ending with '... and N more' when the list is cut. "
-            "There is no paging parameter; the count tells you how many pages "
-            "remain. Read-only. Use 'stale' or 'draft' to find pages to update; "
-            "use wiki_dashboard to see how many pages are in each state."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "state": {
-                    "type": "string",
-                    "enum": ["draft", "reviewed", "verified", "stale", "archived"],
-                    "description": "Which lifecycle state to filter by.",
-                },
-            },
-            "required": ["state"],
-        },
-    },
+    # v1.0 (#159) — wiki_dashboard is the survivor of the five listing
+    # tools; the other four were cut in v3.0 (no consumers beyond tests).
     {
         "name": "wiki_dashboard",
         "description": (
@@ -399,68 +347,12 @@ TOOLS = [
             "or no confidence. Returns plain-text Markdown. Read-only, no "
             "parameters. No cache: every call re-reads wiki/ from disk, so the "
             "numbers are current and the cost grows with the wiki. Call it "
-            "first to see the wiki's size and health, then use wiki_lifecycle "
-            "or wiki_confidence for the page lists."
+            "first to see the wiki's size and health, then use wiki_query "
+            "with lifecycle or tag filters for the page lists."
         ),
         "inputSchema": {
             "type": "object",
             "properties": {},
-        },
-    },
-    {
-        "name": "wiki_entity_search",
-        "description": (
-            "Find entity pages (people, orgs, tools, libraries, APIs, "
-            "projects, concepts): wiki pages with type: entity. name matches a "
-            "case-insensitive substring of the title or path; entity_type "
-            "matches exactly; when both are given both must match; with "
-            "neither, every entity is listed. A name with no match returns a "
-            "zero count, not an error. Returns plain text: the count, then up "
-            "to 50 lines of '[type] path - title', sorted by title. Read-only. "
-            "Use wiki_query for free-text questions and wiki_category_browse "
-            "for tags."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "Entity name substring (case-insensitive).",
-                },
-                "entity_type": {
-                    "type": "string",
-                    "enum": ["person", "org", "tool", "concept", "api", "library", "project"],
-                    "description": "Filter by entity type.",
-                },
-            },
-        },
-    },
-    {
-        "name": "wiki_category_browse",
-        "description": (
-            "Browse the wiki by tag (the 'tags' frontmatter field; 'category' "
-            "here means tag). Tag names are lowercased and matched exactly. "
-            "Without tag: lists tags used by at least min_count pages, most "
-            "used first, up to 100. The count line reports every tag that "
-            "passes min_count; when more than 100 qualify, only the first 100 "
-            "are shown. With tag: lists up to 50 pages with that tag as "
-            "'path - title' (min_count is ignored). Returns plain text. "
-            "Read-only. Use wiki_entity_search for named things and wiki_query "
-            "for free-text questions."
-        ),
-        "inputSchema": {
-            "type": "object",
-            "properties": {
-                "tag": {
-                    "type": "string",
-                    "description": "Optional tag to drill into. If omitted, returns counts for all tags.",
-                },
-                "min_count": {
-                    "type": "integer",
-                    "description": "Only include tags with >= this many pages (default 1).",
-                    "default": 1,
-                },
-            },
         },
     },
     # ─── Write tools (card 30) ────────────────────────────────────────
@@ -581,8 +473,8 @@ TOOLS = [
             "or multiline value is an error, not truncated. An already archived page returns "
             "written=false with a note. Refused for system pages and pages with origin: human. "
             "Without confirm=true it writes nothing and returns a preview. Ask the user before "
-            "confirm=true. Returns JSON {path, previous_lifecycle, written}. Use wiki_lifecycle "
-            "with state 'archived' to list archived pages."
+            "confirm=true. Returns JSON {path, previous_lifecycle, written}. Use wiki_query "
+            "with lifecycle='archived' to list archived pages."
         ),
         "inputSchema": {
             "type": "object",
@@ -624,11 +516,7 @@ _TOOL_TITLES = {
     "wiki_lint": "Check wiki links",
     "wiki_sync": "Import new sessions",
     "wiki_export": "Export the whole wiki",
-    "wiki_confidence": "List pages by confidence",
-    "wiki_lifecycle": "List pages by lifecycle state",
     "wiki_dashboard": "Wiki overview",
-    "wiki_entity_search": "Find entities",
-    "wiki_category_browse": "Browse by tag",
     "wiki_write_page": "Write a page",
     "wiki_update_frontmatter": "Edit page fields",
     "wiki_archive_page": "Archive a page",
@@ -1639,73 +1527,6 @@ def _err(text: str) -> dict[str, Any]:
     return {"content": [{"type": "text", "text": text}], "isError": True}
 
 
-def tool_wiki_confidence(args: dict[str, Any]) -> dict[str, Any]:
-    """List pages filtered by confidence score range (v1.0 · #159)."""
-    from sessionwiki.lint import load_pages
-
-    bounds: dict[str, float] = {}
-    for key, default in (("min_confidence", 0.0), ("max_confidence", 1.0)):
-        try:
-            bounds[key] = float(args.get(key, default))
-        except (TypeError, ValueError):
-            return _err(f"{key} must be a number")
-    min_c, max_c = bounds["min_confidence"], bounds["max_confidence"]
-
-    wiki = REPO_ROOT / "wiki"
-    pages = load_pages(wiki)
-
-    results: list[dict[str, Any]] = []
-    for rel, page in pages.items():
-        conf_raw = page["meta"].get("confidence", "")
-        if not conf_raw:
-            continue
-        try:
-            conf = float(conf_raw)
-        except (ValueError, TypeError):
-            continue
-        if min_c <= conf <= max_c:
-            results.append({
-                "path": rel,
-                "title": page["meta"].get("title", ""),
-                "confidence": conf,
-                "lifecycle": page["meta"].get("lifecycle", ""),
-            })
-
-    results.sort(key=lambda r: r["confidence"])
-    text = f"{len(results)} pages with confidence in [{min_c}, {max_c}]:\n\n"
-    for r in results[:50]:
-        text += f"  {r['confidence']:.2f}  {r['path']}  — {r['title']}\n"
-    if len(results) > 50:
-        text += f"\n  ... and {len(results) - 50} more\n"
-    return _ok(text)
-
-
-def tool_wiki_lifecycle(args: dict[str, Any]) -> dict[str, Any]:
-    """List pages filtered by lifecycle state (v1.0 · #159)."""
-    from sessionwiki.lint import load_pages
-
-    state = (args.get("state") or "").strip().lower()
-    if not state:
-        return _err("state is required")
-
-    wiki = REPO_ROOT / "wiki"
-    pages = load_pages(wiki)
-
-    matches = [
-        (rel, page["meta"].get("title", ""), page["meta"].get("last_updated", ""))
-        for rel, page in pages.items()
-        if page["meta"].get("lifecycle", "").lower() == state
-    ]
-    matches.sort(key=lambda m: m[2], reverse=True)
-
-    text = f"{len(matches)} pages in lifecycle '{state}':\n\n"
-    for rel, title, updated in matches[:50]:
-        text += f"  {updated}  {rel}  — {title}\n"
-    if len(matches) > 50:
-        text += f"\n  ... and {len(matches) - 50} more\n"
-    return _ok(text)
-
-
 def tool_wiki_dashboard(args: dict[str, Any]) -> dict[str, Any]:
     """Return wiki health summary (v1.0 · #159)."""
     from sessionwiki.lint import load_pages
@@ -1751,76 +1572,6 @@ def tool_wiki_dashboard(args: dict[str, Any]) -> dict[str, Any]:
         lines.append(f"  {conf_buckets[bucket]:4d}  {bucket}")
 
     return _ok("\n".join(lines))
-
-
-def tool_wiki_entity_search(args: dict[str, Any]) -> dict[str, Any]:
-    """Search entities by name or entity_type (v1.0 · #159)."""
-    from sessionwiki.lint import load_pages
-
-    name_q = (args.get("name") or "").strip().lower()
-    etype_q = (args.get("entity_type") or "").strip().lower()
-
-    wiki = REPO_ROOT / "wiki"
-    pages = load_pages(wiki)
-
-    matches: list[dict[str, Any]] = []
-    for rel, page in pages.items():
-        meta = page["meta"]
-        if meta.get("type") != "entity":
-            continue
-        title = meta.get("title", "")
-        etype = meta.get("entity_type", "").lower()
-        if name_q and name_q not in title.lower() and name_q not in rel.lower():
-            continue
-        if etype_q and etype_q != etype:
-            continue
-        matches.append({
-            "path": rel,
-            "title": title,
-            "entity_type": etype,
-            "confidence": meta.get("confidence", ""),
-        })
-
-    matches.sort(key=lambda m: m["title"])
-    text = f"{len(matches)} matching entities:\n\n"
-    for m in matches[:50]:
-        text += f"  [{m['entity_type']:10}] {m['path']}  — {m['title']}\n"
-    if len(matches) > 50:
-        text += f"\n  ... and {len(matches) - 50} more\n"
-    return _ok(text)
-
-
-def tool_wiki_category_browse(args: dict[str, Any]) -> dict[str, Any]:
-    """Browse tags / categories (v1.0 · #159)."""
-    from sessionwiki.categories import scan_tags
-    from sessionwiki.lint import load_pages
-
-    tag = (args.get("tag") or "").strip().lower()
-    try:
-        min_count = int(args.get("min_count", 1))
-    except (TypeError, ValueError):
-        return _err("min_count must be an integer")
-
-    wiki = REPO_ROOT / "wiki"
-    pages = load_pages(wiki)
-    tags = scan_tags(pages)
-
-    if tag:
-        page_rels = tags.get(tag, [])
-        text = f"{len(page_rels)} pages tagged '{tag}':\n\n"
-        for rel in page_rels[:50]:
-            title = pages[rel]["meta"].get("title", "")
-            text += f"  {rel}  — {title}\n"
-        return _ok(text)
-
-    # List all tags with counts
-    filtered = [(t, len(pgs)) for t, pgs in tags.items() if len(pgs) >= min_count]
-    filtered.sort(key=lambda x: x[1], reverse=True)
-
-    text = f"{len(filtered)} tags with >= {min_count} pages:\n\n"
-    for t, count in filtered[:100]:
-        text += f"  {count:4d}  {t}\n"
-    return _ok(text)
 
 
 # ─── Write tools (card 30) ──────────────────────────────────────────────
@@ -2096,12 +1847,8 @@ TOOL_IMPLS = {
     "wiki_lint": tool_wiki_lint,
     "wiki_sync": tool_wiki_sync,
     "wiki_export": tool_wiki_export,
-    # v1.0 (#159)
-    "wiki_confidence": tool_wiki_confidence,
-    "wiki_lifecycle": tool_wiki_lifecycle,
+    # v1.0 (#159) — dashboard survives the v3.0 surface cut
     "wiki_dashboard": tool_wiki_dashboard,
-    "wiki_entity_search": tool_wiki_entity_search,
-    "wiki_category_browse": tool_wiki_category_browse,
     # card 30: guarded writers
     "wiki_write_page": tool_wiki_write_page,
     "wiki_update_frontmatter": tool_wiki_update_frontmatter,

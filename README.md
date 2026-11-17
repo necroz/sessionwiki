@@ -44,7 +44,7 @@ Already using Claude Code's built-in memory, claude-mem or a session search tool
 | **Synthesis backends** | **extractive** (default, no model), Ollama, **any OpenAI-compatible server** (vLLM, SGLang, LM Studio, LiteLLM, hosted), agent-delegate, offline dummy |
 | **Signal over noise** | Low-signal session coalescing, wikilink cleanup, concurrency control, cost `--estimate` |
 | **Static site** | 365-day heatmap, token and cache stats, filterable sessions table, session pages with highlighted code, project pages with topics, session ↔ project graph, ⌘K search, dark mode |
-| **MCP server** | 15 tools: query, search, read, list sources, lint, sync, exports, dashboard, write/edit/archive pages (with a confirm step)… |
+| **MCP server** | 11 tools: query, search, read, list sources, lint, sync, exports, dashboard, write/edit/archive pages (with a confirm step)… |
 | **AI exports** | `llms.txt`, `llms-full.txt`, JSON-LD graph, per-page `.txt` / `.json`, sitemap, RSS |
 | **Safe by default** | Redaction of usernames and 31 secret patterns, read-only database exports, OS file locks and atomic state writes, `doctor` and `audit` |
 
@@ -192,7 +192,7 @@ Backends: `extractive` (the default — no model and no network: a useful page f
 
 From a source checkout, use `"command": "/path/to/sessionwiki/.venv/bin/sessionwiki"` with `"args": ["mcp"]`; the checkout is the data root, so no `env` is needed.
 
-Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query` (ranked search over wiki pages in any language, falling back to raw transcripts), `wiki_search` (exact text, optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and more — 15 in total, stdio transport, no SDK dependency, path-traversal guarded.
+Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query` (ranked search over wiki pages in any language, falling back to raw transcripts), `wiki_search` (exact text, optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and the guarded write tools — 11 in total, stdio transport, no SDK dependency, path-traversal guarded.
 
 <a href="https://glama.ai/mcp/servers/necroz/sessionwiki">
   <img src="https://glama.ai/mcp/servers/necroz/sessionwiki/badge"
