@@ -646,6 +646,17 @@ _DEFAULT_TOKEN_PATTERNS = [
     # Passwords given on a command line.
     re.compile(r"\bmysql(?:dump|admin|sh)?\b[^\n]*?\s-p(?P<secret>[^\s'\"]{4,})"),
     re.compile(r"\bsshpass\s+-p\s*(?P<secret>'[^'\n]+'|\"[^\"\n]+\"|\S+)"),
+    # `SSHPASS=` (read by `sshpass -e`), `DB_PASS=`, `PGPASS=`: an
+    # upper-case name ending in PASS. `PASSWORD` is the keyword rule's.
+    re.compile(
+        r"\b[A-Z][A-Z0-9_]*PASS\s*=\s*"
+        r"(?P<secret>'[^'\n]+'|\"[^\"\n]+\"|[^\s'\"`;|&$][^\s'\"`;|&]*)"
+    ),
+    # A password piped into `sudo -S`.
+    re.compile(
+        r"\becho\s+(?P<secret>'[^'\n]+'|\"[^\"\n]+\"|[^\s'\"|;&]+)"
+        r"\s*\|\s*sudo\b[^|\n]*?\s-S\b"
+    ),
     # AWS secret access key: 40 chars that may hold `/` and `+`.
     re.compile(
         r"(?i)aws[_-]?secret[_-]?access[_-]?key" + _KEYWORD_SEP
@@ -667,21 +678,6 @@ _DEFAULT_TOKEN_PATTERNS = [
         + r"(?![/~^$%|-])(?P<secret>[^\s\"'`<>,;:=|()\[\]{}\\]{8,})"
     ),
 ]
-
-
-def _redact_matches(pattern: re.Pattern[str], text: str) -> str:
-    """Replace each match, or only its ``secret`` group when it has one."""
-    if "secret" not in pattern.groupindex:
-        return pattern.sub("<REDACTED>", text)
-
-    def _repl(m: re.Match[str]) -> str:
-        start, end = m.span("secret")
-        if start < 0:
-            return m.group()
-        base = m.start()
-        return m.group()[: start - base] + "<REDACTED>" + m.group()[end - base:]
-
-    return pattern.sub(_repl, text)
 
 
 def _secret_span(m: re.Match[str]) -> tuple[int, int]:
@@ -881,18 +877,18 @@ class Redactor:
         if self.real_user and self.real_user in text:
             text = self._redact_username(text)
             text = self._redact_username_contexts(text)
-        # Wrapped secrets first: once the line-local pass has replaced
-        # the head of a token, its tail no longer touches it.
-        spans = find_split_spans(text, [*self.patterns, *_DEFAULT_TOKEN_PATTERNS])
-        for start, end in reversed(_merge_spans((s, e) for s, e, _ in spans)):
+        # Collect every match on the same text, then replace once. When
+        # each pattern ran on the output of the one before, a wide match
+        # (an email joined with the next line's first word) could remove
+        # the word another pattern needs (`sshpass` before a password).
+        # #416: the default token patterns always run, so users never
+        # publish credentials by forgetting to configure `extra_patterns`.
+        patterns = [*self.patterns, *_DEFAULT_TOKEN_PATTERNS]
+        spans = [(s, e) for s, e, _ in find_split_spans(text, patterns)]
+        for pat in patterns:
+            spans.extend(_secret_span(m) for m in pat.finditer(text))
+        for start, end in reversed(_merge_spans(sp for sp in spans if sp[0] < sp[1])):
             text = text[:start] + "<REDACTED>" + text[end:]
-        for pat in self.patterns:
-            text = _redact_matches(pat, text)
-        # #416: default token redaction runs unconditionally so users
-        # never accidentally publish credentials by forgetting to
-        # configure `extra_patterns`.
-        for pat in _DEFAULT_TOKEN_PATTERNS:
-            text = _redact_matches(pat, text)
         return text
 
     def _redact_username_contexts(self, text: str) -> str:

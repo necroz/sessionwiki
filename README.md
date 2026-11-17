@@ -46,7 +46,7 @@ Already using Claude Code's built-in memory, claude-mem or a session search tool
 | **Static site** | 365-day heatmap, token and cache stats, filterable sessions table, session pages with highlighted code, project pages with topics, session ↔ project graph, ⌘K search, dark mode |
 | **MCP server** | 15 tools: query, search, read, list sources, lint, sync, exports, dashboard, write/edit/archive pages (with a confirm step)… |
 | **AI exports** | `llms.txt`, `llms-full.txt`, JSON-LD graph, per-page `.txt` / `.json`, sitemap, RSS |
-| **Safe by default** | Redaction of usernames and 29 secret patterns, read-only database exports, OS file locks and atomic state writes, `doctor` and `audit` |
+| **Safe by default** | Redaction of usernames and 31 secret patterns, read-only database exports, OS file locks and atomic state writes, `doctor` and `audit` |
 
 ## Screenshots
 
@@ -258,7 +258,7 @@ Three layers, following [Karpathy's LLM Wiki pattern](https://gist.github.com/ka
 
 ## Privacy
 
-- Transcripts are redacted on conversion: your username, home paths and 29 kinds of keys, tokens and passwords, plus your own patterns.
+- Transcripts are redacted on conversion: your username, home paths and 31 kinds of keys, tokens and passwords, plus your own patterns.
 - ZCode and OpenCode databases are opened read-only.
 - Nothing leaves your machine unless you configure a remote synthesis backend — and sessionwiki warns when you do.
 - `sessionwiki audit` scans `raw/`, `wiki/` and `site/` before you publish a site.

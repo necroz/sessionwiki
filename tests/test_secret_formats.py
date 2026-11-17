@@ -95,6 +95,12 @@ def test_username_inside_other_words_is_unchanged(user_redactor, text):
     "123456789:AA" + BODY[:33],
     "https://hooks.slack.com/services/T0AB12CD3/B0AB12CD3/" + BODY[:24],
     "https://discord.com/api/webhooks/1234567890/" + BODY,
+    f"export SSHPASS='{BODY[:10]}!'; sshpass -e ssh host",
+    f"SSHPASS='{BODY[:10]}' timeout 50 sshpass -e ssh host",
+    f"PGPASSWORD={BODY[:12]} psql -h db",
+    f"DB_PASS=\"{BODY[:12]}\"",
+    f'echo "{BODY[:10]}" | sudo -S dmesg',
+    f"echo '{BODY[:10]}!' | sudo -S -k fuser -v /dev/nvidia0",
     "api_key%3D" + BODY[:20],
     '{"cmd": "export TOKEN=\\"' + BODY[:20] + '\\""}',
 ])
@@ -168,6 +174,10 @@ def test_user_config_replacing_extra_patterns_keeps_keyword_redaction():
     'grep -v "PASSWORD\\|SECRET\\|API_KEY" .env',
     "password=$DB_PASSWORD",
     "/home/jdoe-xyz/code",
+    'echo "done" | tee log.txt',
+    "echo ok | sudo tee /etc/x",
+    "export PASSES=3",
+    'PGPASSWORD="$DB_PASSWORD" psql',
     "SESSIONWIKI_HOME=$PWD .venv/bin/python -m sessionwiki",
     "cd $PWD && pwd   something_long",
 ])

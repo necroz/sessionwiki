@@ -110,6 +110,20 @@ def test_keyword_with_value_on_next_line_is_redacted(default_redactor):
     assert "next: 1" in out
 
 
+def test_a_joined_match_does_not_hide_the_next_secret(default_redactor):
+    """The email pattern used to join `host.example.com` with `sshpass`
+    on the next line and replace both, so the second password lost the
+    word its pattern needs."""
+    first, second = fake(12), fake(12)
+    text = (
+        f"sshpass -p '{first}' ssh ops@host.example.com\n"
+        f"sshpass -p '{second}!' ssh ops@gpu-105"
+    )
+    out = default_redactor(text)
+    assert first not in out
+    assert second not in out
+
+
 # ─── no over-redaction across ordinary line breaks ────────────────────────
 
 
