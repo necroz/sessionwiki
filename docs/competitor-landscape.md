@@ -28,15 +28,16 @@ you can open, inspect and edit.
 | **Output a human can read (Markdown pages)** | Yes — `wiki/` pages + static site | Yes — `MEMORY.md` + topic files | — | Yes — Markdown/local files | Yes — git-backed Markdown wiki | Yes — local files + viewer | — | — | — |
 | **Needs an LLM** | No — `extractive` is the default and writes useful pages with no model; `dummy` gives metadata-only stubs; `agent` adds no API cost; `ollama`/`openai` optional | Yes — the agent writes the files | Yes — a model summarizes every session | — | No — zero-LLM default | No — keyless BM25 default | — | No — no LLM | — |
 | **Runs locally** | Yes — local-first, no cloud | Yes — files under `~/.claude/projects/<project>/memory/` | — | Yes — local Markdown; Basic Memory Cloud for sync | Yes — git-backed | Yes — local files | Yes — verbatim local storage | — | — |
-| **MCP server** | Yes — 15 tools | — | — | Yes — progressive tool discovery | Yes — MCP for access | Yes — exposes its knowledge over MCP | Yes — 47 tools (claimed) | — | — |
+| **MCP server** | Yes — 11 tools | — | — | Yes — progressive tool discovery | Yes — MCP for access | Yes — exposes its knowledge over MCP | Yes — 47 tools (claimed) | — | — |
 | **Agents supported** | 10 adapters: 4 built in + 6 opt-in | Claude Code | Claude Code | Claude Code (plugin) | Cross-agent handoff | — | — | 44 harnesses (claimed) | 30+ providers (claimed) |
 
 `—` means the competitive map does not state the fact; it is not a "no".
 
-`sessionwiki` numbers are the verified state after 2.1.0: 10 adapters, 15 MCP
-tools (the map's v2.0.5 snapshot recorded 12), five synthesis backends, one
-runtime dependency (`markdown>=3.9`). Retrieval is lexical — BM25-style IDF,
-recency and one graph hop — with no embeddings and no FTS index.
+`sessionwiki` numbers are the verified state after 3.0.0: 10 adapters, 11 MCP
+tools (15 before the v3.0.0 surface cut; the map's v2.0.5 snapshot recorded 12),
+five synthesis backends, one runtime dependency (`markdown>=3.9`). Retrieval is
+lexical — BM25-style IDF, recency and one graph hop — with no embeddings and no
+FTS index.
 
 Stars measure attention, not quality. GitHub API, 2026-11-06: claude-mem
 113.8k, MemPalace 60.4k, agentmemory 30.2k, ai-memory 15.3k, Basic Memory

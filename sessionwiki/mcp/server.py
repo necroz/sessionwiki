@@ -514,7 +514,7 @@ _TOOL_TITLES = {
     "wiki_search": "Search exact text",
     "wiki_list_sources": "List session transcripts",
     "wiki_read_page": "Read a page",
-    "wiki_lint": "Check wiki links",
+    "wiki_lint": "Lint the wiki",
     "wiki_sync": "Import new sessions",
     "wiki_export": "Export the whole wiki",
     "wiki_dashboard": "Wiki overview",
@@ -848,7 +848,7 @@ def rank_query(
         weight *= _LIFECYCLE_WEIGHT.get(str(meta.get("lifecycle", "") or "").lower(), 1.0)
         # Snippets show the body, not the YAML: a lesson's rule must fit
         # the window (raw transcripts already snippet from the body).
-        snippet_src = body.lstrip() if content.lstrip("\ufeff").startswith("---") else body
+        snippet_src = _snippet_body(content, body)
         _collect(content, page, weight, snippet_src, meta)
         links[page] = _page_links(content)
 
@@ -877,7 +877,7 @@ def rank_query(
             if not _passes_filters(meta, filters, content):
                 continue
             target = page_by_slug.get(str(meta.get("slug", "") or ""), raw)
-            snippet_src = body.lstrip() if content.lstrip("\ufeff").startswith("---") else body
+            snippet_src = _snippet_body(content, body)
             _collect(content, target, 1.0, snippet_src, meta)
 
     # Rare words decide the match: "палец" in 3 transcripts outweighs
@@ -1098,7 +1098,17 @@ def _hit_status(rel_path: str) -> str:
     if not head.lstrip("\ufeff").startswith("---"):
         return "status: no frontmatter"
     meta, _ = parse_frontmatter(head)
+    if not meta:
+        # Closing fence beyond the 8 KiB head window: the tolerant
+        # delegate still reads the status keys from the raw block.
+        meta = {k: _frontmatter_value(head, k) for k in _STATUS_KEYS}
     return "status: " + " · ".join(_wiki_status_parts(meta, head))
+
+
+_STATUS_KEYS = (
+    "type", "lifecycle", "confidence", "last_updated", "date",
+    "sources", "confidence_measured", "confidence_pages",
+)
 
 
 def _wiki_status_parts(meta: dict[str, Any], head: str = "") -> list[str]:
@@ -1202,6 +1212,12 @@ def _body(content: str) -> str:
     """Content without the leading frontmatter block."""
     fm, body = parse_frontmatter_or_none(content)
     return content if fm is None else body.lstrip()
+
+
+def _snippet_body(content: str, body: str) -> str:
+    """Snippet source: the parsed body without leading whitespace when a
+    frontmatter fence is present, else the content as-is."""
+    return body.lstrip() if content.lstrip("\ufeff").startswith("---") else body
 
 
 
@@ -1354,8 +1370,13 @@ def _source_meta(p: Path) -> dict[str, str]:
     Reads only the head of the file. raw/sessions/ is flat, so the
     frontmatter is the only place that names the project.
     """
-    meta, _ = parse_frontmatter(_read_head(p))
+    head = _read_head(p)
+    meta, _ = parse_frontmatter(head)
     if not meta:
+        if head.lstrip("\ufeff").startswith("---"):
+            # Unterminated head read: the tolerant delegate still extracts
+            # project/date from the raw block.
+            return {k: _frontmatter_value(head, k) for k in ("project", "date")}
         return {}
     return {key: str(meta.get(key, "") or "") for key in ("project", "date")}
 
@@ -1608,7 +1629,7 @@ _ALLOWED_UPDATE_FIELDS = ("title", "type", "tags", "lifecycle", "confidence")
 
 
 def _page_tags(text: str) -> list[str]:
-    """Current tags, including the block-list form ``parse_frontmatter`` skips."""
+    """Current tags, including the zero-indent block-list form the canonical parser skips."""
     meta, _ = parse_frontmatter(text)
     raw = meta.get("tags")
     if isinstance(raw, list):

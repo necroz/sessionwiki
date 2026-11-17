@@ -62,7 +62,10 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
         key, raw = mm.group(1), mm.group(2).strip()
         if not raw:
             # Block list: subsequent `- item` lines belong to this key.
-            # Items parse like inline-list items (no bool coercion).
+            # Items parse like inline-list items (no bool coercion). A
+            # wikilink-shaped item (`- [[a]]`) nests via _parse_scalar's
+            # inline-list recursion — a pre-existing quirk; counts stay
+            # correct.
             items = []
             j = i + 1
             while j < len(lines):
