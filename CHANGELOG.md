@@ -10,8 +10,23 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+## [3.0.0] — 2026-11-17
+
+Theme: a smaller MCP surface — 11 tools instead of 15, one lint engine, one frontmatter parser.
+
+### Removed
+
+- **Four consumer-less MCP listing tools** — `wiki_confidence`, `wiki_lifecycle`, `wiki_entity_search` and `wiki_category_browse` had no consumers beyond their own tests and duplicated filters `wiki_query` already has (`lifecycle`, `tag`, `type`). Their ~1000 tokens of tool definitions no longer ride along in every session. Confidence distribution stays in `wiki_dashboard`; archived pages are listable via `wiki_query` with `lifecycle='archived'`.
+
+### Changed
+
+- **`wiki_lint` runs the canonical lint engine** — the same 15 structural rules as the CLI `sessionwiki lint` (no LLM rules), instead of a stale inline orphan/broken-link pass. The report is now CLI-aligned: `{total_pages, summary, issue_count, issues, truncated}` with the issues list capped at 200; the old `orphans/orphan_count/broken_links/broken_link_count` keys are gone. False positives are gone too: `[[Page#section]]` anchors resolve, system pages (`hot`, `_context`, …) are not orphans, and links to `wiki/archive/` pages resolve.
+- **The MCP server parses frontmatter via the canonical parser** — `wiki_query` ranking, filters and status lines read one parsed meta dict per page instead of per-key regexes; `_source_meta` and the body/snippet helpers share the same parser. Query tag matching keeps agent tags (`claude-code`) — the shared tag parser's noise filter is opt-out for query. The canonical parser itself now reads block-list values (`tags:\n  - a`), as its docstring always promised.
+
 ### Fixed
 
+- **`wiki_query(tag=…)` sees block-list tags** — pages whose `tags` frontmatter is a YAML block list were invisible to the tag filter; the write tools already handled that shape.
+- **BOM-prefixed pages are visible to query filters and status lines** — a Notepad-authored page parsed as zero frontmatter and failed every filter (the #423 bug class, in the MCP layer). Raw transcripts with a BOM now merge into their wiki page by `slug` instead of standing alone.
 - **`SSHPASS=` and `echo … | sudo -S` passwords are redacted** — after `sync --force` with the 2.3.1 redactor, the same SSH password was still in clear text in 36 places as `export SSHPASS='…'` (for `sshpass -e`) and in 9 places as `echo "…" | sudo -S`. Two built-in patterns cover an upper-case name ending in `PASS` and a password piped into `sudo -S`; there are 31 built-in patterns now.
 - **One redaction no longer hides the next secret** — each pattern ran on the output of the one before, so a wide match could remove the context another pattern needs: the email pattern joined `host.example.com` with `sshpass` on the next line and replaced both, and the password after that `sshpass -p` stayed in clear text. The redactor now collects every match on the same text and replaces them in one pass.
 
