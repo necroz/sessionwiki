@@ -13,6 +13,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 ### Fixed
 
 - **`SSHPASS=` and `echo … | sudo -S` passwords are redacted** — after `sync --force` with the 2.3.1 redactor, the same SSH password was still in clear text in 36 places as `export SSHPASS='…'` (for `sshpass -e`) and in 9 places as `echo "…" | sudo -S`. Two built-in patterns cover an upper-case name ending in `PASS` and a password piped into `sudo -S`; there are 31 built-in patterns now.
+- **One redaction no longer hides the next secret** — each pattern ran on the output of the one before, so a wide match could remove the context another pattern needs: the email pattern joined `host.example.com` with `sshpass` on the next line and replaced both, and the password after that `sshpass -p` stayed in clear text. The redactor now collects every match on the same text and replaces them in one pass.
 
 ## [2.3.1] — 2026-11-17
 
