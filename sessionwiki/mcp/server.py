@@ -42,6 +42,7 @@ from sessionwiki._frontmatter import (
 )
 from sessionwiki._system_pages import is_system_file
 from sessionwiki.lifecycle import LifecycleState
+from sessionwiki.lint import WIKILINK_RE
 from sessionwiki.lock import atomic_write_text
 from sessionwiki.tag_utils import parse_tags_field
 
@@ -962,7 +963,6 @@ _GRAPH_MAX_NAME_LEN = 60
 _CONNECTIONS_RE = re.compile(r"^## Connections[ \t]*\n(.*?)(?=^## |\Z)", re.MULTILINE | re.DOTALL)
 # "- Keycloak — why", "- [[Keycloak]]: why", "- Keycloak"
 _CONNECTION_NAME_RE = re.compile(r"^[-*]\s+(.+?)(?:\s+[—–-]\s|:\s|\s*$)", re.MULTILINE)
-_LINK_RE = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
 
 
 def _page_links(content: str) -> dict[str, str]:
@@ -971,7 +971,7 @@ def _page_links(content: str) -> dict[str, str]:
     # regex below would miss "## Connections\r\n" and the graph hop
     # would find no neighbours.
     content = content.replace("\r\n", "\n")
-    names = _LINK_RE.findall(content)
+    names = WIKILINK_RE.findall(content)
     section = _CONNECTIONS_RE.search(content)
     if section:
         names += _CONNECTION_NAME_RE.findall(section.group(1))

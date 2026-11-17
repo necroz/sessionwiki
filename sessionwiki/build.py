@@ -41,6 +41,7 @@ import markdown
 from markdown.preprocessors import Preprocessor
 
 from sessionwiki import REPO_ROOT
+from sessionwiki.lint import WIKILINK_RE
 from sessionwiki.changelog_timeline import (
     extract_price_points,
     find_recently_updated,
@@ -2503,7 +2504,6 @@ def build_site(
     n_sessions = 0
     n_siblings = 0
     sibling_failures: list[tuple[str, BaseException]] = []
-    _wikilink_re = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
     for path, meta, body in sources:
         project = str(meta.get("project") or path.parent.name)
         render_session(path, meta, body, out_dir, project)
@@ -2518,7 +2518,7 @@ def build_site(
             continue
         try:
             body_stripped = strip_leading_h1(body)
-            wikilinks_out = _wikilink_re.findall(body_stripped)
+            wikilinks_out = WIKILINK_RE.findall(body_stripped)
             write_page_txt(html_path, body_stripped)
             n_siblings += 1
             meta_copy = dict(meta)
