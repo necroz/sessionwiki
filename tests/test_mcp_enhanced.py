@@ -315,5 +315,5 @@ def test_export_description_covers_every_format():
 def test_lint_description_claims_only_what_it_checks():
     (lint,) = [t for t in TOOLS if t["name"] == "wiki_lint"]
     assert "orphan" in lint["description"]
+    assert "no LLM" in lint["description"]
     assert "contradiction" not in lint["description"].lower()
-    assert "stale" not in lint["description"].lower()

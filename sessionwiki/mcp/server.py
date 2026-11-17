@@ -254,14 +254,16 @@ TOOLS = [
     {
         "name": "wiki_lint",
         "description": (
-            "Check the link structure of wiki/: find orphan pages (no inbound "
-            "[[wikilinks]]; index, overview and log are exempt) and broken "
-            "[[wikilinks]] that point to no page. Returns JSON {total_pages, "
-            "orphan_count, orphans, broken_link_count, broken_links}; the "
-            "counts cover every page, while each list stops at 50 items. "
-            "Read-only: it reports and changes nothing. Use it after wiki_sync "
-            "or before publishing; use wiki_lifecycle or wiki_confidence to "
-            "review page quality."
+            "Run the wiki's structural lint rules — the same engine as the "
+            "CLI `sessionwiki lint`: orphan pages, broken [[wikilinks]], "
+            "frontmatter completeness and validity, content freshness, index "
+            "sync, duplicates and every other registered rule that needs no "
+            "LLM. Returns JSON {total_pages, summary: {severity: count}, "
+            "issue_count, issues: [{rule, severity, page, message}], "
+            "truncated}; the issues list stops at 200 items, summary and "
+            "issue_count cover all. Read-only: it reports and changes "
+            "nothing. Use wiki_dashboard for a quick health overview; "
+            "wiki_query to open the pages it names."
         ),
         "inputSchema": {
             "type": "object",
@@ -1503,55 +1505,25 @@ def tool_wiki_read_page(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def tool_wiki_lint(args: dict[str, Any]) -> dict[str, Any]:
-    """Run a basic lint pass over wiki/ and return a JSON report.
+    """Run the canonical structural lint rules over wiki/ (no LLM rules).
 
-    This is the programmatic equivalent of the /wiki-lint slash command — but
-    without any LLM synthesis. It just walks the files and reports structural
-    issues.
+    Same engine as the CLI ``sessionwiki lint``; the report is CLI-aligned
+    with a 200-item cap on the issues list.
     """
+    from sessionwiki.lint import load_pages, run_all, summarize
+
     wiki = REPO_ROOT / "wiki"
     if not wiki.exists():
         return _err("wiki/ does not exist")
 
-    # 1. Collect all pages and their slugs
-    pages: dict[str, Path] = {}
-    for p in wiki.rglob("*.md"):
-        slug = p.stem
-        pages[slug] = p
-
-    # 2. Collect all wikilinks
-    wikilink_re = re.compile(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]")
-    out_links: dict[str, set[str]] = {}
-    all_links: set[str] = set()
-    for slug, path in pages.items():
-        try:
-            text = path.read_text(encoding="utf-8")
-        except OSError:
-            continue
-        links = set(wikilink_re.findall(text))
-        out_links[slug] = links
-        all_links.update(links)
-
-    # 3. Compute in-degree
-    in_deg: dict[str, int] = {slug: 0 for slug in pages}
-    for slug, links in out_links.items():
-        for target in links:
-            if target in in_deg:
-                in_deg[target] += 1
-
-    orphans = [slug for slug, d in in_deg.items() if d == 0 and slug not in ("index", "overview", "log")]
-    broken_links: list[dict[str, str]] = []
-    for slug, links in out_links.items():
-        for target in links:
-            if target not in pages:
-                broken_links.append({"page": slug, "broken_link": target})
-
+    pages = load_pages(wiki)
+    issues = run_all(pages, include_llm=False)
     report = {
         "total_pages": len(pages),
-        "orphans": orphans[:50],
-        "orphan_count": len(orphans),
-        "broken_links": broken_links[:50],
-        "broken_link_count": len(broken_links),
+        "summary": summarize(issues),
+        "issue_count": len(issues),
+        "issues": issues[:200],
+        "truncated": len(issues) > 200,
     }
     return _ok(json.dumps(report, indent=2))
 
