@@ -384,9 +384,15 @@ sessionwiki doctor 2.3.1
   [ok  ] zcode_db     /home/me/.zcode/cli/db/db.sqlite
   [ok  ] zcode_export 842 session file(s) in /home/me/.llmwiki/zcode
   [warn] synthesis    9 raw session(s) not synthesized, 0 page(s) waiting for the agent
+  [ok  ] llm          extractive (no LLM) — to use your own LLM, set synthesis.backend, base_url and model in config.local.json (template: examples/config.local.example.json)
 ```
 
-The `synthesis` check is informational: it never changes the exit code.
+The `synthesis` and `llm` checks are informational: they never change the
+exit code. `llm` names the backend that writes the wiki pages; with an
+LLM backend it shows the model and `base_url`, and it warns while the
+template's placeholder model name `your-model-name` is still in place.
+It does not touch the network — `sessionwiki synthesize --check` tests
+the connection.
 
 ---
 

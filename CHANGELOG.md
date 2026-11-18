@@ -10,8 +10,14 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
+### Added
+
+- **A template for your own LLM** — `examples/config.local.example.json` holds a filled-in `synthesis` block (`openai` backend, `base_url`, `model`, `api_key`) to copy to the git-ignored `config.local.json`. Until now a new user found the place for their LLM only in a README snippet.
+- **`sessionwiki doctor` shows which LLM writes the pages** — a new `llm` line names the backend, model and `base_url`, points to the template while the default `extractive` backend is active, and warns when the template's placeholder model name is still in place. `setup.sh` / `setup.bat` run doctor, so a fresh install shows the line too. No network probe; `synthesize --check` tests the connection.
+
 ### Fixed
 
+- **A LAN address is gone from the public task journal** — `docs/tasks/RUN_JOURNAL.md` named the maintainer's local LLM server, and the docs site published it. The entry now says "on the local network".
 - **`SSHPASS=` and `echo … | sudo -S` passwords are redacted** — after `sync --force` with the 2.3.1 redactor, the same SSH password was still in clear text in 36 places as `export SSHPASS='…'` (for `sshpass -e`) and in 9 places as `echo "…" | sudo -S`. Two built-in patterns cover an upper-case name ending in `PASS` and a password piped into `sudo -S`; there are 31 built-in patterns now.
 - **One redaction no longer hides the next secret** — each pattern ran on the output of the one before, so a wide match could remove the context another pattern needs: the email pattern joined `host.example.com` with `sshpass` on the next line and replaced both, and the password after that `sshpass -p` stayed in clear text. The redactor now collects every match on the same text and replaces them in one pass.
 
