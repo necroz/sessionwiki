@@ -6,8 +6,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/necroz/sessionwiki/blob/master/LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
-[![Version](https://img.shields.io/badge/version-v2.3.1-10B981.svg)](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
-[![Tests](https://img.shields.io/badge/tests-3244%20passing-10B981.svg)](https://github.com/necroz/sessionwiki/tree/master/tests)
+[![Version](https://img.shields.io/badge/version-v3.0.0-10B981.svg)](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
+[![Tests](https://img.shields.io/badge/tests-3243%20passing-10B981.svg)](https://github.com/necroz/sessionwiki/tree/master/tests)
 [![CI](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/ci.yml)
 [![Link check](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/link-check.yml)
 [![Wiki checks](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml/badge.svg?branch=master)](https://github.com/necroz/sessionwiki/actions/workflows/wiki-checks.yml)
@@ -44,7 +44,7 @@ Already using Claude Code's built-in memory, claude-mem or a session search tool
 | **Synthesis backends** | **extractive** (default, no model), Ollama, **any OpenAI-compatible server** (vLLM, SGLang, LM Studio, LiteLLM, hosted), agent-delegate, offline dummy |
 | **Signal over noise** | Low-signal session coalescing, wikilink cleanup, concurrency control, cost `--estimate` |
 | **Static site** | 365-day heatmap, token and cache stats, filterable sessions table, session pages with highlighted code, project pages with topics, session ↔ project graph, ⌘K search, dark mode |
-| **MCP server** | 15 tools: query, search, read, list sources, lint, sync, exports, dashboard, write/edit/archive pages (with a confirm step)… |
+| **MCP server** | 6 read tools by default (query, search, read, list sources, lint, dashboard); `SESSIONWIKI_MCP_TOOLS=full` adds sync, exports and write/edit/archive pages (with a confirm step) — 11 in total |
 | **AI exports** | `llms.txt`, `llms-full.txt`, JSON-LD graph, per-page `.txt` / `.json`, sitemap, RSS |
 | **Safe by default** | Redaction of usernames and 31 secret patterns, read-only database exports, OS file locks and atomic state writes, `doctor` and `audit` |
 
@@ -101,7 +101,16 @@ A step-by-step walkthrough with screenshots lives in the [setup guide](https://g
 
 ## Connect your agents
 
-**Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot** — read straight from their session folders on `sessionwiki sync`. To sync after every Claude Code reply, add a `Stop` hook to `~/.claude/settings.json`:
+**Claude Code** — one command sets up the whole pipeline:
+
+```bash
+sessionwiki claude install --dry-run   # show what will be written
+sessionwiki claude install             # Stop + SessionStart hooks, nightly sync → synthesize → build
+```
+
+It adds a `Stop` hook (import new sessions in the background after every reply) and a `SessionStart` hook (recent sessions of the project into context) to `~/.claude/settings.json`, writes a nightly job for systemd, launchd or Task Scheduler that runs `sessionwiki claude nightly`, and prints the `claude mcp add` command for the MCP server. Hooks and jobs that already exist — also hand-written ones — are left alone unless you pass `--force`. Without the nightly job only `raw/` grows: nothing else turns transcripts into wiki pages.
+
+**Codex CLI, Cursor, Gemini CLI, Copilot** — read straight from their session folders on `sessionwiki sync`. The `Stop` hook that `claude install` writes looks like this, if you prefer to add it by hand:
 
 ```json
 {
@@ -177,7 +186,7 @@ Backends: `extractive` (the default — no model and no network: a useful page f
 
 ## Ask your wiki from your agents (MCP)
 
-**Claude Code plugin** — the MCP server, a skill that tells the agent when to search the wiki, and a `SessionStart` hook that puts the project's recent sessions into context. It asks for your sessionwiki folder on install:
+**Claude Code plugin** — the MCP server, a skill that tells the agent when to search the wiki, a `SessionStart` hook that puts the project's recent sessions into context, and a `Stop` hook that imports new Claude Code sessions in the background after every reply. It asks for your sessionwiki folder on install. For wiki pages from those sessions, add the nightly synthesize job without a second set of hooks: `sessionwiki claude install --no-hooks`.
 
 ```
 /plugin marketplace add necroz/sessionwiki
@@ -200,7 +209,9 @@ Backends: `extractive` (the default — no model and no network: a useful page f
 
 From a source checkout, use `"command": "/path/to/sessionwiki/.venv/bin/sessionwiki"` with `"args": ["mcp"]`; the checkout is the data root, so no `env` is needed.
 
-Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query` (ranked search over wiki pages in any language, falling back to raw transcripts), `wiki_search` (exact text, optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and more — 15 in total, stdio transport, no SDK dependency, path-traversal guarded.
+Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query` (ranked search over wiki pages in any language, falling back to raw transcripts), `wiki_search` (exact text, optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and the guarded write tools — 11 in total, stdio transport, no SDK dependency, path-traversal guarded.
+
+By default the server lists only the six read-only tools, so the rest do not cost tokens in every session. Every install path — the plugin, `uvx`, a source checkout — gets the same six. Set `"SESSIONWIKI_MCP_TOOLS": "full"` in `env` to add `wiki_sync`, `wiki_export` and the three write tools; new sessions reach the wiki through hooks and the nightly job, not through `wiki_sync`.
 
 <a href="https://glama.ai/mcp/servers/necroz/sessionwiki">
   <img src="https://glama.ai/mcp/servers/necroz/sessionwiki/badge"
@@ -227,6 +238,7 @@ sessionwiki doctor                  # check Python, deps, config, agent paths
 sessionwiki audit                   # scan raw/ wiki/ site/ for usernames and secrets
 sessionwiki zcode                   # export · autosync · install
 sessionwiki opencode                # export · autosync · install
+sessionwiki claude                  # install (hooks + nightly job) · nightly
 sessionwiki mcp                     # MCP server on stdio
 sessionwiki recall                  # a project's recent sessions, for a SessionStart hook
 sessionwiki version

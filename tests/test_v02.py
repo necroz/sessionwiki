@@ -159,7 +159,7 @@ def test_mcp_tool_wiki_lint():
     if result["isError"]:
         pytest.skip("wiki/ not present")
     data = json.loads(result["content"][0]["text"])
-    for key in ("total_pages", "orphans", "orphan_count", "broken_links", "broken_link_count"):
+    for key in ("total_pages", "summary", "issue_count", "issues", "truncated"):
         assert key in data
 
 

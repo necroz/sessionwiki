@@ -111,7 +111,7 @@ sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=30)
 У самого llm-wiki watch-режим удалён в v1.2.0, авторы рекомендуют внешний планировщик. Три уровня дополняют друг друга.
 
 1. **Stop-hook ZCode** — обновление после каждой сессии. Установка: `sessionwiki zcode install --dry-run`, затем `sessionwiki zcode install`. Установщик идемпотентно правит `~/.zcode/cli/config.json` → `hooks.events.Stop`, включает `hooks.enabled`, сохраняет существующие хуки. На POSIX команда отцепляется через `nohup … &`; на Windows используется `start "" /B`. Хук вызывает `autosync --lock-timeout 0`: если предыдущий цикл ещё идёт, новый сразу выходит, а не ждёт блокировку до 600 с. Ночной таймер запускается без этого флага и ждёт.
-2. **systemd --user timer / launchd / Task Scheduler** — `sessionwiki zcode install` пишет unit-файлы или plist, либо печатает команду `schtasks`. Ночной прогон вызывает `sessionwiki zcode autosync --build`; это одна переносимая Python-команда, без bash и `flock`.
+2. **systemd --user timer / launchd / Task Scheduler** — `sessionwiki zcode install` пишет unit-файлы или plist, либо печатает команду `schtasks`. Если ночью компьютер выключен, пропущенный запуск догоняется: у systemd-таймера стоит `Persistent=true`, у launchd-агента — `RunAtLoad`, а для Windows установщик печатает вторую команду `Set-ScheduledTask … -StartWhenAvailable`. Ночной прогон вызывает `sessionwiki zcode autosync --build`; это одна переносимая Python-команда, без bash и `flock`.
 3. **Автоматизация ZCode по расписанию** — нативная, но запускается как сессия агента, то есть тратит токены.
 
 Ручной прогон:

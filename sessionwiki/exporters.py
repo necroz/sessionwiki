@@ -538,16 +538,18 @@ exposes the full entity/concept/source relation graph. The per-page
 
 ## Querying via MCP
 
-If you have MCP access, the sessionwiki MCP server exposes 7 tools
-(v0.4 adds `wiki_export`):
+If you have MCP access, the sessionwiki MCP server lists six read-only
+tools by default:
 
-- `wiki_query(question, max_pages)` — keyword search + page content
-- `wiki_search(term, include_raw)` — raw grep
+- `wiki_query(question, max_pages)` — ranked search + page content
+- `wiki_search(term, include_raw)` — exact text, grouped by file
 - `wiki_list_sources(project)` — list sources with metadata
 - `wiki_read_page(path)` — read one page
-- `wiki_lint()` — orphans + broken wikilinks report
-- `wiki_sync(dry_run)` — trigger the converter
-- `wiki_export(format)` — export the whole wiki in a named format
+- `wiki_lint()` — the structural rules of `sessionwiki lint`
+- `wiki_dashboard()` — page counts, lifecycle and confidence
+
+With `SESSIONWIKI_MCP_TOOLS=full` it also lists `wiki_sync`,
+`wiki_export` and the guarded page write tools.
 
 ## Projects
 

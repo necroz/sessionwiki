@@ -1028,6 +1028,41 @@ def cmd_opencode_autosync(args: argparse.Namespace) -> int:
     )
 
 
+def cmd_claude_install(args: argparse.Namespace) -> int:
+    """Install the Claude Code hooks and the nightly synthesize job."""
+    from sessionwiki.claude_install import install_all
+
+    try:
+        messages = install_all(
+            scheduler=args.scheduler,
+            python_exe=getattr(args, "python_exe", None),
+            repo_root=getattr(args, "repo_root", None) or REPO_ROOT,
+            at=args.at,
+            build=not bool(getattr(args, "no_build", False)),
+            hooks=not bool(getattr(args, "no_hooks", False)),
+            dry_run=bool(getattr(args, "dry_run", False)),
+            force=bool(getattr(args, "force", False)),
+        )
+    except (OSError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    for message in messages:
+        print(message)
+    return 0
+
+
+def cmd_claude_nightly(args: argparse.Namespace) -> int:
+    """Sync Claude Code sessions, synthesize new raw sessions, build."""
+    from sessionwiki import claude_install
+
+    return claude_install.run_nightly(build=not bool(getattr(args, "no_build", False)))
+
+
+def cmd_claude(args: argparse.Namespace) -> int:
+    print("usage: sessionwiki claude {install,nightly} [options]", file=sys.stderr)
+    return 2
+
+
 def cmd_opencode_install(args: argparse.Namespace) -> int:
     """Install the OpenCode autosync plugin."""
     if getattr(args, "opencode_command", None) != "install":
@@ -2042,6 +2077,49 @@ def build_parser() -> argparse.ArgumentParser:
         "--force", action="store_true", help="replace an existing plugin"
     )
     opencode_install.set_defaults(func=cmd_opencode_install)
+
+    # claude (Claude Code hooks + nightly synthesis)
+    claude = sub.add_parser(
+        "claude", help="Claude Code hooks and the nightly synthesize job"
+    )
+    claude.set_defaults(func=cmd_claude)
+    claude_sub = claude.add_subparsers(dest="claude_command", metavar="COMMAND")
+    claude_install = claude_sub.add_parser(
+        "install",
+        help="Add the Stop (sync) and SessionStart (recall) hooks and a nightly "
+             "sync → synthesize → build job",
+    )
+    claude_install.add_argument(
+        "--scheduler",
+        choices=["auto", "systemd", "launchd", "windows", "none"],
+        default="auto",
+        help="Native scheduler for the nightly job (default: auto-detect)",
+    )
+    claude_install.add_argument("--at", default="04:15", help="nightly start time HH:MM")
+    claude_install.add_argument(
+        "--python", dest="python_exe", default=None,
+        help="Python interpreter for hooks and the job (default: current)",
+    )
+    claude_install.add_argument(
+        "--repo-root", type=Path, default=None,
+        help="data root with raw/ and wiki/ (default: the current data root)",
+    )
+    claude_install.add_argument("--no-build", action="store_true",
+                                help="nightly job skips the site build")
+    claude_install.add_argument("--no-hooks", action="store_true",
+                                help="install only the nightly job")
+    claude_install.add_argument("--dry-run", action="store_true", help="print changes only")
+    claude_install.add_argument(
+        "--force", action="store_true",
+        help="replace existing sessionwiki hooks and nightly job files",
+    )
+    claude_install.set_defaults(func=cmd_claude_install)
+    claude_nightly = claude_sub.add_parser(
+        "nightly",
+        help="Sync Claude Code sessions, synthesize new raw sessions, build the site",
+    )
+    claude_nightly.add_argument("--no-build", action="store_true", help="skip the site build")
+    claude_nightly.set_defaults(func=cmd_claude_nightly)
 
     # graph
     graph = sub.add_parser("graph", help="Build the knowledge graph (graph/graph.json + graph.html)")

@@ -91,7 +91,7 @@ def test_search_response_includes_skipped_oversize_counter(tmp_path: Path):
     assert payload["skipped_oversize_files"] >= 1, (
         f"expected ≥1 oversize file skipped, got {payload}"
     )
-    assert any("findme" in m.get("text", "") for m in payload["matches"])
+    assert any("findme" in line[1] for f in payload["files"] for line in f["lines"])
 
 
 def test_search_normal_corpus_no_skips(tmp_path: Path):

@@ -261,3 +261,124 @@ def test_lifecycle_filter_ignores_case_and_spaces(tmp_path: Path):
             "widget", include_raw=False, filters={"lifecycle": " Reviewed , VERIFIED "},
         )
     assert {Path(p).stem for p in _paths(result)} == {"reviewed-page"}
+
+
+# ─── canonical-parser regressions (MCP surface refactor, Task 3) ─────
+
+
+def test_query_tag_filter_matches_block_list_tags(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "BlockTags.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: BlockTags\ntype: concept\ntags:\n  - blocktag\n---\n\nBlock list tags page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("block", include_raw=False, filters={"tag": "blocktag"})
+    assert "wiki/concepts/BlockTags.md" in _paths(result)
+
+
+def test_query_filter_sees_bom_prefixed_page(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "BomPage.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("\ufeff---\ntitle: BomPage\ntype: concept\nproject: bomproj\n---\n\nBom page body.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("bom", include_raw=False, filters={"project": "bomproj"})
+    assert "wiki/concepts/BomPage.md" in _paths(result)
+
+
+def test_query_tag_filter_boolish_tags_stay_strings(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "BoolTags.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: BoolTags\ntype: concept\ntags: [no, yes]\n---\n\nBool tags body.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("bool", include_raw=False, filters={"tag": "no"})
+    assert "wiki/concepts/BoolTags.md" in _paths(result)
+
+
+def test_raw_fallback_merges_bom_transcript_by_slug(tmp_path: Path):
+    w = tmp_path / "wiki" / "sources" / "BomRaw.md"
+    w.parent.mkdir(parents=True, exist_ok=True)
+    w.write_text("---\ntitle: BomRaw\ntype: source\nslug: bomraw\n---\n\nCompiled page.\n")
+    r = tmp_path / "raw" / "sessions" / "bom.md"
+    r.parent.mkdir(parents=True, exist_ok=True)
+    r.write_text("\ufeff---\nslug: bomraw\n---\n\nuniquequerytoken in the transcript.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("uniquequerytoken")  # no wiki hit -> raw fallback
+    assert "wiki/sources/BomRaw.md" in _paths(result)
+    assert "raw/sessions/bom.md" not in _paths(result)
+
+
+# ─── scalar bool-looking values keep their YAML spelling (review fix) ─
+
+
+def test_query_tag_filter_matches_scalar_boolish_tag(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "NoTag.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: NoTag\ntype: concept\ntags: no\n---\n\nNorwegian language page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("norwegian", include_raw=False, filters={"tag": "no"})
+    assert "wiki/concepts/NoTag.md" in _paths(result)
+
+
+def test_query_project_filter_matches_boolish_scalar_no(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "NoProject.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: NoProject\ntype: concept\nproject: no\n---\n\nBoolish project page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("boolish", include_raw=False, filters={"project": "no"})
+    assert "wiki/concepts/NoProject.md" in _paths(result)
+
+
+def test_query_project_filter_true_keeps_yaml_spelling(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "TrueProject.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: TrueProject\ntype: concept\nproject: true\n---\n\nTrue project page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("true project", include_raw=False, filters={"project": "true"})
+    assert "wiki/concepts/TrueProject.md" in _paths(result)
+
+
+def test_status_line_keeps_boolish_scalar_spelling(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "YesConf.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: YesConf\ntype: concept\nconfidence: yes\n---\n\nStatus spelling page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = tool_wiki_query({"question": "status spelling"})
+    assert "confidence=yes" in result["content"][0]["text"]
+
+
+# ─── numeric-looking scalars keep their YAML spelling (review fix) ───
+
+
+def test_query_project_filter_matches_zero_padded_number(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "Bond.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: Bond\ntype: concept\nproject: 007\n---\n\nAgent page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("agent", include_raw=False, filters={"project": "007"})
+    assert "wiki/concepts/Bond.md" in _paths(result)
+
+
+def test_status_line_keeps_float_spelling(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "Conf.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: Conf\ntype: concept\nconfidence: 0.70\n---\n\nFloat spelling page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = tool_wiki_query({"question": "float spelling"})
+    assert "confidence=0.70" in result["content"][0]["text"]
+
+
+def test_query_tag_filter_matches_zero_indent_block_list(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "FlatTags.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: FlatTags\ntype: concept\ntags:\n- flattag\n---\n\nFlat list page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("flat", include_raw=False, filters={"tag": "flattag"})
+    assert "wiki/concepts/FlatTags.md" in _paths(result)
+
+
+def test_query_type_survives_dashes_in_title(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "Dashes.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: before---after\ntype: concept\n---\n\nDash title page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("dash", include_raw=False, filters={"type": "concept"})
+    assert "wiki/concepts/Dashes.md" in _paths(result)

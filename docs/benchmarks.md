@@ -98,6 +98,13 @@ The command palette and search are vanilla JS (~4 KB minified).
 
 ## Retrieval recall (wiki_query)
 
+> **v3.0.0 note (2026-11-17):** the parser consolidation (canonical
+> frontmatter parser in the MCP hot loop) is gated on the synthetic
+> recall suites (`tests/test_mcp_recall.py`, `tests/test_eval_recall.py`),
+> both green. A live `scripts/eval_recall.py` rerun on the real query set
+> is pending — the maintainer runs it post-commit on another machine;
+> record the numbers here then.
+
 Method: 24 hand-made queries over a real 900-page wiki, 8 per kind. `exact`
 uses words from the page; `paraphrase` uses other words for the same meaning;
 `relational` puts the answer on a page linked to the match. recall@k is the

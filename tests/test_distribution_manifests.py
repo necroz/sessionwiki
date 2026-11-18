@@ -133,3 +133,22 @@ def test_plugin_launcher_is_pinned_to_the_package_version():
     hooks = _load(PLUGIN_DIR / "hooks" / "hooks.json")["hooks"]["SessionStart"]
     (command,) = [h["command"] for entry in hooks for h in entry["hooks"]]
     assert f"uvx sessionwiki=={__version__} recall" in command
+
+
+def test_plugin_uses_the_default_read_tool_profile():
+    """Every install path lists the same six read tools; the plugin does
+    not need the full profile because its Stop hook imports sessions."""
+    env = _load(PLUGIN_JSON)["mcpServers"]["sessionwiki"]["env"]
+    assert "SESSIONWIKI_MCP_TOOLS" not in env
+
+
+def test_plugin_stop_hook_syncs_claude_code_sessions_in_the_background():
+    hooks = _load(PLUGIN_DIR / "hooks" / "hooks.json")["hooks"]["Stop"]
+    (command,) = [h["command"] for entry in hooks for h in entry["hooks"]]
+    assert f"uvx sessionwiki=={__version__} sync --adapter claude_code" in command
+    assert "--no-auto-build" in command
+    key = next(iter(_load(PLUGIN_JSON)["userConfig"]))
+    assert f'SESSIONWIKI_HOME="$CLAUDE_PLUGIN_OPTION_{key.upper()}"' in command
+    # After every reply: never hold up the answer.
+    assert command.startswith("SESSIONWIKI_HOME=") and command.rstrip().endswith("&")
+    assert "nohup" in command

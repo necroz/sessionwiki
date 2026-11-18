@@ -1,11 +1,22 @@
 {
   "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "SESSIONWIKI_HOME=\"$CLAUDE_PLUGIN_OPTION_WIKI_HOME\" nohup uvx sessionwiki==3.0.0 sync --adapter claude_code --no-zcode-export --no-opencode-export --no-auto-build >/dev/null 2>&1 &",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "SESSIONWIKI_HOME=\"$CLAUDE_PLUGIN_OPTION_WIKI_HOME\" uvx sessionwiki==2.3.1 recall --format hook",
+            "command": "SESSIONWIKI_HOME=\"$CLAUDE_PLUGIN_OPTION_WIKI_HOME\" uvx sessionwiki==3.0.0 recall --format hook",
             "timeout": 30
           }
         ]

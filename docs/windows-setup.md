@@ -110,8 +110,8 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ## Known limitations
 
-- **Claude Code SessionStart hook is still manual.** Add it to `%USERPROFILE%\.claude\settings.json` yourself.
-- **ZCode autosync is supported.** Run `.venv\Scripts\python.exe -m sessionwiki zcode install --scheduler windows`. It writes `%USERPROFILE%\.llmwiki\zcode\autosync.cmd`, adds the Stop hook, and prints the `schtasks` command to register the daily task. No bash or `flock` is required.
+- **Claude Code: `sessionwiki claude install --scheduler windows`** adds the SessionStart hook to `%USERPROFILE%\.claude\settings.json`, writes `%USERPROFILE%\.llmwiki\claude\nightly.cmd` and prints the `schtasks` command for the nightly sync → synthesize → build, then a `Set-ScheduledTask … -StartWhenAvailable` command so a night with the computer off is caught up at the next boot. It skips the background Stop hook on Windows; the nightly task imports new sessions instead.
+- **ZCode autosync is supported.** Run `.venv\Scripts\python.exe -m sessionwiki zcode install --scheduler windows`. It writes `%USERPROFILE%\.llmwiki\zcode\autosync.cmd`, adds the Stop hook, and prints the `schtasks` command to register the daily task plus the `Set-ScheduledTask … -StartWhenAvailable` command that lets a missed run start at the next boot. No bash or `flock` is required.
 - **No GPG signing setup.** sessionwiki doesn't require signed commits for contributions, but if you want them on Windows, install Git for Windows with the GPG support option.
 - **Emoji in terminal output** may render as boxes. This is a Windows terminal font issue — everything still works, it just looks odd.
 

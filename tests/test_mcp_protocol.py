@@ -99,8 +99,9 @@ def test_initialize_returns_protocol_version() -> None:
     assert "protocolVersion" in resp["result"]
 
 
-def test_tools_list_returns_fifteen_tools() -> None:
-    proc = _spawn()
+def _listed_tools(profile: str | None) -> list[dict]:
+    env = {"SESSIONWIKI_MCP_TOOLS": profile} if profile else {"SESSIONWIKI_MCP_TOOLS": ""}
+    proc = _spawn(env)
     try:
         resp = _exchange(proc, {
             "jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}
@@ -109,11 +110,21 @@ def test_tools_list_returns_fifteen_tools() -> None:
         _shutdown(proc)
     assert resp is not None
     tools = resp.get("result", {}).get("tools") or []
-    assert len(tools) == 15, f"expected 15 tools, got {len(tools)}"
     # Each tool must carry name + inputSchema.
     for t in tools:
         assert "name" in t
         assert "inputSchema" in t
+    return tools
+
+
+def test_tools_list_returns_six_read_tools_by_default() -> None:
+    tools = _listed_tools(None)
+    assert len(tools) == 6, f"expected 6 tools, got {len(tools)}"
+
+
+def test_tools_list_full_profile_returns_eleven_tools() -> None:
+    tools = _listed_tools("full")
+    assert len(tools) == 11, f"expected 11 tools, got {len(tools)}"
 
 
 # ─── Error envelopes ──────────────────────────────────────────────────

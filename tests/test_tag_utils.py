@@ -130,3 +130,18 @@ def test_categories_module_still_exposes_scan_tags():
 def test_search_facets_module_still_exposes_noise_tags():
     from sessionwiki.search_facets import NOISE_TAGS as sf_noise
     assert sf_noise is NOISE_TAGS
+
+
+# ─── keep_noise opt-out + list input (MCP surface refactor, Task 2) ──
+
+
+def test_keep_noise_retains_agent_tags():
+    assert parse_tags_field("[claude-code, demo]", keep_noise=True) == ["claude-code", "demo"]
+
+
+def test_list_input():
+    assert parse_tags_field(["Alpha", " beta "]) == ["alpha", "beta"]
+
+
+def test_default_still_filters_noise():
+    assert parse_tags_field("[claude-code, real]") == ["real"]

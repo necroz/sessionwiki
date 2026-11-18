@@ -21,12 +21,17 @@ from pathlib import Path
 from typing import Any, Optional
 
 # Accept LF, CRLF, or CR after each fence so Windows-authored (CRLF) and
-# old-Mac (CR) files parse identically to LF input. The optional newline
-# slots match the historical regex (`\n?(.*?)\n?---\n?`) so empty
-# frontmatter (`---\n---\nbody`) still parses. BOM is handled separately
-# in `_strip_bom()` before the regex runs. See #409, #423.
+# old-Mac (CR) files parse identically to LF input. Both fences must sit
+# on their own line: a `---` inside a value (`title: a---b`) must not
+# close the block. The lookbehind alternative lets an empty block
+# (`---\n---\nbody`) close right after the opening fence's newline. BOM
+# is handled separately in `_strip_bom()` before the regex runs.
+# See #409, #423.
 _FRONTMATTER_RE = re.compile(
-    r"^---[ \t]*(?:\r\n|\r|\n)?(.*?)(?:\r\n|\r|\n)?---[ \t]*(?:\r\n|\r|\n)?(.*)$",
+    r"^---[ \t]*(?:\r\n|\r|\n)"
+    r"(.*?)"
+    r"(?:(?<=[\r\n])|\r\n|\r|\n)---[ \t]*(?:\r\n|\r|\n|\Z)"
+    r"(.*)$",
     re.DOTALL,
 )
 
@@ -52,12 +57,35 @@ def parse_frontmatter(text: str) -> tuple[dict[str, Any], str]:
     meta_text = m.group(1)
     body = m.group(2)
     meta: dict[str, Any] = {}
-    for line in meta_text.splitlines():
-        mm = re.match(r"^([a-zA-Z_][\w-]*):\s*(.*)$", line)
+    lines = meta_text.splitlines()
+    i = 0
+    while i < len(lines):
+        mm = re.match(r"^([a-zA-Z_][\w-]*):\s*(.*)$", lines[i])
         if not mm:
+            i += 1
             continue
         key, raw = mm.group(1), mm.group(2).strip()
+        if not raw:
+            # Block list: subsequent `- item` lines belong to this key,
+            # indented or not (PyYAML writes `tags:\n- a` at column 0).
+            # Items parse like inline-list items (no bool coercion). A
+            # wikilink-shaped item (`- [[a]]`) nests via _parse_scalar's
+            # inline-list recursion — a pre-existing quirk; counts stay
+            # correct.
+            items = []
+            j = i + 1
+            while j < len(lines):
+                im = re.match(r"^\s*-(?:\s+(.*))?$", lines[j])
+                if not im:
+                    break
+                items.append(_parse_scalar(im.group(1) or "", coerce_bool=False))
+                j += 1
+            if items:
+                meta[key] = items
+                i = j
+                continue
         meta[key] = _parse_scalar(raw)
+        i += 1
     return meta, body
 
 

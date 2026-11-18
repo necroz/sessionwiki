@@ -15,6 +15,52 @@ The canonical per-release detail is
 [CHANGELOG.md](https://github.com/necroz/sessionwiki/blob/master/CHANGELOG.md)
 — this guide focuses on "what might break".
 
+## v3.0.0 — smaller MCP surface
+
+**Released: 2026-11-17.**
+
+### Summary
+
+Breaking for MCP clients only: the tool surface drops from 15 to 11 and
+`wiki_lint` returns a new report shape. The CLI, the wiki format and
+`raw/` are unchanged — `sync`, `build` and `serve` work as before.
+
+### What breaks
+
+- **Four tools are gone**: `wiki_confidence`, `wiki_lifecycle`,
+  `wiki_entity_search`, `wiki_category_browse` now answer
+  `Unknown tool`. They had no consumers beyond their own tests.
+  Migrate to `wiki_query` filters: `lifecycle='stale'`, `tag='…'`,
+  `type='entity'`; archived pages via `lifecycle='archived'`. The
+  confidence distribution stays in `wiki_dashboard`.
+- **`wiki_lint` report keys changed**: the old
+  `orphans/orphan_count/broken_links/broken_link_count` are replaced by
+  the CLI-aligned `{total_pages, summary, issue_count, issues,
+  truncated}` — the same engine as `sessionwiki lint` (15 structural
+  rules, no LLM rules), issues capped at 200.
+- **Five tools are hidden by default**: the server now lists only the
+  six read-only tools (`wiki_query`, `wiki_search`, `wiki_list_sources`,
+  `wiki_read_page`, `wiki_dashboard`, `wiki_lint`). `wiki_sync`,
+  `wiki_export`, `wiki_write_page`, `wiki_update_frontmatter` and
+  `wiki_archive_page` need `SESSIONWIKI_MCP_TOOLS=full` in the MCP
+  server's `env`; without it a call returns an error that names this
+  switch. The Claude Code plugin uses the same `read` profile; it imports
+  new sessions with its own `Stop` hook instead of `wiki_sync`.
+- **`wiki_search` returns hits grouped by file**: `matches: [{path,
+  line, text}]` is replaced by `match_count` and `files: [{path, hits,
+  lines: [[line, snippet]]}]` (up to 40 files, 3 lines each, plus
+  `more_files`). The JSON is compact, and snippets are centred on the
+  match.
+
+### What improves
+
+- Fewer false lint positives: `[[Page#section]]` anchors resolve,
+  system pages are not orphans, links to archived pages resolve.
+- `wiki_query(tag=…)` now sees block-list tags, and BOM-prefixed pages
+  are visible to filters and status lines.
+- ~1000 tokens of dead tool definitions no longer load into every
+  session.
+
 ## v1.3.0 — consolidated 1.2.x patch roll-up
 
 **Released: 2026-04-26.**
