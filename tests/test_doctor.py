@@ -117,3 +117,53 @@ def test_synthesis_check_survives_an_unreadable_state_file(tmp_path, monkeypatch
 
     assert report["ok"] is False
     assert "cannot read synthesis state" in report["detail"]
+
+
+# ─── which LLM writes the wiki pages ─────────────────────────────────
+
+
+def _write_local(tmp_path, synthesis: dict) -> None:
+    (tmp_path / "config.local.json").write_text(json.dumps({"synthesis": synthesis}))
+
+
+def test_llm_check_without_config_points_to_the_template(tmp_path):
+    item = doctor.collect_report(repo_root=tmp_path, home=tmp_path)["llm"]
+    assert item["ok"] is True
+    assert item["detail"].startswith("extractive (no LLM)")
+    assert "config.local.json" in item["detail"]
+    assert "examples/config.local.example.json" in item["detail"]
+
+
+def test_llm_check_shows_the_configured_backend(tmp_path):
+    _write_local(tmp_path, {"backend": "openai", "model": "qwen3-coder",
+                            "base_url": "http://127.0.0.1:8000/v1"})
+    item = doctor.collect_report(repo_root=tmp_path, home=tmp_path)["llm"]
+    assert item["ok"] is True
+    assert item["detail"].startswith("openai · model qwen3-coder · http://127.0.0.1:8000/v1")
+    assert "synthesize --check" in item["detail"]
+
+
+def test_llm_check_warns_on_an_unfilled_template(tmp_path):
+    _write_local(tmp_path, {"backend": "openai", "model": "your-model-name",
+                            "base_url": "http://127.0.0.1:8000/v1"})
+    item = doctor.collect_report(repo_root=tmp_path, home=tmp_path)["llm"]
+    assert item["ok"] is False
+    assert "your-model-name" in item["detail"]
+
+
+def test_llm_check_agent_delegate(tmp_path):
+    _write_local(tmp_path, {"backend": "agent-delegate"})
+    item = doctor.collect_report(repo_root=tmp_path, home=tmp_path)["llm"]
+    assert item["detail"].startswith("agent-delegate")
+
+
+def test_example_local_config_is_a_valid_template():
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parent.parent
+    data = json.loads((root / "examples" / "config.local.example.json").read_text())
+    synthesis = data["synthesis"]
+    assert synthesis["backend"] == "openai"
+    assert synthesis["base_url"].endswith("/v1")
+    assert synthesis["model"] == "your-model-name"
+    assert synthesis["api_key"] == ""

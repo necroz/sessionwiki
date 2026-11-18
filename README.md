@@ -154,7 +154,15 @@ Hook-triggered runs skip instead of queueing when a cycle is already running; sc
 
 ## LLM synthesis
 
-`sync` fills `raw/` with redacted transcripts. `synthesize` turns them into wiki pages: a summary per session, project pages, cross-links. Point it at any backend in `config.local.json`:
+`sync` fills `raw/` with redacted transcripts. `synthesize` turns them into wiki pages: a summary per session, project pages, cross-links. Out of the box it uses `extractive` — no LLM and no network. To use your own LLM, copy the template and fill in your server and model; `config.local.json` is git-ignored, so the address stays on your machine:
+
+```bash
+cp examples/config.local.example.json config.local.json   # then edit base_url and model
+sessionwiki doctor                                         # the `llm` line shows the active backend
+sessionwiki synthesize --check                             # test the connection
+```
+
+A fuller example:
 
 ```json
 {

@@ -8,6 +8,7 @@ the things that break a fresh install on another machine:
 * whether the process runs inside a virtualenv
 * which config files are present
 * the ZCode database and exported JSONL corpus
+* which LLM backend writes the wiki pages
 
 Only Python and ``markdown`` are hard failures. Adapter and ZCode
 checks are reported so a new user can see what is missing without
@@ -131,6 +132,47 @@ def _check_synthesis(repo_root: Path) -> dict[str, Any]:
     return {"ok": ok, "detail": detail}
 
 
+_TEMPLATE = "examples/config.local.example.json"
+_PLACEHOLDER_MODEL = "your-model-name"
+
+
+def _check_llm(repo_root: Path) -> dict[str, Any]:
+    """Which backend ``synthesize`` uses, and where to plug in your own LLM.
+
+    No network probe: doctor stays fast and offline. ``synthesize --check``
+    tests the connection.
+    """
+    from sessionwiki.config import resolve_config
+
+    try:
+        synth = resolve_config(repo_root).get("synthesis") or {}
+    except Exception as e:  # a broken config must not crash doctor
+        return {"ok": False, "detail": f"cannot read config: {e}"}
+    if not isinstance(synth, dict):
+        synth = {}
+    backend = str(synth.get("backend") or "extractive").strip().lower()
+    if backend in ("extractive", "dummy"):
+        label = "extractive (no LLM)" if backend == "extractive" else "dummy (metadata stubs)"
+        return {
+            "ok": True,
+            "detail": (
+                f"{label} — to use your own LLM, set synthesis.backend, base_url "
+                f"and model in config.local.json (template: {_TEMPLATE})"
+            ),
+        }
+    if backend == "agent-delegate":
+        return {"ok": True, "detail": "agent-delegate — your coding agent writes the pages"}
+    model = str(synth.get("model") or "unset")
+    base_url = str(synth.get("base_url") or "unset")
+    detail = f"{backend} · model {model} · {base_url}"
+    if model == _PLACEHOLDER_MODEL:
+        return {
+            "ok": False,
+            "detail": f"{detail} — replace the template model name in config.local.json",
+        }
+    return {"ok": True, "detail": f"{detail} — test it with `sessionwiki synthesize --check`"}
+
+
 def collect_report(
     repo_root: Path | None = None,
     home: Path | None = None,
@@ -146,6 +188,7 @@ def collect_report(
         "zcode_db": _check_zcode_db(home_dir),
         "zcode_export": _check_zcode_export(home_dir),
         "synthesis": _check_synthesis(root),
+        "llm": _check_llm(root),
     }
 
 
