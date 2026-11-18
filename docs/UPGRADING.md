@@ -17,7 +17,7 @@ The canonical per-release detail is
 
 ## v3.0.0 — smaller MCP surface
 
-**Released: 2026-11-17.**
+**Released: 2026-11-18.**
 
 ### Summary
 

@@ -10,7 +10,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 
 ## [Unreleased]
 
-## [3.0.0] — 2026-11-17
+## [3.0.0] — 2026-11-18
 
 Theme: a smaller MCP surface — 6 read-only tools by default and 11 in the `full` profile instead of 15, one lint engine, one frontmatter parser, and one command that sets up the Claude Code side on a new machine.
 
@@ -42,7 +42,7 @@ Theme: a smaller MCP surface — 6 read-only tools by default and 11 in the `ful
 - **`wiki_query(tag=…)` sees block-list tags** — pages whose `tags` frontmatter is a YAML block list were invisible to the tag filter; the write tools already handled that shape.
 - **A `---` inside a frontmatter value no longer ends the frontmatter** — the canonical parser accepted a closing fence anywhere on a line, so `title: a---b` cut the block after `title: a` and lost every later key. Both fences must now stand on their own line. The MCP server reads frontmatter through this parser since this release, so the bug would have reached `wiki_query` filters and status lines.
 - **Number-looking frontmatter values keep their spelling in filters and status lines** — `project: 007` was read as `7` and failed `wiki_query(project="007")`, and `confidence: 0.70` showed as `0.7`. Bool-looking values were already re-read as written; number-looking values are now too.
-- **BOM-prefixed pages are visible to query filters and status lines** — a Notepad-authored page parsed as zero frontmatter and failed every filter (the #423 bug class, in the MCP layer). Raw transcripts with a BOM now merge into their wiki page by `slug` instead of standing alone.
+- **BOM-prefixed pages are visible to query filters and status lines** — a Notepad-authored page parsed as zero frontmatter and failed every filter (the bug class of upstream llmwiki #423, in the MCP layer). Raw transcripts with a BOM now merge into their wiki page by `slug` instead of standing alone.
 - **A LAN address is gone from the public task journal** — `docs/tasks/RUN_JOURNAL.md` named the maintainer's local LLM server, and the docs site published it. The entry now says "on the local network".
 - **`SSHPASS=` and `echo … | sudo -S` passwords are redacted** — after `sync --force` with the 2.3.1 redactor, the same SSH password was still in clear text in 36 places as `export SSHPASS='…'` (for `sshpass -e`) and in 9 places as `echo "…" | sudo -S`. Two built-in patterns cover an upper-case name ending in `PASS` and a password piped into `sudo -S`; there are 31 built-in patterns now.
 - **One redaction no longer hides the next secret** — each pattern ran on the output of the one before, so a wide match could remove the context another pattern needs: the email pattern joined `host.example.com` with `sshpass` on the next line and replaced both, and the password after that `sshpass -p` stayed in clear text. The redactor now collects every match on the same text and replaces them in one pass.
