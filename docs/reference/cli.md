@@ -364,6 +364,53 @@ python3 -m sessionwiki opencode install --no-build --force
 
 ---
 
+## `claude` — Claude Code hooks and the nightly job
+
+### `claude install`
+
+Sets up the Claude Code side of a machine:
+
+- a `Stop` hook in `~/.claude/settings.json` (or `$CLAUDE_CONFIG_DIR/settings.json`)
+  that runs `sync --adapter claude_code` in the background after every reply;
+- a `SessionStart` hook that runs `recall --format hook`;
+- a nightly job that runs `claude nightly`: systemd user units
+  `sessionwiki-synth.service` / `.timer`, a launchd agent
+  `com.sessionwiki.claude.nightly`, or `%USERPROFILE%\.llmwiki\claude\nightly.cmd`
+  plus a printed `schtasks` command;
+- a printed `claude mcp add` command for the MCP server.
+
+A hook whose command already runs `sessionwiki sync` or
+`sessionwiki recall --format hook`, and an existing job file, count as
+installed — hand-written ones too — and stay untouched unless `--force`.
+On Windows the background `Stop` hook is skipped. The systemd timer is
+written, not enabled: run the printed `systemctl` command.
+
+```bash
+python3 -m sessionwiki claude install --dry-run
+python3 -m sessionwiki claude install --at 04:15
+python3 -m sessionwiki claude install --scheduler none   # hooks only
+```
+
+| Flag | What |
+|---|---|
+| `--scheduler {auto,systemd,launchd,windows,none}` | Nightly job backend. Default: auto-detect. |
+| `--at HH:MM` | Nightly start time. Default: `04:15`. |
+| `--python PATH` | Interpreter for hooks and the job. Default: current. |
+| `--repo-root PATH` | Data root with `raw/` and `wiki/`. Default: the current data root. |
+| `--no-build` | The nightly job skips the site build. |
+| `--no-hooks` | Install only the nightly job. |
+| `--dry-run` | Print the plan without writing. |
+| `--force` | Replace existing sessionwiki hooks and job files. |
+
+### `claude nightly`
+
+Runs `sync --adapter claude_code`, then `synthesize` (every new raw
+session, from any agent), then `build`. A failed synthesis does not stop
+the build; the build is skipped while `raw/sessions/` is empty. The exit
+code reports a failed sync or build. `--no-build` skips the build.
+
+---
+
 ## `doctor` — check the local install
 
 Prints Python, `markdown`, virtualenv, config files, and ZCode database /

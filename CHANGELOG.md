@@ -11,8 +11,13 @@ Versions below 1.0 are pre-production — API and file formats may change.
 ## [Unreleased]
 
 ## [3.0.0] — 2026-11-17
-Theme: a smaller MCP surface — 6 read-only tools by default and 11 in the `full` profile instead of 15, one lint engine, one frontmatter parser.
-Theme: a smaller MCP surface — 11 tools instead of 15, one lint engine, one frontmatter parser.
+
+Theme: a smaller MCP surface — 6 read-only tools by default and 11 in the `full` profile instead of 15, one lint engine, one frontmatter parser, and one command that sets up the Claude Code side on a new machine.
+
+### Added
+
+- **`sessionwiki claude install`** — sets up the Claude Code side of a new machine in one command. It adds a `Stop` hook that imports new Claude Code sessions in the background after every reply and a `SessionStart` hook that puts the project's recent sessions into context (both in `~/.claude/settings.json`, honouring `$CLAUDE_CONFIG_DIR`), writes a nightly job for systemd, launchd or Task Scheduler, and prints the `claude mcp add` command. Until now all three were written by hand from the README, and nothing synthesized wiki pages on a new machine: the ZCode and OpenCode autosync jobs only coalesce. Existing hooks and job files — also hand-written ones — count as installed and stay untouched unless `--force`; `--dry-run` prints the plan. On Windows the background `Stop` hook is skipped, and the nightly task imports the sessions.
+- **`sessionwiki claude nightly`** — the job the scheduler runs: `sync` of Claude Code sessions, `synthesize` of every new raw session from any agent, then `build`. A failed synthesis (an unreachable LLM backend) does not stop the build, and the build is skipped while `raw/sessions/` is still empty, so a fresh machine does not report a failed job every night.
 
 ### Removed
 

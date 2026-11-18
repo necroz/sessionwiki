@@ -101,7 +101,16 @@ A step-by-step walkthrough with screenshots lives in the [setup guide](https://g
 
 ## Connect your agents
 
-**Claude Code, Codex CLI, Cursor, Gemini CLI, Copilot** — read straight from their session folders on `sessionwiki sync`. To sync after every Claude Code reply, add a `Stop` hook to `~/.claude/settings.json`:
+**Claude Code** — one command sets up the whole pipeline:
+
+```bash
+sessionwiki claude install --dry-run   # show what will be written
+sessionwiki claude install             # Stop + SessionStart hooks, nightly sync → synthesize → build
+```
+
+It adds a `Stop` hook (import new sessions in the background after every reply) and a `SessionStart` hook (recent sessions of the project into context) to `~/.claude/settings.json`, writes a nightly job for systemd, launchd or Task Scheduler that runs `sessionwiki claude nightly`, and prints the `claude mcp add` command for the MCP server. Hooks and jobs that already exist — also hand-written ones — are left alone unless you pass `--force`. Without the nightly job only `raw/` grows: nothing else turns transcripts into wiki pages.
+
+**Codex CLI, Cursor, Gemini CLI, Copilot** — read straight from their session folders on `sessionwiki sync`. The `Stop` hook that `claude install` writes looks like this, if you prefer to add it by hand:
 
 ```json
 {
@@ -221,6 +230,7 @@ sessionwiki doctor                  # check Python, deps, config, agent paths
 sessionwiki audit                   # scan raw/ wiki/ site/ for usernames and secrets
 sessionwiki zcode                   # export · autosync · install
 sessionwiki opencode                # export · autosync · install
+sessionwiki claude                  # install (hooks + nightly job) · nightly
 sessionwiki mcp                     # MCP server on stdio
 sessionwiki recall                  # a project's recent sessions, for a SessionStart hook
 sessionwiki version
