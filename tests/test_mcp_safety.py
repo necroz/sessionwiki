@@ -64,7 +64,7 @@ def test_search_caps_at_200_hits(tmp_path: Path):
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
-    assert len(payload["matches"]) == 200, payload["matches"][:3]
+    assert payload["match_count"] == 200, payload["files"][:3]
     assert payload["truncated"] is True
 
 
@@ -77,8 +77,8 @@ def test_search_with_include_raw_still_caps_at_200(tmp_path: Path):
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle", "include_raw": True})
     payload = _result_json(result)
-    assert len(payload["matches"]) == 200, (
-        f"expected ≤200 hits, got {len(payload['matches'])}"
+    assert payload["match_count"] == 200, (
+        f"expected ≤200 hits, got {payload['match_count']}"
     )
     assert payload["truncated"] is True
 
@@ -89,7 +89,7 @@ def test_search_under_cap_returns_all(tmp_path: Path):
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
-    assert len(payload["matches"]) == 30
+    assert payload["match_count"] == 30
     assert payload["truncated"] is False
 
 
@@ -100,7 +100,7 @@ def test_search_term_case_insensitive(tmp_path: Path):
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
-    assert len(payload["matches"]) == 10
+    assert payload["match_count"] == 10
 
 
 def test_search_empty_term_errors(tmp_path: Path):
@@ -129,7 +129,7 @@ def test_search_term_with_regex_metacharacters_treated_literally(tmp_path: Path)
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "[a literal]"})
     payload = _result_json(result)
-    assert len(payload["matches"]) == 1
+    assert payload["match_count"] == 1
 
 
 def test_search_unicode_term(tmp_path: Path):
@@ -139,10 +139,10 @@ def test_search_unicode_term(tmp_path: Path):
     (wiki / "p.md").write_text("café 🚀 中文\n", encoding="utf-8")
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "🚀"})
-    assert len(_result_json(result)["matches"]) == 1
+    assert _result_json(result)["match_count"] == 1
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "中文"})
-    assert len(_result_json(result)["matches"]) == 1
+    assert _result_json(result)["match_count"] == 1
 
 
 def test_search_one_file_with_many_hits_caps(tmp_path: Path):
@@ -155,7 +155,7 @@ def test_search_one_file_with_many_hits_caps(tmp_path: Path):
     with patch("sessionwiki.mcp.server.REPO_ROOT", tmp_path):
         result = tool_wiki_search({"term": "needle"})
     payload = _result_json(result)
-    assert len(payload["matches"]) == 200
+    assert payload["match_count"] == 200
     assert payload["truncated"] is True
 
 

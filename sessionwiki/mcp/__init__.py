@@ -4,15 +4,23 @@ Exposes sessionwiki operations as Model Context Protocol (MCP) tools that any
 MCP-capable client (Claude Desktop, Claude Code, Codex, Cline, Cursor, ChatGPT
 desktop, etc.) can call directly.
 
-Seven production tools:
+Eleven tools in two profiles, chosen with ``SESSIONWIKI_MCP_TOOLS``.
 
-    - wiki_query(question)       — keyword search + page content
-    - wiki_search(term)          — raw grep over wiki/ (+ optional raw/)
-    - wiki_list_sources(project) — list raw source files with metadata
+``read`` (default) — read-only:
+
+    - wiki_query(question)       — ranked search, falls back to raw/
+    - wiki_search(term)          — exact text over wiki/ (+ optional raw/)
+    - wiki_list_sources(project) — list raw session files with metadata
     - wiki_read_page(path)       — read one page (path-traversal guarded)
-    - wiki_lint()                — orphans + broken-wikilinks report
-    - wiki_sync(dry_run)         — trigger the converter
+    - wiki_lint()                — the structural rules of `sessionwiki lint`
+    - wiki_dashboard()           — page counts, lifecycle and confidence
+
+``full`` adds:
+
+    - wiki_sync(confirm)         — import new sessions
     - wiki_export(format)        — return any AI-consumable export
+    - wiki_write_page, wiki_update_frontmatter, wiki_archive_page
+                                 — guarded writers (preview, then confirm)
 
 Protocol: Model Context Protocol, stdio transport, JSON-RPC 2.0.
 See the MCP spec at: https://modelcontextprotocol.io/

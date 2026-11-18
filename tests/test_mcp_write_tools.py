@@ -447,7 +447,8 @@ def test_archive_never_changes_human_page(repo: Path):
 # ─── Protocol ────────────────────────────────────────────────────────
 
 
-def test_tools_list_marks_write_tools_read_only_false():
+def test_tools_list_marks_write_tools_read_only_false(monkeypatch):
+    monkeypatch.setenv("SESSIONWIKI_MCP_TOOLS", "full")
     tools = server.handle_tools_list({})["tools"]
     by_name = {tool["name"]: tool for tool in tools}
     for name in ("wiki_write_page", "wiki_update_frontmatter", "wiki_archive_page"):

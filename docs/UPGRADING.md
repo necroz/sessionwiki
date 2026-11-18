@@ -38,6 +38,18 @@ Breaking for MCP clients only: the tool surface drops from 15 to 11 and
   the CLI-aligned `{total_pages, summary, issue_count, issues,
   truncated}` — the same engine as `sessionwiki lint` (15 structural
   rules, no LLM rules), issues capped at 200.
+- **Five tools are hidden by default**: the server now lists only the
+  six read-only tools (`wiki_query`, `wiki_search`, `wiki_list_sources`,
+  `wiki_read_page`, `wiki_dashboard`, `wiki_lint`). `wiki_sync`,
+  `wiki_export`, `wiki_write_page`, `wiki_update_frontmatter` and
+  `wiki_archive_page` need `SESSIONWIKI_MCP_TOOLS=full` in the MCP
+  server's `env`; without it a call returns an error that names this
+  switch. The Claude Code plugin sets `full` for you.
+- **`wiki_search` returns hits grouped by file**: `matches: [{path,
+  line, text}]` is replaced by `match_count` and `files: [{path, hits,
+  lines: [[line, snippet]]}]` (up to 40 files, 3 lines each, plus
+  `more_files`). The JSON is compact, and snippets are centred on the
+  match.
 
 ### What improves
 

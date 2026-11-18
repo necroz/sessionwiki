@@ -11,7 +11,7 @@ Versions below 1.0 are pre-production — API and file formats may change.
 ## [Unreleased]
 
 ## [3.0.0] — 2026-11-17
-
+Theme: a smaller MCP surface — 6 read-only tools by default and 11 in the `full` profile instead of 15, one lint engine, one frontmatter parser.
 Theme: a smaller MCP surface — 11 tools instead of 15, one lint engine, one frontmatter parser.
 
 ### Removed
@@ -20,6 +20,8 @@ Theme: a smaller MCP surface — 11 tools instead of 15, one lint engine, one fr
 
 ### Changed
 
+- **The MCP server lists six read-only tools by default** — calls counted in Claude Code, OpenCode and ZCode transcripts: `wiki_query`, `wiki_search`, `wiki_read_page` and `wiki_list_sources` carried 215 of 218 calls; `wiki_sync`, `wiki_export` and the three page write tools were never called. The new `SESSIONWIKI_MCP_TOOLS` switch selects a profile: `read` (default) lists query, search, list sources, read page, lint and dashboard; `full` lists all 11. The hidden definitions no longer ride along: the tool list plus instructions drop from ~3.9k to ~2.0k tokens in every session, and the write-tool line leaves the server instructions with them. A call to a hidden tool returns an error that names the switch. The Claude Code plugin sets `full`, because it imports sessions through `wiki_sync`.
+- **`wiki_search` output is grouped by file and compact** — real `include_raw=true` calls returned a median of 22.7k characters, up to 62k, mostly repeated paths and JSON indentation. Hits are now counted in `match_count` and listed as `files: [{path, hits, lines: [[line, snippet]]}]` — up to 40 files with up to 3 lines each, plus `more_files` — in compact JSON that keeps non-ASCII text as is (Cyrillic used to cost six characters per letter as `\uXXXX`). Transcripts are scanned newest first, so the hit cap cuts old sessions, not recent ones. On 12 real queries the median output went from 30.4k to 9.1k characters and the largest from 159k to 17.6k.
 - **`wiki_lint` runs the canonical lint engine** — the same 15 structural rules as the CLI `sessionwiki lint` (no LLM rules), instead of a stale inline orphan/broken-link pass. The report is now CLI-aligned: `{total_pages, summary, issue_count, issues, truncated}` with the issues list capped at 200; the old `orphans/orphan_count/broken_links/broken_link_count` keys are gone. False positives are gone too: `[[Page#section]]` anchors resolve, system pages (`hot`, `_context`, …) are not orphans, and links to `wiki/archive/` pages resolve.
 - **The MCP server parses frontmatter via the canonical parser** — `wiki_query` ranking, filters and status lines read one parsed meta dict per page instead of per-key regexes; `_source_meta` and the body/snippet helpers share the same parser. Query tag matching keeps agent tags (`claude-code`) — the shared tag parser's noise filter is opt-out for query. The canonical parser itself now reads block-list values (`tags:\n  - a`, and the zero-indent `tags:\n- a` that PyYAML writes), as its docstring always promised.
 - **`wiki_lint` lists the worst issues first** — the report is capped at 200 issues, so it sorts them error → warning → info before the cut; hundreds of info-level orphans can no longer push an error out.
@@ -27,6 +29,8 @@ Theme: a smaller MCP surface — 11 tools instead of 15, one lint engine, one fr
 
 ### Fixed
 
+- **`wiki_search` snippets contain the term** — a snippet was the first 200 characters of the line, so on long transcript lines the match was often cut off: up to 22 % of the snippets for one real query lacked the term. Snippets are now centred on the match, with `…` on a cut side.
+- **String booleans work in `include_raw`** — models sometimes send `"true"`/`"false"` as strings. `wiki_search` read `"false"` as true, and `wiki_query` ignored `"true"` and still read transcripts on `"false"`. Both tools now accept `true/false`, `1/0`, `yes/no` and `on/off` as booleans or strings.
 - **`wiki_query(tag=…)` sees block-list tags** — pages whose `tags` frontmatter is a YAML block list were invisible to the tag filter; the write tools already handled that shape.
 - **A `---` inside a frontmatter value no longer ends the frontmatter** — the canonical parser accepted a closing fence anywhere on a line, so `title: a---b` cut the block after `title: a` and lost every later key. Both fences must now stand on their own line. The MCP server reads frontmatter through this parser since this release, so the bug would have reached `wiki_query` filters and status lines.
 - **Number-looking frontmatter values keep their spelling in filters and status lines** — `project: 007` was read as `7` and failed `wiki_query(project="007")`, and `confidence: 0.70` showed as `0.7`. Bool-looking values were already re-read as written; number-looking values are now too.
