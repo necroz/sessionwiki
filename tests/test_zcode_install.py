@@ -318,3 +318,30 @@ def test_force_replaces_the_wrapper_with_the_direct_command(tmp_path):
     commands = [hook["command"] for entry in stop for hook in entry["hooks"]]
     assert len(commands) == 1
     assert "zcode autosync" in commands[0]
+
+
+# ─── catch-up after a night with the computer off ────────────────────
+
+
+@pytest.mark.skipif(os.name == "nt", reason="launchd is macOS-only; POSIX path literals")
+def test_launchd_runs_at_load_to_catch_up(tmp_path):
+    # launchd only catches up a missed run after sleep, not after power-off;
+    # RunAtLoad starts the job at the next login instead.
+    path = install.install_launchd(home=tmp_path, python_exe="/venv/bin/python", repo_root=tmp_path)
+    assert "<key>RunAtLoad</key>\n  <true/>" in path.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("dry_run", [False, True])
+def test_windows_task_prints_the_catch_up_command(tmp_path, dry_run):
+    messages = install.install_windows_task(
+        home=tmp_path, python_exe=r"C:\venv\python.exe", repo_root=tmp_path, dry_run=dry_run,
+    )
+    line = next(m for m in messages if "StartWhenAvailable" in m)
+    assert (
+        "powershell -NoProfile -Command \"Set-ScheduledTask -TaskName "
+        "'sessionwiki-zcode-autosync' -Settings (New-ScheduledTaskSettingsSet "
+        "-StartWhenAvailable)\""
+    ) in line
+    assert "$" not in line
+    # The schtasks line comes first: the task must exist before Set-ScheduledTask.
+    assert messages.index(_schtasks_line(messages)) < messages.index(line)

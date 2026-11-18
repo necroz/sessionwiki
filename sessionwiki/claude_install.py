@@ -29,7 +29,9 @@ from typing import Optional
 from xml.sax.saxutils import escape as _xml_escape
 
 from sessionwiki.lock import atomic_write_text
-from sessionwiki.zcode.install import _at_parts, _cmd_escape, _home, _python, detect_scheduler
+from sessionwiki.zcode.install import (
+    _at_parts, _catch_up_command, _cmd_escape, _home, _python, detect_scheduler,
+)
 
 _SERVICE_NAME = "sessionwiki-synth.service"
 _TIMER_NAME = "sessionwiki-synth.timer"
@@ -270,7 +272,10 @@ def install_scheduler(
             f"    <key>Hour</key>\n    <integer>{hour}</integer>\n"
             f"    <key>Minute</key>\n    <integer>{minute}</integer>\n"
             "  </dict>\n"
-            "  <key>RunAtLoad</key>\n  <false/>\n"
+            # Catch up after a night with the Mac off: launchd only replays a
+            # run missed during sleep. synthesize skips known sessions, so an
+            # extra run at login is cheap.
+            "  <key>RunAtLoad</key>\n  <true/>\n"
             "</dict>\n"
             "</plist>\n"
         )
@@ -297,6 +302,10 @@ def install_scheduler(
         )
         messages = _write_new([(cmd_path, script)], label="windows", force=force, dry_run=dry_run)
         messages.append(f"windows: register with: {task}")
+        messages.append(
+            "windows: then let a missed run start at the next boot: "
+            + _catch_up_command(_WINDOWS_TASK)
+        )
         return messages
 
     if scheduler == "none":

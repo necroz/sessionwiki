@@ -52,6 +52,21 @@ def _autosync_command(python_exe: str, *, build: bool, coalesce: bool = False) -
     return command
 
 
+def _catch_up_command(task_name: str) -> str:
+    """Turn on "run as soon as possible after a missed start" for a task.
+
+    ``schtasks /Create`` has no flag for it, so a night with the computer
+    off silently skips the run. ``Set-ScheduledTask`` changes the existing
+    task; the line has no ``$``, so it reads the same pasted into cmd.exe
+    or into PowerShell.
+    """
+    return (
+        f"powershell -NoProfile -Command \"Set-ScheduledTask -TaskName "
+        f"'{task_name}' -Settings (New-ScheduledTaskSettingsSet "
+        f"-StartWhenAvailable)\""
+    )
+
+
 def _cmd_escape(text: str) -> str:
     """Escape ``%`` for a .cmd file, where ``%name%`` expands as a variable."""
     return text.replace("%", "%%")
@@ -342,7 +357,9 @@ def install_launchd(
         f"    <key>Hour</key>\n    <integer>{hour}</integer>\n"
         f"    <key>Minute</key>\n    <integer>{minute}</integer>\n"
         "  </dict>\n"
-        "  <key>RunAtLoad</key>\n  <false/>\n"
+        # launchd catches up a run missed during sleep, not one missed while
+        # the Mac was off; RunAtLoad starts it at the next login instead.
+        "  <key>RunAtLoad</key>\n  <true/>\n"
         "</dict>\n"
         "</plist>\n"
     )
@@ -386,11 +403,15 @@ def install_windows_task(
         f'schtasks /Create /F /SC DAILY /ST {hour:02d}:{minute:02d} '
         f'/TN "sessionwiki-zcode-autosync" /TR "\\"{cmd_path}\\""'
     )
+    catch_up = (
+        "windows: then let a missed run start at the next boot: "
+        + _catch_up_command("sessionwiki-zcode-autosync")
+    )
     if dry_run:
-        return [f"windows: would write {cmd_path}", f"windows: {task_command}"]
+        return [f"windows: would write {cmd_path}", f"windows: {task_command}", catch_up]
     output_dir.mkdir(parents=True, exist_ok=True)
     cmd_path.write_text(script, encoding="utf-8")
-    return [f"windows: wrote {cmd_path}", f"windows: run: {task_command}"]
+    return [f"windows: wrote {cmd_path}", f"windows: run: {task_command}", catch_up]
 
 
 def detect_scheduler() -> str:

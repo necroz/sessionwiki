@@ -169,6 +169,14 @@ def test_windows_task_wrapper(tmp_path: Path):
     script = (tmp_path / ".llmwiki" / "claude" / "nightly.cmd").read_text()
     assert "claude nightly" in script
     assert any("schtasks /Create" in m for m in messages)
+    catch_up = next(m for m in messages if "StartWhenAvailable" in m)
+    assert "Set-ScheduledTask -TaskName 'sessionwiki-claude-nightly'" in catch_up
+
+
+def test_launchd_runs_at_load_to_catch_up(tmp_path: Path):
+    ci.install_scheduler("launchd", home=tmp_path, python_exe=PY, repo_root=tmp_path)
+    plist = (tmp_path / "Library" / "LaunchAgents" / "com.sessionwiki.claude.nightly.plist").read_text()
+    assert "<key>RunAtLoad</key>\n  <true/>" in plist
 
 
 def test_bad_time_is_an_error(tmp_path: Path):

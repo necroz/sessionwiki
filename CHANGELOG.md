@@ -34,6 +34,7 @@ Theme: a smaller MCP surface — 6 read-only tools by default and 11 in the `ful
 
 ### Fixed
 
+- **A night with the computer off no longer skips the scheduled job on macOS and Windows** — both `zcode install` and `claude install` wrote a launchd agent with `RunAtLoad` off, and launchd replays a run missed during sleep but not one missed while the Mac was off; on Windows, `schtasks /Create` cannot set "run as soon as possible after a missed start". The agents now run at load (the next login), and both installers print a `Set-ScheduledTask … -StartWhenAvailable` command to run after `schtasks`. The systemd timers already had `Persistent=true`.
 - **`wiki_search` snippets contain the term** — a snippet was the first 200 characters of the line, so on long transcript lines the match was often cut off: up to 22 % of the snippets for one real query lacked the term. Snippets are now centred on the match, with `…` on a cut side.
 - **String booleans work in `include_raw`** — models sometimes send `"true"`/`"false"` as strings. `wiki_search` read `"false"` as true, and `wiki_query` ignored `"true"` and still read transcripts on `"false"`. Both tools now accept `true/false`, `1/0`, `yes/no` and `on/off` as booleans or strings.
 - **`wiki_query(tag=…)` sees block-list tags** — pages whose `tags` frontmatter is a YAML block list were invisible to the tag filter; the write tools already handled that shape.

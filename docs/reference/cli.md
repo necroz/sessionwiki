@@ -262,7 +262,7 @@ python3 -m sessionwiki zcode autosync --coalesce --build
 
 Installs the ZCode `Stop` hook and one native scheduler entry:
 systemd user timer (Linux), launchd agent (macOS), or Task Scheduler
-(Windows). The hook is idempotent.
+(Windows). The hook is idempotent. A night with the computer off is caught up: the systemd timer has `Persistent=true`, the launchd agent has `RunAtLoad` (launchd itself only replays a run missed during sleep), and on Windows the installer prints a second command — `Set-ScheduledTask … -StartWhenAvailable` — to run after `schtasks`, because `schtasks /Create` cannot set it.
 
 ```bash
 python3 -m sessionwiki zcode install --dry-run
@@ -384,6 +384,8 @@ A hook whose command already runs `sessionwiki sync` or
 installed — hand-written ones too — and stay untouched unless `--force`.
 On Windows the background `Stop` hook is skipped. The systemd timer is
 written, not enabled: run the printed `systemctl` command.
+A night with the computer off is caught up: the systemd timer has `Persistent=true`, the launchd agent has `RunAtLoad` (launchd itself only replays a run missed during sleep), and on Windows the installer prints a second command — `Set-ScheduledTask … -StartWhenAvailable` — to run after `schtasks`, because `schtasks /Create` cannot set it. The extra run at login is cheap: `synthesize` skips known
+sessions.
 
 ```bash
 python3 -m sessionwiki claude install --dry-run

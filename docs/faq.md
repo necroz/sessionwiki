@@ -108,7 +108,7 @@ Python 3.9 or later. The only runtime dependency is the `markdown` package. Ever
 Yes. Sync, build, and the MCP server run on Windows. A few notes:
 
 - **Deep clone paths.** If `git clone` fails with "Filename too long", enable long paths: `git config --global core.longpaths true`.
-- **Stop hook.** The ZCode Stop hook prefers `pythonw.exe` (no console window) when it sits beside `python.exe`. The nightly run uses Task Scheduler; `sessionwiki zcode install` writes an `autosync.cmd` wrapper and prints the `schtasks` command.
+- **Stop hook.** The ZCode Stop hook prefers `pythonw.exe` (no console window) when it sits beside `python.exe`. The nightly run uses Task Scheduler; `sessionwiki zcode install` writes an `autosync.cmd` wrapper and prints the `schtasks` command, then a `Set-ScheduledTask … -StartWhenAvailable` command so a run missed while the computer was off starts at the next boot.
 - **Non-ASCII search.** The MCP server forces UTF-8 on stdin/stdout, so Cyrillic and other non-ASCII queries work regardless of the system code page.
 - **Project names.** Non-ASCII (e.g. Cyrillic) project folder names are preserved in slugs, so distinct projects stay distinct.
 
