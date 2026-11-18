@@ -84,3 +84,15 @@ def test_missing_wiki_is_error(tmp_path):
     with patch.object(server, "REPO_ROOT", tmp_path):
         result = tool_wiki_lint({})
     assert result["isError"] and "wiki/" in result["content"][0]["text"]
+
+
+def test_truncated_report_keeps_errors_first(tmp_path):
+    _page(tmp_path, "A.md", "Page.")
+    noise = [{"rule": "r", "severity": "info", "page": f"p{n}.md", "message": "m"} for n in range(250)]
+    noise.append({"rule": "r", "severity": "error", "page": "bad.md", "message": "m"})
+    noise.append({"rule": "r", "severity": "warning", "page": "warn.md", "message": "m"})
+    with patch("sessionwiki.lint.run_all", return_value=noise):
+        data = _lint_report(tmp_path)
+    assert data["truncated"] is True
+    assert [i["severity"] for i in data["issues"][:2]] == ["error", "warning"]
+    assert data["issue_count"] == 252

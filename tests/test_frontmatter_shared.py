@@ -319,3 +319,43 @@ def test_set_frontmatter_fields_still_normalizes_block_list():
     text = "---\ntags:\n  - a\n  - b\n---\nbody"
     out = set_frontmatter_fields(text, {"tags": ["c"]})
     assert "tags: [c]" in out and "- a" not in out and out.endswith("body")
+
+
+# ─── fence and block-list edges (MCP surface review) ─────────────────
+
+
+def test_dashes_inside_a_value_do_not_close_frontmatter():
+    meta, body = parse_frontmatter("---\ntitle: a---b\ntype: source\n---\nbody\n")
+    assert meta == {"title": "a---b", "type": "source"}
+    assert body == "body\n"
+
+
+def test_closing_fence_needs_its_own_line():
+    meta, _ = parse_frontmatter("---\ntitle: x\n---extra\ntype: y\n---\nbody")
+    assert meta["type"] == "y"
+
+
+@pytest.mark.parametrize("eol", ["\n", "\r\n", "\r"])
+def test_empty_frontmatter_parses_with_any_line_ending(eol):
+    meta, body = parse_frontmatter(f"---{eol}---{eol}body")
+    assert meta == {}
+    assert body == "body"
+
+
+def test_closing_fence_at_end_of_file():
+    meta, body = parse_frontmatter("---\ntitle: x\n---")
+    assert meta == {"title": "x"}
+    assert body == ""
+
+
+def test_zero_indent_block_list():
+    meta, _ = parse_frontmatter("---\ntags:\n- a\n- b\ntype: x\n---\nbody")
+    assert meta == {"tags": ["a", "b"], "type": "x"}
+
+
+def test_set_fields_keeps_value_with_dashes():
+    text = "---\ntitle: a---b\ntype: source\n---\nbody\n"
+    out = set_frontmatter_fields(text, {"lifecycle": "draft"})
+    meta, body = parse_frontmatter(out)
+    assert meta == {"title": "a---b", "type": "source", "lifecycle": "draft"}
+    assert body == "body\n"

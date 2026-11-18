@@ -343,3 +343,42 @@ def test_status_line_keeps_boolish_scalar_spelling(tmp_path: Path):
     with patch.object(server, "REPO_ROOT", tmp_path):
         result = tool_wiki_query({"question": "status spelling"})
     assert "confidence=yes" in result["content"][0]["text"]
+
+
+# ─── numeric-looking scalars keep their YAML spelling (review fix) ───
+
+
+def test_query_project_filter_matches_zero_padded_number(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "Bond.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: Bond\ntype: concept\nproject: 007\n---\n\nAgent page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("agent", include_raw=False, filters={"project": "007"})
+    assert "wiki/concepts/Bond.md" in _paths(result)
+
+
+def test_status_line_keeps_float_spelling(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "Conf.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: Conf\ntype: concept\nconfidence: 0.70\n---\n\nFloat spelling page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = tool_wiki_query({"question": "float spelling"})
+    assert "confidence=0.70" in result["content"][0]["text"]
+
+
+def test_query_tag_filter_matches_zero_indent_block_list(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "FlatTags.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: FlatTags\ntype: concept\ntags:\n- flattag\n---\n\nFlat list page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("flat", include_raw=False, filters={"tag": "flattag"})
+    assert "wiki/concepts/FlatTags.md" in _paths(result)
+
+
+def test_query_type_survives_dashes_in_title(tmp_path: Path):
+    p = tmp_path / "wiki" / "concepts" / "Dashes.md"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text("---\ntitle: before---after\ntype: concept\n---\n\nDash title page.\n")
+    with patch.object(server, "REPO_ROOT", tmp_path):
+        result = rank_query("dash", include_raw=False, filters={"type": "concept"})
+    assert "wiki/concepts/Dashes.md" in _paths(result)

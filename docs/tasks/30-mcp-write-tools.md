@@ -172,7 +172,7 @@ is, so links keep working, and wiki_update_frontmatter with lifecycle: reviewed
 restores it. Nothing is ever deleted. Refused for system pages and pages with
 origin: human. Without confirm=true it writes nothing and returns a preview.
 Ask the user before confirm=true. Returns JSON {path, previous_lifecycle,
-written}. Use wiki_lifecycle with state 'archived' to list archived pages.
+written}. Use wiki_query with lifecycle='archived' to list archived pages.
 ```
 
 Schema: `path` (string, required), `reason` (string, required, at most 200
