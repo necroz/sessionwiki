@@ -38,7 +38,8 @@ place that mentions the version is derivative and must match.
       enforces both)
 - [ ] Update the `sessionwiki==X.Y.Z` launcher pin in
       `plugin/.claude-plugin/plugin.json` and in
-      `plugin/hooks/hooks.json` (`test_plugin_launcher_is_pinned_to_the_package_version`
+      `plugin/hooks/hooks.json` — both the `SessionStart` and the `Stop` hook
+      (`test_plugin_launcher_is_pinned_to_the_package_version`
       enforces both)
 - [ ] Update the version badge in `README.md`
       (`Version-vX.Y.Z-7C3AED.svg`)

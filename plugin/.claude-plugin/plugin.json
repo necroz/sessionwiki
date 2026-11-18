@@ -26,8 +26,7 @@
       "command": "uvx",
       "args": ["sessionwiki==3.0.0", "mcp"],
       "env": {
-        "SESSIONWIKI_HOME": "${user_config.wiki_home}",
-        "SESSIONWIKI_MCP_TOOLS": "full"
+        "SESSIONWIKI_HOME": "${user_config.wiki_home}"
       }
     }
   }

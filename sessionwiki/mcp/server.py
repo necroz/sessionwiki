@@ -551,8 +551,9 @@ for _tool in TOOLS:
 # list_sources carried 215 of 218; sync, export and the three page writers
 # were never called. The default ``read`` profile lists the read-only tools
 # only, so the unused definitions (~1.9k tokens) stop riding along in every
-# session. ``full`` lists every tool; the plugin sets it because it has no
-# sync hook and imports sessions through wiki_sync.
+# session. ``full`` lists every tool. Every install path, the plugin
+# included, uses ``read``: hooks and the nightly job import sessions, not
+# wiki_sync.
 _PROFILE_ENV = "SESSIONWIKI_MCP_TOOLS"
 _READ_PROFILE = frozenset({
     "wiki_query", "wiki_search", "wiki_list_sources", "wiki_read_page",

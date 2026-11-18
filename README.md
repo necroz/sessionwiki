@@ -186,7 +186,7 @@ Backends: `extractive` (the default — no model and no network: a useful page f
 
 ## Ask your wiki from your agents (MCP)
 
-**Claude Code plugin** — the MCP server, a skill that tells the agent when to search the wiki, and a `SessionStart` hook that puts the project's recent sessions into context. It asks for your sessionwiki folder on install:
+**Claude Code plugin** — the MCP server, a skill that tells the agent when to search the wiki, a `SessionStart` hook that puts the project's recent sessions into context, and a `Stop` hook that imports new Claude Code sessions in the background after every reply. It asks for your sessionwiki folder on install. For wiki pages from those sessions, add the nightly synthesize job without a second set of hooks: `sessionwiki claude install --no-hooks`.
 
 ```
 /plugin marketplace add necroz/sessionwiki
@@ -211,7 +211,7 @@ From a source checkout, use `"command": "/path/to/sessionwiki/.venv/bin/sessionw
 
 Add it to Claude Code, Claude Desktop, ZCode or any MCP client. Tools include `wiki_query` (ranked search over wiki pages in any language, falling back to raw transcripts), `wiki_search` (exact text, optionally over raw transcripts), `wiki_read_page`, `wiki_list_sources`, `wiki_lint`, `wiki_sync`, `wiki_export`, `wiki_dashboard` and the guarded write tools — 11 in total, stdio transport, no SDK dependency, path-traversal guarded.
 
-By default the server lists only the six read-only tools, so the rest do not cost tokens in every session. Set `"SESSIONWIKI_MCP_TOOLS": "full"` in `env` to add `wiki_sync`, `wiki_export` and the three write tools. The Claude Code plugin sets `full`, because it imports new sessions through `wiki_sync`.
+By default the server lists only the six read-only tools, so the rest do not cost tokens in every session. Every install path — the plugin, `uvx`, a source checkout — gets the same six. Set `"SESSIONWIKI_MCP_TOOLS": "full"` in `env` to add `wiki_sync`, `wiki_export` and the three write tools; new sessions reach the wiki through hooks and the nightly job, not through `wiki_sync`.
 
 <a href="https://glama.ai/mcp/servers/necroz/sessionwiki">
   <img src="https://glama.ai/mcp/servers/necroz/sessionwiki/badge"

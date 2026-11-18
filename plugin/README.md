@@ -23,12 +23,17 @@ on the way in, and no data leaves your computer.
 ## What you get
 
 - **MCP tools** — `wiki_query`, `wiki_search`, `wiki_read_page`,
-  `wiki_list_sources`, `wiki_sync` and more, so Claude can look up an earlier
-  decision instead of asking you again.
+  `wiki_list_sources`, `wiki_lint` and `wiki_dashboard`, so Claude can look up
+  an earlier decision instead of asking you again. The write tools stay off
+  unless you set `SESSIONWIKI_MCP_TOOLS=full`.
 - **A skill** that says when to search: before a task that may depend on past
   work, and when you ask what you decided about something.
 - **Session start recall** — a short note at the start of a session that
   points at the last unfinished work in the current project.
+- **Background import** — after every reply, a `Stop` hook copies new Claude
+  Code sessions into `raw/`. To turn them into wiki pages every night, run
+  `sessionwiki claude install --no-hooks` once (the plugin already has the
+  hooks).
 
 ## Links
 

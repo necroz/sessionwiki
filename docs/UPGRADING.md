@@ -44,7 +44,8 @@ Breaking for MCP clients only: the tool surface drops from 15 to 11 and
   `wiki_export`, `wiki_write_page`, `wiki_update_frontmatter` and
   `wiki_archive_page` need `SESSIONWIKI_MCP_TOOLS=full` in the MCP
   server's `env`; without it a call returns an error that names this
-  switch. The Claude Code plugin sets `full` for you.
+  switch. The Claude Code plugin uses the same `read` profile; it imports
+  new sessions with its own `Stop` hook instead of `wiki_sync`.
 - **`wiki_search` returns hits grouped by file**: `matches: [{path,
   line, text}]` is replaced by `match_count` and `files: [{path, hits,
   lines: [[line, snippet]]}]` (up to 40 files, 3 lines each, plus
