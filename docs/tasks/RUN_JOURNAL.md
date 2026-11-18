@@ -297,7 +297,7 @@ Newest entries go at the bottom.
   `getattr` for `backfill_only` and `vault` for the same reason.
 - Next card: 30
 - Blockers: none. The end-to-end smoke test used the configured
-  OpenAI-compatible backend at `http://10.3.71.12:8001/v1` because the
+  OpenAI-compatible backend on the local network because the
   `synthesize` command has no backend override flag; only the two-line
   throwaway fixture was sent, and the temp vault was deleted. The
   pre-existing uncommitted `docs/tasks/AUTONOMOUS.md` change (scheduling
