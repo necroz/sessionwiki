@@ -9,6 +9,7 @@ so the tests never touch the real user config.
 from __future__ import annotations
 
 import json
+import shlex
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,11 @@ import pytest
 from sessionwiki import claude_install as ci
 
 PY = "/opt/venv/bin/python"
+# The installer normalises the interpreter through Path(); on Windows that
+# turns "/opt/..." into "\\opt\\...". Expected strings follow the same rules
+# (and shlex.quote, which quotes any path with a backslash) so the tests
+# hold on every CI runner.
+PY_NATIVE = str(Path(PY))
 
 
 def _settings(home: Path) -> dict:
@@ -49,7 +55,7 @@ def test_hooks_are_written_and_other_settings_kept(tmp_path: Path):
     assert stop[0] == "notify-send done"
     assert "-m sessionwiki sync --adapter claude_code" in stop[1]
     assert stop[1].rstrip().endswith("&")
-    assert f"SESSIONWIKI_HOME={tmp_path / 'wiki-home'}" in stop[1]
+    assert f"SESSIONWIKI_HOME={shlex.quote(str(tmp_path / 'wiki-home'))}" in stop[1]
     start = _commands(data, "SessionStart")
     assert len(start) == 1
     assert "-m sessionwiki recall --format hook" in start[0]
@@ -127,8 +133,9 @@ def test_paths_with_spaces_are_quoted(tmp_path: Path):
     root = tmp_path / "my wiki"
     ci.install_hooks(home=tmp_path, python_exe="/opt/my venv/python", repo_root=root, windows=False)
     stop = _commands(_settings(tmp_path), "Stop")[0]
-    assert "'/opt/my venv/python'" in stop
-    assert f"'{root}'" in stop
+    assert shlex.quote(str(Path("/opt/my venv/python"))) in stop
+    assert "'" in shlex.quote(str(Path("/opt/my venv/python")))  # really quoted
+    assert shlex.quote(str(root)) in stop
 
 
 # ─── nightly scheduler entry ─────────────────────────────────────────
@@ -139,7 +146,7 @@ def test_systemd_units_run_the_nightly_command(tmp_path: Path):
     unit_dir = tmp_path / ".config" / "systemd" / "user"
     service = (unit_dir / "sessionwiki-synth.service").read_text()
     timer = (unit_dir / "sessionwiki-synth.timer").read_text()
-    assert f"ExecStart={PY} -m sessionwiki claude nightly" in service
+    assert f"ExecStart={PY_NATIVE} -m sessionwiki claude nightly" in service
     assert f"Environment=SESSIONWIKI_HOME={tmp_path / 'w'}" in service
     assert "OnCalendar=*-*-* 04:15:00" in timer
     assert "Persistent=true" in timer
